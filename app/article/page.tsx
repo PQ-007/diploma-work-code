@@ -1,272 +1,285 @@
+// src/app/FeedPage.tsx (or similar main route file)
+
 "use client";
+import { useState, useCallback } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
+// import { useAuth } from "@/contexts/AuthContext"; // Keeping it commented out as it's not strictly needed for this file's logic
+import { Sparkles, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, Eye, Heart, MessageCircle, Search, Filter, Plus } from "lucide-react";
-import { useState } from "react";
+// --- Components Import ---
+import ListItem from "@/components/article/ListItem";
+import Leaderboard from "@/components/Leaderboard";
+import TrendingTopics from "@/components/TrendingTopics";
+import ReadingList from "@/components/ReadingList";
+import AdventBanner from "@/components/AdventBanner";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  publishedAt: string;
-  readTime: number;
-  tags: string[];
-  views: number;
-  likes: number;
-  comments: number;
-  status: "published" | "draft";
-}
-
-const samplePosts: BlogPost[] = [
+// --- Data (Moved here for easy access, but ideally would come from an API/global store) ---
+const ArticlefeedItems = [
+  // ... (Your original feedItems array) ...
   {
     id: "1",
-    title: "Getting Started with React Server Components",
-    excerpt: "Learn how to leverage the power of React Server Components in your Next.js applications for better performance and user experience.",
-    content: "",
-    author: { name: "Alex Johnson", avatar: "/api/placeholder/32/32" },
-    publishedAt: "2024-12-15",
-    readTime: 8,
-    tags: ["React", "Next.js", "Server Components"],
-    views: 1247,
-    likes: 89,
-    comments: 23,
-    status: "published"
+    day: 1,
+    type: "project",
+    author: {
+      name: "Sarah Chen",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+      username: "@sarahchen",
+      verified: true,
+      reputation: 2450,
+      contributions: 352,
+    },
+    timestamp: "Dec 1, 2025",
+    readTime: "8 min",
+    content: {
+      title: "AlgoViz - Interactive Algorithm Visualizer",
+      description:
+        "Built a new tool to help students understand sorting algorithms through interactive visualizations. Features include step-by-step execution, code highlighting, and complexity analysis.",
+      image:
+        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+      tags: ["React", "D3.js", "Education", "Algorithms"],
+    },
+    stats: {
+      likes: 234,
+      comments: 45,
+      views: 1200,
+      shares: 23,
+    },
+    featured: false,
+    trending: true,
   },
   {
     id: "2",
-    title: "Advanced TypeScript Tips for Better Code",
-    excerpt: "Discover advanced TypeScript patterns and techniques that will make your code more robust and maintainable.",
-    content: "",
-    author: { name: "Sarah Chen", avatar: "/api/placeholder/32/32" },
-    publishedAt: "2024-12-10",
-    readTime: 12,
-    tags: ["TypeScript", "JavaScript", "Best Practices"],
-    views: 892,
-    likes: 67,
-    comments: 15,
-    status: "published"
+    day: 2,
+    type: "blog",
+    author: {
+      name: "Mike Rodriguez",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
+      username: "@mikecodes",
+      verified: true,
+      reputation: 3200,
+      contributions: 310,
+    },
+    timestamp: "Dec 2, 2025",
+    readTime: "12 min",
+    content: {
+      title: "10 Advanced React Patterns You Should Know",
+      description:
+        "Dive deep into compound components, render props, custom hooks, and more. Learn how to write cleaner, more maintainable React code with these proven patterns.",
+      tags: ["React", "JavaScript", "Tutorial"],
+    },
+    stats: {
+      likes: 567,
+      comments: 89,
+      views: 3400,
+      shares: 78,
+    },
+    featured: true,
+    trending: true,
   },
   {
     id: "3",
-    title: "Building Scalable REST APIs with Node.js",
-    excerpt: "A comprehensive guide to building robust and scalable REST APIs using Node.js, Express, and modern best practices.",
-    content: "",
-    author: { name: "Mike Rodriguez", avatar: "/api/placeholder/32/32" },
-    publishedAt: "2024-12-05",
-    readTime: 15,
-    tags: ["Node.js", "REST API", "Backend"],
-    views: 1543,
-    likes: 124,
-    comments: 34,
-    status: "published"
+    day: 3,
+    type: "contest",
+    author: {
+      name: "CodeMasters",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Code",
+      username: "@codemasters",
+      verified: true,
+      reputation: 5600,
+      contributions: 186,
+    },
+    timestamp: "Dec 3, 2025",
+    readTime: "5 min",
+    deadline: "3 days left",
+    content: {
+      title: "Summer Coding Challenge 2025",
+      description:
+        "Join our biggest coding competition yet! Solve algorithmic problems, compete with developers worldwide, and win amazing prizes. Registration closes in 3 days.",
+      image:
+        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
+      tags: ["Contest", "Algorithms"],
+    },
+    stats: {
+      likes: 890,
+      comments: 156,
+      views: 5600,
+      shares: 234,
+    },
+    featured: false,
+    trending: false,
   },
   {
     id: "4",
-    title: "Next.js 15 Features Deep Dive",
-    excerpt: "Exploring the latest features and improvements in Next.js 15 and how they can enhance your development workflow.",
-    content: "",
-    author: { name: "Emma Wilson", avatar: "/api/placeholder/32/32" },
-    publishedAt: "2024-11-28",
-    readTime: 10,
-    tags: ["Next.js", "React", "Web Development"],
-    views: 756,
-    likes: 45,
-    comments: 12,
-    status: "draft"
-  }
+    day: 4,
+    type: "achievement",
+    author: {
+      name: "Alex Kim",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+      username: "@alexkim",
+      verified: false,
+      reputation: 1200,
+      contributions: 215,
+    },
+    timestamp: "Dec 4, 2025",
+    readTime: "3 min",
+    content: {
+      title: "Completed 100-Day Coding Streak!",
+      description:
+        "Finally hit 100 consecutive days of coding! Learned so much about consistency and building habits. Special thanks to the community for the support!",
+      tags: ["Achievement", "Motivation"],
+    },
+    stats: {
+      likes: 445,
+      comments: 67,
+      views: 1800,
+    },
+    featured: false,
+    trending: false,
+  },
+  {
+    id: "5",
+    day: 5,
+    type: "flashcard",
+    author: {
+      name: "Emma Wilson",
+      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+      username: "@emmawilson",
+      verified: true,
+      reputation: 1800,
+      contributions: 154,
+    },
+    timestamp: "Dec 5, 2025",
+    readTime: "15 min",
+    content: {
+      title: "JavaScript Interview Prep - 50 Essential Questions",
+      description:
+        "Created a comprehensive flashcard deck covering closures, async/await, prototypes, and more. Perfect for technical interviews!",
+      tags: ["JavaScript", "Interview"],
+    },
+    stats: {
+      likes: 678,
+      comments: 92,
+      views: 2900,
+      shares: 145,
+    },
+    featured: false,
+    trending: true,
+  },
 ];
 
-export default function BlogPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+const trendingTopics: Array<{
+  id: string;
+  name: string;
+  posts: number;
+  trend: "up" | "stable" | "down";
+}> = [
+  // ... (Your original trendingTopics array) ...
+  { id: "1", name: "React 19", posts: 1234, trend: "up" },
+  { id: "2", name: "Machine Learning", posts: 987, trend: "up" },
+  { id: "3", name: "Web3", posts: 756, trend: "stable" },
+  { id: "4", name: "TypeScript", posts: 654, trend: "up" },
+  { id: "5", name: "System Design", posts: 543, trend: "down" },
+];
+// --- End of Data ---
 
-  // Get all unique tags
-  const allTags = Array.from(new Set(samplePosts.flatMap(post => post.tags)));
+export default function ArticleBrowsePage() {
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState("all");
+  const [likedItems, setLikedItems] = useState(new Set(["2", "4"]));
+  const [bookmarkedItems, setBookmarkedItems] = useState(
+    new Set(["1", "3", "5"])
+  );
+  const [readingList, setReadingList] = useState(new Set<string>());
+  const [showQuickActions, setShowQuickActions] = useState<string | null>(null);
 
-  // Filter posts based on search and filters
-  const filteredPosts = samplePosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = selectedTag === "" || post.tags.includes(selectedTag);
-    const matchesStatus = statusFilter === "all" || post.status === statusFilter;
-    
-    return matchesSearch && matchesTag && matchesStatus;
+  const toggleLike = useCallback((id: string) => {
+    setLikedItems((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
+  }, []);
+
+  const toggleBookmark = useCallback((id: string) => {
+    setBookmarkedItems((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
+  }, []);
+
+  const toggleReadingList = useCallback((id: string) => {
+    setReadingList((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
+    setShowQuickActions(null);
+  }, []);
+
+  const handleMoreClick = useCallback((id: string | null) => {
+    setShowQuickActions((prev) => (prev === id ? null : id));
+  }, []);
+
+  const filteredFeedItems = ArticlefeedItems.filter((item) => {
+    if (activeTab === "all") return true;
+    return item.content.tags.some((tag) =>
+      tag.toLowerCase().includes(activeTab)
+    );
   });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Blog Posts</h1>
-          <p className="text-muted-foreground mt-1">
-            Share knowledge and insights with the community
-          </p>
-        </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          New Post
-        </Button>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search posts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <div className="flex gap-2">
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-          >
-            <option value="">All Tags</option>
-            {allTags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
-            ))}
-          </select>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as "all" | "published" | "draft")}
-            className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-          >
-            <option value="all">All Status</option>
-            <option value="published">Published</option>
-            <option value="draft">Drafts</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Blog Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{samplePosts.filter(p => p.status === 'published').length}</div>
-            <p className="text-xs text-muted-foreground">Published Posts</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{samplePosts.filter(p => p.status === 'draft').length}</div>
-            <p className="text-xs text-muted-foreground">Draft Posts</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{samplePosts.reduce((acc, p) => acc + p.views, 0).toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Total Views</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{samplePosts.reduce((acc, p) => acc + p.likes, 0)}</div>
-            <p className="text-xs text-muted-foreground">Total Likes</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Blog Posts Grid */}
-      <div className="grid gap-6">
-        {filteredPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                      {post.status}
-                    </Badge>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {post.views}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        {post.likes}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="h-3 w-3" />
-                        {post.comments}
-                      </div>
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
-                  <CardDescription className="text-base">{post.excerpt}</CardDescription>
-                </div>
-              </div>
-              
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1 mt-3">
-                {post.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+        <div className="flex gap-8 xl:gap-12 justify-center">
+          {/* Main Feed */}
+          <div className="flex-1 max-w-7xl">
+            {/* Category Tabs */}
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="mb-6"
+            >
+              <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
+                {["all", "nextjs", "ai", "python", "rust"].map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs capitalize"
+                  >
+                    {tab === "all" ? "All" : tab}
+                  </TabsTrigger>
                 ))}
-              </div>
-            </CardHeader>
-            
-            <CardFooter className="flex items-center justify-between pt-0">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={post.author.avatar} alt={post.author.name} />
-                  <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">{post.author.name}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(post.publishedAt)}
-                    <Clock className="h-3 w-3 ml-2" />
-                    {post.readTime} min read
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  Edit
-                </Button>
-                <Button size="sm">
-                  View
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+              </TabsList>
+            </Tabs>
 
-      {filteredPosts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No posts found matching your criteria.</p>
+            {/* Feed Items */}
+            <div className="space-y-4">
+              {filteredFeedItems.map((item) => (
+                <ListItem
+                  key={item.id}
+                  item={item}
+                  isLiked={likedItems.has(item.id)}
+                  isBookmarked={bookmarkedItems.has(item.id)}
+                  isInReadingList={readingList.has(item.id)}
+                  showQuickActions={showQuickActions === item.id}
+                  toggleLike={toggleLike}
+                  toggleBookmark={toggleBookmark}
+                  toggleReadingList={toggleReadingList}
+                  handleMoreClick={handleMoreClick}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
+            <TrendingTopics trendingTopics={trendingTopics} t={t} />
+            <ReadingList readingListCount={readingList.size} />
+          </aside>
         </div>
-      )}
+      </div>
     </div>
   );
 }

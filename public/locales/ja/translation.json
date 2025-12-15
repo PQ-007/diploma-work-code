@@ -133,6 +133,7 @@
     "duration": "期間"
   },
   "ranking": {
+    "topRated": "トップユーザー",
     "topContributors": "トップ貢献者",
     "weeklyLeaders": "週間リーダー",
     "trendingTopics": "トレンドトピック",

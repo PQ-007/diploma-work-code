@@ -203,7 +203,8 @@
     }
   },
   "ranking": {
-    "topContributors": "Top Contributors",
+    "topRated": "Top rated",
+    "topContributors": "Top contributors",
     "weeklyLeaders": "This Week's Leaders",
     "trendingTopics": "Trending Topics",
     "suggestedUsers": "Suggested for You",

@@ -155,7 +155,8 @@
     "continueWithGoogle": "Google-ээр үргэлжлүүлэх"
   },
    "ranking": {
-    "topContributors": "Шилдэг хэрэглэгчид",
+    "topRated": "Шилдэг хэрэглэгчид",
+    "topContributors": "Шилдэг хувь нэмэр оруулагчид",
     "weeklyLeaders": "Энэ долоо хоногийн шилдгүүд",
     "trendingTopics": "Тренд сэдвүүд",
     "suggestedUsers": "Санал болгож буй хэрэглэгчид",
