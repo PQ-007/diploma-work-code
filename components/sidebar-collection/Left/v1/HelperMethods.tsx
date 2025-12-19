@@ -1,4 +1,13 @@
-import { File, FileText, Folder, FolderOpen, Image, Code, FileVideo, Music} from "lucide-react";
+import {
+  File,
+  FileText,
+  Folder,
+  FolderOpen,
+  Image,
+  Code,
+  FileVideo,
+  Music,
+} from "lucide-react";
 import { EnhancedTreeNode } from "./type";
 
 // File type icon mapping
@@ -463,8 +472,4 @@ const generateTreeDataBySectionPage = (section: string): EnhancedTreeNode[] => {
 
 // Custom tile renderer for tree nodes and its utility functions
 
-
-
-
 export { getFileIcon, generateTreeDataBySectionPage };
-

@@ -4,7 +4,7 @@ type InterestProps = {
   profile: Profile;
 };
 export const InterestsSection = ({profile} : InterestProps) => (
-    <div className="bg-[#15151E] p-4 rounded-xl shadow-xl">
+    <div className="bg-background p-4 rounded-xl shadow-xl">
       <h3 className="font-semibold text-gray-300 mb-2">INTERESTS AND HOBBIES</h3>
       <div className="flex flex-wrap gap-2">
         {(profile.interests_hobby ?? []).map((item, index) => (

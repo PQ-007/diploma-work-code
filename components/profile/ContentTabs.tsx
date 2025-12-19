@@ -31,13 +31,13 @@ type ContentTabsProps = {
 
         <div className="bg-[#15151E] p-4 rounded-xl shadow-xl">
           {activeItems.length > 0 ? (
-            <ul className="space-y-2 list-disc list-inside text-gray-300">
+            <ul className="space-y-2 list-disc list-inside">
               {activeItems.map((item, index) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
           ) : (
-            <div className="text-center text-gray-400 py-6">
+            <div className="text-center py-6">
               No {activeTab} to show
             </div>
           )}

@@ -11,7 +11,7 @@ import { Tree } from "antd";
 import { Edit, FileText, FolderPlus, Trash2 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import { generateTreeDataBySectionPage, getFileIcon } from "./HelperMethods";
-import { EnhancedTreeNode, TreeViewProps } from "./type";
+import { EnhancedTreeNode, TreeViewProps } from "../type";
 
 export const TreeView: React.FC<TreeViewProps> = ({ activeSection = "/" }) => {
   // Generate tree data based on active section

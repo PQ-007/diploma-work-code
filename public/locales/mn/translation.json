@@ -1,6 +1,224 @@
 {
-  "welcome": "FutureHub-д тавтай морил",
-  "about": "Намайг тухай",
-  "projects": "Төслүүд",
-  "blog": "Блог"
+  "common": {
+    "welcome": "FutureHub-д тавтай морилно уу",
+    "loading": "Ачаалж байна...",
+    "error": "Алдаа",
+    "save": "Хадгалах",
+    "cancel": "Цуцлах",
+    "delete": "Устгах",
+    "edit": "Засах",
+    "view": "Харах",
+    "share": "Түгээх",
+    "search": "Хайх",
+    "filter": "Шүүлтүүр",
+    "create": "Үүсгэх",
+    "back": "Буцах",
+    "next": "Дараах",
+    "previous": "Өмнөх",
+    "moto": "Суралц. Бүтээ. Хуваалц."
+  },
+  "sidebar": {
+    "competitions": "Тэмцээн",
+    "learn": "Сурах",
+    "articles": "Нийтлэл",
+    "discussions": "Асуулт хариулт",
+    "projects": "Төслүүд",
+    "knowledgeTree": "Мэдлэгийн Мод",
+    "dictionary": "Толь бичиг",
+    "store": "Дэлгүүр",
+    "ongoing": "Үргэлжилж буй",
+    "upcoming": "Удахгүй болох",
+    "past": "Өнгөрсөн",
+    "algorithm": "Алгоритм",
+    "dataStructures": "Өгөгдлийн Бүтэц",
+    "languages": "Програмчлалын Хэл",
+    "resources": "Сургалтын Материалууд",
+    "internship": "Дадлага",
+    "post-grad" : "Төгсөлтийн дараах",
+    "graduation": "Төгсөлтийн судалгаа",
+    "tutorial": "Tutorial",
+    "myProjects": "Миний Төслүүд",
+    "myArticles": "Миний Нийтлэлүүд",
+    "myFlashcards": "Миний Флаш картууд",
+    "webDev": "Веб Хөгжүүлэлт",
+    "mobileDev": "Мобайл Хөгжүүлэлт",
+    "aiMl": "Хиймэл Оюун & Машин Сургалт",
+    "techArticles": "Технологийн Нийтлэлүүд",
+    "tutorials": "Зааврууд",
+    "reviews": "Сэтгэгдлүүд",
+    "algorithms": "Алгоритмууд",
+    "dataScience": "Өгөгдлийн Шинжлэх Ухаан",
+    "webDesign": "Веб Дизайн",
+    "more": "Цааш",
+    "viewItem": "Харах",
+    "editItem": "Засах",
+    "shareItem": "Хуваалцах",
+    "deleteItem": "Устгах",
+    "deleteConfirm": "Устгах",
+    "profile": "Профайл",
+    "settings": "Тохиргоо",
+    "notifications": "Мэдэгдлүүд",
+    "upgrade": "Төлөвлөгөөг шинэчлэх",
+    "logout": "Гарах"
+  },
+  "dashboard": {
+    "welcomeBack": "Тавтай морилно уу, {{name}}!",
+    "overview": "Ерөнхий тойм",
+    "quickActions": "Түргэн үйлдэл",
+    "newProject": "Шинэ төсөл",
+    "newBlog": "Шинэ блог",
+    "createFlashcards": "Флаш карт үүсгэх",
+    "joinContest": "Тэмцээнд оролцох",
+    "recentActivity": "Сүүлийн үеийн үйл ажиллагаа",
+    "achievements": "Амжилтууд",
+    "learningProgress": "Суралцах явц",
+    "learningStreak": "Суралцсан дараалсан өдөр",
+    "weeklyGoal": "Долоо хоногийн зорилго",
+    "days": "өдөр",
+    "completion": "Гүйцэтгэл",
+    "totalProjects": "Нийт төслийн тоо",
+    "blogPosts": "Блогын нийтлэл",
+    "activeContests": "Идэвхтэй тэмцээнүүд",
+    "studyCards": "Сургалтын картууд",
+    "myProjects": "Миний төслүүд",
+    "myBlogs": "Миний блогууд",
+    "publishedOn": "Нийтэлсэн огноо",
+    "views": "Үзэлт",
+    "likes": "Таалагдсан",
+    "comments": "Сэтгэгдэл"
+  },
+  "projects": {
+    "title": "Төслүүд",
+    "description": "Төслүүдээ удирдах, нийтлэх",
+    "newProject": "Шинэ төсөл",
+    "status": "Төлөв",
+    "draft": "Ноорог",
+    "published": "Нийтлэгдсэн",
+    "inProgress": "Үргэлжилж буй",
+    "completed": "Дууссан",
+    "technologies": "Технологиуд",
+    "contributors": "Оролцогчид",
+    "lastUpdated": "Сүүлд шинэчлэгдсэн"
+  },
+  "blogs": {
+    "title": "Блогын нийтлэл",
+    "description": "Мэдлэг, ойлголтоо хуваалцах",
+    "newPost": "Шинэ нийтлэл",
+    "readTime": "минутын уншлага",
+    "author": "Зохиогч",
+    "category": "Ангилал",
+    "tags": "Шошгууд"
+  },
+  "flashcards": {
+    "title": "Флаш картууд",
+    "description": "Завсарлагатай давталтаар сурах",
+    "createDeck": "Картын багц үүсгэх",
+    "studyNow": "Одоо сурах",
+    "cardsStudied": "Судалсан картын тоо",
+    "accuracy": "Үнэн зөв байдал",
+    "mastery": "Эзэмшил",
+    "deck": "Багц",
+    "decks": "Багцууд"
+  },
+  "competitions": {
+    "title": "Тэмцээнүүд",
+    "description": "Код бичих тэмцээнд оролцох",
+    "upcoming": "Удахгүй",
+    "active": "Идэвхтэй",
+    "completed": "Дууссан",
+    "register": "Бүртгүүлэх",
+    "participants": "Оролцогчид",
+    "prize": "Шагнал",
+    "duration": "Үргэлжлэх хугацаа"
+  },
+  "profile": {
+    "title": "Профайл",
+    "bio": "Намтар",
+    "skills": "Ур чадвар",
+    "interests": "Сонирхол",
+    "achievements": "Амжилтууд",
+    "following": "Дагаж буй",
+    "followers": "Дагагч",
+    "joinedDate": "Нэгдсэн огноо",
+    "editProfile": "Профайл засах",
+    "signOut": "Гарах"
+  },
+  "auth": {
+    "signIn": "Нэвтрэх",
+    "signUp": "Бүртгүүлэх",
+    "signOut": "Гарах",
+    "email": "И-мэйл",
+    "password": "Нууц үг",
+    "forgotPassword": "Нууц үгээ мартсан уу?",
+    "noAccount": "Та бүртгэлгүй юу?",
+    "hasAccount": "Та бүртгэлтэй юу?",
+    "continueWithGoogle": "Google-ээр үргэлжлүүлэх"
+  },
+   "ranking": {
+    "topRated": "Шилдэг хэрэглэгчид",
+    "topContributors": "Шилдэг хувь нэмэр оруулагчид",
+    "weeklyLeaders": "Энэ долоо хоногийн шилдгүүд",
+    "trendingTopics": "Тренд сэдвүүд",
+    "suggestedUsers": "Санал болгож буй хэрэглэгчид",
+    "viewAll": "Бүгдийг харах",
+    "posts": "Постууд",
+    "thisWeek": "Энэ долоо хоног",
+    "rank": "Ранк"
+  },
+  
+  "landing": {
+    "hero": {
+      "title": "Суралцах, бүтээх орчин",
+      "subtitle": "FutureHub — КУТ-ийн оюутнуудад зориулсан хэрэглээний цогц платформ",
+      "searchPlaceholder": "Төсөл, нийтлэл, тэмцээн хайх..."
+    },
+    "cta": {
+      "title": "FutureHub ашиглах",
+      "subtitle": "Бусдаас суралцаж, хамтдаа хөгж.",
+      "getStarted": "Эхлэх"
+    },
+    "stats": {
+      "projects": "Төсөл",
+      "articles": "Нийтлэл",
+      "discussions": "Асуулт хариулт",
+      "contests": "Тэмцээн"
+    },
+    "features": {
+      "title": "Онцлох боломжууд",
+      "items": [
+        { "title": "Төслөө танилцуулах", "desc": "Төлөвлөх, төгсөлтийн ажил унших, tutorial төсөл" },
+        { "title": "Флашкард үүсгэх", "desc": "Сайт дээрх текстээс хэрэгтэй үгсийг автоматаар боловсруулж хадгалах." },
+        { "title": "Тэмцээнд оролцох", "desc": "Тэнхимээс зохиож буй тэмцээнд оролцох." },
+        { "title": "Нийтлэл", "desc": "Өөрийн туршлага, мэдлэгээ хуваалцах, бусдаас суралцах" },
+        { "title": "Олон хэлний дэмжлэг", "desc": "Монгол, Япон, Англи хэл дээр платформыг ашиглах боломжтой." },
+        { "title": "Мэргэжлийн толь бичиг", "desc": "Мэргэжлийн тохирсон монгол орчуулга бүхий толь бичигйй                         " }
+      ]
+    },
+    "projects": {
+      "title": "Онцлох төслүүд",
+      "seeAll": "Бүгдийг харах",
+      "open": "Нээх",
+      "demo": "Демо"
+    },
+    "blogs": {
+      "title": "Сүүлийн блог",
+      "seeAll": "Бүгдийг харах",
+      "readMore": "Унших",
+      "items": [
+        { "title": "AI ба боловсрол", "desc": "AI суралцах орчинг ямар байдлаар өөрчилж байгааг тоймлов." },
+        { "title": "Вэб апп хөгжүүлэлтийн зарчим", "desc": "Маштабтай систем бүтээх үед юу анхаарах талаар." },
+        { "title": "Дата бүтэц ойлгох", "desc": "Програмчлалд чухал үндсэн ойлголтуудыг танилцуулсан." }
+      ]
+    },
+    
+    "projectsList": [
+      { "title": "AlgoRush", "desc": "Граф алгоритмын визуалчлалын тоглоом." },
+      { "title": "Super Portfolio", "desc": "Оюутнуудын олон хэлтэй портфолио платформ." },
+      { "title": "FlashCard Sync", "desc": "OCR ба аудиотой флешкард систем." },
+      { "title": "AI Tutor", "desc": "ML ашигласан сургалтын туслагч." },
+      { "title": "EcoTracker", "desc": "Байгаль орчны нөлөөг хянах апп." },
+      { "title": "CodeCollab", "desc": "Бусадтай хамтран код бичих орчин." }
+    ]
+  }
 }
+

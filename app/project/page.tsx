@@ -247,79 +247,8 @@ export default function ProjectPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage and showcase your development projects
-          </p>
-        </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          New Project
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-                <Folder className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{totalProjects}</div>
-                <p className="text-xs text-muted-foreground">Total Projects</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
-                <Award className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{completedProjects}</div>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg">
-                <Zap className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{inProgressProjects}</div>
-                <p className="text-xs text-muted-foreground">In Progress</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
-                <Star className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{totalStars}</div>
-                <p className="text-xs text-muted-foreground">Total Stars</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+      
+     
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
