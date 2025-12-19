@@ -1,31 +1,33 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
-  Heart,
-  MessageCircle,
-  Share2,
+  ArrowUp,
   Bookmark,
-  Clock,
   Calendar,
   Check,
   Copy,
-  ArrowUp,
-  X,
-  FileText,
+  Github,
   Hash,
-  ChevronRight,
-  MoreHorizontal,
+  Heart,
+  MessageCircle,
   PlayCircle,
+  Share2,
   Terminal,
-  Twitter,
-  Github
+  Twitter
 } from "lucide-react";
+import { JSX, useEffect, useState } from "react";
+
+// Import MDX components - you'll need to install these packages:
+// npm install @mdx-js/react next-mdx-remote
+// OR for client-side only:
+// npm install @mdx-js/mdx
+import { MDXRemote } from 'next-mdx-remote';
+import { serialize } from 'next-mdx-remote/serialize';
 
 // --- Types & Mock Data ---
 
@@ -51,8 +53,70 @@ const articleData = {
     likes: 847,
     comments: 156,
   },
-  coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80" // Abstract 3D shape
+  coverImage: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80"
 };
+
+// Sample MDX content - in production, this would come from your API/filesystem
+const sampleMDXContent = `
+## Introduction
+
+Building scalable  applications requires careful planning and architectural decisions from the start. In this guide, we explore the patterns that define modern web development.
+
+### Why Architecture Matters
+xdc
+### o
+
+A well-architected application provides several benefits: easier onboarding for new developers, reduced technical debt, and improved performance. It distinguishes a "weekend project" from a product that can sustain years of iteration.
+
+## Core Principles
+
+Before writing a single line of code, we must agree on the fundamental constraints that will guide our decisions.
+
+### Separation of Concerns
+
+Keep your business logic separate from your UI components. This makes testing easier and allows you to reuse logic across different interfaces, such as Mobile or CLI tools.
+
+\`\`\`typescript
+// Custom Hook: useIntersectionObserver
+import { useEffect, useRef, useState } from 'react';
+
+export function useOnScreen(ref) {
+  const [isIntersecting, setIntersecting] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntersecting(entry.isIntersecting),
+      { rootMargin: "0px" }
+    );
+    if (ref.current) observer.observe(ref.current);
+    
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return isIntersecting;
+}
+\`\`\`
+
+### Component Composition
+
+Build complex UIs by composing smaller, reusable components. This pattern, often called "Atomic Design" in design circles, translates perfectly to React's component model.
+
+<ProTip>
+Avoid "God Components" that take 20+ props. If a component is doing too much, break it down using children props or slots.
+</ProTip>
+
+## Performance Optimization
+
+Performance isn't just about loading speed; it's about runtime interaction.
+
+### Code Splitting
+
+Using \`React.lazy\` and Suspense allows us to ship only the JavaScript needed for the current route.
+
+### Memoization Strategies
+
+Proper use of \`useMemo\`, \`useCallback\`, and \`React.memo\` is crucial for preventing unnecessary re-renders in deeply nested component trees.
+`;
 
 const tocData = [
   {
@@ -69,17 +133,16 @@ const tocData = [
     level: 2,
     children: [
       { id: "separation-of-concerns", text: "Separation of Concerns", level: 3 },
-      { id: "component-composition", text: "Component Composition", level: 3 },
-      { id: "state-management", text: "State Management", level: 3 }
+      { id: "component-composition", text: "Component Composition", level: 3 }
     ]
   },
   {
-    id: "performance",
-    text: "Performance",
+    id: "performance-optimization",
+    text: "Performance Optimization",
     level: 2,
     children: [
       { id: "code-splitting", text: "Code Splitting", level: 3 },
-      { id: "memoization", text: "Memoization Strategies", level: 3 }
+      { id: "memoization-strategies", text: "Memoization Strategies", level: 3 }
     ]
   },
 ];
@@ -110,9 +173,13 @@ const ScrollProgress = () => {
   );
 };
 
-// 2. High-Fidelity Code Block
-const CodeWindow = ({ code, language, title }: { code: string; language: string, title?: string }) => {
+// 2. High-Fidelity Code Block Component for MDX
+const CodeWindow = ({ children, className, title }: any) => {
   const [copied, setCopied] = useState(false);
+  
+  // Extract language from className (e.g., "language-typescript")
+  const language = className?.replace(/language-/, '') || 'text';
+  const code = children?.trim() || '';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
@@ -122,7 +189,6 @@ const CodeWindow = ({ code, language, title }: { code: string; language: string,
 
   return (
     <div className="my-10 rounded-xl overflow-hidden border bg-[#0d1117] shadow-2xl ring-1 ring-white/10">
-      {/* Window Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-white/5">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
@@ -131,7 +197,7 @@ const CodeWindow = ({ code, language, title }: { code: string; language: string,
             <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
           </div>
           <span className="ml-3 text-xs text-muted-foreground font-mono">
-            {title || "example.tsx"}
+            {title || `example.${language}`}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -146,7 +212,6 @@ const CodeWindow = ({ code, language, title }: { code: string; language: string,
           </Button>
         </div>
       </div>
-      {/* Code Area */}
       <div className="p-5 overflow-x-auto">
         <pre className="font-mono text-sm leading-relaxed text-zinc-300">
           <code>{code}</code>
@@ -155,6 +220,22 @@ const CodeWindow = ({ code, language, title }: { code: string; language: string,
     </div>
   );
 };
+
+// Custom ProTip component for MDX
+const ProTip = ({ children }: { children: React.ReactNode }) => (
+  <div className="not-prose my-10 bg-primary/5 border border-primary/20 rounded-xl p-6 relative overflow-hidden">
+    <div className="absolute top-0 right-0 p-4 opacity-10">
+      <Terminal className="w-24 h-24 text-primary" />
+    </div>
+    <h4 className="flex items-center gap-2 font-bold text-primary mb-2">
+      <Check className="w-5 h-5" />
+      Pro Tip
+    </h4>
+    <div className="text-muted-foreground relative z-10">
+      {children}
+    </div>
+  </div>
+);
 
 // 3. Polished Table of Contents
 const TocItem = ({ item, activeId, level = 2 }: any) => {
@@ -178,12 +259,10 @@ const TocItem = ({ item, activeId, level = 2 }: any) => {
           }
         `}
       >
-        {/* Active Indicator Line (Absolute positioned to the left) */}
         {!isChild && isActive && (
           <div className="absolute -left-[17px] top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
         )}
         
-        {/* Bullet for children */}
         {isChild && (
           <div className={`
             absolute left-2 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full transition-colors
@@ -316,6 +395,33 @@ const AuthorBox = ({ author }: { author: typeof articleData.author }) => (
   </Card>
 );
 
+// Custom heading components with IDs for TOC navigation
+const createHeading = (level: number) => {
+  const Heading = ({ children, ...props }: any) => {
+    const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+    const id = children?.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    
+    return (
+      <Tag id={id} className="scroll-mt-24" {...props}>
+        {children}
+      </Tag>
+    );
+  };
+  return Heading;
+};
+
+// MDX Components mapping
+const mdxComponents = {
+  h1: createHeading(1),
+  h2: createHeading(2),
+  h3: createHeading(3),
+  h4: createHeading(4),
+  h5: createHeading(5),
+  h6: createHeading(6),
+  code: CodeWindow,
+  pre: ({ children }: any) => <>{children}</>, // Wrapper handled by CodeWindow
+  ProTip,
+};
 
 // --- Main Page Component ---
 
@@ -323,67 +429,64 @@ export default function ModernArticlePage() {
   const [activeSection, setActiveSection] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [mdxSource, setMdxSource] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load and serialize MDX content
+  useEffect(() => {
+    const loadMDX = async () => {
+      try {
+        // In production, fetch from your API:
+        // const response = await fetch(`/api/articles/${articleId}`);
+        // const { content } = await response.json();
+        
+        const serialized = await serialize(sampleMDXContent);
+        setMdxSource(serialized);
+      } catch (error) {
+        console.error('Error loading MDX:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMDX();
+  }, []);
 
   // Intersection Observer for TOC
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the section that is currently intersecting from the top
         const intersectingEntry = entries.find(entry => entry.isIntersecting);
         if (intersectingEntry) {
           setActiveSection(intersectingEntry.target.id);
         } else {
-          // Fallback: If no single section is intersecting based on the rootMargin,
-          // find the section closest to the top of the viewport.
-          // This ensures one section is always marked active.
-          const topVisibleSection = Array.from(document.querySelectorAll("section[id]"))
+          const topVisibleSection = Array.from(document.querySelectorAll("h2[id], h3[id]"))
             .map(section => ({
               id: section.id,
               top: section.getBoundingClientRect().top,
             }))
-            .filter(section => section.top < 200) // Sections visible in the top 200px
-            .sort((a, b) => b.top - a.top) // Closest to the top (but still in view)
-            [0];
+            .filter(section => section.top < 200)
+            .sort((a, b) => b.top - a.top)[0];
 
           if (topVisibleSection) setActiveSection(topVisibleSection.id);
         }
       },
-      // rootMargin: Adjust to focus on the top of the viewport
       { rootMargin: "-100px 0% -80% 0%" } 
     );
 
-    document.querySelectorAll("section[id]").forEach((section) => observer.observe(section));
+    const headings = document.querySelectorAll("h2[id], h3[id]");
+    headings.forEach((heading) => observer.observe(heading));
     return () => observer.disconnect();
-  }, []);
-
-  const sampleCode = `// Custom Hook: useIntersectionObserver
-import { useEffect, useRef, useState } from 'react';
-
-export function useOnScreen(ref) {
-  const [isIntersecting, setIntersecting] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntersecting(entry.isIntersecting),
-      { rootMargin: "0px" } // Observe strictly
-    );
-    if (ref.current) observer.observe(ref.current);
-    
-    return () => observer.disconnect();
-  }, [ref]); // Dependency on ref is cleaner
-
-  return isIntersecting;
-}`;
+  }, [mdxSource]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary">
       
-      {/* 1. Scroll Progress Bar */}
       <ScrollProgress />
 
       <div className="container mx-auto max-w-7xl px-4 py-6 flex flex-col lg:flex-row gap-6 xl:gap-20">
         
-        {/* --- Left Sidebar (Share & Stats - Desktop) --- */}
+        {/* --- Left Sidebar --- */}
         <aside className="hidden lg:flex flex-col gap-8 w-16 sticky top-32 h-fit items-center">
             <div className="flex flex-col gap-6 items-center">
                 <Button 
@@ -393,7 +496,6 @@ export function useOnScreen(ref) {
                     onClick={() => setIsLiked(!isLiked)}
                 >
                     <Heart className={`h-6 w-6 ${isLiked ? 'fill-current' : ''}`} />
-                    <span className="sr-only">Like</span>
                 </Button>
                 <span className="text-sm font-medium text-muted-foreground -mt-3">{articleData.stats.likes + (isLiked ? 1 : 0)}</span>
                 
@@ -474,86 +576,33 @@ export function useOnScreen(ref) {
             <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
           </div>
 
-          {/* Prose Content */}
-          <article className="prose prose-lg dark:prose-invert max-w-none 
-            prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground
-            prose-h2:mt-12 prose-h2:pt-4 prose-h2:border-t prose-h2:border-border/50
-            prose-p:text-lg prose-p:leading-8 prose-p:text-muted-foreground/90
-            prose-strong:text-foreground prose-strong:font-semibold
-            prose-li:text-muted-foreground
-            prose-img:rounded-xl prose-img:shadow-lg
-          ">
-            
-            <section id="introduction" className="scroll-mt-24">
-              <p className="lead text-2xl font-serif text-foreground/80 leading-relaxed mb-8">
-                Building scalable React applications requires careful planning and architectural decisions from the start. In this guide, we explore the patterns that define modern web development.
-              </p>
-              
-              <h2 id="why-architecture-matters">Why Architecture Matters</h2>
-              <p>
-                A well-architected application provides several benefits: easier onboarding for new developers, reduced technical debt, and improved performance. It distinguishes a "weekend project" from a product that can sustain years of iteration.
-              </p>
-            </section>
-
-            <section id="core-principles" className="scroll-mt-24">
-              <h2>Core Principles</h2>
-              <p>
-                Before writing a single line of code, we must agree on the fundamental constraints that will guide our decisions.
-              </p>
-
-              <h3 id="separation-of-concerns">Separation of Concerns</h3>
-              <p>
-                Keep your business logic separate from your UI components. This makes testing easier and allows you to reuse logic across different interfaces, such as Mobile or CLI tools.
-              </p>
-
-              <CodeWindow 
-                title="useOnScreen.ts" 
-                language="TypeScript" 
-                code={sampleCode} 
-              />
-
-              <h3 id="component-composition">Component Composition</h3>
-              <p>
-                Build complex UIs by composing smaller, reusable components. This pattern, often called "Atomic Design" in design circles, translates perfectly to React's component model.
-              </p>
-
-              <div className="not-prose my-10 bg-primary/5 border border-primary/20 rounded-xl p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Terminal className="w-24 h-24 text-primary" />
-                </div>
-                <h4 className="flex items-center gap-2 font-bold text-primary mb-2">
-                    <Check className="w-5 h-5" />
-                    Pro Tip
-                </h4>
-                <p className="text-muted-foreground relative z-10">
-                    Avoid "God Components" that take 20+ props. If a component is doing too much, break it down using children props or slots.
-                </p>
-              </div>
-            </section>
-
-            <section id="performance" className="scroll-mt-24">
-                <h2>Performance Optimization</h2>
-                <p>
-                    Performance isn't just about loading speed; it's about runtime interaction. 
-                </p>
-                <h3 id="code-splitting">Code Splitting</h3>
-                <p>
-                    Using <code>React.lazy</code> and Suspense allows us to ship only the JavaScript needed for the current route.
-                </p>
-                <h3 id="memoization">Memoization Strategies</h3>
-                <p>
-                    Proper use of <code>useMemo</code>, <code>useCallback</code>, and <code>React.memo</code> is crucial for preventing unnecessary re-renders in deeply nested component trees.
-                </p>
-            </section>
-
-          </article>
+          {/* MDX Content */}
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : mdxSource ? (
+            <article className="prose prose-lg dark:prose-invert max-w-none 
+              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground
+              prose-h2:mt-12 prose-h2:pt-4 prose-h2:border-t prose-h2:border-border/50
+              prose-p:text-lg prose-p:leading-8 prose-p:text-muted-foreground/90
+              prose-strong:text-foreground prose-strong:font-semibold
+              prose-li:text-muted-foreground
+              prose-img:rounded-xl prose-img:shadow-lg
+            ">
+              <MDXRemote {...mdxSource} components={mdxComponents} />
+            </article>
+          ) : (
+            <div className="text-center py-20 text-muted-foreground">
+              Failed to load article content
+            </div>
+          )}
           
           <Separator className="my-12" />
           
-          {/* Author Box - Added for a personal touch */}
           <AuthorBox author={articleData.author} />
 
-          {/* Subscription/Footer CTA */}
+          {/* Subscription CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-muted/30 p-8 rounded-2xl border border-border/50 mt-12">
              <div className="flex flex-col gap-2 text-center sm:text-left">
                 <h3 className="font-bold text-lg">Enjoyed this article?</h3>
@@ -563,7 +612,7 @@ export function useOnScreen(ref) {
                 <input 
                     type="email" 
                     placeholder="Enter your email" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:w-64"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:w-64"
                 />
                 <Button>Subscribe</Button>
              </div>
@@ -571,9 +620,8 @@ export function useOnScreen(ref) {
         </main>
 
         {/* --- Right Sidebar (TOC) --- */}
-        <aside className="hidden xl:block w-64 shrink-0"> {/* Increased width for more comfortable reading */}
+        <aside className="hidden xl:block w-64 shrink-0">
             <div className="sticky top-20 space-y-10 p-4 border border-border/50 rounded-xl bg-card/50 backdrop-blur-sm">
-                {/* Table of Contents */}
                 <div>
                     <h3 className="font-bold text-lg tracking-tight text-foreground mb-4">Table of Contents</h3>
                     <nav className="border-l border-border/50 ml-4 relative">
@@ -587,7 +635,6 @@ export function useOnScreen(ref) {
 
                 <Separator />
 
-                {/* Related Tags */}
                 <div>
                     <h3 className="font-semibold text-sm tracking-wider text-muted-foreground uppercase mb-4">Tags</h3>
                     <div className="flex flex-wrap gap-2">
@@ -604,7 +651,6 @@ export function useOnScreen(ref) {
 
       </div>
 
-      {/* Mobile/Tablet Floating Action Bar */}
       <div className="lg:hidden">
           <FloatingActionBar 
               likes={articleData.stats.likes} 
@@ -615,7 +661,6 @@ export function useOnScreen(ref) {
           />
       </div>
 
-      {/* Back to Top Button */}
       <BackToTopButton />
 
     </div>
