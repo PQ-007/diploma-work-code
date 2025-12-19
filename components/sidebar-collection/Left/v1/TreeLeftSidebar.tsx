@@ -171,7 +171,7 @@ const EnhancedSidebarHeader: React.FC<{
   );
 };
 
-export function LeftSidebar({
+export function TreeLeftSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { setOpen, isMobile } = useSidebar();

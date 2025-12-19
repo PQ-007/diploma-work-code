@@ -1,28 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { 
-  Moon, 
-  Sun, 
-  Monitor, 
-  Palette, 
+import {
   Check,
-  Settings,
-  Eye,
-  Zap
+  Monitor,
+  Moon,
+  Sun
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useState } from 'react';
 
 export default function ThemeToggleButton() {
   const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();

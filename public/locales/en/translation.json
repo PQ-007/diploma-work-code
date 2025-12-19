@@ -1,6 +1,264 @@
 {
-  "welcome": "Welcome to FutureHub",
-  "about": "About Me",
-  "projects": "Projects",
-  "blog": "Blog"
+  "common": {
+    "welcome": "Welcome to FutureHub",
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "share": "Share",
+    "search": "Search",
+    "filter": "Filter",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "moto": "Learn. Build. Share."
+  },
+
+  "sidebar": {
+    "internship": "Internship",
+    "post-grad": "Post-Grad-Life",
+    "contest": "Contest",
+    "competitions": "Competitions",
+    "learn": "Learn",
+    "articles": "Articles",
+    "discussions": "Discussions",
+    "projects": "Projects",
+    "knowledgeTree": "Knowledge Tree",
+    "dictionary": "Dictionary",
+    "store": "Store",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "algorithm": "Algorithm",
+    "dataStructures": "Data Structures",
+    "languages": "Languages",
+    "resources": "Resources",
+    "graduation": "Graduation",
+    "tutorial": "Tutorial",
+    "myProjects": "My Projects",
+    "myArticles": "My Articles",
+    "myFlashcards": "My Flashcards",
+    "webDev": "Web Development",
+    "mobileDev": "Mobile Development",
+    "aiMl": "AI & ML",
+    "techArticles": "Tech Articles",
+    "tutorials": "Tutorials",
+    "reviews": "Reviews",
+    "algorithms": "Algorithms",
+    "dataScience": "Data Science",
+    "webDesign": "Web Design",
+    "more": "More",
+    "viewItem": "View Item",
+    "editItem": "Edit Item",
+    "shareItem": "Share Item",
+    "deleteItem": "Delete Item",
+    "deleteConfirm": "Delete",
+    "profile": "Profile",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "upgrade": "Upgrade Plan",
+    "logout": "Log Out"
+  },
+
+  "navigation": {
+    "dashboard": "Dashboard",
+    "competitions": "Competitions",
+    "learn": "Learn",
+    "blogs": "Blogs",
+    "projects": "Projects",
+    "flashcards": "Flashcards",
+    "store": "Store",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcomeBack": "Welcome back, {{name}}!",
+    "overview": "Overview",
+    "quickActions": "Quick Actions",
+    "newProject": "New Project",
+    "newBlog": "New Blog Post",
+    "createFlashcards": "Create Flashcards",
+    "joinContest": "Join Contest",
+    "recentActivity": "Recent Activity",
+    "achievements": "Recent Achievements",
+    "learningProgress": "Learning Progress",
+    "learningStreak": "Learning Streak",
+    "weeklyGoal": "Weekly Goal",
+    "days": "days",
+    "completion": "completion",
+    "totalProjects": "Total Projects",
+    "blogPosts": "Blog Posts",
+    "activeContests": "Active Contests",
+    "studyCards": "Study Cards",
+    "myProjects": "My Projects",
+    "myBlogs": "My Blog Posts",
+    "publishedOn": "Published on",
+    "views": "views",
+    "likes": "likes",
+    "comments": "comments"
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Manage and showcase your projects",
+    "newProject": "New Project",
+    "status": "Status",
+    "draft": "Draft",
+    "published": "Published",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "technologies": "Technologies",
+    "contributors": "Contributors",
+    "lastUpdated": "Last Updated"
+  },
+  "blogs": {
+    "title": "Blog Posts",
+    "description": "Share knowledge and insights",
+    "newPost": "New Post",
+    "readTime": "min read",
+    "author": "Author",
+    "category": "Category",
+    "tags": "Tags"
+  },
+  "flashcards": {
+    "title": "Flashcards",
+    "description": "Study with spaced repetition",
+    "createDeck": "Create Deck",
+    "studyNow": "Study Now",
+    "cardsStudied": "Cards Studied",
+    "accuracy": "Accuracy",
+    "mastery": "Mastery",
+    "deck": "Deck",
+    "decks": "Decks"
+  },
+  "competitions": {
+    "title": "Competitions",
+    "description": "Participate in coding contests",
+    "upcoming": "Upcoming",
+    "active": "Active",
+    "completed": "Completed",
+    "register": "Register",
+    "participants": "Participants",
+    "prize": "Prize",
+    "duration": "Duration"
+  },
+  "profile": {
+    "title": "Profile",
+    "bio": "Bio",
+    "skills": "Skills",
+    "interests": "Interests",
+    "achievements": "Achievements",
+    "following": "Following",
+    "followers": "Followers",
+    "joinedDate": "Joined",
+    "editProfile": "Edit Profile",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "continueWithGoogle": "Continue with Google"
+  },
+
+  "feed": {
+    "title": "Your Feed",
+    "description": "Stay updated with the latest from your community",
+    "tabs": {
+      "all": "All",
+      "projects": "Projects",
+      "blogs": "Blogs",
+      "contests": "Contests",
+      "following": "Following"
+    },
+    "actions": {
+      "like": "Like",
+      "comment": "Comment",
+      "share": "Share",
+      "bookmark": "Bookmark",
+      "follow": "Follow",
+      "following": "Following"
+    },
+    "stats": {
+      "views": "views",
+      "likes": "likes",
+      "comments": "comments",
+      "shares": "shares",
+      "points": "pts"
+    },
+    "types": {
+      "project": "Project",
+      "blog": "Blog",
+      "contest": "Contest",
+      "flashcard": "Flashcard",
+      "achievement": "Achievement"
+    }
+  },
+  "ranking": {
+    "topRated": "Top rated",
+    "topContributors": "Top contributors",
+    "weeklyLeaders": "This Week's Leaders",
+    "trendingTopics": "Trending Topics",
+    "suggestedUsers": "Suggested for You",
+    "viewAll": "View All",
+    "posts": "posts",
+    "thisWeek": "this week",
+    "rank": "Rank"
+  },
+
+  "landing": {
+    "hero": {
+      "title": "A place to learn and create",
+      "subtitle": "FutureHub — A practical platform for Kosen Computer science students",
+      "searchPlaceholder": "Search projects, articles, contests..."
+    },
+    "cta": {
+      "title": "Use FutureHub",
+      "subtitle": "Learn from others and grow together.",
+      "getStarted": "Get Started"
+    },
+    "stats": {
+      "projects": "Projects",
+      "articles": "Articles",
+      "discussions": "Q&A",
+      "contests": "Contests"
+    },
+    "features": {
+      "title": "Key Features",
+      "items": [
+        {
+          "title": "Showcase Your Projects",
+          "desc": "Browse plans, graduation works, and tutorial projects."
+        },
+        {
+          "title": "Create Flashcards",
+          "desc": "Automatically extract useful words from text on the site."
+        },
+        {
+          "title": "Join Contests",
+          "desc": "Participate in department-hosted competitions."
+        },
+        {
+          "title": "Articles",
+          "desc": "Share your knowledge and experiences, and learn from others."
+        },
+        {
+          "title": "Multilingual Support",
+          "desc": "Use the platform in Mongolian, Japanese, or English."
+        },
+        {
+          "title": "Technical Dictionary",
+          "desc": "A dictionary with Mongolian translations tailored for your field."
+        }
+      ]
+    }
+  }
 }

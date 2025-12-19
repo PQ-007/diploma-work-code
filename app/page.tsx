@@ -2,31 +2,21 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardPage from "@/pages/DashboardPage";
+import FeedPage from "@/pages/FeedPage";
 import LandingPage from "@/pages/LandingPage";
-import { useState } from "react";
-
-// Define the User type to match the previous NavUser component
-type User = {
-  name: string;
-  email: string;
-  avatar: string;
-} | null;
 
 export default function HomePage() {
-  const [lang, setLang] = useState<"ENG" | "MGL" | "JP">("ENG");
-  const user = useAuth(); 
-  const isAuthenticated = user.user !== null;
+  const { user, loading } = useAuth();
+  const isAuthenticated = user !== null;
 
   return (
     <>
-      {user.loading ? (
+      {loading ? (
         <div>Loading...</div>
       ) : isAuthenticated ? (
-          <DashboardPage />
+        <FeedPage />
       ) : (
-        <div className="space-y-16">
-          <LandingPage setLang={setLang} lang={lang} />
-        </div>
+        <LandingPage />
       )}
     </>
   );
