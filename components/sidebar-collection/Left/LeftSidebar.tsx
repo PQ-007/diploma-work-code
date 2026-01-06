@@ -29,12 +29,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Anvil,
   Atom,
   Bird,
   Blocks,
-  BookOpen,
   Brain,
   ChevronRight,
   Clock,
@@ -45,7 +45,6 @@ import {
   Folder,
   GraduationCap,
   Hammer,
-  Home,
   Library,
   MessagesSquare,
   MoreHorizontal,
@@ -57,13 +56,12 @@ import {
   Swords,
   Telescope,
   Trash2,
-  Trophy,
+  Trophy
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { NavItem, LibraryItem, SidebarData } from "./type";
-import { useAuth } from "@/contexts/AuthContext";
+import { LibraryItem, NavItem, SidebarData } from "./type";
 
 // Navigation data structure (using translation keys)
 const navData: SidebarData = {
@@ -424,7 +422,6 @@ export function NavLibrary({ items }: { items: LibraryItem[] }) {
         <SidebarMenu>
           {items.map((item) => {
             const hasSubItems = item.items && item.items.length > 0;
-            // Create a pseudo href for library categories (optional)
             const categoryHref = `/library/${item.nameKey.split(".").pop()}`;
 
             return (

@@ -1,10 +1,7 @@
-// src/app/FeedPage.tsx (or similar main route file)
-
 "use client";
 import { useState, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-// import { useAuth } from "@/contexts/AuthContext"; // Keeping it commented out as it's not strictly needed for this file's logic
 import { Sparkles, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 // --- Components Import ---
@@ -14,7 +11,6 @@ import TrendingTopics from "@/components/TrendingTopics";
 import ReadingList from "@/components/ReadingList";
 import AdventBanner from "@/components/AdventBanner";
 
-// --- Data (Moved here for easy access, but ideally would come from an API/global store) ---
 const ArticlefeedItems = [
   // ... (Your original feedItems array) ...
   {

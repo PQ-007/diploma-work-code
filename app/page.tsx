@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import DashboardPage from "@/pages/DashboardPage";
 import FeedPage from "@/pages/FeedPage";
 import LandingPage from "@/pages/LandingPage";
 

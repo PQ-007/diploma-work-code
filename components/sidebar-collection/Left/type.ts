@@ -1,5 +1,5 @@
 
-// Enhanced tree data interface
+// Tree data interface
 export interface EnhancedTreeNode {
   key: string;
   title: React.ReactNode;
@@ -14,10 +14,6 @@ export interface TreeViewProps {
   showQuickActions?: boolean;
   activeSection?: string;
 }
-
-
-
-
 
 // Type definitions
 export interface NavSubItem {
