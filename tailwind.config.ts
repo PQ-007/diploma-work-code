@@ -1,10 +1,11 @@
 module.exports = {
-  darkMode: 'class',
+  darkMode: "class",
   theme: {
     extend: {
       backgroundColor: {
-        background: 'var(--background)',
+        background: "var(--background)",
       },
     },
   },
+  plugins: [require("@tailwindcss/typography")],
 };

@@ -11,28 +11,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import {
-  ChevronDown,
   Code,
   FileText,
   MessageSquare,
   MousePointerClick,
-  Plus,
   SwatchBook,
-  Trophy,
+  Trophy
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
+import {useTranslation} from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CreateButton = () => {
   const router = useRouter();
+  const { user } = useAuth();
+  const { t } = useTranslation();
 
-  // Defined action handler to show intended route/action (for demonstration)
   const handleAction = (label: string, path?: string) => {
     console.log(`Action: Create ${label}`);
     if (path) {
       router.push(path);
     }
-    // You'd typically close the dropdown here if needed, but the library handles it.
   };
 
   const createOptions = [
@@ -41,15 +41,15 @@ const CreateButton = () => {
       items: [
         {
           icon: FileText,
-          label: "Blog",
-          description: "Write a new blog post",
-          action: () => handleAction("Blog", "/create/blog"),
+          label: t("create_button.article"),
+          description: t("create_button.article_disc"),
+          action: () => handleAction("Blog", "/article/create"),
         },
         {
           icon: SwatchBook,
-          label: "Flashcard Deck",
-          description: "Make a new flashcard deck",
-          action: () => handleAction("Flashcard Deck", "/create/flashcards"),
+          label: t("create_button.flashcards"),
+          description: t("create_button.flashcards_disc"),
+          action: () => handleAction("Flashcard Deck", "/flashcards/create"),
         },
       ],
     },
@@ -58,15 +58,15 @@ const CreateButton = () => {
       items: [
         {
           icon: Trophy,
-          label: "Competition",
-          description: "Organize a new competition",
-          action: () => handleAction("Competition", "/create/competition"),
+          label: t("create_button.contest"),
+          description: t("create_button.contest_disc"),
+          action: () => handleAction("Competition", "/competition/create"),
         },
         {
           icon: MessageSquare,
-          label: "Discussion",
-          description: "Start a discussion thread",
-          action: () => handleAction("Discussion", "/create/discussion"),
+          label: t("create_button.discussions"),
+          description: t("create_button.discussions_disc"),
+          action: () => handleAction("Discussion", "/discussion/create"),
         },
       ],
     },
@@ -75,9 +75,9 @@ const CreateButton = () => {
       items: [
         {
           icon: Code,
-          label: "Project",
-          description: "Create new coding project",
-          action: () => handleAction("Project", "/create/project"),
+          label: t("create_button.project"),
+          description: t("create_button.project_disc"),
+          action: () => handleAction("Project", "/project/create"),
         },
       ],
     },
@@ -86,20 +86,18 @@ const CreateButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* FIX: Using 'default' variant and explicit sizing for a strong call to action */}
         <Button
-          // Use 'default' variant for better visibility (or 'primary' if customized)
           variant="default" 
           size="default" 
           className={cn(
-            "h-9 px-3 rounded-md transition-colors", // Standard button sizing
-            "flex items-center gap-1.5" // Ensure proper spacing for icons
+            "h-9 px-3 rounded-md transition-colors",
+            "flex items-center gap-1.5" 
           )}
           aria-label="Create new content or activity"
         >
           {/* Main Icon */}
           
-          <span className="font-medium">Create</span>
+          <span className="font-medium">{t("create_button.create")}</span>
           <MousePointerClick/>
           
         </Button>

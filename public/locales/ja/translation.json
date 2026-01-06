@@ -166,7 +166,19 @@
     "hasAccount": "すでにアカウントをお持ちですか？",
     "continueWithGoogle": "Googleで続行"
   },
-
+  "create_button": {
+    "create": "作成",
+    "project": "プロジェクト",
+    "project_disc": "新しいプロジェクトを作成する",
+    "article": "記事",
+    "article_disc": "新しい記事を書く",
+    "flashcards": "フラッシュカード",
+    "flashcards_disc": "テキストからフラッシュカードを作成する",
+    "contest": "コンテスト",
+    "contest_disc": "コンテストを作成する",
+    "discussions": "ディスカッション",
+    "discussions_disc": "新しいディスカッションを開始する"
+  },
   "landing": {
     "hero": {
       "title": "学び、創るための場所",
@@ -184,6 +196,7 @@
       "discussions": "Q&A",
       "contests": "コンテスト"
     },
+
     "features": {
       "title": "主な機能",
       "items": [
