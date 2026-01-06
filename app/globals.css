@@ -1,5 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+/* Nuclear option */
+.mdxeditor * {
+  caret-color: auto !important;
+}
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -744,6 +751,3 @@ body {
 .custom-tree-view .ant-tree-switcher {
   display: none !important;
 }
-
-
-
