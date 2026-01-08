@@ -8,7 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Sparkles, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 // --- Components Import ---
-import ListItem from "@/components/article/ListItem";
+import ListItem from "@/app/article/components/ListItem";
 import Leaderboard from "@/components/Leaderboard";
 import TrendingTopics from "@/components/TrendingTopics";
 import ReadingList from "@/components/ReadingList";
@@ -207,7 +207,12 @@ const leaderboard = [
   },
 ];
 
-const trendingTopics: Array<{ id: string; name: string; posts: number; trend: "up" | "stable" | "down" }> = [
+const trendingTopics: Array<{
+  id: string;
+  name: string;
+  posts: number;
+  trend: "up" | "stable" | "down";
+}> = [
   // ... (Your original trendingTopics array) ...
   { id: "1", name: "React 19", posts: 1234, trend: "up" },
   { id: "2", name: "Machine Learning", posts: 987, trend: "up" },
@@ -258,7 +263,9 @@ export default function FeedPage() {
 
   const filteredFeedItems = feedItems.filter((item) => {
     if (activeTab === "all") return true;
-    return item.content.tags.some(tag => tag.toLowerCase().includes(activeTab));
+    return item.content.tags.some((tag) =>
+      tag.toLowerCase().includes(activeTab)
+    );
   });
 
   return (
@@ -309,23 +316,10 @@ export default function FeedPage() {
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
-            <Leaderboard
-              isStudent={true}
-              leaderboard={leaderboard}
-              t={t}
-            />
-            <Leaderboard
-            isStudent={false}
-              leaderboard={leaderboard}
-              t={t}
-            />
-            <TrendingTopics
-              trendingTopics={trendingTopics}
-              t={t}
-            />
-            <ReadingList
-              readingListCount={readingList.size}
-            />
+            <Leaderboard isStudent={true} leaderboard={leaderboard} t={t} />
+            <Leaderboard isStudent={false} leaderboard={leaderboard} t={t} />
+            <TrendingTopics trendingTopics={trendingTopics} t={t} />
+            <ReadingList readingListCount={readingList.size} />
           </aside>
         </div>
       </div>

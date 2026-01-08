@@ -1,7 +1,7 @@
 "use client";
 
 import { LeftSidebar } from "@/components/sidebar-collection/Left/LeftSidebar";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SiteHeader } from "@/components/header-collection/SiteHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";

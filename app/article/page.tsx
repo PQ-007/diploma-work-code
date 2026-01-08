@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Sparkles, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 // --- Components Import ---
-import ListItem from "@/components/article/ListItem";
+import ListItem from "@/app/article/components/ListItem";
 import Leaderboard from "@/components/Leaderboard";
 import TrendingTopics from "@/components/TrendingTopics";
 import ReadingList from "@/components/ReadingList";

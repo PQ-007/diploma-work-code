@@ -25,12 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 // --- Component Imports ---
-import CreateButton from "./button-collection/CreateButton";
-import NotificationButton from "./button-collection/NotificationButton";
-import SearchButton from "./button-collection/SearchButton";
-import ThemeToggleButton from "./button-collection/ThemeToggleButton";
-import { NavUser } from "./NavUser";
-import { LanguageToggleButton } from "./button-collection/LanguageSwitcherButton";
+import CreateButton from "../button-collection/CreateButton";
+import NotificationButton from "../button-collection/NotificationButton";
+import SearchButton from "../button-collection/SearchButton";
+import ThemeToggleButton from "../button-collection/ThemeToggleButton";
+import { NavUser } from "../NavUser";
+import { LanguageToggleButton } from "../button-collection/LanguageSwitcherButton";
 
 // --- Utility Functions and Types ---
 

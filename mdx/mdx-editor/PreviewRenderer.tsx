@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { compileMdx } from "../mdx-editor/MdxCompiler";
-
+import { compileMdx } from "./MdxCompiler";
+import { components } from "@/mdx/mdx-components";
 export function MdxPreview({ source }: { source: string }) {
   const [Content, setContent] = useState<any>(null);
 
@@ -12,11 +12,7 @@ export function MdxPreview({ source }: { source: string }) {
         const mod = await compileMdx(source);
         setContent(() => mod.default);
       } catch (e) {
-        setContent(() => () => (
-          <pre className="text-red-500">
-            {String(e)}
-          </pre>
-        ));
+        setContent(() => () => {String(e)});
       }
     };
 
@@ -24,5 +20,5 @@ export function MdxPreview({ source }: { source: string }) {
   }, [source]);
 
   if (!Content) return null;
-  return <Content />;
+  return <Content components={components} />;
 }
