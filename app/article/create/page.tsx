@@ -9,6 +9,8 @@ import {
   Columns2,
   Download,
   Eye,
+  Loader2,
+  Languages,
   FileQuestionMark,
   FileText,
   FolderOpen,
@@ -62,11 +64,17 @@ Danger admonition
 :::
 `);
   const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [viewMenuOpen, setViewMenuOpen] = useState(false);
+  const [contentLang, setContentLang] = useState<"en" | "es" | "mn" | "jp">(
+    "en"
+  );
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
 
   const viewIcon = {
     split: <Columns2 size={16} />,
@@ -86,9 +94,36 @@ Danger admonition
     }
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaved(false);
+
+    try {
+      const res = await fetch("/api/articles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          body: mdx,
+          tags,
+          language_code: contentLang,
+          status: "draft",
+        }),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to save article", await res.text());
+        return;
+      }
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error("Error saving article", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleExport = () => {
@@ -102,6 +137,11 @@ Danger admonition
     URL.revokeObjectURL(url);
   };
 
+  const toggleLanguage = (lang: "en" | "es" | "mn" | "jp") => {
+    setContentLang(lang);
+    setLangMenuOpen(false);
+  };
+
   return (
     <div className=" bg-background">
       <div className="max-w-7xl mx-auto">
@@ -110,21 +150,28 @@ Danger admonition
             <div className="space-y-3">
               <input
                 type="text"
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground text-lg font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                className="w-full px-4 py-2 bg-background border border-border rounded-full text-foreground text-lg font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
                 placeholder="Enter article title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-              <div className="flex flex-wrap gap-2 items-center">
+              <input
+                type="text"
+                className="w-full px-4 py-1 bg-background border border-border rounded-full text-foreground text-sm font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
+                placeholder="Sub title / Description"
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+              />
+              <div className="flex flex-wrap items-center gap-2">
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-sm"
+                    className="inline-flex items-center gap-2 px-2 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-sm"
                   >
                     {tag}
                     <button
                       onClick={() => setTags(tags.filter((t) => t !== tag))}
-                      className="flex items-center p-0.5 rounded-full transition-colors hover:bg-white/20"
+                      className="flex items-center p-0. rounded-full transition-colors hover:bg-white/20"
                       aria-label={`Remove ${tag}`}
                     >
                       <X size={14} />
@@ -133,7 +180,7 @@ Danger admonition
                 ))}
                 <input
                   type="text"
-                  className="flex-1 min-w-[220px] px-3 py-2.5 bg-background border border-border rounded-lg text-foreground text-sm transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 min-w-[220px] px-3 py-2.5 bg-background border border-border rounded-full text-foreground text-sm transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Add tags (press Enter, max 5)..."
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
@@ -146,7 +193,22 @@ Danger admonition
             <SplitView mdx={mdx} setMdx={setMdx} viewMode={viewMode} />
           </div>
 
-          <div className="w-16 flex flex-col items-center gap-2 rounded-2xl border border-border/80 bg-background/95 p-2 shadow-md shadow-black/10">
+          <div className="w-16 flex flex-col items-center gap-2 rounded-full border border-border/80 bg-background/95 p-2 shadow-md shadow-black/10">
+            <button
+              className="h-10 w-10 flex items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-accent disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={handleSave}
+              disabled={isSaving || !title.trim() || !mdx.trim()}
+              aria-label="Save draft"
+              title="Save draft"
+            >
+              {isSaving ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : saved ? (
+                <Check size={16} />
+              ) : (
+                <Save size={16} />
+              )}
+            </button>
             <div className="relative">
               <button
                 className="h-10 w-10 flex items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-accent"
@@ -202,7 +264,67 @@ Danger admonition
                 </div>
               )}
             </div>
-
+            <div className="relative">
+              <button
+                className="h-10 w-10 flex items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-accent"
+                onClick={() => setLangMenuOpen((o) => !o)}
+                aria-label={`Switch language (current ${contentLang})`}
+              >
+                <Languages size={16} />
+              </button>
+              {langMenuOpen && (
+                <div className="absolute top-0 right-12 z-20 w-28 rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-col gap-1">
+                  <button
+                    className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
+                      contentLang === "en"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => toggleLanguage("en")}
+                    aria-label="Switch to English"
+                  >
+                    <span>EN</span>
+                    {contentLang === "en" && <Check size={14} />}
+                  </button>
+                  <button
+                    className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
+                      contentLang === "es"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => toggleLanguage("es")}
+                    aria-label="Switch to Spanish"
+                  >
+                    <span>ES</span>
+                    {contentLang === "es" && <Check size={14} />}
+                  </button>
+                  <button
+                    className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
+                      contentLang === "mn"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => toggleLanguage("mn")}
+                    aria-label="Switch to Mongolian"
+                  >
+                    <span>MN</span>
+                    {contentLang === "mn" && <Check size={14} />}
+                  </button>
+                  <button
+                    className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
+                      contentLang === "jp"
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => toggleLanguage("jp")}
+                    aria-label="Switch to Japanese"
+                  >
+                    <span>JP</span>
+                    {contentLang === "jp" && <Check size={14} />}
+                  </button>
+                </div>
+              )}
+            </div>
             <Separator orientation="horizontal" />
 
             <button

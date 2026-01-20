@@ -1,168 +1,50 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Sparkles, Trophy, TrendingUp, BookOpen } from "lucide-react";
 
 // --- Components Import ---
 import ListItem from "@/app/article/components/ListItem";
-import Leaderboard from "@/components/Leaderboard";
 import TrendingTopics from "@/components/TrendingTopics";
 import ReadingList from "@/components/ReadingList";
-import AdventBanner from "@/components/AdventBanner";
+interface ApiArticle {
+  article_id: string;
+  title: string;
+  body: string;
+  language_code: string;
+  published_at: string | null;
+  author_id: string | null;
+  tags: string[];
+}
 
-const ArticlefeedItems = [
-  // ... (Your original feedItems array) ...
-  {
-    id: "1",
-    day: 1,
-    type: "project",
-    author: {
-      name: "Sarah Chen",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      username: "@sarahchen",
-      verified: true,
-      reputation: 2450,
-      contributions: 352,
-    },
-    timestamp: "Dec 1, 2025",
-    readTime: "8 min",
-    content: {
-      title: "AlgoViz - Interactive Algorithm Visualizer",
-      description:
-        "Built a new tool to help students understand sorting algorithms through interactive visualizations. Features include step-by-step execution, code highlighting, and complexity analysis.",
-      image:
-        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
-      tags: ["React", "D3.js", "Education", "Algorithms"],
-    },
-    stats: {
-      likes: 234,
-      comments: 45,
-      views: 1200,
-      shares: 23,
-    },
-    featured: false,
-    trending: true,
-  },
-  {
-    id: "2",
-    day: 2,
-    type: "blog",
-    author: {
-      name: "Mike Rodriguez",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-      username: "@mikecodes",
-      verified: true,
-      reputation: 3200,
-      contributions: 310,
-    },
-    timestamp: "Dec 2, 2025",
-    readTime: "12 min",
-    content: {
-      title: "10 Advanced React Patterns You Should Know",
-      description:
-        "Dive deep into compound components, render props, custom hooks, and more. Learn how to write cleaner, more maintainable React code with these proven patterns.",
-      tags: ["React", "JavaScript", "Tutorial"],
-    },
-    stats: {
-      likes: 567,
-      comments: 89,
-      views: 3400,
-      shares: 78,
-    },
-    featured: true,
-    trending: true,
-  },
-  {
-    id: "3",
-    day: 3,
-    type: "contest",
-    author: {
-      name: "CodeMasters",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Code",
-      username: "@codemasters",
-      verified: true,
-      reputation: 5600,
-      contributions: 186,
-    },
-    timestamp: "Dec 3, 2025",
-    readTime: "5 min",
-    deadline: "3 days left",
-    content: {
-      title: "Summer Coding Challenge 2025",
-      description:
-        "Join our biggest coding competition yet! Solve algorithmic problems, compete with developers worldwide, and win amazing prizes. Registration closes in 3 days.",
-      image:
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
-      tags: ["Contest", "Algorithms"],
-    },
-    stats: {
-      likes: 890,
-      comments: 156,
-      views: 5600,
-      shares: 234,
-    },
-    featured: false,
-    trending: false,
-  },
-  {
-    id: "4",
-    day: 4,
-    type: "achievement",
-    author: {
-      name: "Alex Kim",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      username: "@alexkim",
-      verified: false,
-      reputation: 1200,
-      contributions: 215,
-    },
-    timestamp: "Dec 4, 2025",
-    readTime: "3 min",
-    content: {
-      title: "Completed 100-Day Coding Streak!",
-      description:
-        "Finally hit 100 consecutive days of coding! Learned so much about consistency and building habits. Special thanks to the community for the support!",
-      tags: ["Achievement", "Motivation"],
-    },
-    stats: {
-      likes: 445,
-      comments: 67,
-      views: 1800,
-    },
-    featured: false,
-    trending: false,
-  },
-  {
-    id: "5",
-    day: 5,
-    type: "flashcard",
-    author: {
-      name: "Emma Wilson",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
-      username: "@emmawilson",
-      verified: true,
-      reputation: 1800,
-      contributions: 154,
-    },
-    timestamp: "Dec 5, 2025",
-    readTime: "15 min",
-    content: {
-      title: "JavaScript Interview Prep - 50 Essential Questions",
-      description:
-        "Created a comprehensive flashcard deck covering closures, async/await, prototypes, and more. Perfect for technical interviews!",
-      tags: ["JavaScript", "Interview"],
-    },
-    stats: {
-      likes: 678,
-      comments: 92,
-      views: 2900,
-      shares: 145,
-    },
-    featured: false,
-    trending: true,
-  },
-];
+interface FeedItem {
+  id: string;
+  day: number;
+  author: {
+    name: string;
+    avatar: string;
+    username: string;
+    verified: boolean;
+    reputation: number;
+    contributions: number;
+  };
+  timestamp: string;
+  readTime: string;
+  content: {
+    title: string;
+    description: string;
+    image?: string;
+    tags: string[];
+  };
+  stats: {
+    likes: number;
+    comments: number;
+    views: number;
+    shares?: number;
+  };
+  featured: boolean;
+  trending: boolean;
+}
 
 const trendingTopics: Array<{
   id: string;
@@ -179,15 +61,105 @@ const trendingTopics: Array<{
 ];
 // --- End of Data ---
 
+const stripMarkdown = (value: string) =>
+  value
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/[>*#_\-\[\]\(\)!]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const calcReadTime = (body: string) => {
+  const words = stripMarkdown(body || "")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 200));
+  return `${minutes} min`;
+};
+
 export default function ArticleBrowsePage() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
-  const [likedItems, setLikedItems] = useState(new Set(["2", "4"]));
-  const [bookmarkedItems, setBookmarkedItems] = useState(
-    new Set(["1", "3", "5"])
-  );
+  const [likedItems, setLikedItems] = useState(new Set<string>());
+  const [bookmarkedItems, setBookmarkedItems] = useState(new Set<string>());
   const [readingList, setReadingList] = useState(new Set<string>());
   const [showQuickActions, setShowQuickActions] = useState<string | null>(null);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch("/api/articles?status=published");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed to load articles");
+        }
+
+        const items: ApiArticle[] = Array.isArray(data?.items)
+          ? data.items
+          : [];
+
+        const mapped = items.map((article, index) => {
+          const authorName = article.author_id
+            ? `Author ${article.author_id.slice(0, 6)}`
+            : "Anonymous";
+          const username = article.author_id
+            ? `@${article.author_id.slice(0, 8)}`
+            : "@anonymous";
+          const published = article.published_at
+            ? new Date(article.published_at).toLocaleDateString()
+            : "Unpublished";
+          const cleanBody = stripMarkdown(article.body || "");
+          const description = cleanBody.length
+            ? cleanBody.slice(0, 220) + (cleanBody.length > 220 ? "..." : "")
+            : "No preview available.";
+
+          return {
+            id: article.article_id,
+            day: index + 1,
+            author: {
+              name: authorName,
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`,
+              username,
+              verified: false,
+              reputation: 0,
+              contributions: 0,
+            },
+            timestamp: published,
+            readTime: calcReadTime(article.body || ""),
+            content: {
+              title: article.title || "Untitled article",
+              description,
+              tags: article.tags || [],
+            },
+            stats: {
+              likes: 0,
+              comments: 0,
+              views: 0,
+            },
+            featured: index === 0,
+            trending: index < 3,
+          } as FeedItem;
+        });
+
+        setFeedItems(mapped);
+      } catch (err: any) {
+        console.error("Error loading articles", err);
+        setError(err?.message || "Failed to load articles");
+        setFeedItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
 
   const toggleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
@@ -218,10 +190,10 @@ export default function ArticleBrowsePage() {
     setShowQuickActions((prev) => (prev === id ? null : id));
   }, []);
 
-  const filteredFeedItems = ArticlefeedItems.filter((item) => {
+  const filteredFeedItems = feedItems.filter((item) => {
     if (activeTab === "all") return true;
     return item.content.tags.some((tag) =>
-      tag.toLowerCase().includes(activeTab)
+      tag.toLowerCase().includes(activeTab),
     );
   });
 
@@ -252,20 +224,35 @@ export default function ArticleBrowsePage() {
 
             {/* Feed Items */}
             <div className="space-y-4">
-              {filteredFeedItems.map((item) => (
-                <ListItem
-                  key={item.id}
-                  item={item}
-                  isLiked={likedItems.has(item.id)}
-                  isBookmarked={bookmarkedItems.has(item.id)}
-                  isInReadingList={readingList.has(item.id)}
-                  showQuickActions={showQuickActions === item.id}
-                  toggleLike={toggleLike}
-                  toggleBookmark={toggleBookmark}
-                  toggleReadingList={toggleReadingList}
-                  handleMoreClick={handleMoreClick}
-                />
-              ))}
+              {loading && (
+                <div className="text-sm text-muted-foreground">
+                  Loading published articles...
+                </div>
+              )}
+              {!loading && error && (
+                <div className="text-sm text-red-500">{error}</div>
+              )}
+              {!loading && !error && filteredFeedItems.length === 0 && (
+                <div className="text-sm text-muted-foreground">
+                  No published articles yet.
+                </div>
+              )}
+              {!loading &&
+                !error &&
+                filteredFeedItems.map((item) => (
+                  <ListItem
+                    key={item.id}
+                    item={item}
+                    isLiked={likedItems.has(item.id)}
+                    isBookmarked={bookmarkedItems.has(item.id)}
+                    isInReadingList={readingList.has(item.id)}
+                    showQuickActions={showQuickActions === item.id}
+                    toggleLike={toggleLike}
+                    toggleBookmark={toggleBookmark}
+                    toggleReadingList={toggleReadingList}
+                    handleMoreClick={handleMoreClick}
+                  />
+                ))}
             </div>
           </div>
 
