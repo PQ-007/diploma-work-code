@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import FeedPage from "@/pages/FeedPage";
-import LandingPage from "@/pages/LandingPage";
+import FeedPage from "@/app/pages/FeedPage";
+import LandingPage from "@/app/pages/LandingPage";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
