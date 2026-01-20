@@ -2,12 +2,6 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-/* Nuclear option */
-.mdxeditor * {
-  caret-color: auto !important;
-}
-
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -350,24 +344,49 @@ body {
   transition: transform 0.2s ease;
 }
 
-/* Modern scrollbar */
+/* Hide all scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--muted);
-  border-radius: 4px;
+  background: transparent !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 4px;
-  border: 2px solid var(--muted);
+  background: transparent !important;
+  border: none !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
+/* Monaco editor scrollbar aligned to site theme */
+.monaco-editor .scrollbar,
+.monaco-diff-editor .scrollbar {
+  background: var(--muted);
+}
+
+.monaco-editor .scrollbar.vertical,
+.monaco-diff-editor .scrollbar.vertical {
+  width: 8px !important;
+}
+
+.monaco-editor .scrollbar.horizontal,
+.monaco-diff-editor .scrollbar.horizontal {
+  height: 8px !important;
+}
+
+.monaco-editor .scrollbar > .slider,
+.monaco-diff-editor .scrollbar > .slider {
+  background: var(--primary);
+  border: 2px solid var(--muted);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.monaco-editor .scrollbar > .slider:hover,
+.monaco-editor .scrollbar > .slider.active,
+.monaco-diff-editor .scrollbar > .slider:hover,
+.monaco-diff-editor .scrollbar > .slider.active {
   background: var(--accent);
 }
 

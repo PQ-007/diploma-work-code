@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ArticleCreateHeader } from "./ArticleCreateHeader";
 // --- Shadcn Breadcrumb Imports ---
 import Link from "next/link";
 import {
@@ -25,12 +26,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 // --- Component Imports ---
-import CreateButton from "./button-collection/CreateButton";
-import NotificationButton from "./button-collection/NotificationButton";
-import SearchButton from "./button-collection/SearchButton";
-import ThemeToggleButton from "./button-collection/ThemeToggleButton";
-import { NavUser } from "./NavUser";
-import { LanguageToggleButton } from "./button-collection/LanguageSwitcherButton";
+import CreateButton from "../button-collection/CreateButton";
+import NotificationButton from "../button-collection/NotificationButton";
+import SearchButton from "../button-collection/SearchButton";
+import ThemeToggleButton from "../button-collection/ThemeToggleButton";
+import { NavUser } from "../NavUser";
+import { LanguageToggleButton } from "../button-collection/LanguageSwitcherButton";
 
 // --- Utility Functions and Types ---
 
@@ -195,4 +196,15 @@ export function SiteHeader() {
       </div>
     </header>
   );
+}
+
+// Switch-like resolver to choose which header to render based on route
+export function ResolvedHeader() {
+  const pathname = usePathname() || "/";
+
+  if (pathname.startsWith("/article/create")) {
+    return <ArticleCreateHeader />;
+  }
+
+  return <SiteHeader />;
 }

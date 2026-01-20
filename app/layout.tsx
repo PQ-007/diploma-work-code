@@ -1,7 +1,7 @@
 "use client";
 
 import { LeftSidebar } from "@/components/sidebar-collection/Left/LeftSidebar";
-import { SiteHeader } from "@/components/SiteHeader";
+import { ResolvedHeader } from "@/components/header-collection/SiteHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -73,7 +73,7 @@ export default function RootLayout({
 
                   {/* Main Content Area */}
                   <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
-                    <SiteHeader />
+                    <ResolvedHeader />
 
                     {/* Main Content */}
                     <main className="flex-1 overflow-y-auto relative">

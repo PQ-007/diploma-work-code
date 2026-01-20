@@ -56,7 +56,7 @@ import {
   Swords,
   Telescope,
   Trash2,
-  Trophy
+  Trophy,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
@@ -550,8 +550,13 @@ export function LeftSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const { user, loading } = useAuth();
   const isAuthenticated = user !== null;
+  const pathname = usePathname();
+  const isArticleDetail = pathname
+    ? /^\/article\/[^/]+$/.test(pathname)
+    : false;
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible={isArticleDetail ? "offcanvas" : "icon"} {...props}>
       <SidebarHeader className="border-b ">
         <Header />
       </SidebarHeader>
