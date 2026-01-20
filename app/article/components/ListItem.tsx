@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 import {
   Heart,
   Bookmark,
@@ -15,8 +16,6 @@ import {
   CheckCircle2,
   X,
 } from "lucide-react";
-
-
 
 interface ListItemData {
   id: string;
@@ -59,8 +58,6 @@ interface ListItemProps {
   handleMoreClick: (id: string) => void;
 }
 
-
-
 export default function ListItem({
   item,
   isLiked,
@@ -77,7 +74,7 @@ export default function ListItem({
       <Card
         className={`transition-all duration-300 hover:shadow-md overflow-hidden border-border/40 ${
           item.featured ? "border-foreground/20 shadow-sm bg-muted/20" : ""
-        } p-4`} 
+        } p-4`}
       >
         <div className="flex gap-4">
           {/* Content (Title, Description, Author, Tags) */}
@@ -110,12 +107,18 @@ export default function ListItem({
             </div>
             {/* Title and Description */}
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold tracking-tight leading-snug group-hover:text-foreground/90 transition-colors line-clamp-2">
-                {item.content.title}
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                {item.content.description}
-              </p>
+              <Link
+                href={`/article/${item.id}`}
+                className="block space-y-1"
+                prefetch
+              >
+                <h2 className="text-lg font-semibold tracking-tight leading-snug group-hover:text-foreground/90 transition-colors line-clamp-2">
+                  {item.content.title}
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                  {item.content.description}
+                </p>
+              </Link>
             </div>
             {/* Tags, Type, Stats and Actions */}
             <div className="flex items-center justify-between pt-1">
