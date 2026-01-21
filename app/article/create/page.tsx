@@ -1,25 +1,26 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import SplitView from "@/mdx/mdx-editor/SplitView";
 import {
-  ChartColumn,
   Check,
   CircleQuestionMark,
   Columns2,
   Download,
   Eye,
-  Loader2,
-  Languages,
   FileText,
-  FolderOpen,
   Image,
+  Languages,
+  Loader2,
   MessageCircleMore,
-  Plus,
   Save,
+  Settings2,
   X,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
+import ArticleSettingsButton from "@/components/button-collection/ArticleSettingsButton";
 
 type ViewMode = "split" | "editor" | "preview";
 
@@ -44,6 +45,10 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     "en",
   );
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const viewIcon = {
     split: <Columns2 size={16} />,
@@ -111,6 +116,60 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     setLangMenuOpen(false);
   };
 
+  const insertImageMarkdown = (url: string) => {
+    setMdx((prev) => {
+      const spacer =
+        prev.trim().length === 0 ? "" : prev.endsWith("\n") ? "\n" : "\n\n";
+      return `${prev}${spacer}![](${url})\n`;
+    });
+  };
+
+  const buildOptimizedUrl = (secureUrl: string, publicId?: string | null) => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (cloudName && publicId) {
+      return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200/${publicId}`;
+    }
+    return secureUrl;
+  };
+
+  const handleImageButtonClick = () => {
+    setImageError(null);
+    fileInputRef.current?.click();
+  };
+
+  const handleImageFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setImageError(null);
+
+    if (!file.type.startsWith("image/")) {
+      setImageError("Please choose an image file.");
+      return;
+    }
+
+    const maxBytes = 10 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setImageError("Image must be 10MB or smaller.");
+      return;
+    }
+
+    setImageUploading(true);
+    try {
+      const { secureUrl, publicId } = await uploadImageToCloudinary(file);
+      const finalUrl = buildOptimizedUrl(secureUrl, publicId);
+      insertImageMarkdown(finalUrl);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed.";
+      setImageError(message);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-4 py-2">
@@ -164,12 +223,13 @@ This is a **Zenn/Qiita-style** editor for technical writing.
 
           <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-10 lg:self-start">
             <div className="w-16 flex flex-col items-center gap-2 rounded-full border border-border/80 bg-background/95 p-2 shadow-md shadow-black/10 backdrop-blur">
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent disabled:opacity-60 disabled:cursor-not-allowed"
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full"
                 onClick={handleSave}
                 disabled={isSaving || !title.trim() || !mdx.trim()}
                 aria-label="Save draft"
-                title="Save draft"
               >
                 {isSaving ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -178,15 +238,18 @@ This is a **Zenn/Qiita-style** editor for technical writing.
                 ) : (
                   <Save size={16} />
                 )}
-              </button>
+              </Button>
+
               <div className="relative">
-                <button
-                  className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
                   onClick={() => setViewMenuOpen((o) => !o)}
                   aria-label="Change view"
                 >
                   {viewIcon}
-                </button>
+                </Button>
                 {viewMenuOpen && (
                   <div className="absolute top-[-9px] right-14 z-20 rounded-full border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-row gap-1">
                     <button
@@ -234,14 +297,17 @@ This is a **Zenn/Qiita-style** editor for technical writing.
                   </div>
                 )}
               </div>
+
               <div className="relative">
-                <button
-                  className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full"
                   onClick={() => setLangMenuOpen((o) => !o)}
                   aria-label={`Switch language (current ${contentLang})`}
                 >
                   <Languages size={16} />
-                </button>
+                </Button>
                 {langMenuOpen && (
                   <div className="absolute top-0 right-14 z-20 w-28 rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-col gap-1">
                     <button
@@ -284,47 +350,66 @@ This is a **Zenn/Qiita-style** editor for technical writing.
                   </div>
                 )}
               </div>
+
               <Separator orientation="horizontal" />
 
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
-                aria-label="Stats"
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full"
+                onClick={handleImageButtonClick}
+                disabled={imageUploading}
+                aria-label="Insert image"
               >
-                <Image size={16} />
-              </button>
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
-                aria-label="Add"
-              >
-                <Plus size={16} />
-              </button>
+                {imageUploading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Image size={16} />
+                )}
+              </Button>
+              {imageError && (
+                <span className="text-xs text-destructive text-center px-1">
+                  {imageError}
+                </span>
+              )}
 
-             
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
-                aria-label="Stats overview"
-              >
-                <ChartColumn size={16} />
-              </button>
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
+              <ArticleSettingsButton />
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full"
                 aria-label="Comments"
               >
                 <MessageCircleMore size={16} />
-              </button>
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full"
                 onClick={handleExport}
                 aria-label="Export"
               >
                 <Download size={16} />
-              </button>
-              <button
-                className="h-10 w-10 flex items-center justify-center rounded-full border border-border transition-colors hover:bg-accent"
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full"
                 aria-label="Help"
               >
                 <CircleQuestionMark size={20} />
-              </button>
+              </Button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageFileChange}
+              />
             </div>
           </aside>
         </div>
