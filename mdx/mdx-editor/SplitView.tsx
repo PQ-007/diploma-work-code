@@ -1,6 +1,6 @@
-
 "use client";
 
+import { useMemo } from "react";
 import { MdxEditor } from "./MonacoEditor";
 import { MdxPreview } from "./PreviewRenderer";
 
@@ -11,38 +11,37 @@ interface SplitViewProps {
 }
 
 export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
+  const editorHeight = useMemo(() => {
+    const lineHeight = 24;
+    const padding = 48; // top+bottom from Monaco padding
+    const minHeight = 560;
+    const maxHeight = 1600;
+
+    const logicalLines = mdx.split("\n").reduce((total, line) => {
+      const visualLines = Math.max(1, Math.ceil(line.length / 90));
+      return total + visualLines;
+    }, 0);
+
+    const estimated = logicalLines * lineHeight + padding;
+    return Math.min(maxHeight, Math.max(minHeight, estimated));
+  }, [mdx]);
+
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm min-h-[600px] h-[calc(100vh-300px)] flex flex-col md:flex-row">
-      {/* Editor Pane */}
+    <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col md:flex-row md:divide-x md:divide-border">
       <div
-        className={`flex-1 flex flex-col overflow-hidden ${
-          viewMode === "preview" ? "hidden" : ""
-        }`}
+        className={`flex-1 flex flex-col ${viewMode === "preview" ? "hidden" : ""}`}
+        style={{ minHeight: editorHeight }}
       >
-        
-        {/* Editor Content */}
-        <div className="flex-1 overflow-auto bg-card">
-          <MdxEditor value={mdx} onChange={setMdx} />
-        </div>
+        <MdxEditor value={mdx} onChange={setMdx} height={editorHeight} />
       </div>
 
-      {/* Divider */}
-      {viewMode === "split" && (
-        <div className="w-px bg-border flex-shrink-0 hidden md:block" />
-      )}
-      {viewMode === "split" && (
-        <div className="h-px bg-border flex-shrink-0 md:hidden" />
-      )}
+      {viewMode === "split" && <div className="md:hidden h-px bg-border" />}
 
-      {/* Preview Pane */}
       <div
-        className={`flex-1 flex flex-col overflow-hidden ${
-          viewMode === "editor" ? "hidden" : ""
-        }`}
+        className={`flex-1 flex flex-col ${viewMode === "editor" ? "hidden" : ""}`}
+        style={{ minHeight: editorHeight }}
       >
-        
-        {/* Preview Content */}
-        <div className="flex-1 overflow-y-auto bg-card px-8 py-8">
+        <div className="bg-card px-8 pt-4 pb-8">
           <MdxPreview source={mdx} />
         </div>
       </div>
