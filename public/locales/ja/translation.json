@@ -166,6 +166,13 @@
     "hasAccount": "すでにアカウントをお持ちですか？",
     "continueWithGoogle": "Googleで続行"
   },
+  "nav_user": {
+    "profile": "プロフィール",
+    "roadmap": "ロードマップ",
+    "theme": "テーマ",
+    "language": "言語",
+    "logout": "ログアウト"
+  },
   "create_button": {
     "create": "作成",
     "project": "プロジェクト",

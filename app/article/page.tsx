@@ -10,10 +10,16 @@ import ReadingList from "@/components/ReadingList";
 interface ApiArticle {
   article_id: string;
   title: string;
+  sub_title: string | null;
   body: string;
   language_code: string;
   published_at: string | null;
   author_id: string | null;
+  author: {
+    user_name: string | null;
+    avatar_url: string | null;
+    ranking_point: number | null;
+  } | null;
   tags: string[];
 }
 
@@ -27,6 +33,7 @@ interface FeedItem {
     verified: boolean;
     reputation: number;
     contributions: number;
+    ranking_point: number;
   };
   timestamp: string;
   readTime: string;
@@ -106,30 +113,31 @@ export default function ArticleBrowsePage() {
           : [];
 
         const mapped = items.map((article, index) => {
-          const authorName = article.author_id
-            ? `Author ${article.author_id.slice(0, 6)}`
-            : "Anonymous";
-          const username = article.author_id
-            ? `@${article.author_id.slice(0, 8)}`
+          const authorName = article.author?.user_name || "Anonymous";
+          const username = article.author?.user_name
+            ? `@${article.author.user_name}`
             : "@anonymous";
+          const avatarUrl =
+            article.author?.avatar_url ||
+            `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`;
           const published = article.published_at
             ? new Date(article.published_at).toLocaleDateString()
             : "Unpublished";
-          const cleanBody = stripMarkdown(article.body || "");
-          const description = cleanBody.length
-            ? cleanBody.slice(0, 220) + (cleanBody.length > 220 ? "..." : "")
-            : "No preview available.";
+
+          // Use subtitle if available, otherwise skip description
+          const description = article.sub_title || "";
 
           return {
             id: article.article_id,
             day: index + 1,
             author: {
               name: authorName,
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`,
+              avatar: avatarUrl,
               username,
               verified: false,
               reputation: 0,
               contributions: 0,
+              ranking_point: article.author?.ranking_point ?? 0,
             },
             timestamp: published,
             readTime: calcReadTime(article.body || ""),

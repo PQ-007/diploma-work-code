@@ -165,6 +165,13 @@
     "thisWeek": "Энэ долоо хоног",
     "rank": "Ранк"
   },
+  "nav_user": {
+    "profile": "Профайл",
+    "roadmap": "Roadmap",
+    "theme": "Theme",
+    "language": "Хэл",
+    "logout": "Гарах"
+  },
   "create_button": {
     "create": "Үүсгэх",
     "project": "Төсөл",

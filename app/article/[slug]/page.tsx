@@ -251,7 +251,7 @@ export default function ModernArticlePage() {
     : null;
 
   const displayTitle = article?.title || "Untitled article";
-  const displaySubtitle = article?.sub_title || "okay";
+  const displaySubtitle = article?.sub_title || null;
   const displayTags = article?.tags ?? [];
 
   const articleData = useMemo(() => {

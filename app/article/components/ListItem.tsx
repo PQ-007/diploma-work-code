@@ -15,7 +15,26 @@ import {
   Clock,
   CheckCircle2,
   X,
+  ChessBishop,
+  ChessKing,
+  ChessKnight,
+  ChessQueen,
+  ChessPawn,
+  ChessRook,
 } from "lucide-react";
+
+const getRankIcon = (rank: number) => {
+  if (rank >= 2500) return <ChessKing className="h-3.5 w-3.5 text-red-500" />;
+  if (rank >= 2000)
+    return <ChessQueen className="h-3.5 w-3.5 text-orange-500" />;
+  if (rank >= 1600)
+    return <ChessRook className="h-3.5 w-3.5 text-purple-500" />;
+  if (rank >= 1200)
+    return <ChessBishop className="h-3.5 w-3.5 text-blue-500" />;
+  if (rank >= 800)
+    return <ChessKnight className="h-3.5 w-3.5 text-green-500" />;
+  return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
+};
 
 interface ListItemData {
   id: string;
@@ -27,6 +46,7 @@ interface ListItemData {
     verified: boolean;
     reputation: number;
     contributions: number;
+    ranking_point: number;
   };
   timestamp: string;
   readTime: string;
@@ -93,6 +113,7 @@ export default function ListItem({
                     <span className="text-sm font-medium truncate">
                       {item.author.name}
                     </span>
+                    {getRankIcon(item.author.ranking_point)}
                     <span className="text-xs text-muted-foreground">
                       ({item.author.username})
                     </span>

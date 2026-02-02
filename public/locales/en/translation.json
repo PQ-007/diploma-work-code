@@ -213,19 +213,26 @@
     "thisWeek": "this week",
     "rank": "Rank"
   },
+  "nav_user": {
+    "profile": "Profile",
+    "roadmap": "Roadmap",
+    "theme": "Theme",
+    "language": "Language",
+    "logout": "Log out"
+  },
   "create_button": {
-      "create": "Create",
-      "project": "Project",
-      "project_disc": "Create new project",
-      "article": "Article",
-      "article_disc": "Write a new article",
-      "flashcards": "Flashcards",
-      "flashcards_disc": "Make flashcards from text",
-      "contest": "Contest",
-      "contest_disc": "Make a contest",
-      "discussions": "Discussions",
-      "discussions_disc": "Start a new discussion"
-    },
+    "create": "Create",
+    "project": "Project",
+    "project_disc": "Create new project",
+    "article": "Article",
+    "article_disc": "Write a new article",
+    "flashcards": "Flashcards",
+    "flashcards_disc": "Make flashcards from text",
+    "contest": "Contest",
+    "contest_disc": "Make a contest",
+    "discussions": "Discussions",
+    "discussions_disc": "Start a new discussion"
+  },
 
   "landing": {
     "hero": {
@@ -244,7 +251,7 @@
       "discussions": "Q&A",
       "contests": "Contests"
     },
-    
+
     "features": {
       "title": "Key Features",
       "items": [
