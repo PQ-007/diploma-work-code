@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { components as mdxComponents } from "@/mdx/mdx-components";
 import {
@@ -80,6 +81,110 @@ export default function ModernArticlePage() {
     [relatedLinks, showAllLinks],
   );
 
+  const PageSkeleton = () => (
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
+          {/* Left rail skeleton */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-6">
+              <div className="flex flex-col items-center gap-3">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <Skeleton
+                    key={idx}
+                    className="h-10 w-10 rounded-full bg-muted"
+                  />
+                ))}
+                <div className="h-px w-10 bg-border my-1" />
+                <Skeleton className="h-4 w-12 bg-muted" />
+              </div>
+            </div>
+          </aside>
+
+          {/* Article column skeleton */}
+          <main className="min-w-0 space-y-6">
+            <Card className="bg-card/50 border-border/60 shadow-sm">
+              <div className="px-6 sm:px-8 space-y-6 py-6">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <Skeleton className="h-4 w-20 bg-muted" />
+                  <Skeleton className="h-4 w-16 bg-muted" />
+                  <Skeleton className="h-4 w-20 bg-muted" />
+                </div>
+                <Skeleton className="h-9 w-3/4 bg-muted" />
+                <Skeleton className="h-6 w-2/3 bg-muted" />
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <Skeleton key={idx} className="h-6 w-16 bg-muted" />
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-12 w-12 rounded-full bg-muted" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32 bg-muted" />
+                    <Skeleton className="h-3 w-24 bg-muted" />
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 sm:px-8 pb-8 space-y-3">
+                {Array.from({ length: 10 }).map((_, idx) => (
+                  <Skeleton key={idx} className="h-4 w-full bg-muted" />
+                ))}
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <Skeleton
+                    key={`wide-${idx}`}
+                    className="h-4 w-11/12 bg-muted"
+                  />
+                ))}
+              </div>
+            </Card>
+
+            <Card className="bg-card/50 border-border/60 shadow-sm">
+              <div className="p-6 space-y-3">
+                <Skeleton className="h-4 w-40 bg-muted" />
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <Skeleton key={idx} className="h-4 w-full bg-muted" />
+                ))}
+              </div>
+            </Card>
+          </main>
+
+          {/* Right sidebar skeleton */}
+          <aside className="hidden xl:block">
+            <div className="sticky top-6 space-y-6">
+              <Card className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-12 w-12 rounded-full bg-muted" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32 bg-muted" />
+                    <Skeleton className="h-3 w-20 bg-muted" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-16 bg-muted" />
+                  <Skeleton className="h-6 w-12 bg-muted" />
+                </div>
+              </Card>
+
+              <Card className="p-4 space-y-2">
+                <Skeleton className="h-4 w-24 bg-muted" />
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <Skeleton key={idx} className="h-3 w-full bg-muted" />
+                ))}
+              </Card>
+
+              <Card className="p-4 space-y-2">
+                <Skeleton className="h-4 w-32 bg-muted" />
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <Skeleton key={idx} className="h-3 w-full bg-muted" />
+                ))}
+              </Card>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+
   // Load and serialize MDX content
   useEffect(() => {
     const loadMDX = async () => {
@@ -152,23 +257,16 @@ export default function ModernArticlePage() {
   const articleData = useMemo(() => {
     const wordCount = (article?.body || "").split(/\s+/).filter(Boolean).length;
     const readTime = Math.max(1, Math.ceil(wordCount / 200));
-    const authorName =
-      article?.author?.display_name ||
-      article?.author?.username ||
-      "Unknown author";
+    const authorName = article?.author?.user_name || "Unknown";
 
     return {
       readTime,
       views: article?.views ?? 0,
       author: {
-        name: authorName,
-        username: article?.author?.username || "",
+        username: article?.author?.user_name || "",
         avatar: article?.author?.avatar_url || "",
-        role: article?.author?.role || "Contributor",
-        verified: false,
-        bio: "",
-        twitter: "",
-        github: "",
+        ranking: article?.author?.ranking_point || 0,
+        bio: article?.author?.bio ?? "",
       },
     };
   }, [article]);
@@ -235,6 +333,10 @@ export default function ModernArticlePage() {
     headings.forEach((h) => observer.observe(h));
     return () => observer.disconnect();
   }, [mdxSource]);
+
+  if (loading) {
+    return <PageSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary">
@@ -355,14 +457,11 @@ export default function ModernArticlePage() {
 
               {/* Article body (wireframe: big center area) */}
               <div className="px-6  sm:px-8" ref={articleRef}>
-                {loading ? (
-                  <div className="flex items-center justify-center py-16">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
-                  </div>
-                ) : mdxSource ? (
+                {mdxSource ? (
                   <article
                     className="prose dark:prose-invert prose-headings:font-semibold prose-h2:mt-10 prose-h3:mt-8
-                    prose-p:text-[15px] prose-p:leading-7 prose-li:text-[15px] prose-li:leading-7 max-w-none"
+                    prose-p:text-[15px] prose-p:leading-7 prose-li:text-[15px] prose-li:leading-7 max-w-none
+                    prose-a:break-all overflow-hidden"
                   >
                     <MDXRemote
                       {...mdxSource}
@@ -415,15 +514,8 @@ export default function ModernArticlePage() {
 
           {/* Right panels (wireframe: Author data, TOC, Definitions, Related links) */}
           <aside className="hidden xl:block">
-            <div className="sticky top-6 space-y-6">
-              
-               
-                  <AuthorBox author={articleData.author} />
-                
-
-               
-             
-
+            <AuthorBox author={articleData.author} />
+            <div className="sticky top-6 mt-6 space-y-6">
               <RightPanelCard title="Table of Contents">
                 <nav className="flex flex-col gap-1">
                   {tocItems.length ? (

@@ -2,11 +2,11 @@ export type TocEntry = { id: string; text: string; level: number };
 
 export type AuthorPayload = {
   id?: string;
-  display_name?: string | null;
   avatar_url?: string | null;
-  username?: string | null;
+  user_name?: string | null;
   role?: string | null;
   bio?: string | null;
+  ranking_point?: number;
   
 };
 

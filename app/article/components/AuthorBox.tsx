@@ -1,98 +1,121 @@
-import { Card } from "@/components/ui/card";
+"use client";
+
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Check, Github, Twitter } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  ChessBishop,
+  ChessKing,
+  ChessKnight,
+  ChessQueen,
+  ChessPawn,
+  ChessRook,
+  Plus,
+  Check,
+} from "lucide-react";
 import Link from "next/link";
 
 type Props = {
   author: {
-    name: string;
     avatar: string;
-    verified?: boolean;
-    role: string;
     username: string;
+    ranking: number;
     bio: string;
-    twitter?: string;
-    github?: string;
+    followersCount?: number;
   };
 };
 
-export default function AuthorBox({ author }: Props) {
-  const profileHref = author.username
-    ? `/profile/${author.username.replace(/^@/, "")}`
-    : "";
+const getRankIcon = (rank: number) => {
+  if (rank >= 2500) return <ChessKing className="h-3.5 w-3.5 text-red-500" />;
+  if (rank >= 2000)
+    return <ChessQueen className="h-3.5 w-3.5 text-orange-500" />;
+  if (rank >= 1600)
+    return <ChessRook className="h-3.5 w-3.5 text-purple-500" />;
+  if (rank >= 1200)
+    return <ChessBishop className="h-3.5 w-3.5 text-blue-500" />;
+  if (rank >= 800)
+    return <ChessKnight className="h-3.5 w-3.5 text-green-500" />;
+  return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
+};
+
+export default function MinimalAuthorBox({ author }: Props) {
+  const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
+  const rankingPoints = author.ranking; // normalize missing ranking
+  const [isFollowing, setIsFollowing] = useState(false);
+  const handleFollowToggle = () => {
+    setIsFollowing((prev) => !prev);
+  };
 
   return (
-    <Card className="p-6  bg-muted/30 border-primary/20">
-      <div className="flex items-center gap-4 mb-4">
-        <Avatar className="h-16 w-16 border-2 border-primary">
-          <AvatarImage src={author.avatar} />
-          <AvatarFallback>{author.name.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-        <div className="space-y-1">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            {author.name}
-            {author.verified && (
-              <Check className="w-4 h-4 text-primary fill-primary/20" />
-            )}
-          </h3>
-          <p className="text-sm text-primary font-medium">{author.role}</p>
-          <p className="text-xs text-muted-foreground">{author.username}</p>
-          <div className="pt-1">
-            <Button
-              asChild={Boolean(profileHref)}
-              variant="default"
-              size="sm"
-              className="gap-2"
-              disabled={!profileHref}
-              aria-label="Follow author"
-            >
-              {profileHref ? (
-                <Link href={profileHref}>Follow</Link>
-              ) : (
-                <span>Follow</span>
-              )}
-            </Button>
+    <div className="group relative flex flex-col gap-3 rounded-xl border border-border/50 bg-card p-4 transition-all duration-300 hover:border-border/80 hover:shadow-sm">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <Link href={profileHref} className="relative shrink-0">
+            <Avatar className="h-11 w-11 border border-border/10">
+              <AvatarImage
+                src={author.avatar}
+                alt={author.username}
+                className="object-cover"
+              />
+              <AvatarFallback className="bg-muted text-[10px] font-bold">
+                {author.username.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+
+          <div className="flex flex-col min-w-0 leading-tight">
+            <div className="flex items-center gap-1 min-w-0">
+              <Link
+                href={profileHref}
+                className="text-sm font-bold tracking-tight text-foreground/90 hover:text-primary transition-colors truncate"
+              >
+                {author.username}
+              </Link>
+              {getRankIcon(rankingPoints)}
+            </div>
+
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+                {Intl.NumberFormat("en-US", { notation: "compact" }).format(
+                  author.followersCount ?? 0,
+                )}{" "}
+                Followers
+              </span>
+            </div>
           </div>
         </div>
+
+        <Button
+          onClick={handleFollowToggle}
+          variant={isFollowing ? "outline" : "secondary"}
+          size="sm"
+          className={cn(
+            "h-8 rounded-full px-3 text-[11px] font-bold transition-all duration-200 active:scale-95",
+            isFollowing
+              ? "bg-transparent border-primary/20 text-primary hover:bg-primary/5"
+              : "hover:bg-primary hover:text-primary-foreground",
+          )}
+        >
+          {isFollowing ? (
+            <span className="flex items-center gap-1">
+              <Check className="h-3 w-3" />
+              <span>Following</span>
+            </span>
+          ) : (
+            <span className="flex items-center gap-1">
+              <Plus className="h-3 w-3" />
+              <span>Follow</span>
+            </span>
+          )}
+        </Button>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
-        {author.bio || "This author has not added a bio yet."}
-      </p>
-      <div className="flex gap-3">
-        {author.twitter && (
-          <a
-            href={`https://twitter.com/${author.twitter}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 text-blue-400 border-blue-400 hover:bg-blue-50/50"
-            >
-              <Twitter className="w-4 h-4" />
-              Follow
-            </Button>
-          </a>
-        )}
-        {author.github && (
-          <a
-            href={`https://github.com/${author.github}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 text-foreground/80 hover:bg-muted"
-            >
-              <Github className="w-4 h-4" />
-              GitHub
-            </Button>
-          </a>
-        )}
-      </div>
-    </Card>
+
+      {author.bio && (
+        <p className="text-[12px] leading-[1.4] text-muted-foreground/80 line-clamp-2 italic font-serif">
+          "{author.bio}"
+        </p>
+      )}
+    </div>
   );
 }
