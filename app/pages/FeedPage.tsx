@@ -28,6 +28,7 @@ const feedItems = [
       verified: true,
       reputation: 2450,
       contributions: 352,
+      ranking_point: 2650,
     },
     timestamp: "Dec 1, 2025",
     readTime: "8 min",
@@ -59,6 +60,7 @@ const feedItems = [
       verified: true,
       reputation: 3200,
       contributions: 310,
+      ranking_point: 2950,
     },
     timestamp: "Dec 2, 2025",
     readTime: "12 min",
@@ -88,6 +90,7 @@ const feedItems = [
       verified: true,
       reputation: 5600,
       contributions: 186,
+      ranking_point: 3100,
     },
     timestamp: "Dec 3, 2025",
     readTime: "5 min",
@@ -120,6 +123,7 @@ const feedItems = [
       verified: false,
       reputation: 1200,
       contributions: 215,
+      ranking_point: 1800,
     },
     timestamp: "Dec 4, 2025",
     readTime: "3 min",
@@ -148,6 +152,7 @@ const feedItems = [
       verified: true,
       reputation: 1800,
       contributions: 154,
+      ranking_point: 2100,
     },
     timestamp: "Dec 5, 2025",
     readTime: "15 min",
@@ -227,7 +232,7 @@ export default function FeedPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [likedItems, setLikedItems] = useState(new Set(["2", "4"]));
   const [bookmarkedItems, setBookmarkedItems] = useState(
-    new Set(["1", "3", "5"])
+    new Set(["1", "3", "5"]),
   );
   const [readingList, setReadingList] = useState(new Set<string>());
   const [showQuickActions, setShowQuickActions] = useState<string | null>(null);
@@ -264,7 +269,7 @@ export default function FeedPage() {
   const filteredFeedItems = feedItems.filter((item) => {
     if (activeTab === "all") return true;
     return item.content.tags.some((tag) =>
-      tag.toLowerCase().includes(activeTab)
+      tag.toLowerCase().includes(activeTab),
     );
   });
 
