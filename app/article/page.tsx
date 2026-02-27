@@ -1,10 +1,28 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Search,
+  RefreshCw,
+  FileText,
+  AlertCircle,
+  Flame,
+  Users,
+  ExternalLink,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // --- Components Import ---
 import ListItem from "@/app/article/components/ListItem";
+import {
+  ArticlePageSkeleton,
+  ArticleFeedSkeleton,
+} from "@/app/article/components/ArticleSkeleton";
 import TrendingTopics from "@/components/TrendingTopics";
 import ReadingList from "@/components/ReadingList";
 interface ApiArticle {
@@ -66,6 +84,43 @@ const trendingTopics: Array<{
   { id: "4", name: "TypeScript", posts: 654, trend: "up" },
   { id: "5", name: "System Design", posts: 543, trend: "down" },
 ];
+const popularTags = [
+  { name: "React", count: 128 },
+  { name: "TypeScript", count: 96 },
+  { name: "Next.js", count: 84 },
+  { name: "Python", count: 72 },
+  { name: "AI", count: 67 },
+  { name: "Rust", count: 54 },
+  { name: "System Design", count: 48 },
+  { name: "DevOps", count: 41 },
+];
+
+const topAuthors = [
+  {
+    name: "Sarah Chen",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+    username: "@sarahchen",
+    articles: 24,
+  },
+  {
+    name: "Mike Rodriguez",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
+    username: "@mikecodes",
+    articles: 19,
+  },
+  {
+    name: "Emma Wilson",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+    username: "@emmawilson",
+    articles: 15,
+  },
+  {
+    name: "Alex Kim",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+    username: "@alexkim",
+    articles: 12,
+  },
+];
 // --- End of Data ---
 
 const stripMarkdown = (value: string) =>
@@ -94,80 +149,86 @@ export default function ArticleBrowsePage() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchArticles = useCallback(async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      const res = await fetch("/api/articles?status=published");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to load articles");
+      }
+
+      const items: ApiArticle[] = Array.isArray(data?.items)
+        ? data.items
+        : [];
+
+      const mapped = items.map((article, index) => {
+        const authorName = article.author?.user_name || "Anonymous";
+        const username = article.author?.user_name
+          ? `@${article.author.user_name}`
+          : "@anonymous";
+        const avatarUrl =
+          article.author?.avatar_url ||
+          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`;
+        const published = article.published_at
+          ? new Date(article.published_at).toLocaleDateString()
+          : "Unpublished";
+
+        const description = article.sub_title || "";
+
+        return {
+          id: article.article_id,
+          day: index + 1,
+          author: {
+            name: authorName,
+            avatar: avatarUrl,
+            username,
+            verified: false,
+            reputation: 0,
+            contributions: 0,
+            ranking_point: article.author?.ranking_point ?? 0,
+          },
+          timestamp: published,
+          readTime: calcReadTime(article.body || ""),
+          content: {
+            title: article.title || "Untitled article",
+            description,
+            tags: article.tags || [],
+          },
+          stats: {
+            likes: 0,
+            comments: 0,
+            views: 0,
+          },
+          featured: index === 0,
+          trending: index < 3,
+        } as FeedItem;
+      });
+
+      setFeedItems(mapped);
+    } catch (err: any) {
+      console.error("Error loading articles", err);
+      setError(err?.message || "Failed to load articles");
+      setFeedItems([]);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const res = await fetch("/api/articles?status=published");
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data?.error || "Failed to load articles");
-        }
-
-        const items: ApiArticle[] = Array.isArray(data?.items)
-          ? data.items
-          : [];
-
-        const mapped = items.map((article, index) => {
-          const authorName = article.author?.user_name || "Anonymous";
-          const username = article.author?.user_name
-            ? `@${article.author.user_name}`
-            : "@anonymous";
-          const avatarUrl =
-            article.author?.avatar_url ||
-            `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`;
-          const published = article.published_at
-            ? new Date(article.published_at).toLocaleDateString()
-            : "Unpublished";
-
-          // Use subtitle if available, otherwise skip description
-          const description = article.sub_title || "";
-
-          return {
-            id: article.article_id,
-            day: index + 1,
-            author: {
-              name: authorName,
-              avatar: avatarUrl,
-              username,
-              verified: false,
-              reputation: 0,
-              contributions: 0,
-              ranking_point: article.author?.ranking_point ?? 0,
-            },
-            timestamp: published,
-            readTime: calcReadTime(article.body || ""),
-            content: {
-              title: article.title || "Untitled article",
-              description,
-              tags: article.tags || [],
-            },
-            stats: {
-              likes: 0,
-              comments: 0,
-              views: 0,
-            },
-            featured: index === 0,
-            trending: index < 3,
-          } as FeedItem;
-        });
-
-        setFeedItems(mapped);
-      } catch (err: any) {
-        console.error("Error loading articles", err);
-        setError(err?.message || "Failed to load articles");
-        setFeedItems([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchArticles();
-  }, []);
+  }, [fetchArticles]);
 
   const toggleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
@@ -199,23 +260,93 @@ export default function ArticleBrowsePage() {
   }, []);
 
   const filteredFeedItems = feedItems.filter((item) => {
-    if (activeTab === "all") return true;
-    return item.content.tags.some((tag) =>
-      tag.toLowerCase().includes(activeTab),
-    );
+    // Tab filter
+    const matchesTab =
+      activeTab === "all" ||
+      item.content.tags.some((tag) =>
+        tag.toLowerCase().includes(activeTab),
+      );
+
+    // Search filter
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      item.content.title.toLowerCase().includes(q) ||
+      item.content.description.toLowerCase().includes(q) ||
+      item.author.name.toLowerCase().includes(q) ||
+      item.content.tags.some((tag) => tag.toLowerCase().includes(q));
+
+    return matchesTab && matchesSearch;
   });
+
+  const totalCount = feedItems.length;
+  const filteredCount = filteredFeedItems.length;
+
+  // Initial full-page skeleton
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+          <div className="mb-6">
+            <div className="h-6 w-32 bg-muted-foreground/15 animate-pulse rounded-md mb-1" />
+            <div className="h-4 w-56 bg-muted-foreground/15 animate-pulse rounded-md" />
+          </div>
+          <ArticlePageSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+        {/* Page Header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-foreground">Articles</h1>
+            <p className="text-sm text-muted-foreground">
+              Discover articles from the community
+              {totalCount > 0 && (
+                <span className="ml-1">
+                  &middot; {totalCount} published
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              onClick={() => fetchArticles(true)}
+              disabled={isRefreshing}
+              title="Refresh articles"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+            </Button>
+          </div>
+        </div>
+
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Feed */}
-          <div className="flex-1 max-w-7xl">
+          <div className="flex-1 max-w-7xl space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search articles by title, author, or tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+            </div>
+
             {/* Category Tabs */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="mb-6"
             >
               <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
                 {["all", "nextjs", "ai", "python", "rust"].map((tab) => (
@@ -230,24 +361,108 @@ export default function ArticleBrowsePage() {
               </TabsList>
             </Tabs>
 
+            {/* Results info bar */}
+            {(searchQuery || activeTab !== "all") && !error && (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {filteredCount} result{filteredCount !== 1 ? "s" : ""}
+                  {searchQuery && (
+                    <span>
+                      {" "}for &ldquo;{searchQuery}&rdquo;
+                    </span>
+                  )}
+                  {activeTab !== "all" && (
+                    <span> in {activeTab}</span>
+                  )}
+                </span>
+                {(searchQuery || activeTab !== "all") && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs px-2"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveTab("all");
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Refresh indicator */}
+            {isRefreshing && (
+              <ArticleFeedSkeleton count={2} />
+            )}
+
+            {/* Error State */}
+            {!isRefreshing && error && (
+              <Card className="border-destructive/30">
+                <CardContent className="p-6 flex flex-col items-center text-center space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Failed to load articles</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {error}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => fetchArticles(false)}
+                  >
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Empty State */}
+            {!isRefreshing && !error && filteredCount === 0 && (
+              <Card className="border-border/40">
+                <CardContent className="p-8 flex flex-col items-center text-center space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  {searchQuery || activeTab !== "all" ? (
+                    <div>
+                      <p className="text-sm font-medium">No matching articles</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Try adjusting your search or filters.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs mt-3"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setActiveTab("all");
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm font-medium">No articles yet</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Be the first to publish an article!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Feed Items */}
-            <div className="space-y-4">
-              {loading && (
-                <div className="text-sm text-muted-foreground">
-                  Loading published articles...
-                </div>
-              )}
-              {!loading && error && (
-                <div className="text-sm text-red-500">{error}</div>
-              )}
-              {!loading && !error && filteredFeedItems.length === 0 && (
-                <div className="text-sm text-muted-foreground">
-                  No published articles yet.
-                </div>
-              )}
-              {!loading &&
-                !error &&
-                filteredFeedItems.map((item) => (
+            {!isRefreshing && !error && filteredCount > 0 && (
+              <div className="space-y-4">
+                {filteredFeedItems.map((item) => (
                   <ListItem
                     key={item.id}
                     item={item}
@@ -261,12 +476,80 @@ export default function ArticleBrowsePage() {
                     handleMoreClick={handleMoreClick}
                   />
                 ))}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
+            {/* Popular Tags */}
+            <div>
+              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
+                <Flame className="h-4 w-4" />
+                Popular Tags
+              </h3>
+              <Card className="border-border/40">
+                <CardContent className="p-3">
+                  <div className="flex flex-wrap gap-2">
+                    {popularTags.map((tag) => (
+                      <Badge
+                        key={tag.name}
+                        variant="secondary"
+                        className="text-xs font-normal cursor-pointer hover:bg-secondary/80 transition-colors"
+                        onClick={() => {
+                          setSearchQuery(tag.name);
+                          setActiveTab("all");
+                        }}
+                      >
+                        #{tag.name}
+                        <span className="ml-1 text-muted-foreground">
+                          {tag.count}
+                        </span>
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <TrendingTopics trendingTopics={trendingTopics} t={t} />
+
+            {/* Top Authors */}
+            <div>
+              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
+                <Users className="h-4 w-4" />
+                Top Authors
+              </h3>
+              <Card className="border-border/40">
+                <CardContent className="p-0">
+                  {topAuthors.map((author, i) => (
+                    <div
+                      key={author.username}
+                      className="flex items-center justify-between px-3 py-2.5 border-b border-border/20 last:border-b-0 hover:bg-muted/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 flex-1">
+                        <Avatar className="h-7 w-7">
+                          <AvatarImage src={author.avatar} />
+                          <AvatarFallback className="text-xs">
+                            {author.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium truncate">
+                            {author.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {author.articles} articles
+                          </p>
+                        </div>
+                      </div>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
             <ReadingList readingListCount={readingList.size} />
           </aside>
         </div>

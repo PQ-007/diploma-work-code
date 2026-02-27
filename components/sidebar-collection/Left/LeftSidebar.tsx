@@ -96,10 +96,14 @@ const navData: SidebarData = {
         },
         {
           titleKey: "sidebar.dataStructures",
-          href: "/learn/data-structures",
+          href: "/learn/data-structure",
           icon: Blocks,
         },
-        { titleKey: "sidebar.languages", href: "/learn/languages", icon: Code },
+        {
+          titleKey: "sidebar.languages",
+          href: "/learn/programming-lang",
+          icon: Code,
+        },
         {
           titleKey: "sidebar.resources",
           href: "/learn/resources",

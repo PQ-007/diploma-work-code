@@ -1,391 +1,263 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Trophy, 
-  Calendar, 
-  Clock, 
-  Users, 
-  Target, 
-  Code, 
-  Award,
-  TrendingUp,
-  ExternalLink,
-  Play
-} from "lucide-react";
-import { useState } from "react";
+import { Clock, DollarSign, Trophy } from "lucide-react";
 
+// --- Types ---
 interface Competition {
   id: string;
   name: string;
-  platform: string;
-  type: "contest" | "hackathon" | "challenge";
-  status: "upcoming" | "active" | "completed";
-  startDate: string;
-  endDate: string;
-  duration: string;
-  participants: number;
-  maxParticipants?: number;
-  difficulty: "Easy" | "Medium" | "Hard";
-  prize: string;
   description: string;
-  tags: string[];
-  myRank?: number;
-  totalProblems?: number;
-  solvedProblems?: number;
+  prize: number;
+  status: "active" | "upcoming" | "past";
+  image: string;
+  hot?: boolean;
+  endsAt: string; // ISO date string
 }
 
+// --- Mock Data ---
 const competitions: Competition[] = [
   {
     id: "1",
-    name: "LeetCode Weekly Contest 380",
-    platform: "LeetCode",
-    type: "contest",
-    status: "completed",
-    startDate: "2024-12-15T14:30:00Z",
-    endDate: "2024-12-15T16:00:00Z",
-    duration: "1h 30m",
-    participants: 23567,
-    difficulty: "Medium",
-    prize: "LeetCode Points",
-    description: "Weekly algorithmic programming contest with 4 problems of increasing difficulty.",
-    tags: ["Algorithms", "Data Structures", "Problem Solving"],
-    myRank: 1247,
-    totalProblems: 4,
-    solvedProblems: 3
+    name: "Winter Code Jam",
+    description:
+      "Build a sustainable energy dashboard using real-time IoT dat...",
+    prize: 5000,
+    status: "active",
+    image:
+      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80",
+    hot: true,
+    endsAt: "2026-03-02T00:00:00Z",
   },
   {
     id: "2",
-    name: "CodeForces Round 912",
-    platform: "CodeForces",
-    type: "contest",
-    status: "upcoming",
-    startDate: "2024-12-20T17:35:00Z",
-    endDate: "2024-12-20T19:35:00Z",
-    duration: "2h",
-    participants: 0,
-    maxParticipants: 50000,
-    difficulty: "Hard",
-    prize: "Rating Points",
-    description: "Division 2 contest featuring 6 challenging problems.",
-    tags: ["Competitive Programming", "Mathematics", "Graph Theory"]
+    name: "AI Optimization",
+    description:
+      "Optimize large language models for edge devices. Prizes include...",
+    prize: 2500,
+    status: "active",
+    image:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80",
+    endsAt: "2026-03-05T08:00:00Z",
   },
   {
     id: "3",
-    name: "TechCrunch Disrupt 2024",
-    platform: "TechCrunch",
-    type: "hackathon",
+    name: "Cyber Sentinel",
+    description: "Penetration testing and vulnerability assessment of a...",
+    prize: 10000,
     status: "active",
-    startDate: "2024-12-18T00:00:00Z",
-    endDate: "2024-12-20T23:59:00Z",
-    duration: "3 days",
-    participants: 1247,
-    maxParticipants: 2000,
-    difficulty: "Medium",
-    prize: "$100,000",
-    description: "Build innovative solutions for the future of technology.",
-    tags: ["Innovation", "Startups", "AI", "Web3"]
+    image:
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
+    endsAt: "2026-02-28T00:45:00Z",
   },
   {
     id: "4",
-    name: "Google Code Jam Qualification",
-    platform: "Google",
-    type: "contest",
+    name: "GreenTech Hack",
+    description:
+      "Creating digital solutions for reducing urban carbon footprints...",
+    prize: 3000,
+    status: "active",
+    image:
+      "https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=600&q=80",
+    endsAt: "2026-03-08T20:00:00Z",
+  },
+  {
+    id: "5",
+    name: "DevOps Challenge",
+    description:
+      "Design and implement a CI/CD pipeline for a complex microservices...",
+    prize: 4000,
     status: "upcoming",
-    startDate: "2025-03-15T00:00:00Z",
-    endDate: "2025-03-17T23:59:00Z",
-    duration: "3 days",
-    participants: 0,
-    difficulty: "Hard",
-    prize: "Qualification to Round 1",
-    description: "Qualification round for the prestigious Google Code Jam competition.",
-    tags: ["Algorithms", "Logic", "Mathematics"]
-  }
+    image:
+      "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=600&q=80",
+    endsAt: "2026-04-01T00:00:00Z",
+  },
+  {
+    id: "6",
+    name: "Data Viz Sprint",
+    description:
+      "Create compelling data visualizations from complex datasets to tell...",
+    prize: 2000,
+    status: "upcoming",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
+    endsAt: "2026-04-10T00:00:00Z",
+  },
+  {
+    id: "7",
+    name: "Blockchain Buildathon",
+    description:
+      "Build a decentralized application that solves a real-world problem...",
+    prize: 8000,
+    status: "past",
+    image:
+      "https://images.unsplash.com/photo-1639762681057-408e52192e55?w=600&q=80",
+    endsAt: "2026-01-15T00:00:00Z",
+  },
+  {
+    id: "8",
+    name: "ML Model Arena",
+    description:
+      "Train the most accurate machine learning model on a mystery dataset...",
+    prize: 6000,
+    status: "past",
+    image:
+      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80",
+    endsAt: "2026-02-01T00:00:00Z",
+  },
 ];
 
-const achievements = [
-  { id: "1", title: "First Contest", description: "Participated in your first competition", icon: "🏁", unlocked: true },
-  { id: "2", title: "Problem Solver", description: "Solved 100 problems", icon: "🧩", unlocked: true },
-  { id: "3", title: "Top 10%", description: "Ranked in top 10% of a contest", icon: "🏆", unlocked: false },
-  { id: "4", title: "Streak Master", description: "5 contest participation streak", icon: "🔥", unlocked: true },
-  { id: "5", title: "Speed Demon", description: "Solved a problem in under 5 minutes", icon: "⚡", unlocked: false },
-  { id: "6", title: "Hackathon Winner", description: "Won a hackathon", icon: "🥇", unlocked: false }
-];
+// --- Countdown Hook ---
+function useCountdown(endsAt: string) {
+  const calcTimeLeft = useCallback(() => {
+    const diff = new Date(endsAt).getTime() - Date.now();
+    if (diff <= 0) return "Ended";
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    if (d > 0) return `${d}d ${h}h left`;
+    if (h > 0) return `${h}h ${m}m left`;
+    return `${m}m left`;
+  }, [endsAt]);
 
-export default function CompetitionPage() {
-  const [activeTab, setActiveTab] = useState("active");
+  const [timeLeft, setTimeLeft] = useState(calcTimeLeft);
 
-  const getStatusColor = (status: Competition["status"]) => {
-    switch (status) {
-      case "active": return "bg-green-500";
-      case "upcoming": return "bg-blue-500";
-      case "completed": return "bg-gray-500";
-      default: return "bg-gray-500";
-    }
-  };
+  useEffect(() => {
+    const id = setInterval(() => setTimeLeft(calcTimeLeft()), 60_000);
+    return () => clearInterval(id);
+  }, [calcTimeLeft]);
 
-  const getTypeIcon = (type: Competition["type"]) => {
-    switch (type) {
-      case "contest": return <Code className="h-4 w-4" />;
-      case "hackathon": return <Trophy className="h-4 w-4" />;
-      case "challenge": return <Target className="h-4 w-4" />;
-      default: return <Code className="h-4 w-4" />;
-    }
-  };
+  return timeLeft;
+}
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const filteredCompetitions = competitions.filter(comp => {
-    if (activeTab === "all") return true;
-    return comp.status === activeTab;
-  });
+// --- Competition Card ---
+function CompetitionCard({ comp }: { comp: Competition }) {
+  const timeLeft = useCountdown(comp.endsAt);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Competitions</h1>
-          <p className="text-muted-foreground mt-1">
-            Participate in coding contests and hackathons
+    <Card className="border-border/40 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
+      {/* Image */}
+      <div className="relative h-40 overflow-hidden bg-muted">
+        <img
+          src={comp.image}
+          alt={comp.name}
+          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+        />
+        {comp.hot && (
+          <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase tracking-wider border-0">
+            HOT
+          </Badge>
+        )}
+      </div>
+
+      {/* Content */}
+      <CardContent className="p-4 flex flex-col flex-1">
+        {/* Title + Prize */}
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="text-base font-semibold leading-tight">{comp.name}</h3>
+          <Badge
+            variant="outline"
+            className="flex-shrink-0 border-primary/40 text-primary text-xs font-semibold gap-1"
+          >
+            <DollarSign className="h-3 w-3" />${comp.prize.toLocaleString()}
+          </Badge>
+        </div>
+
+        {/* Description */}
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4 flex-1">
+          {comp.description}
+        </p>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{timeLeft}</span>
+          </div>
+          <Button size="sm" className="text-xs font-semibold px-4">
+            {comp.status === "past" ? "View Results" : "Join Challenge"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// --- Tabs ---
+type TabValue = "active" | "upcoming" | "past";
+
+const tabs: { value: TabValue; label: string }[] = [
+  { value: "active", label: "Active" },
+  { value: "upcoming", label: "Upcoming" },
+  { value: "past", label: "Past Results" },
+];
+
+// --- Page ---
+export default function CompetitionPage() {
+  const [activeTab, setActiveTab] = useState<TabValue>("active");
+
+  const filtered = competitions.filter((c) => c.status === activeTab);
+  const activeCount = competitions.filter((c) => c.status === "active").length;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Competitions</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Join global challenges, solve complex problems, and win amazing
+            prizes.
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <ExternalLink className="h-4 w-4" />
-          Browse More
-        </Button>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-                <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">Contests Participated</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
-                <Award className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">4</div>
-                <p className="text-xs text-muted-foreground">Achievements</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">1,247</div>
-                <p className="text-xs text-muted-foreground">Best Rank</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-orange-100 dark:bg-orange-900 p-3 rounded-lg">
-                <Code className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">89</div>
-                <p className="text-xs text-muted-foreground">Problems Solved</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-          <TabsTrigger value="all">All</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="space-y-4">
-          {/* Competitions List */}
-          <div className="grid gap-4">
-            {filteredCompetitions.map((competition) => (
-              <Card key={competition.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-2">
-                          {getTypeIcon(competition.type)}
-                          <CardTitle className="text-xl">{competition.name}</CardTitle>
-                        </div>
-                        <Badge className={`${getStatusColor(competition.status)} text-white`}>
-                          {competition.status}
-                        </Badge>
-                        <Badge variant="outline">
-                          {competition.difficulty}
-                        </Badge>
-                      </div>
-                      
-                      <CardDescription className="text-base mb-3">
-                        {competition.description}
-                      </CardDescription>
-                      
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {competition.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatDate(competition.startDate)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{competition.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{competition.participants.toLocaleString()} participants</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Trophy className="h-4 w-4 text-muted-foreground" />
-                      <span>{competition.prize}</span>
-                    </div>
-                  </div>
-
-                  {competition.myRank && (
-                    <div className="bg-muted/50 p-4 rounded-lg mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">My Performance</span>
-                        <Badge variant="outline">Rank #{competition.myRank}</Badge>
-                      </div>
-                      {competition.totalProblems && competition.solvedProblems && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Problems Solved</span>
-                            <span>{competition.solvedProblems}/{competition.totalProblems}</span>
-                          </div>
-                          <Progress 
-                            value={(competition.solvedProblems / competition.totalProblems) * 100} 
-                            className="h-2"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    {competition.status === "active" && (
-                      <Button className="flex items-center gap-2">
-                        <Play className="h-4 w-4" />
-                        Join Now
-                      </Button>
-                    )}
-                    {competition.status === "upcoming" && (
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Register
-                      </Button>
-                    )}
-                    {competition.status === "completed" && (
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4" />
-                        View Results
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredCompetitions.length === 0 && (
-            <div className="text-center py-12">
-              <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No competitions found for this category.</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Achievements Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5" />
-            Achievements
-          </CardTitle>
-          <CardDescription>
-            Track your progress and unlock new achievements
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {achievements.map((achievement) => (
-              <div
-                key={achievement.id}
-                className={`p-4 rounded-lg border ${
-                  achievement.unlocked 
-                    ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800" 
-                    : "bg-muted/50 border-muted"
+        {/* Tabs */}
+        <div className="flex items-center gap-6 border-b border-border/40 mb-6">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.value;
+            const count = tab.value === "active" ? activeCount : undefined;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`relative pb-3 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground/80"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">{achievement.icon}</div>
-                  <div className="flex-1">
-                    <h4 className="font-medium">{achievement.title}</h4>
-                    <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                  </div>
-                  {achievement.unlocked && (
-                    <Badge variant="default" className="bg-green-600">Unlocked</Badge>
-                  )}
-                </div>
-              </div>
+                {tab.label}
+                {count !== undefined && (
+                  <span className="ml-1 text-muted-foreground">({count})</span>
+                )}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Competition Grid */}
+        {filtered.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filtered.map((comp) => (
+              <CompetitionCard key={comp.id} comp={comp} />
             ))}
           </div>
-        </CardContent>
-      </Card>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Trophy className="h-10 w-10 text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">
+              No competitions found in this category.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

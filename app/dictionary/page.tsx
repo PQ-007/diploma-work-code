@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -377,51 +378,55 @@ export default function DictionaryPage() {
               ) : viewMode === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredTerms.map((term) => (
-                    <Card
+                    <Link
                       key={term.id}
-                      className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group"
+                      href={`/dictionary/${term.name.toLowerCase().replace(/[\s/]+/g, "-")}`}
                     >
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                            {term.name}
-                          </h3>
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                          {term.description}
-                        </p>
-                        <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                          {term.category}
-                        </span>
-                      </CardContent>
-                    </Card>
+                      <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full">
+                        <CardContent className="p-4 space-y-2">
+                          <div className="flex items-start justify-between">
+                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
+                              {term.name}
+                            </h3>
+                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                            {term.description}
+                          </p>
+                          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                            {term.category}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-2">
                   {filteredTerms.map((term) => (
-                    <Card
+                    <Link
                       key={term.id}
-                      className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group"
+                      href={`/dictionary/${term.name.toLowerCase().replace(/[\s/]+/g, "-")}`}
                     >
-                      <CardContent className="p-3 flex items-center gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors truncate">
-                              {term.name}
-                            </h3>
-                            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase flex-shrink-0">
-                              {term.category}
-                            </span>
+                      <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group">
+                        <CardContent className="p-3 flex items-center gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors truncate">
+                                {term.name}
+                              </h3>
+                              <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase flex-shrink-0">
+                                {term.category}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
+                              {term.description}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
-                            {term.description}
-                          </p>
-                        </div>
-                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                      </CardContent>
-                    </Card>
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                        </CardContent>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               )}
