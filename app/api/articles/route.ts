@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     const { data: translations, error: translationError } = await supabase
       .from("article_translations")
-      .select("article_id, language_code, title, body, published_at")
+      .select("article_id, language_code, title, sub_title, body, published_at")
       .in("article_id", articleIds)
       .order("published_at", { ascending: false });
 
@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
         article_id: string;
         language_code: string;
         title: string;
+        sub_title: string | null;
         body: string;
         published_at: string | null;
       }
@@ -115,15 +116,63 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const items = Array.from(latestByArticle.values()).map((t) => ({
-      article_id: t.article_id,
-      title: t.title,
-      body: t.body,
-      language_code: t.language_code,
-      published_at: t.published_at,
-      author_id: articleMap.get(t.article_id)?.author_id || null,
-      tags: tagsByArticle.get(t.article_id) || [],
-    }));
+    // Fetch author profiles
+    const authorIds = Array.from(
+      new Set(
+        (articles || [])
+          .map((a) => a.author_id)
+          .filter((id): id is string => !!id),
+      ),
+    );
+
+    const profilesById = new Map<
+      string,
+      {
+        user_name: string | null;
+        avatar_url: string | null;
+        ranking_point: number | null;
+      }
+    >();
+
+    if (authorIds.length) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, user_name, avatar_url, ranking_point")
+        .in("id", authorIds);
+
+      if (!profilesError && profiles) {
+        profiles.forEach((p) => {
+          profilesById.set(p.id, {
+            user_name: p.user_name,
+            avatar_url: p.avatar_url,
+            ranking_point: p.ranking_point,
+          });
+        });
+      }
+    }
+
+    const items = Array.from(latestByArticle.values()).map((t) => {
+      const authorId = articleMap.get(t.article_id)?.author_id || null;
+      const authorProfile = authorId ? profilesById.get(authorId) : null;
+
+      return {
+        article_id: t.article_id,
+        title: t.title,
+        sub_title: t.sub_title,
+        body: t.body,
+        language_code: t.language_code,
+        published_at: t.published_at,
+        author_id: authorId,
+        author: authorProfile
+          ? {
+              user_name: authorProfile.user_name,
+              avatar_url: authorProfile.avatar_url,
+              ranking_point: authorProfile.ranking_point,
+            }
+          : null,
+        tags: tagsByArticle.get(t.article_id) || [],
+      };
+    });
 
     return NextResponse.json({ items }, { status: 200 });
   } catch (error) {

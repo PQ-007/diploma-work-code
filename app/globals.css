@@ -38,20 +38,21 @@
   --sidebar-border: #27272a;
   --sidebar-ring: #1e40af;
   --sidebar-width: 256px; /* Set standard sidebar width */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --radius: 12px;
   --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1),
-    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-md:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
   --glow: 0 0 20px rgb(30 64 175 / 0.3);
@@ -217,7 +218,8 @@ body {
 }
 
 .gradient-mesh {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 80%,
       rgba(139, 92, 246, 0.08) 0%,
       transparent 50%
@@ -236,7 +238,8 @@ body {
 
 /* Light mode specific gradient mesh */
 .light .gradient-mesh {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 80%,
       rgba(139, 92, 246, 0.04) 0%,
       transparent 50%
@@ -769,4 +772,65 @@ body {
 }
 .custom-tree-view .ant-tree-switcher {
   display: none !important;
+}
+
+/* KaTeX Math Styling */
+.katex-display {
+  margin: 1.5rem 0 !important;
+  padding: 1rem 1.5rem;
+  background: var(--muted);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  position: relative;
+}
+
+.katex-display > .katex {
+  text-align: center;
+}
+
+.katex {
+  font-size: 1.1em !important;
+  color: var(--foreground);
+}
+
+/* Equation tags like \tag{1} */
+.katex-display .tag {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Inline math */
+.katex:not(.katex-display .katex) {
+  padding: 0.1em 0.2em;
+}
+
+/* Math in light mode */
+.light .katex-display {
+  background: var(--muted);
+}
+
+/* Scrollbar for overflow math */
+.katex-display::-webkit-scrollbar {
+  height: 6px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+}
+
+.katex-display::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Utility: hide scrollbar while keeping scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

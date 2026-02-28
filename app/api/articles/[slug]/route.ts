@@ -77,15 +77,17 @@ export async function GET(_req: NextRequest, context: { params: RouteParams }) {
 
     let author = null as {
       id: string;
-      display_name: string | null;
+      user_name: string | null;
       avatar_url: string | null;
       bio: string | null;
+      ranking_point?: number;
+      followersCount?: number;
     } | null;
 
     if (article.author_id) {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, bio, role")
+        .select("id, user_name, avatar_url, bio, ranking_point")
         .eq("id", article.author_id)
         .single();
 
@@ -94,9 +96,10 @@ export async function GET(_req: NextRequest, context: { params: RouteParams }) {
       } else if (profile) {
         author = {
           id: profile.id,
-          display_name: profile.display_name,
+          user_name: profile.user_name,
           avatar_url: profile.avatar_url,
           bio: profile.bio,
+          ranking_point: profile.ranking_point,
         };
       }
     }

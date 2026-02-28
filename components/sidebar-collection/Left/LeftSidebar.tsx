@@ -88,6 +88,7 @@ const navData: SidebarData = {
       titleKey: "sidebar.learn",
       icon: GraduationCap,
       href: "/learn",
+      authRequired: true,
       items: [
         {
           titleKey: "sidebar.algorithm",
@@ -96,10 +97,14 @@ const navData: SidebarData = {
         },
         {
           titleKey: "sidebar.dataStructures",
-          href: "/learn/data-structures",
+          href: "/learn/data-structure",
           icon: Blocks,
         },
-        { titleKey: "sidebar.languages", href: "/learn/languages", icon: Code },
+        {
+          titleKey: "sidebar.languages",
+          href: "/learn/programming-lang",
+          icon: Code,
+        },
         {
           titleKey: "sidebar.resources",
           href: "/learn/resources",
@@ -158,6 +163,7 @@ const navData: SidebarData = {
       icon: Scroll,
       href: "/knowledge-tree",
       items: [],
+      authRequired: true,
     },
     {
       titleKey: "sidebar.dictionary",
@@ -170,6 +176,7 @@ const navData: SidebarData = {
       icon: Store,
       href: "/store",
       items: [],
+      authRequired: true,
     },
   ],
   navLibrary: [
@@ -561,7 +568,13 @@ export function LeftSidebar({
         <Header />
       </SidebarHeader>
       <SidebarContent className="gap-0">
-        <NavMain items={navData.navMain} />
+        <NavMain
+          items={
+            isAuthenticated
+              ? navData.navMain
+              : navData.navMain.filter((item) => !item.authRequired)
+          }
+        />
         {isAuthenticated && <NavLibrary items={navData.navLibrary} />}
       </SidebarContent>
 

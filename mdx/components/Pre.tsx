@@ -5,10 +5,7 @@ export function Pre({
   ...props
 }: React.HTMLAttributes<HTMLPreElement>) {
   return (
-    <pre
-      className=""
-      {...props}
-    >
+    <pre className="overflow-x-auto" {...props}>
       {children}
     </pre>
   );

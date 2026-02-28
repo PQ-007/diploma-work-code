@@ -15,7 +15,24 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "moto": "Learn. Build. Share."
+    "moto": "Learn. Build. Share.",
+    "guest": "Guest",
+    "points": "points",
+    "contributions": "contributions",
+    "published": "published",
+    "result": "result",
+    "results": "results",
+    "for": "for",
+    "in": "in",
+    "articles": "articles",
+    "ended": "Ended",
+    "left": "left",
+    "hot": "HOT",
+    "all": "All",
+    "clearFilters": "Clear filters",
+    "tryAgain": "Try Again",
+    "noResults": "No results found",
+    "toggleMenu": "Toggle menu"
   },
 
   "sidebar": {
@@ -75,10 +92,12 @@
     "profile": "Profile",
     "settings": "Settings"
   },
+
   "dashboard": {
     "welcomeBack": "Welcome back, {{name}}!",
     "overview": "Overview",
     "quickActions": "Quick Actions",
+    "quickActionsDesc": "Start something new or continue your work",
     "newProject": "New Project",
     "newBlog": "New Blog Post",
     "createFlashcards": "Create Flashcards",
@@ -86,6 +105,7 @@
     "recentActivity": "Recent Activity",
     "achievements": "Recent Achievements",
     "learningProgress": "Learning Progress",
+    "learningProgressDesc": "Your learning journey this week",
     "learningStreak": "Learning Streak",
     "weeklyGoal": "Weekly Goal",
     "days": "days",
@@ -99,8 +119,14 @@
     "publishedOn": "Published on",
     "views": "views",
     "likes": "likes",
-    "comments": "comments"
+    "comments": "comments",
+    "subtitle": "Here's what's happening with your projects and learning today.",
+    "changeThisWeek2": "+2 this week",
+    "changeThisWeek1": "+1 this week",
+    "endingSoon": "2 ending soon",
+    "todayChange": "+15 today"
   },
+
   "projects": {
     "title": "Projects",
     "description": "Manage and showcase your projects",
@@ -114,6 +140,7 @@
     "contributors": "Contributors",
     "lastUpdated": "Last Updated"
   },
+
   "blogs": {
     "title": "Blog Posts",
     "description": "Share knowledge and insights",
@@ -123,6 +150,7 @@
     "category": "Category",
     "tags": "Tags"
   },
+
   "flashcards": {
     "title": "Flashcards",
     "description": "Study with spaced repetition",
@@ -134,17 +162,35 @@
     "deck": "Deck",
     "decks": "Decks"
   },
+
   "competitions": {
     "title": "Competitions",
-    "description": "Participate in coding contests",
+    "subtitle": "Join global challenges, solve complex problems, and win amazing prizes.",
+    "description": "Join global challenges, solve complex problems, and win amazing prizes.",
     "upcoming": "Upcoming",
     "active": "Active",
     "completed": "Completed",
     "register": "Register",
     "participants": "Participants",
     "prize": "Prize",
-    "duration": "Duration"
+    "duration": "Duration",
+    "pastResults": "Past Results",
+    "viewResults": "View Results",
+    "joinChallenge": "Join Challenge",
+    "noCompetitions": "No competitions found in this category.",
+    "hot": "HOT",
+    "ended": "Ended",
+    "days": "d",
+    "hours": "h",
+    "minutes": "m",
+    "left": "left",
+    "tabs": {
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "pastResults": "Past Results"
+    }
   },
+
   "profile": {
     "title": "Profile",
     "bio": "Bio",
@@ -157,6 +203,7 @@
     "editProfile": "Edit Profile",
     "signOut": "Sign Out"
   },
+
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
@@ -166,7 +213,30 @@
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
-    "continueWithGoogle": "Continue with Google"
+    "continueWithGoogle": "Continue with Google",
+    "welcomeBack": "Welcome Back",
+    "signInSubtitle": "Sign in to your account",
+    "signUpTitle": "Create Your Account",
+    "signUpSubtitle": "Sign up to get started",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signingIn": "Signing in...",
+    "signingUp": "Signing up...",
+    "orContinueWith": "Or continue with",
+    "connecting": "Connecting...",
+    "signInWithGoogle": "Sign in with Google",
+    "fillAllFields": "Please fill in all fields",
+    "unexpectedError": "An unexpected error occurred",
+    "googleError": "Failed to connect to Google",
+    "checkEmail": "Check your email for a confirmation link!",
+    "signedOut": "Signed Out",
+    "signedOutDesc": "You have been successfully signed out.",
+    "signOutFailed": "Sign-out failed",
+    "signOutFailedDesc": "An error occurred during sign-out. Please try again.",
+    "languageChanged": "Language Changed",
+    "languageChangedDesc": "Language set to {{lang}}."
   },
 
   "feed": {
@@ -181,9 +251,12 @@
     },
     "actions": {
       "like": "Like",
+      "unlike": "Unlike",
       "comment": "Comment",
       "share": "Share",
       "bookmark": "Bookmark",
+      "removeBookmark": "Remove Bookmark",
+      "reply": "Reply",
       "follow": "Follow",
       "following": "Following"
     },
@@ -195,13 +268,21 @@
       "points": "pts"
     },
     "types": {
-      "project": "Project",
-      "blog": "Blog",
+      "project": "Article",
+      "blog": "Project update",
       "contest": "Contest",
       "flashcard": "Flashcard",
-      "achievement": "Achievement"
+      "achievement": "Achievement",
+      "discussion": "Discussion thread"
+    },
+    "postBox": {
+      "placeholder": "What's on your mind, {{name}}?",
+      "post": "Post",
+      "code": "Code",
+      "poll": "Poll"
     }
   },
+
   "ranking": {
     "topRated": "Top rated",
     "topContributors": "Top contributors",
@@ -213,19 +294,28 @@
     "thisWeek": "this week",
     "rank": "Rank"
   },
+
+  "nav_user": {
+    "profile": "Profile",
+    "roadmap": "Roadmap",
+    "theme": "Theme",
+    "language": "Language",
+    "logout": "Log out"
+  },
+
   "create_button": {
-      "create": "Create",
-      "project": "Project",
-      "project_disc": "Create new project",
-      "article": "Article",
-      "article_disc": "Write a new article",
-      "flashcards": "Flashcards",
-      "flashcards_disc": "Make flashcards from text",
-      "contest": "Contest",
-      "contest_disc": "Make a contest",
-      "discussions": "Discussions",
-      "discussions_disc": "Start a new discussion"
-    },
+    "create": "Create",
+    "project": "Project",
+    "project_disc": "Create new project",
+    "article": "Article",
+    "article_disc": "Write a new article",
+    "flashcards": "Flashcards",
+    "flashcards_disc": "Make flashcards from text",
+    "contest": "Contest",
+    "contest_disc": "Make a contest",
+    "discussions": "Discussions",
+    "discussions_disc": "Start a new discussion"
+  },
 
   "landing": {
     "hero": {
@@ -244,7 +334,6 @@
       "discussions": "Q&A",
       "contests": "Contests"
     },
-    
     "features": {
       "title": "Key Features",
       "items": [
@@ -274,5 +363,154 @@
         }
       ]
     }
+  },
+
+  "articles": {
+    "title": "Articles",
+    "subtitle": "Discover articles from the community",
+    "searchPlaceholder": "Search articles by title, author, or tag...",
+    "refreshArticles": "Refresh articles",
+    "failedToLoad": "Failed to load articles",
+    "noMatching": "No matching articles",
+    "adjustFilters": "Try adjusting your search or filters.",
+    "noArticlesYet": "No articles yet",
+    "beFirst": "Be the first to publish an article!",
+    "popularTags": "Popular Tags",
+    "topAuthors": "Top Authors",
+    "untitled": "Untitled article",
+    "anonymous": "Anonymous",
+    "unpublished": "Unpublished"
+  },
+
+  "discussions": {
+    "title": "Discussions",
+    "subtitle": "Ask questions, share ideas, and connect with the community.",
+    "newDiscussion": "New Discussion",
+    "noDiscussions": "No discussions found for this category.",
+    "stats": "Discussion Stats",
+    "totalThreads": "Total threads",
+    "answered": "Answered",
+    "unanswered": "Unanswered",
+    "topContributors": "Top Contributors",
+    "tabs": {
+      "all": "All",
+      "help": "Help",
+      "general": "General",
+      "unanswered": "Unanswered",
+      "ideas": "Ideas"
+    }
+  },
+
+  "dictionary": {
+    "title": "Welcome to the Dictionary",
+    "subtitle": "Learn key concepts and terminologies.",
+    "searchPlaceholder": "Search terms, definitions, categories...",
+    "featuredTerm": "Featured Term of the Day",
+    "fullDefinition": "Full Definition",
+    "saveTerm": "Save Term",
+    "browseGlossary": "Browse Glossary",
+    "grid": "Grid",
+    "list": "List",
+    "noTermsFound": "No terms found",
+    "forThisLetter": "for this letter",
+    "popularTopics": "Popular Topics",
+    "trendingArticles": "Trending Articles",
+    "cantFindTerm": "Can't find the term?",
+    "cantFindTermDesc": "Feel free to add new terms to the dictionary that you think can help the community!",
+    "addNewTerm": "Add New Term"
+  },
+
+  "store": {
+    "title": "Digital Store",
+    "subtitle": "Premium templates, courses, and development resources",
+    "sellProduct": "Sell Product",
+    "productsOwned": "Products Owned",
+    "totalSpent": "Total Spent",
+    "downloads": "Downloads",
+    "orders": "Orders",
+    "featuredProducts": "Featured Products",
+    "handPicked": "Hand-picked premium products",
+    "searchPlaceholder": "Search products...",
+    "allCategories": "All Categories",
+    "allPrices": "All Prices",
+    "tabs": {
+      "browse": "Browse",
+      "myProducts": "My Products",
+      "featured": "Featured",
+      "orderHistory": "Order History"
+    },
+    "owned": "Owned",
+    "buyNow": "Buy Now",
+    "buy": "Buy",
+    "access": "Access",
+    "off": "% OFF",
+    "featured": "Featured",
+    "under25": "Under $25",
+    "under50": "Under $50",
+    "under100": "Under $100",
+    "over100": "Over $100"
+  },
+
+  "learn": {
+    "title": "Learn",
+    "searchPlaceholder": "Search courses, instructors...",
+    "continueLearning": "Continue Learning",
+    "trendingNow": "Trending Now",
+    "startHere": "Start Here",
+    "deepDives": "Deep Dives",
+    "exploreByTopic": "Explore by Topic",
+    "learningPaths": "Learning Paths",
+    "allCourses": "All Courses",
+    "programmingLanguages": "Programming Languages",
+    "dataStructures": "Data Structures",
+    "algorithms": "Algorithms",
+    "resourcesGuides": "Resources & Guides",
+    "beginner": "BEGINNER",
+    "intermediate": "INTERMEDIATE",
+    "advanced": "ADVANCED",
+    "enrolled": "Enrolled",
+    "completed": "Completed",
+    "hoursLearned": "Hours Learned",
+    "dayStreak": "Day Streak",
+    "lessons": "lessons",
+    "courses": "courses",
+    "progress": "Progress",
+    "complete": "complete",
+    "mostPopular": "Most Popular",
+    "latest": "Latest",
+    "highestRated": "Highest Rated",
+    "aToZ": "A → Z",
+    "noCoursesFound": "No courses found matching your criteria.",
+    "structuredJourneys": "Structured journeys to help you go from zero to job-ready.",
+    "browseFullCatalog": "Browse our full catalog of courses taught by industry experts.",
+    "tutorial": "Tutorial"
+  },
+
+  "carousel": {
+    "sponsored": "Sponsored",
+    "event": "Event",
+    "wordOfDay": "Word of the Day",
+    "devTip": "Dev Tip",
+    "learnMore": "Learn More",
+    "registerNow": "Register Now"
+  },
+
+  "project": {
+    "title": "Projects",
+    "searchPlaceholder": "Search...",
+    "beginnerFriendly": "Beginner-friendly picks",
+    "getAiReady": "Get AI-ready",
+    "hackathonStarter": "Hackathon starter pack",
+    "allProjectTutorials": "All project tutorials",
+    "exploreFullCollection": "Explore our full collection of project tutorials curated by experts.",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "aToZ": "A → Z",
+    "zToA": "Z → A",
+    "noTutorialsFound": "No tutorials found matching your criteria.",
+    "tutorial": "Tutorial",
+    "beginner": "BEGINNER",
+    "intermediate": "INTERMEDIATE",
+    "advanced": "ADVANCED"
   }
 }

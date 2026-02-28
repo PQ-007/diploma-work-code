@@ -17,6 +17,7 @@ export const components = {
   Image: RImage,
   a: CLink,
   code: Code,
+  pre: Pre,
   Table,
   Callout,
   // Enhanced paragraph

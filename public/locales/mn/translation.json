@@ -15,8 +15,26 @@
     "back": "Буцах",
     "next": "Дараах",
     "previous": "Өмнөх",
-    "moto": "Суралц. Бүтээ. Хуваалц."
+    "moto": "Суралц. Бүтээ. Хуваалц.",
+    "guest": "Зочин",
+    "points": "оноо",
+    "contributions": "хувь нэмэр",
+    "published": "нийтлэгдсэн",
+    "result": "илэрц",
+    "results": "илэрц",
+    "for": "-д зориулсан",
+    "in": "-д",
+    "articles": "нийтлэл",
+    "ended": "Дууссан",
+    "left": "үлдсэн",
+    "hot": "ШИН",
+    "all": "Бүгд",
+    "clearFilters": "Шүүлтүүрийг цэвэрлэх",
+    "tryAgain": "Дахин оролдох",
+    "noResults": "Илэрц олдсонгүй",
+    "toggleMenu": "Цэс солих"
   },
+
   "sidebar": {
     "competitions": "Тэмцээн",
     "learn": "Сурах",
@@ -61,10 +79,24 @@
     "upgrade": "Төлөвлөгөөг шинэчлэх",
     "logout": "Гарах"
   },
+
+  "navigation": {
+    "dashboard": "Хянах самбар",
+    "competitions": "Тэмцээн",
+    "learn": "Сурах",
+    "blogs": "Блогууд",
+    "projects": "Төслүүд",
+    "flashcards": "Флаш картууд",
+    "store": "Дэлгүүр",
+    "profile": "Профайл",
+    "settings": "Тохиргоо"
+  },
+
   "dashboard": {
     "welcomeBack": "Тавтай морилно уу, {{name}}!",
     "overview": "Ерөнхий тойм",
     "quickActions": "Түргэн үйлдэл",
+    "quickActionsDesc": "Шинэ зүйл эхлүүлэх эсвэл ажлаа үргэлжлүүлэх",
     "newProject": "Шинэ төсөл",
     "newBlog": "Шинэ блог",
     "createFlashcards": "Флаш карт үүсгэх",
@@ -72,6 +104,7 @@
     "recentActivity": "Сүүлийн үеийн үйл ажиллагаа",
     "achievements": "Амжилтууд",
     "learningProgress": "Суралцах явц",
+    "learningProgressDesc": "Энэ долоо хоногийн суралцах аялал",
     "learningStreak": "Суралцсан дараалсан өдөр",
     "weeklyGoal": "Долоо хоногийн зорилго",
     "days": "өдөр",
@@ -85,8 +118,14 @@
     "publishedOn": "Нийтэлсэн огноо",
     "views": "Үзэлт",
     "likes": "Таалагдсан",
-    "comments": "Сэтгэгдэл"
+    "comments": "Сэтгэгдэл",
+    "subtitle": "Таны төсөл болон суралцах явцын өнөөдрийн мэдээлэл.",
+    "changeThisWeek2": "Энэ долоо хоногт +2",
+    "changeThisWeek1": "Энэ долоо хоногт +1",
+    "endingSoon": "2 удахгүй дуусна",
+    "todayChange": "Өнөөдөр +15"
   },
+
   "projects": {
     "title": "Төслүүд",
     "description": "Төслүүдээ удирдах, нийтлэх",
@@ -100,6 +139,7 @@
     "contributors": "Оролцогчид",
     "lastUpdated": "Сүүлд шинэчлэгдсэн"
   },
+
   "blogs": {
     "title": "Блогын нийтлэл",
     "description": "Мэдлэг, ойлголтоо хуваалцах",
@@ -109,6 +149,7 @@
     "category": "Ангилал",
     "tags": "Шошгууд"
   },
+
   "flashcards": {
     "title": "Флаш картууд",
     "description": "Завсарлагатай давталтаар сурах",
@@ -120,17 +161,35 @@
     "deck": "Багц",
     "decks": "Багцууд"
   },
+
   "competitions": {
     "title": "Тэмцээнүүд",
-    "description": "Код бичих тэмцээнд оролцох",
+    "subtitle": "Дэлхийн даяар сорилуудад оролцож, бодлого шийдэж, шагнал хожоорой.",
+    "description": "Дэлхийн даяар сорилуудад оролцож, бодлого шийдэж, шагнал хожоорой.",
     "upcoming": "Удахгүй",
     "active": "Идэвхтэй",
     "completed": "Дууссан",
     "register": "Бүртгүүлэх",
     "participants": "Оролцогчид",
     "prize": "Шагнал",
-    "duration": "Үргэлжлэх хугацаа"
+    "duration": "Үргэлжлэх хугацаа",
+    "pastResults": "Өнгөрсөн үр дүн",
+    "viewResults": "Үр дүнг харах",
+    "joinChallenge": "Сорилд нэгдэх",
+    "noCompetitions": "Энэ ангилалд тэмцээн олдсонгүй.",
+    "hot": "ШИЛДЭГ",
+    "ended": "Дууссан",
+    "days": "ө",
+    "hours": "ц",
+    "minutes": "м",
+    "left": "үлдсэн",
+    "tabs": {
+      "active": "Идэвхтэй",
+      "upcoming": "Удахгүй",
+      "pastResults": "Өнгөрсөн үр дүн"
+    }
   },
+
   "profile": {
     "title": "Профайл",
     "bio": "Намтар",
@@ -143,6 +202,7 @@
     "editProfile": "Профайл засах",
     "signOut": "Гарах"
   },
+
   "auth": {
     "signIn": "Нэвтрэх",
     "signUp": "Бүртгүүлэх",
@@ -152,8 +212,76 @@
     "forgotPassword": "Нууц үгээ мартсан уу?",
     "noAccount": "Та бүртгэлгүй юу?",
     "hasAccount": "Та бүртгэлтэй юу?",
-    "continueWithGoogle": "Google-ээр үргэлжлүүлэх"
+    "continueWithGoogle": "Google-ээр үргэлжлүүлэх",
+    "welcomeBack": "Тавтай морилно уу",
+    "signInSubtitle": "Бүртгэлдээ нэвтрэх",
+    "signUpTitle": "Бүртгэл үүсгэх",
+    "signUpSubtitle": "Бүртгүүлж эхлэх",
+    "emailLabel": "И-мэйл хаяг",
+    "passwordLabel": "Нууц үг",
+    "emailPlaceholder": "И-мэйлээ оруулна уу",
+    "passwordPlaceholder": "Нууц үгээ оруулна уу",
+    "signingIn": "Нэвтэрч байна...",
+    "signingUp": "Бүртгүүлж байна...",
+    "orContinueWith": "Эсвэл",
+    "connecting": "Холбогдож байна...",
+    "signInWithGoogle": "Google-ээр нэвтрэх",
+    "fillAllFields": "Бүх талбарыг бөглөнө үү",
+    "unexpectedError": "Гэнэтийн алдаа гарлаа",
+    "googleError": "Google-тэй холбогдож чадсангүй",
+    "checkEmail": "Баталгаажуулах линкийг и-мэйлээсээ шалгана уу!",
+    "signedOut": "Гарсан",
+    "signedOutDesc": "Та амжилттай гарлаа.",
+    "signOutFailed": "Гарах амжилтгүй болсон",
+    "signOutFailedDesc": "Гарах үед алдаа гарлаа. Дахин оролдоно уу.",
+    "languageChanged": "Хэл солигдсон",
+    "languageChangedDesc": "Хэлийг {{lang}} руу солисон."
   },
+
+  "feed": {
+    "title": "Таны мэдээ",
+    "description": "Нийгэмлэгийн сүүлийн мэдээтэй байгаарай",
+    "tabs": {
+      "all": "Бүгд",
+      "projects": "Төслүүд",
+      "blogs": "Блогууд",
+      "contests": "Тэмцээн",
+      "following": "Дагаж буй"
+    },
+    "actions": {
+      "like": "Таалагдсан",
+      "unlike": "Таалагдахгүй",
+      "comment": "Сэтгэгдэл",
+      "share": "Хуваалцах",
+      "bookmark": "Хадгалах",
+      "removeBookmark": "Хадгалсанаас хасах",
+      "reply": "Хариулах",
+      "follow": "Дагах",
+      "following": "Дагаж буй"
+    },
+    "stats": {
+      "views": "үзэлт",
+      "likes": "таалагдсан",
+      "comments": "сэтгэгдэл",
+      "shares": "хуваалцсан",
+      "points": "оноо"
+    },
+    "types": {
+      "project": "Нийтлэл",
+      "blog": "Төслийн шинэчлэл",
+      "contest": "Тэмцээн",
+      "flashcard": "Флаш карт",
+      "achievement": "Амжилт",
+      "discussion": "Хэлэлцүүлгийн сэдэв"
+    },
+    "postBox": {
+      "placeholder": "Юу бодож байна, {{name}}?",
+      "post": "Нийтлэх",
+      "code": "Код",
+      "poll": "Санал асуулга"
+    }
+  },
+
   "ranking": {
     "topRated": "Шилдэг хэрэглэгчид",
     "topContributors": "Шилдэг хувь нэмэр оруулагчид",
@@ -165,6 +293,15 @@
     "thisWeek": "Энэ долоо хоног",
     "rank": "Ранк"
   },
+
+  "nav_user": {
+    "profile": "Профайл",
+    "roadmap": "Roadmap",
+    "theme": "Theme",
+    "language": "Хэл",
+    "logout": "Гарах"
+  },
+
   "create_button": {
     "create": "Үүсгэх",
     "project": "Төсөл",
@@ -176,7 +313,7 @@
     "contest": "Тэмцээн",
     "contest_disc": "Тэмцээнд зохиох",
     "discussions": "Асуулт",
-    "discussions_disc": "Шинэ асуулт үүсгэх "
+    "discussions_disc": "Шинэ асуулт үүсгэх"
   },
 
   "landing": {
@@ -196,7 +333,6 @@
       "discussions": "Асуулт хариулт",
       "contests": "Тэмцээн"
     },
-
     "features": {
       "title": "Онцлох боломжууд",
       "items": [
@@ -222,7 +358,7 @@
         },
         {
           "title": "Мэргэжлийн толь бичиг",
-          "desc": "Мэргэжлийн тохирсон монгол орчуулга бүхий толь бичигйй                         "
+          "desc": "Мэргэжлийн тохирсон монгол орчуулга бүхий толь бичиг."
         }
       ]
     },
@@ -251,7 +387,6 @@
         }
       ]
     },
-
     "projectsList": [
       { "title": "AlgoRush", "desc": "Граф алгоритмын визуалчлалын тоглоом." },
       {
@@ -263,5 +398,154 @@
       { "title": "EcoTracker", "desc": "Байгаль орчны нөлөөг хянах апп." },
       { "title": "CodeCollab", "desc": "Бусадтай хамтран код бичих орчин." }
     ]
+  },
+
+  "articles": {
+    "title": "Нийтлэлүүд",
+    "subtitle": "Нийгэмлэгийн нийтлэлүүдийг нээ",
+    "searchPlaceholder": "Нийтлэлийн гарчиг, зохиогч эсвэл шошгоор хайх...",
+    "refreshArticles": "Нийтлэлүүдийг шинэчлэх",
+    "failedToLoad": "Нийтлэлүүдийг ачааллаж чадсангүй",
+    "noMatching": "Тохирох нийтлэл олдсонгүй",
+    "adjustFilters": "Хайлт болон шүүлтүүрийг тохируулна уу.",
+    "noArticlesYet": "Нийтлэл байхгүй байна",
+    "beFirst": "Нийтлэл хамгийн анх нийтлэгч нь болоорой!",
+    "popularTags": "Алдартай шошгууд",
+    "topAuthors": "Шилдэг зохиогчид",
+    "untitled": "Гарчиггүй нийтлэл",
+    "anonymous": "Нэрсгүй",
+    "unpublished": "Нийтлэгдээгүй"
+  },
+
+  "discussions": {
+    "title": "Хэлэлцүүлэг",
+    "subtitle": "Асуулт асуух, санаа хуваалцах, нийгэмлэгтэй холбогдох.",
+    "newDiscussion": "Шинэ хэлэлцүүлэг",
+    "noDiscussions": "Энэ ангилалд хэлэлцүүлэг олдсонгүй.",
+    "stats": "Хэлэлцүүлгийн статистик",
+    "totalThreads": "Нийт сэдэв",
+    "answered": "Хариулсан",
+    "unanswered": "Хариулаагүй",
+    "topContributors": "Шилдэг хувь нэмэр оруулагчид",
+    "tabs": {
+      "all": "Бүгд",
+      "help": "Тусламж",
+      "general": "Ерөнхий",
+      "unanswered": "Хариулаагүй",
+      "ideas": "Санаа"
+    }
+  },
+
+  "dictionary": {
+    "title": "Толь бичигт тавтай морилно уу",
+    "subtitle": "Гол ойлголт, нэр томъёог сураарай.",
+    "searchPlaceholder": "Нэр томъёо, тодорхойлолт, ангилал хайх...",
+    "featuredTerm": "Өнөөдрийн онцлох нэр томъёо",
+    "fullDefinition": "Бүтэн тодорхойлолт",
+    "saveTerm": "Нэр томъёо хадгалах",
+    "browseGlossary": "Нэр томъёоны жагсаалт",
+    "grid": "Торон",
+    "list": "Жагсаалт",
+    "noTermsFound": "Нэр томъёо олдсонгүй",
+    "forThisLetter": "энэ үсгээр",
+    "popularTopics": "Алдартай сэдвүүд",
+    "trendingArticles": "Тренд нийтлэлүүд",
+    "cantFindTerm": "Нэр томъёо олдохгүй байна уу?",
+    "cantFindTermDesc": "Нийгэмлэгт тус болно гэж бодсон шинэ нэр томъёо нэмнэ үү!",
+    "addNewTerm": "Шинэ нэр томъёо нэмэх"
+  },
+
+  "store": {
+    "title": "Дижитал дэлгүүр",
+    "subtitle": "Загвар, курс, хөгжүүлэлтийн нөөц",
+    "sellProduct": "Бүтээгдэхүүн зарах",
+    "productsOwned": "Эзэмшсэн бүтээгдэхүүн",
+    "totalSpent": "Нийт зарцуулсан",
+    "downloads": "Татаж авалт",
+    "orders": "Захиалга",
+    "featuredProducts": "Онцлох бүтээгдэхүүн",
+    "handPicked": "Сонголттой бүтээгдэхүүнүүд",
+    "searchPlaceholder": "Бүтээгдэхүүн хайх...",
+    "allCategories": "Бүх ангилал",
+    "allPrices": "Бүх үнэ",
+    "tabs": {
+      "browse": "Үзэх",
+      "myProducts": "Миний бүтээгдэхүүн",
+      "featured": "Онцлох",
+      "orderHistory": "Захиалгын түүх"
+    },
+    "owned": "Эзэмшсэн",
+    "buyNow": "Одоо худалдаж авах",
+    "buy": "Авах",
+    "access": "Хандах",
+    "off": "% ХЯМДРАЛ",
+    "featured": "Онцлох",
+    "under25": "$25-аас доош",
+    "under50": "$50-аас доош",
+    "under100": "$100-аас доош",
+    "over100": "$100-аас дээш"
+  },
+
+  "learn": {
+    "title": "Сурах",
+    "searchPlaceholder": "Курс, багш хайх...",
+    "continueLearning": "Суралцаж үргэлжлүүлэх",
+    "trendingNow": "Одоогийн тренд",
+    "startHere": "Эндээс эхэл",
+    "deepDives": "Гүнзгий судлал",
+    "exploreByTopic": "Сэдвээр судлах",
+    "learningPaths": "Суралцах зам",
+    "allCourses": "Бүх курсууд",
+    "programmingLanguages": "Програмчлалын хэлүүд",
+    "dataStructures": "Өгөгдлийн бүтэц",
+    "algorithms": "Алгоритмууд",
+    "resourcesGuides": "Нөөц ба гарын авлага",
+    "beginner": "ЭХЛЭГЧ",
+    "intermediate": "ДУНД",
+    "advanced": "АХИСАН",
+    "enrolled": "Бүртгүүлсэн",
+    "completed": "Дуусгасан",
+    "hoursLearned": "Суралцсан цаг",
+    "dayStreak": "Дараалсан өдөр",
+    "lessons": "хичээл",
+    "courses": "курс",
+    "progress": "Явц",
+    "complete": "дууссан",
+    "mostPopular": "Хамгийн алдартай",
+    "latest": "Сүүлийн",
+    "highestRated": "Хамгийн өндөр үнэлгээ",
+    "aToZ": "А → Я",
+    "noCoursesFound": "Таны шалгуурт тохирсон курс олдсонгүй.",
+    "structuredJourneys": "Тэгээс мэргэжилтэн хүртэл суралцах бүтэцтэй зам.",
+    "browseFullCatalog": "Мэргэжилтнүүдийн заадаг бүх курсыг үзнэ үү.",
+    "tutorial": "Заавар"
+  },
+
+  "carousel": {
+    "sponsored": "Сурталчилгаа",
+    "event": "Арга хэмжээ",
+    "wordOfDay": "Өнөөдрийн үг",
+    "devTip": "Хөгжүүлэгчийн зөвлөгөө",
+    "learnMore": "Дэлгэрэнгүй",
+    "registerNow": "Одоо бүртгүүлэх"
+  },
+
+  "project": {
+    "title": "Төслүүд",
+    "searchPlaceholder": "Хайх...",
+    "beginnerFriendly": "Эхлэгчдэд зориулсан",
+    "getAiReady": "AI-д бэлтгэх",
+    "hackathonStarter": "Хакатоны эхлэл",
+    "allProjectTutorials": "Бүх төслийн заавар",
+    "exploreFullCollection": "Мэргэжилтнүүдийн бичсэн бүрэн цуглуулгыг судлаарай.",
+    "latest": "Сүүлийн",
+    "oldest": "Хамгийн хуучин",
+    "aToZ": "А → Я",
+    "zToA": "Я → А",
+    "noTutorialsFound": "Таны шалгуурт тохирсон заавар олдсонгүй.",
+    "tutorial": "Заавар",
+    "beginner": "ЭХЛЭГЧ",
+    "intermediate": "ДУНД",
+    "advanced": "АХИСАН"
   }
 }

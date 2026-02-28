@@ -11,13 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import {
   Check,
   ChevronDown,
@@ -35,9 +36,9 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { Button } from "./ui/button"; 
+import { Button } from "./ui/button";
 
 // --- Shared Types and Constants ---
 
@@ -53,32 +54,93 @@ type User = {
   avatar: string;
 };
 
-// Theme options for the dropdown
-const themeOptions = [
-    { name: "Light", value: "light", icon: Sun },
-    { name: "Dark", value: "dark", icon: Moon },
-    { name: "System", value: "system", icon: Monitor },
-];
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
-);
+type ProfileData = {
+  user_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  role: string | null;
+  email: string | null;
+};
 
 // --- User Dropdown Component ---
 
-export function NavUser({ user }: { user: User | null }) {
+export function NavUser() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
-  const [isThemeOpen, setIsThemeOpen] = useState(false);
-  
-  const currentLanguage = languages.find((lang) => lang.code === language);
-  const currentThemeOption = themeOptions.find((t) => t.value === theme);
-  const CurrentThemeIcon = currentThemeOption?.icon || Monitor;
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  const supabase = useMemo(
+    () =>
+      createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      ),
+    [],
+  );
+
+  const currentLanguage = languages.find((lang) => lang.code === language);
+
+  // Fetch profile data from profiles table
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
+
+        if (!authUser) {
+          console.log("No authenticated user");
+          setLoading(false);
+          return;
+        }
+
+        console.log("Fetching profile for user ID:", authUser.id);
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, user_name, avatar_url, bio, role, email")
+          .eq("id", authUser.id)
+          .single();
+
+        if (profileError) {
+          console.warn("Profile fetch failed:", profileError.message);
+          setProfileData(null);
+        } else if (profile) {
+          console.log("Profile data fetched:", profile);
+          setProfileData({
+            user_name: profile.user_name,
+            avatar_url: profile.avatar_url,
+            bio: profile.bio,
+            role: profile.role,
+            email: profile.email,
+          });
+        }
+      } catch (err) {
+        console.error("Error in profile fetch:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // Use only profile data
+  const displayName = profileData?.user_name || "User";
+  const displayAvatar = profileData?.avatar_url || "";
+  const displayEmail = profileData?.email || "";
+
+  console.log("Rendering with:", {
+    displayName,
+    displayAvatar,
+    displayEmail,
+    profileData,
+  });
 
   const handleSignOut = async () => {
     try {
@@ -112,22 +174,6 @@ export function NavUser({ user }: { user: User | null }) {
     setTheme(newTheme);
   };
 
-  // If no user is logged in, show a default profile button
-  if (!user) {
-    return (
-      <Button 
-        size="icon"
-        className="h-8 w-8 rounded-full data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-      >
-        <Avatar className="h-8 w-8 rounded-full">
-          <AvatarFallback className="rounded-full">
-            <UserRound className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar>
-      </Button>
-    );
-  }
-
   // User is logged in, show the dropdown menu
   return (
     <DropdownMenu>
@@ -135,11 +181,13 @@ export function NavUser({ user }: { user: User | null }) {
         <Button
           variant="ghost"
           className="relative h-8 w-8 rounded-full focus-visible:ring-2 focus-visible:ring-offset-2"
-          aria-label={`User menu for ${user.name}`}
+          aria-label={`User menu for ${displayName}`}
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={displayAvatar} alt={displayName} />
+            <AvatarFallback>
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -153,15 +201,15 @@ export function NavUser({ user }: { user: User | null }) {
         <DropdownMenuLabel className="font-normal p-0">
           <div className="flex items-center gap-2 px-3 py-2">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src={displayAvatar} alt={displayName} />
               <AvatarFallback>
-                {user.name.charAt(0).toUpperCase()}
+                {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <p className="text-sm font-medium truncate">{user.name}</p>
+              <p className="text-sm font-medium truncate">{displayName}</p>
               <p className="text-xs text-muted-foreground truncate">
-                {user.email}
+                {displayEmail}
               </p>
             </div>
           </div>
@@ -176,7 +224,7 @@ export function NavUser({ user }: { user: User | null }) {
           >
             <div className="flex">
               <UserRound className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{t("nav_user.profile")}</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -185,47 +233,46 @@ export function NavUser({ user }: { user: User | null }) {
           >
             <div className="flex">
               <Route className="mr-2 h-4 w-4" />
-              <span>Roadmap</span>
+              <span>{t("nav_user.roadmap")}</span>
             </div>
           </DropdownMenuItem>
 
-          {/* 🌟 COLLAPSIBLE - THEME SELECTION 🌟 */}
-          <Collapsible open={isThemeOpen} onOpenChange={setIsThemeOpen}>
-            <CollapsibleTrigger asChild>
-              <DropdownMenuItem
-                className="cursor-pointer flex items-center justify-between w-full"
-                onSelect={(e) => e.preventDefault()}
-              >
-                <div className="flex items-center">
-                  <CurrentThemeIcon className="mr-2 h-4 w-4" />
-                  <span>Theme ({currentThemeOption?.name || 'System'})</span>
-                </div>
-                {isThemeOpen ? (
-                  <ChevronUp className="ml-auto h-4 w-4 shrink-0" />
-                ) : (
-                  <ChevronDown className="ml-auto h-4 w-4 shrink-0" />
+          {/* 🌟 THEME TOGGLE 🌟 */}
+          <DropdownMenuItem
+            onClick={() =>
+              setTheme(resolvedTheme === "dark" ? "light" : "dark")
+            }
+            onSelect={(e) => e.preventDefault()}
+            className="cursor-pointer flex items-center justify-between w-full"
+          >
+            <div className="flex items-center">
+              {resolvedTheme === "dark" ? (
+                <Moon className="mr-2 h-4 w-4" />
+              ) : (
+                <Sun className="mr-2 h-4 w-4" />
+              )}
+              <span>{t("nav_user.theme")}</span>
+            </div>
+            <div className="ml-auto flex items-center">
+              <div
+                className={cn(
+                  "relative h-5 w-9 rounded-full transition-colors",
+                  resolvedTheme === "dark"
+                    ? "bg-primary/80"
+                    : "bg-muted-foreground/60",
                 )}
-              </DropdownMenuItem>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="flex flex-col space-y-1 py-1 pl-8 pr-2">
-                {themeOptions.map((themeOption) => (
-                  <DropdownMenuItem
-                    key={themeOption.value}
-                    onClick={() => handleThemeChange(themeOption.value)}
-                    className="flex items-center justify-between cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <themeOption.icon className="h-4 w-4" />
-                      <span>{themeOption.name}</span>
-                    </div>
-                    {theme === themeOption.value && <Check className="h-4 w-4" />}
-                  </DropdownMenuItem>
-                ))}
+              >
+                <div
+                  className={cn(
+                    "absolute top-0.5 h-4 w-4 rounded-full bg-background transition-transform",
+                    resolvedTheme === "dark"
+                      ? "translate-x-4"
+                      : "translate-x-0.5",
+                  )}
+                />
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-
+            </div>
+          </DropdownMenuItem>
 
           {/* 🌟 COLLAPSIBLE - LANGUAGE SELECTION 🌟 */}
           <Collapsible open={isLanguageOpen} onOpenChange={setIsLanguageOpen}>
@@ -236,7 +283,10 @@ export function NavUser({ user }: { user: User | null }) {
               >
                 <div className="flex items-center">
                   <Globe className="mr-2 h-4 w-4" />
-                  <span>Language ({currentLanguage?.name || "English"})</span>
+                  <span>
+                    {t("nav_user.language")} (
+                    {currentLanguage?.name || "English"})
+                  </span>
                 </div>
                 {isLanguageOpen ? (
                   <ChevronUp className="ml-auto h-4 w-4 shrink-0" />
@@ -264,7 +314,7 @@ export function NavUser({ user }: { user: User | null }) {
             </CollapsibleContent>
           </Collapsible>
         </DropdownMenuGroup>
-        
+
         {/* Sign Out */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -272,11 +322,9 @@ export function NavUser({ user }: { user: User | null }) {
           className="cursor-pointer text-destructive focus:text-destructive-foreground focus:bg-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t("nav_user.logout")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
-
