@@ -10,13 +10,7 @@ export default function HomePage() {
 
   return (
     <>
-      {loading ? (
-        <div>Loading...</div>
-      ) : isAuthenticated ? (
-        <FeedPage />
-      ) : (
-        <LandingPage />
-      )}
+      <FeedPage />
     </>
   );
 }
