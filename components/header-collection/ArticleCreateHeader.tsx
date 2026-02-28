@@ -3,7 +3,6 @@
 
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,17 +15,10 @@ import { NavUser } from "../NavUser";
 
 export function ArticleCreateHeader() {
   const router = useRouter();
-  const { user } = useAuth();
   const { t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
-
-  const userData = {
-    name: user?.user_metadata?.name || "Guest",
-    email: user?.email || "",
-    avatar: user?.user_metadata?.avatar_url || "",
-  };
 
   const handleBack = () => router.back();
 
@@ -93,7 +85,7 @@ export function ArticleCreateHeader() {
             )}
             <span>{isPublishing ? "Publishing" : "Publish"}</span>
           </Button>
-          <NavUser user={userData} />
+          <NavUser />
         </div>
       </div>
     </header>
