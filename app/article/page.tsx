@@ -471,12 +471,8 @@ export default function ArticleBrowsePage() {
                     item={item}
                     isLiked={likedItems.has(item.id)}
                     isBookmarked={bookmarkedItems.has(item.id)}
-                    isInReadingList={readingList.has(item.id)}
-                    showQuickActions={showQuickActions === item.id}
                     toggleLike={toggleLike}
                     toggleBookmark={toggleBookmark}
-                    toggleReadingList={toggleReadingList}
-                    handleMoreClick={handleMoreClick}
                   />
                 ))}
               </div>

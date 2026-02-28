@@ -22,7 +22,7 @@ interface CarouselSlide {
   badgeKey: string;
   title: string;
   description: string;
-  ctaKey?: string;
+  ctaKey?: string | null;
   accent: string;
   icon: React.ReactNode;
 }

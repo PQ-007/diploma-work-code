@@ -139,12 +139,6 @@ export function SiteHeader() {
   const { t } = useLanguage();
   const [isSearchOpen, setIsSearchOpen] = useState(true);
 
-  const userData = {
-    name: user?.user_metadata?.name || "Guest",
-    email: user?.email || "",
-    avatar: user?.user_metadata?.avatar_url || "",
-  };
-
   // Generate breadcrumb items
   const breadcrumbItems: BreadcrumbItemType[] = pathname
     .split("/")
@@ -176,7 +170,7 @@ export function SiteHeader() {
               <>
                 <CreateButton />
                 <NotificationButton />
-                <NavUser user={userData} />
+                <NavUser />
               </>
             ) : (
               <>
