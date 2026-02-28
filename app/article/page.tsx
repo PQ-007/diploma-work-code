@@ -43,6 +43,7 @@ interface ApiArticle {
 
 interface FeedItem {
   id: string;
+  type: string;
   day: number;
   author: {
     name: string;
@@ -186,6 +187,7 @@ export default function ArticleBrowsePage() {
 
         return {
           id: article.article_id,
+          type: "article",
           day: index + 1,
           author: {
             name: authorName,

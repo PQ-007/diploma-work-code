@@ -1,4 +1,3 @@
-
 // Tree data interface
 export interface EnhancedTreeNode {
   key: string;
