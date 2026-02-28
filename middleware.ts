@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // Check if the request matches a protected route
   const isProtected = protectedPrefixes.some((prefix) =>
-    pathname.startsWith(prefix)
+    pathname.startsWith(prefix),
   );
 
   if (!isProtected) {
@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
           });
         },
       },
-    }
+    },
   );
 
   // Refresh the session (important for token rotation)
