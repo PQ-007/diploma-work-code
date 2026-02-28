@@ -27,6 +27,7 @@ export interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   href: string;
   items?: NavSubItem[];
+  authRequired?: boolean;
 }
 
 export interface LibrarySubItem {

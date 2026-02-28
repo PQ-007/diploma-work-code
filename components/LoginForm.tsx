@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -14,6 +14,8 @@ export default function LoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
   const supabase = createClient();
 
   const handleLogin = async (e: { preventDefault: () => void }) => {
@@ -36,7 +38,7 @@ export default function LoginForm() {
       if (error) {
         setError(error.message);
       } else {
-        router.push("/");
+        router.push(redirectTo);
         router.refresh();
       }
     } catch (error) {
