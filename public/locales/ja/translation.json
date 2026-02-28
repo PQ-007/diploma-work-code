@@ -15,8 +15,26 @@
     "back": "戻る",
     "next": "次へ",
     "previous": "前へ",
-    "moto": "学ぶ。作る。共有する。"
+    "moto": "学ぶ。作る。共有する。",
+    "guest": "ゲスト",
+    "points": "ポイント",
+    "contributions": "貢献",
+    "published": "公開済み",
+    "result": "件",
+    "results": "件",
+    "for": "の検索結果",
+    "in": "内",
+    "articles": "記事",
+    "ended": "終了",
+    "left": "残り",
+    "hot": "注目",
+    "all": "すべて",
+    "clearFilters": "フィルターをクリア",
+    "tryAgain": "再試行",
+    "noResults": "結果が見つかりません",
+    "toggleMenu": "メニュー切替"
   },
+
   "sidebar": {
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
@@ -62,10 +80,24 @@
     "upgrade": "プランをアップグレード",
     "logout": "ログアウト"
   },
+
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "competitions": "コンペティション",
+    "learn": "学習",
+    "blogs": "ブログ",
+    "projects": "プロジェクト",
+    "flashcards": "フラッシュカード",
+    "store": "ストア",
+    "profile": "プロフィール",
+    "settings": "設定"
+  },
+
   "dashboard": {
     "welcomeBack": "お帰りなさい、{{name}}さん！",
     "overview": "概要",
     "quickActions": "クイックアクション",
+    "quickActionsDesc": "新しいことを始めるか、作業を続けましょう",
     "newProject": "新しいプロジェクト",
     "newBlog": "新しいブログ",
     "createFlashcards": "フラッシュカード作成",
@@ -73,6 +105,7 @@
     "recentActivity": "最近のアクティビティ",
     "achievements": "実績",
     "learningProgress": "学習進捗",
+    "learningProgressDesc": "今週の学習の旅",
     "learningStreak": "学習継続日数",
     "weeklyGoal": "週間目標",
     "days": "日",
@@ -86,8 +119,14 @@
     "publishedOn": "公開日",
     "views": "ビュー",
     "likes": "いいね",
-    "comments": "コメント"
+    "comments": "コメント",
+    "subtitle": "プロジェクトと学習の今日の状況です。",
+    "changeThisWeek2": "今週+2",
+    "changeThisWeek1": "今週+1",
+    "endingSoon": "間もなく終了2件",
+    "todayChange": "今日+15"
   },
+
   "projects": {
     "title": "プロジェクト",
     "description": "プロジェクトを管理・公開",
@@ -101,6 +140,7 @@
     "contributors": "貢献者",
     "lastUpdated": "最終更新"
   },
+
   "blogs": {
     "title": "ブログ投稿",
     "description": "知識と洞察を共有",
@@ -110,6 +150,7 @@
     "category": "カテゴリー",
     "tags": "タグ"
   },
+
   "flashcards": {
     "title": "フラッシュカード",
     "description": "間隔反復で学習",
@@ -121,28 +162,35 @@
     "deck": "デッキ",
     "decks": "デッキ"
   },
+
   "competitions": {
     "title": "コンテスト",
-    "description": "コーディングコンテストに参加",
+    "subtitle": "グローバルチャレンジに参加し、複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
+    "description": "グローバルチャレンジに参加し、複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
     "upcoming": "予定",
     "active": "進行中",
     "completed": "完了",
     "register": "登録",
     "participants": "参加者",
     "prize": "賞品",
-    "duration": "期間"
+    "duration": "期間",
+    "pastResults": "過去の結果",
+    "viewResults": "結果を見る",
+    "joinChallenge": "チャレンジに参加",
+    "noCompetitions": "このカテゴリーにはコンテストがありません。",
+    "hot": "注目",
+    "ended": "終了",
+    "days": "日",
+    "hours": "時",
+    "minutes": "分",
+    "left": "残り",
+    "tabs": {
+      "active": "進行中",
+      "upcoming": "予定",
+      "pastResults": "過去の結果"
+    }
   },
-  "ranking": {
-    "topRated": "トップユーザー",
-    "topContributors": "トップ貢献者",
-    "weeklyLeaders": "週間リーダー",
-    "trendingTopics": "トレンドトピック",
-    "suggestedUsers": "おすすめユーザー",
-    "viewAll": "すべて見る",
-    "posts": "投稿",
-    "thisWeek": "今週",
-    "rank": "Rank"
-  },
+
   "profile": {
     "title": "プロフィール",
     "bio": "自己紹介",
@@ -155,6 +203,7 @@
     "editProfile": "プロフィール編集",
     "signOut": "サインアウト"
   },
+
   "auth": {
     "signIn": "サインイン",
     "signUp": "サインアップ",
@@ -164,8 +213,88 @@
     "forgotPassword": "パスワードをお忘れですか？",
     "noAccount": "アカウントをお持ちでないですか？",
     "hasAccount": "すでにアカウントをお持ちですか？",
-    "continueWithGoogle": "Googleで続行"
+    "continueWithGoogle": "Googleで続行",
+    "welcomeBack": "おかえりなさい",
+    "signInSubtitle": "アカウントにサインインしてください",
+    "signUpTitle": "アカウント作成",
+    "signUpSubtitle": "サインアップして始めましょう",
+    "emailLabel": "メールアドレス",
+    "passwordLabel": "パスワード",
+    "emailPlaceholder": "メールを入力してください",
+    "passwordPlaceholder": "パスワードを入力してください",
+    "signingIn": "サインイン中...",
+    "signingUp": "サインアップ中...",
+    "orContinueWith": "または",
+    "connecting": "接続中...",
+    "signInWithGoogle": "Googleでサインイン",
+    "fillAllFields": "すべてのフィールドを入力してください",
+    "unexpectedError": "予期しないエラーが発生しました",
+    "googleError": "Googleに接続できませんでした",
+    "checkEmail": "確認メールのリンクを確認してください！",
+    "signedOut": "サインアウト",
+    "signedOutDesc": "正常にサインアウトしました。",
+    "signOutFailed": "サインアウト失敗",
+    "signOutFailedDesc": "サインアウト中にエラーが発生しました。もう一度お試しください。",
+    "languageChanged": "言語変更",
+    "languageChangedDesc": "言語を{{lang}}に設定しました。"
   },
+
+  "feed": {
+    "title": "フィード",
+    "description": "コミュニティの最新情報をチェック",
+    "tabs": {
+      "all": "すべて",
+      "projects": "プロジェクト",
+      "blogs": "ブログ",
+      "contests": "コンテスト",
+      "following": "フォロー中"
+    },
+    "actions": {
+      "like": "いいね",
+      "unlike": "いいね解除",
+      "comment": "コメント",
+      "share": "共有",
+      "bookmark": "ブックマーク",
+      "removeBookmark": "ブックマーク削除",
+      "reply": "返信",
+      "follow": "フォロー",
+      "following": "フォロー中"
+    },
+    "stats": {
+      "views": "ビュー",
+      "likes": "いいね",
+      "comments": "コメント",
+      "shares": "共有",
+      "points": "pts"
+    },
+    "types": {
+      "project": "記事",
+      "blog": "プロジェクト更新",
+      "contest": "コンテスト",
+      "flashcard": "フラッシュカード",
+      "achievement": "実績",
+      "discussion": "ディスカッション"
+    },
+    "postBox": {
+      "placeholder": "何を考えていますか、{{name}}さん？",
+      "post": "投稿",
+      "code": "コード",
+      "poll": "アンケート"
+    }
+  },
+
+  "ranking": {
+    "topRated": "トップユーザー",
+    "topContributors": "トップ貢献者",
+    "weeklyLeaders": "週間リーダー",
+    "trendingTopics": "トレンドトピック",
+    "suggestedUsers": "おすすめユーザー",
+    "viewAll": "すべて見る",
+    "posts": "投稿",
+    "thisWeek": "今週",
+    "rank": "Rank"
+  },
+
   "nav_user": {
     "profile": "プロフィール",
     "roadmap": "ロードマップ",
@@ -173,6 +302,7 @@
     "language": "言語",
     "logout": "ログアウト"
   },
+
   "create_button": {
     "create": "作成",
     "project": "プロジェクト",
@@ -186,6 +316,7 @@
     "discussions": "ディスカッション",
     "discussions_disc": "新しいディスカッションを開始する"
   },
+
   "landing": {
     "hero": {
       "title": "学び、創るための場所",
@@ -203,7 +334,6 @@
       "discussions": "Q&A",
       "contests": "コンテスト"
     },
-
     "features": {
       "title": "主な機能",
       "items": [
@@ -233,5 +363,154 @@
         }
       ]
     }
+  },
+
+  "articles": {
+    "title": "記事",
+    "subtitle": "コミュニティの記事を発見",
+    "searchPlaceholder": "タイトル、著者、タグで記事を検索...",
+    "refreshArticles": "記事を更新",
+    "failedToLoad": "記事の読み込みに失敗しました",
+    "noMatching": "一致する記事がありません",
+    "adjustFilters": "検索条件やフィルターを調整してください。",
+    "noArticlesYet": "まだ記事がありません",
+    "beFirst": "最初の記事を投稿しませんか！",
+    "popularTags": "人気タグ",
+    "topAuthors": "トップ著者",
+    "untitled": "無題の記事",
+    "anonymous": "匿名",
+    "unpublished": "未公開"
+  },
+
+  "discussions": {
+    "title": "ディスカッション",
+    "subtitle": "質問し、アイデアを共有し、コミュニティとつながりましょう。",
+    "newDiscussion": "新しいディスカッション",
+    "noDiscussions": "このカテゴリーにはディスカッションがありません。",
+    "stats": "ディスカッション統計",
+    "totalThreads": "総スレッド数",
+    "answered": "回答済み",
+    "unanswered": "未回答",
+    "topContributors": "トップ貢献者",
+    "tabs": {
+      "all": "すべて",
+      "help": "ヘルプ",
+      "general": "一般",
+      "unanswered": "未回答",
+      "ideas": "アイデア"
+    }
+  },
+
+  "dictionary": {
+    "title": "辞書へようこそ",
+    "subtitle": "重要な概念と用語を学びましょう。",
+    "searchPlaceholder": "用語、定義、カテゴリーを検索...",
+    "featuredTerm": "今日の注目用語",
+    "fullDefinition": "完全な定義",
+    "saveTerm": "用語を保存",
+    "browseGlossary": "用語集を閲覧",
+    "grid": "グリッド",
+    "list": "リスト",
+    "noTermsFound": "用語が見つかりません",
+    "forThisLetter": "この文字で始まる",
+    "popularTopics": "人気トピック",
+    "trendingArticles": "トレンド記事",
+    "cantFindTerm": "用語が見つかりませんか？",
+    "cantFindTermDesc": "コミュニティに役立つと思う新しい用語を自由に追加してください！",
+    "addNewTerm": "新しい用語を追加"
+  },
+
+  "store": {
+    "title": "デジタルストア",
+    "subtitle": "プレミアムテンプレート、コース、開発リソース",
+    "sellProduct": "商品を販売",
+    "productsOwned": "所有商品",
+    "totalSpent": "総支出額",
+    "downloads": "ダウンロード",
+    "orders": "注文",
+    "featuredProducts": "注目商品",
+    "handPicked": "厳選されたプレミアム商品",
+    "searchPlaceholder": "商品を検索...",
+    "allCategories": "全カテゴリー",
+    "allPrices": "全価格帯",
+    "tabs": {
+      "browse": "閲覧",
+      "myProducts": "マイ商品",
+      "featured": "注目",
+      "orderHistory": "注文履歴"
+    },
+    "owned": "所有済み",
+    "buyNow": "今すぐ購入",
+    "buy": "購入",
+    "access": "アクセス",
+    "off": "% OFF",
+    "featured": "注目",
+    "under25": "$25未満",
+    "under50": "$50未満",
+    "under100": "$100未満",
+    "over100": "$100以上"
+  },
+
+  "learn": {
+    "title": "学習",
+    "searchPlaceholder": "コース、講師を検索...",
+    "continueLearning": "学習を続ける",
+    "trendingNow": "トレンド",
+    "startHere": "ここから始める",
+    "deepDives": "深掘り",
+    "exploreByTopic": "トピック別に探索",
+    "learningPaths": "学習パス",
+    "allCourses": "全コース",
+    "programmingLanguages": "プログラミング言語",
+    "dataStructures": "データ構造",
+    "algorithms": "アルゴリズム",
+    "resourcesGuides": "リソースとガイド",
+    "beginner": "初級",
+    "intermediate": "中級",
+    "advanced": "上級",
+    "enrolled": "受講中",
+    "completed": "完了",
+    "hoursLearned": "学習時間",
+    "dayStreak": "連続日数",
+    "lessons": "レッスン",
+    "courses": "コース",
+    "progress": "進捗",
+    "complete": "完了",
+    "mostPopular": "最も人気",
+    "latest": "最新",
+    "highestRated": "最高評価",
+    "aToZ": "A → Z",
+    "noCoursesFound": "条件に一致するコースが見つかりません。",
+    "structuredJourneys": "ゼロから就職準備まで導く構造化された学習パス。",
+    "browseFullCatalog": "業界の専門家が教える全コースカタログを閲覧。",
+    "tutorial": "チュートリアル"
+  },
+
+  "carousel": {
+    "sponsored": "スポンサー",
+    "event": "イベント",
+    "wordOfDay": "今日の単語",
+    "devTip": "開発者ヒント",
+    "learnMore": "詳しく見る",
+    "registerNow": "今すぐ登録"
+  },
+
+  "project": {
+    "title": "プロジェクト",
+    "searchPlaceholder": "検索...",
+    "beginnerFriendly": "初心者向けピック",
+    "getAiReady": "AI対応準備",
+    "hackathonStarter": "ハッカソンスターターパック",
+    "allProjectTutorials": "全プロジェクトチュートリアル",
+    "exploreFullCollection": "専門家がキュレーションしたプロジェクトチュートリアルの全コレクションを探索。",
+    "latest": "最新",
+    "oldest": "最も古い",
+    "aToZ": "A → Z",
+    "zToA": "Z → A",
+    "noTutorialsFound": "条件に一致するチュートリアルが見つかりません。",
+    "tutorial": "チュートリアル",
+    "beginner": "初級",
+    "intermediate": "中級",
+    "advanced": "上級"
   }
 }

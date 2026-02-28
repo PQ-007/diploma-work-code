@@ -260,10 +260,10 @@ export default function DictionaryPage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-xl font-bold text-foreground">
-            Welcome to the Dictionary
+            {t("dictionary.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Learn key concepts and terminologies.
+            {t("dictionary.subtitle")}
           </p>
         </div>
 
@@ -274,7 +274,7 @@ export default function DictionaryPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search terms, definitions, categories..."
+                placeholder={t("dictionary.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-10"
@@ -296,7 +296,7 @@ export default function DictionaryPage() {
                     variant="secondary"
                     className="w-fit mb-3 text-xs font-semibold tracking-wide uppercase"
                   >
-                    Featured Term of the Day
+                    {t("dictionary.featuredTerm")}
                   </Badge>
                   <h2 className="text-xl font-bold mb-2">
                     {featuredTerm.name}
@@ -306,7 +306,7 @@ export default function DictionaryPage() {
                   </p>
                   <div className="flex items-center gap-3">
                     <Button size="sm" className="text-xs">
-                      Full Definition
+                      {t("dictionary.fullDefinition")}
                     </Button>
                     <Button
                       variant="ghost"
@@ -314,7 +314,7 @@ export default function DictionaryPage() {
                       className="text-xs text-muted-foreground"
                     >
                       <Bookmark className="h-3.5 w-3.5 mr-1.5" />
-                      Save Term
+                      {t("dictionary.saveTerm")}
                     </Button>
                   </div>
                 </CardContent>
@@ -324,7 +324,9 @@ export default function DictionaryPage() {
             {/* Browse Glossary */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Browse Glossary</h2>
+                <h2 className="text-lg font-semibold">
+                  {t("dictionary.browseGlossary")}
+                </h2>
                 <div className="flex items-center gap-1">
                   <Button
                     variant={viewMode === "grid" ? "secondary" : "ghost"}
@@ -333,7 +335,7 @@ export default function DictionaryPage() {
                     onClick={() => setViewMode("grid")}
                   >
                     <LayoutGrid className="h-3.5 w-3.5 mr-1" />
-                    Grid
+                    {t("dictionary.grid")}
                   </Button>
                   <Button
                     variant={viewMode === "list" ? "secondary" : "ghost"}
@@ -342,7 +344,7 @@ export default function DictionaryPage() {
                     onClick={() => setViewMode("list")}
                   >
                     <List className="h-3.5 w-3.5 mr-1" />
-                    List
+                    {t("dictionary.list")}
                   </Button>
                 </div>
               </div>
@@ -373,7 +375,10 @@ export default function DictionaryPage() {
               {filteredTerms.length === 0 ? (
                 <div className="text-sm text-muted-foreground py-8 text-center">
                   No terms found
-                  {searchQuery ? ` for "${searchQuery}"` : " for this letter"}.
+                  {searchQuery
+                    ? ` ${t("common.for")} "${searchQuery}"`
+                    : ` ${t("dictionary.forThisLetter")}`}
+                  .
                 </div>
               ) : viewMode === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -439,7 +444,7 @@ export default function DictionaryPage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <Flame className="h-4 w-4" />
-                Popular Topics
+                {t("dictionary.popularTopics")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-3">
@@ -462,7 +467,7 @@ export default function DictionaryPage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <Flame className="h-4 w-4" />
-                Trending Articles
+                {t("dictionary.trendingArticles")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-0">
@@ -500,15 +505,14 @@ export default function DictionaryPage() {
               <CardContent className="p-4 text-center space-y-2">
                 <CircleHelp className="h-6 w-6 mx-auto text-muted-foreground" />
                 <h3 className="text-sm font-semibold">
-                  Can&apos;t find the term?
+                  {t("dictionary.cantFindTerm")}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Feel free to add new terms to the dictionary that you think
-                  can help the community!
+                  {t("dictionary.cantFindTermDesc")}
                 </p>
                 <Button size="sm" className="text-xs mt-1">
                   <Plus className="h-3.5 w-3.5 mr-1" />
-                  Add New Term
+                  {t("dictionary.addNewTerm")}
                 </Button>
               </CardContent>
             </Card>

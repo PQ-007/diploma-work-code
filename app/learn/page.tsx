@@ -39,6 +39,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -598,6 +599,7 @@ function formatNumber(n: number) {
 /* ------------------------------------------------------------------ */
 
 function CourseCard({ course }: { course: Course }) {
+  const { t } = useLanguage();
   const isEnrolled = course.progress !== undefined;
   return (
     <Link
@@ -649,7 +651,8 @@ function CourseCard({ course }: { course: Course }) {
               <Clock className="h-3 w-3" /> {course.duration}h
             </span>
             <span className="flex items-center gap-1">
-              <BookOpen className="h-3 w-3" /> {course.lessons} lessons
+              <BookOpen className="h-3 w-3" /> {course.lessons}{" "}
+              {t("learn.lessons")}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" /> {formatNumber(course.enrolled)}
@@ -664,7 +667,7 @@ function CourseCard({ course }: { course: Course }) {
                 variant="outline"
                 className="rounded-full px-2 py-0.5 text-[10px] font-semibold border-primary/40 text-primary"
               >
-                {course.progress}% complete
+                {course.progress}% {t("learn.complete")}
               </Badge>
             )}
           </div>
@@ -679,6 +682,7 @@ function CourseCard({ course }: { course: Course }) {
 /* ------------------------------------------------------------------ */
 
 function CourseGridCard({ course }: { course: Course }) {
+  const { t } = useLanguage();
   const isEnrolled = course.progress !== undefined;
   return (
     <Link href={`/learn/${course.slug}`} className="group">
@@ -722,7 +726,8 @@ function CourseGridCard({ course }: { course: Course }) {
               <Clock className="h-3 w-3" /> {course.duration}h
             </span>
             <span className="flex items-center gap-1">
-              <BookOpen className="h-3 w-3" /> {course.lessons} lessons
+              <BookOpen className="h-3 w-3" /> {course.lessons}{" "}
+              {t("learn.lessons")}
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" /> {formatNumber(course.enrolled)}
@@ -736,7 +741,7 @@ function CourseGridCard({ course }: { course: Course }) {
                 variant="outline"
                 className="rounded-full px-2 py-0.5 text-[10px] font-semibold border-primary/40 text-primary"
               >
-                {course.progress}% complete
+                {course.progress}% {t("learn.complete")}
               </Badge>
             )}
           </div>
@@ -881,6 +886,7 @@ function TagBar({
 /* ------------------------------------------------------------------ */
 
 export default function LearnPage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState("All");
   const [sortBy, setSortBy] = useState<"popular" | "latest" | "rating" | "a-z">(
@@ -960,7 +966,9 @@ export default function LearnPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{enrolledCount}</p>
-              <p className="text-xs text-muted-foreground">Enrolled</p>
+              <p className="text-xs text-muted-foreground">
+                {t("learn.enrolled")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -971,7 +979,9 @@ export default function LearnPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{completedCount}</p>
-              <p className="text-xs text-muted-foreground">Completed</p>
+              <p className="text-xs text-muted-foreground">
+                {t("learn.completed")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -982,7 +992,9 @@ export default function LearnPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{hoursLearned}</p>
-              <p className="text-xs text-muted-foreground">Hours Learned</p>
+              <p className="text-xs text-muted-foreground">
+                {t("learn.hoursLearned")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -993,7 +1005,9 @@ export default function LearnPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">12</p>
-              <p className="text-xs text-muted-foreground">Day Streak</p>
+              <p className="text-xs text-muted-foreground">
+                {t("learn.dayStreak")}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1002,7 +1016,7 @@ export default function LearnPage() {
       {/* ── Skill Areas ── */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2">
-          <span>🎯</span> Explore by Topic
+          <span>🎯</span> {t("learn.exploreByTopic")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {skillAreas.map((area) => (
@@ -1023,7 +1037,7 @@ export default function LearnPage() {
                       {area.description}
                     </p>
                     <p className="mt-3 text-xs font-medium text-white/90">
-                      {area.courseCount} courses
+                      {area.courseCount} {t("learn.courses")}
                     </p>
                   </div>
                 </CardContent>
@@ -1036,10 +1050,10 @@ export default function LearnPage() {
       {/* ── Learning Paths ── */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2">
-          <span>🗺️</span> Learning Paths
+          <span>🗺️</span> {t("learn.learningPaths")}
         </h2>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          Structured journeys to help you go from zero to job-ready.
+          {t("learn.structuredJourneys")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {learningPaths.map((path) => (
@@ -1066,7 +1080,7 @@ export default function LearnPage() {
                   <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <BookOpen className="h-3 w-3" /> {path.courseCount}{" "}
-                      courses
+                      {t("learn.courses")}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" /> {path.totalHours}h total
@@ -1076,7 +1090,9 @@ export default function LearnPage() {
                   {path.progress !== undefined && (
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px]">
-                        <span className="text-muted-foreground">Progress</span>
+                        <span className="text-muted-foreground">
+                          {t("learn.progress")}
+                        </span>
                         <span className="font-medium">{path.progress}%</span>
                       </div>
                       <Progress value={path.progress} className="h-1.5" />
@@ -1094,7 +1110,7 @@ export default function LearnPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search courses, instructors..."
+            placeholder={t("learn.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -1114,10 +1130,10 @@ export default function LearnPage() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <span>📚</span> All Courses
+              <span>📚</span> {t("learn.allCourses")}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Browse our full catalog of courses taught by industry experts.
+              {t("learn.browseFullCatalog")}
             </p>
           </div>
 
@@ -1129,10 +1145,10 @@ export default function LearnPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="popular">Most Popular</SelectItem>
-              <SelectItem value="latest">Latest</SelectItem>
-              <SelectItem value="rating">Highest Rated</SelectItem>
-              <SelectItem value="a-z">A → Z</SelectItem>
+              <SelectItem value="popular">{t("learn.mostPopular")}</SelectItem>
+              <SelectItem value="latest">{t("learn.latest")}</SelectItem>
+              <SelectItem value="rating">{t("learn.highestRated")}</SelectItem>
+              <SelectItem value="a-z">{t("learn.aToZ")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -1146,9 +1162,7 @@ export default function LearnPage() {
         ) : (
           <div className="text-center py-16">
             <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              No courses found matching your criteria.
-            </p>
+            <p className="text-muted-foreground">{t("learn.noCoursesFound")}</p>
           </div>
         )}
       </section>

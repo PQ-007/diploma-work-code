@@ -188,12 +188,16 @@ const trendingTopics: Array<{
   { id: "5", name: "System Design", posts: 543, trend: "down" },
 ];
 
-const tabs = [
-  { value: "all", label: "All", icon: MessageSquare },
-  { value: "help", label: "Help", icon: HelpCircle },
-  { value: "general", label: "General", icon: Hash },
-  { value: "unanswered", label: "Unanswered", icon: CircleDot },
-  { value: "ideas", label: "Ideas", icon: Lightbulb },
+const tabKeys = [
+  { value: "all", labelKey: "discussions.tabs.all", icon: MessageSquare },
+  { value: "help", labelKey: "discussions.tabs.help", icon: HelpCircle },
+  { value: "general", labelKey: "discussions.tabs.general", icon: Hash },
+  {
+    value: "unanswered",
+    labelKey: "discussions.tabs.unanswered",
+    icon: CircleDot,
+  },
+  { value: "ideas", labelKey: "discussions.tabs.ideas", icon: Lightbulb },
 ];
 
 // --- End of Data ---
@@ -244,12 +248,12 @@ export default function DiscussionsPage() {
               {t("sidebar.discussions")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Ask questions, share ideas, and connect with the community.
+              {t("discussions.subtitle")}
             </p>
           </div>
           <Button size="sm" className="text-xs">
             <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-            New Discussion
+            {t("discussions.newDiscussion")}
           </Button>
         </div>
 
@@ -263,7 +267,7 @@ export default function DiscussionsPage() {
               className="mb-6"
             >
               <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
-                {tabs.map((tab) => {
+                {tabKeys.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <TabsTrigger
@@ -272,7 +276,7 @@ export default function DiscussionsPage() {
                       className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs"
                     >
                       <Icon className="h-3.5 w-3.5 mr-1.5" />
-                      {tab.label}
+                      {t(tab.labelKey)}
                     </TabsTrigger>
                   );
                 })}
@@ -283,7 +287,7 @@ export default function DiscussionsPage() {
             <div className="space-y-3">
               {sortedDiscussions.length === 0 && (
                 <div className="text-sm text-muted-foreground py-8 text-center">
-                  No discussions found for this category.
+                  {t("discussions.noDiscussions")}
                 </div>
               )}
               {sortedDiscussions.map((item) => (
@@ -305,22 +309,28 @@ export default function DiscussionsPage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <MessageSquare className="h-4 w-4" />
-                Discussion Stats
+                {t("discussions.stats")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Total threads</span>
+                    <span className="text-muted-foreground">
+                      {t("discussions.totalThreads")}
+                    </span>
                     <span className="font-medium">{discussions.length}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Answered</span>
+                    <span className="text-muted-foreground">
+                      {t("discussions.answered")}
+                    </span>
                     <span className="font-medium text-green-600 dark:text-green-400">
                       {discussions.filter((d) => d.answered).length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Unanswered</span>
+                    <span className="text-muted-foreground">
+                      {t("discussions.unanswered")}
+                    </span>
                     <span className="font-medium">
                       {discussions.filter((d) => !d.answered).length}
                     </span>
@@ -333,7 +343,7 @@ export default function DiscussionsPage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <Users className="h-4 w-4" />
-                Top Contributors
+                {t("discussions.topContributors")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-0">
@@ -357,7 +367,7 @@ export default function DiscussionsPage() {
                             {user.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {user.points.toLocaleString()} points
+                            {user.points.toLocaleString()} {t("common.points")}
                           </p>
                         </div>
                       </div>

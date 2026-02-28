@@ -51,7 +51,7 @@ export default function Leaderboard({
                     {user.name}
                     <span className="text-muted-foreground font-normal">
                       {" "}
-                      - {user.points.toLocaleString()} points
+                      - {user.points.toLocaleString()} {t("common.points")}
                     </span>
                   </p>
                 </div>

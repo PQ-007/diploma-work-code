@@ -165,15 +165,13 @@ export default function ArticleBrowsePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Failed to load articles");
+        throw new Error(data?.error || t("articles.failedToLoad"));
       }
 
-      const items: ApiArticle[] = Array.isArray(data?.items)
-        ? data.items
-        : [];
+      const items: ApiArticle[] = Array.isArray(data?.items) ? data.items : [];
 
       const mapped = items.map((article, index) => {
-        const authorName = article.author?.user_name || "Anonymous";
+        const authorName = article.author?.user_name || t("articles.anonymous");
         const username = article.author?.user_name
           ? `@${article.author.user_name}`
           : "@anonymous";
@@ -182,7 +180,7 @@ export default function ArticleBrowsePage() {
           `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`;
         const published = article.published_at
           ? new Date(article.published_at).toLocaleDateString()
-          : "Unpublished";
+          : t("articles.unpublished");
 
         const description = article.sub_title || "";
 
@@ -201,7 +199,7 @@ export default function ArticleBrowsePage() {
           timestamp: published,
           readTime: calcReadTime(article.body || ""),
           content: {
-            title: article.title || "Untitled article",
+            title: article.title || t("articles.untitled"),
             description,
             tags: article.tags || [],
           },
@@ -218,7 +216,7 @@ export default function ArticleBrowsePage() {
       setFeedItems(mapped);
     } catch (err: any) {
       console.error("Error loading articles", err);
-      setError(err?.message || "Failed to load articles");
+      setError(err?.message || t("articles.failedToLoad"));
       setFeedItems([]);
     } finally {
       setLoading(false);
@@ -263,9 +261,7 @@ export default function ArticleBrowsePage() {
     // Tab filter
     const matchesTab =
       activeTab === "all" ||
-      item.content.tags.some((tag) =>
-        tag.toLowerCase().includes(activeTab),
-      );
+      item.content.tags.some((tag) => tag.toLowerCase().includes(activeTab));
 
     // Search filter
     const q = searchQuery.toLowerCase().trim();
@@ -303,12 +299,14 @@ export default function ArticleBrowsePage() {
         {/* Page Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Articles</h1>
+            <h1 className="text-xl font-bold text-foreground">
+              {t("articles.title")}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Discover articles from the community
+              {t("articles.subtitle")}
               {totalCount > 0 && (
                 <span className="ml-1">
-                  &middot; {totalCount} published
+                  &middot; {totalCount} {t("common.published")}
                 </span>
               )}
             </p>
@@ -320,7 +318,7 @@ export default function ArticleBrowsePage() {
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={() => fetchArticles(true)}
               disabled={isRefreshing}
-              title="Refresh articles"
+              title={t("articles.refreshArticles")}
             >
               <RefreshCw
                 className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -336,7 +334,7 @@ export default function ArticleBrowsePage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search articles by title, author, or tag..."
+                placeholder={t("articles.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 text-sm"
@@ -344,10 +342,7 @@ export default function ArticleBrowsePage() {
             </div>
 
             {/* Category Tabs */}
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-            >
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
                 {["all", "nextjs", "ai", "python", "rust"].map((tab) => (
                   <TabsTrigger
@@ -365,15 +360,17 @@ export default function ArticleBrowsePage() {
             {(searchQuery || activeTab !== "all") && !error && (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {filteredCount} result{filteredCount !== 1 ? "s" : ""}
+                  {filteredCount}{" "}
+                  {filteredCount !== 1
+                    ? t("common.results")
+                    : t("common.result")}
                   {searchQuery && (
                     <span>
-                      {" "}for &ldquo;{searchQuery}&rdquo;
+                      {" "}
+                      {t("common.for")} &ldquo;{searchQuery}&rdquo;
                     </span>
                   )}
-                  {activeTab !== "all" && (
-                    <span> in {activeTab}</span>
-                  )}
+                  {activeTab !== "all" && <span> in {activeTab}</span>}
                 </span>
                 {(searchQuery || activeTab !== "all") && (
                   <Button
@@ -392,9 +389,7 @@ export default function ArticleBrowsePage() {
             )}
 
             {/* Refresh indicator */}
-            {isRefreshing && (
-              <ArticleFeedSkeleton count={2} />
-            )}
+            {isRefreshing && <ArticleFeedSkeleton count={2} />}
 
             {/* Error State */}
             {!isRefreshing && error && (
@@ -404,7 +399,9 @@ export default function ArticleBrowsePage() {
                     <AlertCircle className="h-5 w-5 text-destructive" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Failed to load articles</p>
+                    <p className="text-sm font-medium">
+                      {t("articles.failedToLoad")}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {error}
                     </p>
@@ -431,9 +428,11 @@ export default function ArticleBrowsePage() {
                   </div>
                   {searchQuery || activeTab !== "all" ? (
                     <div>
-                      <p className="text-sm font-medium">No matching articles</p>
+                      <p className="text-sm font-medium">
+                        {t("articles.noMatching")}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your search or filters.
+                        {t("articles.adjustFilters")}
                       </p>
                       <Button
                         variant="outline"
@@ -449,9 +448,11 @@ export default function ArticleBrowsePage() {
                     </div>
                   ) : (
                     <div>
-                      <p className="text-sm font-medium">No articles yet</p>
+                      <p className="text-sm font-medium">
+                        {t("articles.noArticlesYet")}
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Be the first to publish an article!
+                        {t("articles.beFirst")}
                       </p>
                     </div>
                   )}
@@ -486,7 +487,7 @@ export default function ArticleBrowsePage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <Flame className="h-4 w-4" />
-                Popular Tags
+                {t("articles.popularTags")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-3">
@@ -518,7 +519,7 @@ export default function ArticleBrowsePage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
                 <Users className="h-4 w-4" />
-                Top Authors
+                {t("articles.topAuthors")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-0">
@@ -539,7 +540,7 @@ export default function ArticleBrowsePage() {
                             {author.name}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {author.articles} articles
+                            {author.articles} {t("common.articles")}
                           </p>
                         </div>
                       </div>

@@ -13,6 +13,7 @@ import { Search, ChevronLeft, ChevronRight, Folder } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -267,14 +268,15 @@ const tutorials: Tutorial[] = [
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-const difficultyMeta: Record<Difficulty, { label: string; bars: number }> = {
-  beginner: { label: "BEGINNER", bars: 1 },
-  intermediate: { label: "INTERMEDIATE", bars: 2 },
-  advanced: { label: "ADVANCED", bars: 3 },
+const difficultyMeta: Record<Difficulty, { labelKey: string; bars: number }> = {
+  beginner: { labelKey: "project.beginner", bars: 1 },
+  intermediate: { labelKey: "project.intermediate", bars: 2 },
+  advanced: { labelKey: "project.advanced", bars: 3 },
 };
 
 function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
-  const { label, bars } = difficultyMeta[difficulty];
+  const { t } = useLanguage();
+  const { labelKey, bars } = difficultyMeta[difficulty];
   return (
     <Badge
       variant="secondary"
@@ -301,7 +303,7 @@ function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
           style={{ height: "90%" }}
         />
       </span>
-      {label}
+      {t(labelKey)}
     </Badge>
   );
 }
@@ -311,6 +313,7 @@ function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
 /* ------------------------------------------------------------------ */
 
 function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
+  const { t } = useLanguage();
   return (
     <Link
       href={`/project/${tutorial.slug}`}
@@ -332,7 +335,7 @@ function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
         {/* Content */}
         <div className="space-y-2 p-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Tutorial
+            {t("project.tutorial")}
           </span>
           <h3 className="text-sm font-semibold leading-snug line-clamp-2">
             {tutorial.title}
@@ -357,6 +360,7 @@ function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
 /* ------------------------------------------------------------------ */
 
 function TutorialGridCard({ tutorial }: { tutorial: Tutorial }) {
+  const { t } = useLanguage();
   return (
     <Link href={`/project/${tutorial.slug}`} className="group">
       <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg h-full">
@@ -375,7 +379,7 @@ function TutorialGridCard({ tutorial }: { tutorial: Tutorial }) {
         {/* Content */}
         <div className="space-y-2 p-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Tutorial
+            {t("project.tutorial")}
           </span>
           <h3 className="text-sm font-semibold leading-snug line-clamp-2">
             {tutorial.title}
@@ -536,6 +540,7 @@ function TagBar({
 /* ------------------------------------------------------------------ */
 
 export default function ProjectPage() {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<"latest" | "oldest" | "a-z" | "z-a">(
@@ -611,7 +616,7 @@ export default function ProjectPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search..."
+            placeholder={t("project.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -635,11 +640,10 @@ export default function ProjectPage() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <span>📚</span> All project tutorials
+              <span>📚</span> {t("project.allProjectTutorials")}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Explore our full collection of project tutorials written by expert
-              developers, educators and community members.
+              {t("project.exploreFullCollection")}
             </p>
           </div>
 
@@ -651,10 +655,10 @@ export default function ProjectPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="latest">Latest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="a-z">A → Z</SelectItem>
-              <SelectItem value="z-a">Z → A</SelectItem>
+              <SelectItem value="latest">{t("project.latest")}</SelectItem>
+              <SelectItem value="oldest">{t("project.oldest")}</SelectItem>
+              <SelectItem value="a-z">{t("project.aToZ")}</SelectItem>
+              <SelectItem value="z-a">{t("project.zToA")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -669,7 +673,7 @@ export default function ProjectPage() {
           <div className="text-center py-16">
             <Folder className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
-              No tutorials found matching your criteria.
+              {t("project.noTutorialsFound")}
             </p>
           </div>
         )}

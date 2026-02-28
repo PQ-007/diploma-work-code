@@ -12,14 +12,15 @@ import {
   Share,
   Clock,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const typeLabels: Record<string, string> = {
-  project: "Article",
-  blog: "Project update",
-  contest: "Contest",
-  achievement: "Achievement",
-  flashcard: "Flashcard",
-  discussion: "Discussion thread",
+const typeKeyMap: Record<string, string> = {
+  project: "feed.types.project",
+  blog: "feed.types.blog",
+  contest: "feed.types.contest",
+  achievement: "feed.types.achievement",
+  flashcard: "feed.types.flashcard",
+  discussion: "feed.types.discussion",
 };
 
 export interface ListItemData {
@@ -68,6 +69,7 @@ export default function ListItem({
   toggleLike,
   toggleBookmark,
 }: ListItemProps) {
+  const { t } = useLanguage();
   return (
     <article key={item.id} className="group relative">
       <Card
@@ -83,7 +85,7 @@ export default function ListItem({
                 variant="secondary"
                 className="px-2 py-0.5 text-xs font-medium whitespace-nowrap"
               >
-                {typeLabels[item.type] || item.type}
+                {typeKeyMap[item.type] ? t(typeKeyMap[item.type]) : item.type}
               </Badge>
               <Avatar className="h-6 w-6 border border-border/40 flex-shrink-0">
                 <AvatarImage src={item.author.avatar} />
@@ -98,7 +100,7 @@ export default function ListItem({
                 ({item.author.username})
               </span>
               <span className="text-xs text-muted-foreground hidden sm:inline">
-                - {item.author.contributions} contributions
+                - {item.author.contributions} {t("common.contributions")}
               </span>
               <span className="text-xs text-muted-foreground hidden sm:inline">
                 - {item.timestamp}
@@ -148,7 +150,7 @@ export default function ListItem({
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              title="Reply"
+              title={t("feed.actions.reply")}
             >
               <Reply className="h-4 w-4" />
             </Button>
@@ -161,7 +163,9 @@ export default function ListItem({
                   : "text-muted-foreground hover:text-red-500"
               }`}
               onClick={() => toggleLike(item.id)}
-              title={isLiked ? "Unlike" : "Like"}
+              title={
+                isLiked ? t("feed.actions.unlike") : t("feed.actions.like")
+              }
             >
               <Heart
                 className="h-4 w-4"
@@ -172,7 +176,7 @@ export default function ListItem({
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              title="Comment"
+              title={t("feed.actions.comment")}
             >
               <MessageCircle className="h-4 w-4" />
             </Button>
@@ -185,7 +189,11 @@ export default function ListItem({
                   : "text-muted-foreground hover:text-blue-500"
               }`}
               onClick={() => toggleBookmark(item.id)}
-              title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+              title={
+                isBookmarked
+                  ? t("feed.actions.removeBookmark")
+                  : t("feed.actions.bookmark")
+              }
             >
               <Bookmark
                 className="h-4 w-4"
@@ -196,7 +204,7 @@ export default function ListItem({
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              title="Share"
+              title={t("feed.actions.share")}
             >
               <Share className="h-4 w-4" />
             </Button>

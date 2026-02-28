@@ -12,68 +12,76 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type SlideType = "ad" | "event" | "word" | "tip";
 
 interface CarouselSlide {
   id: string;
   type: SlideType;
-  badge: string;
+  badgeKey: string;
   title: string;
   description: string;
-  cta?: string;
+  ctaKey?: string;
   accent: string;
   icon: React.ReactNode;
 }
 
-const slides: CarouselSlide[] = [
-  {
-    id: "1",
-    type: "ad",
-    badge: "Sponsored",
-    title: "Master System Design",
-    description:
-      "Join 10,000+ developers in our comprehensive system design course. Limited early-bird pricing!",
-    cta: "Learn More",
-    accent: "from-blue-500/10 to-cyan-500/10",
-    icon: <Megaphone className="h-5 w-5 text-blue-500" />,
-  },
-  {
-    id: "2",
-    type: "event",
-    badge: "Event",
-    title: "Hackathon 2026 🚀",
-    description:
-      "48-hour virtual hackathon starting March 15. Build, compete, and win prizes up to $5,000.",
-    cta: "Register Now",
-    accent: "from-purple-500/10 to-pink-500/10",
-    icon: <CalendarDays className="h-5 w-5 text-purple-500" />,
-  },
-  {
-    id: "3",
-    type: "word",
-    badge: "Word of the Day",
-    title: "Idempotent",
-    description:
-      "An operation that produces the same result no matter how many times it is performed. Essential concept in distributed systems & API design.",
-    accent: "from-amber-500/10 to-orange-500/10",
-    icon: <BookOpenText className="h-5 w-5 text-amber-500" />,
-  },
-  {
-    id: "4",
-    type: "tip",
-    badge: "Dev Tip",
-    title: "Git Stash Pop vs Apply",
-    description:
-      "'git stash pop' removes the stash after applying, while 'git stash apply' keeps it. Use apply when you need the stash in multiple branches.",
-    accent: "from-green-500/10 to-emerald-500/10",
-    icon: <Lightbulb className="h-5 w-5 text-green-500" />,
-  },
-];
+function useSlides() {
+  const { t } = useLanguage();
+
+  const slides: CarouselSlide[] = [
+    {
+      id: "1",
+      type: "ad",
+      badgeKey: "carousel.sponsored",
+      title: "Master System Design",
+      description:
+        "Join 10,000+ developers in our comprehensive system design course. Limited early-bird pricing!",
+      ctaKey: "carousel.learnMore",
+      accent: "from-blue-500/10 to-cyan-500/10",
+      icon: <Megaphone className="h-5 w-5 text-blue-500" />,
+    },
+    {
+      id: "2",
+      type: "event",
+      badgeKey: "carousel.event",
+      title: "Hackathon 2026 🚀",
+      description:
+        "48-hour virtual hackathon starting March 15. Build, compete, and win prizes up to $5,000.",
+      ctaKey: "carousel.registerNow",
+      accent: "from-purple-500/10 to-pink-500/10",
+      icon: <CalendarDays className="h-5 w-5 text-purple-500" />,
+    },
+    {
+      id: "3",
+      type: "word",
+      badgeKey: "carousel.wordOfDay",
+      title: "Idempotent",
+      description:
+        "An operation that produces the same result no matter how many times it is performed. Essential concept in distributed systems & API design.",
+      accent: "from-amber-500/10 to-orange-500/10",
+      icon: <BookOpenText className="h-5 w-5 text-amber-500" />,
+    },
+    {
+      id: "4",
+      type: "tip",
+      badgeKey: "carousel.devTip",
+      title: "Git Stash Pop vs Apply",
+      description:
+        "'git stash pop' removes the stash after applying, while 'git stash apply' keeps it. Use apply when you need the stash in multiple branches.",
+      accent: "from-green-500/10 to-emerald-500/10",
+      icon: <Lightbulb className="h-5 w-5 text-green-500" />,
+    },
+  ];
+
+  return { slides, t };
+}
 
 const AUTO_PLAY_INTERVAL = 5000;
 
 export default function SidebarCarousel() {
+  const { slides, t } = useSlides();
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -101,7 +109,6 @@ export default function SidebarCarousel() {
     >
       <CardContent className="p-0">
         {/* Gradient accent bar */}
-  
 
         <div className="p-4 space-y-1">
           {/* Header */}
@@ -112,7 +119,7 @@ export default function SidebarCarousel() {
                 variant="secondary"
                 className="text-[10px] px-1.5 py-0 font-medium"
               >
-                {slide.badge}
+                {t(slide.badgeKey)}
               </Badge>
             </div>
             <div className="flex items-center gap-0.5">
@@ -146,13 +153,13 @@ export default function SidebarCarousel() {
           </div>
 
           {/* CTA */}
-          {slide.cta && (
+          {slide.ctaKey && (
             <Button
               variant="outline"
               size="sm"
               className="w-full h-7 text-xs font-medium"
             >
-              {slide.cta}
+              {t(slide.ctaKey)}
             </Button>
           )}
 

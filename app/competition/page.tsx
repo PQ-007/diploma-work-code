@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, DollarSign, Trophy } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // --- Types ---
 interface Competition {
@@ -113,16 +114,19 @@ const competitions: Competition[] = [
 
 // --- Countdown Hook ---
 function useCountdown(endsAt: string) {
+  const { t } = useLanguage();
   const calcTimeLeft = useCallback(() => {
     const diff = new Date(endsAt).getTime() - Date.now();
-    if (diff <= 0) return "Ended";
+    if (diff <= 0) return t("competitions.ended");
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const m = Math.floor((diff / (1000 * 60)) % 60);
-    if (d > 0) return `${d}d ${h}h left`;
-    if (h > 0) return `${h}h ${m}m left`;
-    return `${m}m left`;
-  }, [endsAt]);
+    if (d > 0)
+      return `${d}${t("competitions.days")} ${h}${t("competitions.hours")} ${t("competitions.left")}`;
+    if (h > 0)
+      return `${h}${t("competitions.hours")} ${m}${t("competitions.minutes")} ${t("competitions.left")}`;
+    return `${m}${t("competitions.minutes")} ${t("competitions.left")}`;
+  }, [endsAt, t]);
 
   const [timeLeft, setTimeLeft] = useState(calcTimeLeft);
 
@@ -137,6 +141,7 @@ function useCountdown(endsAt: string) {
 // --- Competition Card ---
 function CompetitionCard({ comp }: { comp: Competition }) {
   const timeLeft = useCountdown(comp.endsAt);
+  const { t } = useLanguage();
 
   return (
     <Card className="border-border/40 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
@@ -149,7 +154,7 @@ function CompetitionCard({ comp }: { comp: Competition }) {
         />
         {comp.hot && (
           <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase tracking-wider border-0">
-            HOT
+            {t("competitions.hot")}
           </Badge>
         )}
       </div>
@@ -179,7 +184,9 @@ function CompetitionCard({ comp }: { comp: Competition }) {
             <span>{timeLeft}</span>
           </div>
           <Button size="sm" className="text-xs font-semibold px-4">
-            {comp.status === "past" ? "View Results" : "Join Challenge"}
+            {comp.status === "past"
+              ? t("competitions.viewResults")
+              : t("competitions.joinChallenge")}
           </Button>
         </div>
       </CardContent>
@@ -190,15 +197,16 @@ function CompetitionCard({ comp }: { comp: Competition }) {
 // --- Tabs ---
 type TabValue = "active" | "upcoming" | "past";
 
-const tabs: { value: TabValue; label: string }[] = [
-  { value: "active", label: "Active" },
-  { value: "upcoming", label: "Upcoming" },
-  { value: "past", label: "Past Results" },
+const tabKeys: { value: TabValue; labelKey: string }[] = [
+  { value: "active", labelKey: "competitions.tabs.active" },
+  { value: "upcoming", labelKey: "competitions.tabs.upcoming" },
+  { value: "past", labelKey: "competitions.tabs.pastResults" },
 ];
 
 // --- Page ---
 export default function CompetitionPage() {
   const [activeTab, setActiveTab] = useState<TabValue>("active");
+  const { t } = useLanguage();
 
   const filtered = competitions.filter((c) => c.status === activeTab);
   const activeCount = competitions.filter((c) => c.status === "active").length;
@@ -208,16 +216,17 @@ export default function CompetitionPage() {
       <div className="mx-auto py-6 lg:py-3 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Competitions</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t("competitions.title")}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Join global challenges, solve complex problems, and win amazing
-            prizes.
+            {t("competitions.subtitle")}
           </p>
         </div>
 
         {/* Tabs */}
         <div className="flex items-center gap-6 border-b border-border/40 mb-6">
-          {tabs.map((tab) => {
+          {tabKeys.map((tab) => {
             const isActive = activeTab === tab.value;
             const count = tab.value === "active" ? activeCount : undefined;
             return (
@@ -230,7 +239,7 @@ export default function CompetitionPage() {
                     : "text-muted-foreground hover:text-foreground/80"
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
                 {count !== undefined && (
                   <span className="ml-1 text-muted-foreground">({count})</span>
                 )}
@@ -253,7 +262,7 @@ export default function CompetitionPage() {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Trophy className="h-10 w-10 text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">
-              No competitions found in this category.
+              {t("competitions.noCompetitions")}
             </p>
           </div>
         )}

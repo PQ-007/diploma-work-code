@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Pencil, Code, BarChart3 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type PostType = "post" | "code" | "poll";
 
@@ -18,6 +19,7 @@ export default function PostCreationBox({
   userName = "Sarah",
   userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
 }: PostCreationBoxProps) {
+  const { t } = useLanguage();
   const [activeType, setActiveType] = useState<PostType>("post");
 
   const typeButtons: {
@@ -25,9 +27,21 @@ export default function PostCreationBox({
     label: string;
     icon: React.ReactNode;
   }[] = [
-    { type: "post", label: "Post", icon: <Pencil className="h-4 w-4" /> },
-    { type: "code", label: "Code", icon: <Code className="h-4 w-4" /> },
-    { type: "poll", label: "Poll", icon: <BarChart3 className="h-4 w-4" /> },
+    {
+      type: "post",
+      label: t("feed.postBox.post"),
+      icon: <Pencil className="h-4 w-4" />,
+    },
+    {
+      type: "code",
+      label: t("feed.postBox.code"),
+      icon: <Code className="h-4 w-4" />,
+    },
+    {
+      type: "poll",
+      label: t("feed.postBox.poll"),
+      icon: <BarChart3 className="h-4 w-4" />,
+    },
   ];
 
   return (
@@ -41,7 +55,7 @@ export default function PostCreationBox({
         </Avatar>
         <div className="flex-1">
           <Input
-            placeholder={`What's on your mind, ${userName}?`}
+            placeholder={t("feed.postBox.placeholder", { name: userName })}
             className="bg-muted/40 border-border/40 h-10 text-sm"
           />
         </div>
@@ -62,7 +76,7 @@ export default function PostCreationBox({
           ))}
         </div>
         <Button size="sm" className="h-8 px-5 text-xs font-medium">
-          Post
+          {t("feed.postBox.post")}
         </Button>
       </div>
     </Card>
