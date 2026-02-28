@@ -46,16 +46,9 @@ export function ArticleCreateHeader() {
       <div className="flex w-full items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <SidebarTrigger />
-       
-      
-          
         </div>
 
         <div className="flex items-center gap-2 text-sm font-medium">
-          
-
-          
-
           <div className="h-6 w-px bg-border mx-1" aria-hidden />
 
           <Button
