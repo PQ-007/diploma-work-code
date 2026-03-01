@@ -103,18 +103,26 @@ export default function SidebarCarousel() {
 
   return (
     <Card
-      className="border-border/40 overflow-hidden"
+      className="relative overflow-hidden border-border/50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 hover:-translate-y-1"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <CardContent className="p-0">
-        {/* Gradient accent bar */}
-
-        <div className="p-4 space-y-1">
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${slide.accent} opacity-70`}
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 bg-background/80 backdrop-blur-[2px]"
+        aria-hidden
+      />
+      <CardContent className="relative h-48 p-0">
+        <div className="relative z-10 flex h-full flex-col gap-2 p-4">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {slide.icon}
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-background/80 shadow-sm ring-1 ring-border/60">
+                {slide.icon}
+              </span>
               <Badge
                 variant="secondary"
                 className="text-[10px] px-1.5 py-0 font-medium"
@@ -155,25 +163,26 @@ export default function SidebarCarousel() {
           {/* CTA */}
           {slide.ctaKey && (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="w-full h-7 text-xs font-medium"
+              className="w-full h-8 text-xs font-medium shadow-sm"
             >
               {t(slide.ctaKey)}
             </Button>
           )}
 
           {/* Dots */}
-          <div className="flex items-center justify-center gap-1.5 pt-1">
+          <div className="mt-auto flex items-center justify-center gap-1.5 pt-1">
             {slides.map((_, i) => (
               <button
                 key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${
                   i === current
-                    ? "w-4 bg-foreground/60"
-                    : "w-1.5 bg-foreground/15 hover:bg-foreground/30"
+                    ? "w-4 bg-foreground/70"
+                    : "w-1.5 bg-foreground/20 hover:bg-foreground/40"
                 }`}
                 onClick={() => setCurrent(i)}
+                aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
