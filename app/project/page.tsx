@@ -9,10 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Folder } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Folder,
+  Layers,
+  Sparkles,
+  Wand2,
+  Laptop,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, type SyntheticEvent } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 /* ------------------------------------------------------------------ */
@@ -274,6 +283,8 @@ const difficultyMeta: Record<Difficulty, { labelKey: string; bars: number }> = {
   advanced: { labelKey: "project.advanced", bars: 3 },
 };
 
+const fallbackThumbnail = "/images/tutorials/placeholder.svg";
+
 function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
   const { t } = useLanguage();
   const { labelKey, bars } = difficultyMeta[difficulty];
@@ -308,16 +319,29 @@ function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
   );
 }
 
+const handleImageError = (event: SyntheticEvent<HTMLImageElement, Event>) => {
+  const img = event.currentTarget;
+  img.onerror = null;
+  img.src = fallbackThumbnail;
+};
+
 /* ------------------------------------------------------------------ */
 /*  Tutorial card (horizontal scroll variant)                          */
 /* ------------------------------------------------------------------ */
 
-function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
+function TutorialCard({
+  tutorial,
+  accent,
+}: {
+  tutorial: Tutorial;
+  accent: number;
+}) {
   const { t } = useLanguage();
+  const hue = (accent * 48) % 360;
   return (
     <Link
       href={`/project/${tutorial.slug}`}
-      className="group flex-shrink-0 w-[220px] sm:w-[240px] snap-start"
+      className="group snap-start h-full w-[220px] sm:w-[230px]"
     >
       <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg h-full">
         {/* Thumbnail */}
@@ -329,6 +353,8 @@ function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="240px"
             unoptimized
+            onError={handleImageError}
+            style={{ filter: `hue-rotate(${hue}deg)` }}
           />
         </div>
 
@@ -359,8 +385,15 @@ function TutorialCard({ tutorial }: { tutorial: Tutorial }) {
 /*  Tutorial card (grid variant – for "All project tutorials")         */
 /* ------------------------------------------------------------------ */
 
-function TutorialGridCard({ tutorial }: { tutorial: Tutorial }) {
+function TutorialGridCard({
+  tutorial,
+  accent,
+}: {
+  tutorial: Tutorial;
+  accent: number;
+}) {
   const { t } = useLanguage();
+  const hue = (accent * 48) % 360;
   return (
     <Link href={`/project/${tutorial.slug}`} className="group">
       <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg h-full">
@@ -373,6 +406,8 @@ function TutorialGridCard({ tutorial }: { tutorial: Tutorial }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             unoptimized
+            onError={handleImageError}
+            style={{ filter: `hue-rotate(${hue}deg)` }}
           />
         </div>
 
@@ -414,7 +449,7 @@ function CuratedRow({
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    const amount = 260;
+    const amount = Math.max(scrollRef.current.clientWidth - 80, 220);
     scrollRef.current.scrollBy({
       left: direction === "left" ? -amount : amount,
       behavior: "smooth",
@@ -449,10 +484,10 @@ function CuratedRow({
 
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none pb-2"
+          className="grid grid-flow-col auto-cols-[minmax(220px,260px)] gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none pb-2"
         >
-          {items.map((t) => (
-            <TutorialCard key={t.id} tutorial={t} />
+          {items.map((t, idx) => (
+            <TutorialCard key={t.id} tutorial={t} accent={idx} />
           ))}
         </div>
 
@@ -609,8 +644,87 @@ export default function ProjectPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, activeTags, sortBy]);
 
+  // Quick stats for the hero bar
+  const {
+    total,
+    uniqueLanguages,
+    beginnerCount,
+    intermediateCount,
+    advancedCount,
+  } = useMemo(() => {
+    const languageSet = new Set<string>();
+    let beginner = 0;
+    let intermediate = 0;
+    let advanced = 0;
+
+    for (const t of tutorials) {
+      languageSet.add(t.language);
+      if (t.difficulty === "beginner") beginner += 1;
+      if (t.difficulty === "intermediate") intermediate += 1;
+      if (t.difficulty === "advanced") advanced += 1;
+    }
+
+    return {
+      total: tutorials.length,
+      uniqueLanguages: languageSet.size,
+      beginnerCount: beginner,
+      intermediateCount: intermediate,
+      advancedCount: advanced,
+    };
+  }, []);
+
   return (
     <div className="space-y-10 pb-16">
+      {/* ── Hero stats ── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+            <Layers className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold">{total}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("project.totalProjects")}
+            </p>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="rounded-lg bg-emerald-500/10 p-2.5 text-emerald-500">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold">{uniqueLanguages}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("project.languagesCovered")}
+            </p>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="rounded-lg bg-amber-500/10 p-2.5 text-amber-500">
+            <Wand2 className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold">
+              {beginnerCount + intermediateCount}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t("project.beginnerIntermediate")}
+            </p>
+          </div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+          <div className="rounded-lg bg-purple-500/10 p-2.5 text-purple-500">
+            <Laptop className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold">{advancedCount}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("project.advancedOnly")}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ── Search + Filter Tags ── */}
       <div className="space-y-4">
         <div className="relative max-w-md">
@@ -665,8 +779,8 @@ export default function ProjectPage() {
 
         {allTutorials.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {allTutorials.map((t) => (
-              <TutorialGridCard key={t.id} tutorial={t} />
+            {allTutorials.map((t, idx) => (
+              <TutorialGridCard key={t.id} tutorial={t} accent={idx} />
             ))}
           </div>
         ) : (

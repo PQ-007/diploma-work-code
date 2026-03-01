@@ -120,12 +120,6 @@ const filterTags = [
 
 const curatedSections: CuratedSection[] = [
   {
-    id: "continue",
-    emoji: "⚡",
-    title: "Continue Learning",
-    description: "Pick up right where you left off.",
-  },
-  {
     id: "trending",
     emoji: "🔥",
     title: "Trending Now",
@@ -557,6 +551,8 @@ const levelMeta: Record<Level, { label: string; bars: number }> = {
   advanced: { label: "ADVANCED", bars: 3 },
 };
 
+const fallbackThumbnail = "/images/courses/placeholder.svg";
+
 function LevelBadge({ level }: { level: Level }) {
   const { label, bars } = levelMeta[level];
   return (
@@ -594,6 +590,14 @@ function formatNumber(n: number) {
   return n.toString();
 }
 
+const handleImageError = (
+  event: React.SyntheticEvent<HTMLImageElement, Event>,
+) => {
+  const img = event.currentTarget;
+  img.onerror = null;
+  img.src = fallbackThumbnail;
+};
+
 /* ------------------------------------------------------------------ */
 /*  Course Card (horizontal scroll variant)                            */
 /* ------------------------------------------------------------------ */
@@ -604,7 +608,7 @@ function CourseCard({ course }: { course: Course }) {
   return (
     <Link
       href={`/learn/${course.slug}`}
-      className="group flex-shrink-0 w-[260px] sm:w-[280px] snap-start"
+      className="group snap-start h-full min-w-[240px] sm:min-w-[260px] lg:min-w-[280px]"
     >
       <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg h-full flex flex-col">
         {/* Thumbnail */}
@@ -616,6 +620,7 @@ function CourseCard({ course }: { course: Course }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="280px"
             unoptimized
+            onError={handleImageError}
           />
           {/* Rating badge */}
           <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
@@ -695,6 +700,7 @@ function CourseGridCard({ course }: { course: Course }) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             unoptimized
+            onError={handleImageError}
           />
           <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
@@ -766,8 +772,9 @@ function CuratedRow({
 
   const scroll = (dir: "left" | "right") => {
     if (!scrollRef.current) return;
+    const scrollAmount = Math.max(scrollRef.current.clientWidth - 80, 240);
     scrollRef.current.scrollBy({
-      left: dir === "left" ? -300 : 300,
+      left: dir === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
     });
   };
@@ -797,7 +804,7 @@ function CuratedRow({
 
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none pb-2"
+          className="grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none pb-2"
         >
           {items.map((c) => (
             <CourseCard key={c.id} course={c} />
@@ -944,75 +951,8 @@ export default function LearnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, activeTag, sortBy]);
 
-  // Quick stats
-  const enrolledCount = courses.filter((c) => c.progress !== undefined).length;
-  const completedCount = courses.filter((c) => c.progress === 100).length;
-  const hoursLearned = Math.round(
-    courses.reduce((acc, c) => {
-      if (c.progress !== undefined)
-        return acc + c.duration * (c.progress / 100);
-      return acc;
-    }, 0),
-  );
-
   return (
     <div className="space-y-10 pb-16">
-      {/* ── Hero Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-border">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="rounded-lg bg-blue-500/10 p-2.5">
-              <BookOpen className="h-5 w-5 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{enrolledCount}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("learn.enrolled")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="rounded-lg bg-green-500/10 p-2.5">
-              <GraduationCap className="h-5 w-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{completedCount}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("learn.completed")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="rounded-lg bg-purple-500/10 p-2.5">
-              <Clock className="h-5 w-5 text-purple-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{hoursLearned}</p>
-              <p className="text-xs text-muted-foreground">
-                {t("learn.hoursLearned")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="flex items-center gap-3 p-4">
-            <div className="rounded-lg bg-amber-500/10 p-2.5">
-              <Flame className="h-5 w-5 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">12</p>
-              <p className="text-xs text-muted-foreground">
-                {t("learn.dayStreak")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* ── Skill Areas ── */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2">
