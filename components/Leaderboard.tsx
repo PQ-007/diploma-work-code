@@ -29,7 +29,7 @@ export default function Leaderboard({
         <Trophy className="h-4 w-4" />
         {isStudent ? t("ranking.topRated") : t("ranking.topContributors")}
       </h3>
-      <Card className="border-border/40">
+      <Card className="border-border/40 py-3">
         <CardContent className="p-0">
           {leaderboard.map((user) => (
             <div

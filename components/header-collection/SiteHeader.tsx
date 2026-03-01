@@ -159,7 +159,7 @@ export function SiteHeader() {
 
         {/* RIGHT SECTION: Search and User Actions */}
         <div className="flex items-center space-x-2 text-sm font-medium">
-          <SearchButton />
+          
 
           {/* User Utility Buttons */}
           <div className="flex items-center gap-2">

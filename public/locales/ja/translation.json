@@ -165,7 +165,7 @@
 
   "competitions": {
     "title": "コンテスト",
-    "subtitle": "グローバルチャレンジに参加し、複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
+    "subtitle": "複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
     "description": "グローバルチャレンジに参加し、複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
     "upcoming": "予定",
     "active": "進行中",
@@ -218,6 +218,7 @@
     "signInSubtitle": "アカウントにサインインしてください",
     "signUpTitle": "アカウント作成",
     "signUpSubtitle": "サインアップして始めましょう",
+    "studentCodeLabel": "学生コード",
     "emailLabel": "メールアドレス",
     "passwordLabel": "パスワード",
     "emailPlaceholder": "メールを入力してください",
@@ -317,53 +318,7 @@
     "discussions_disc": "新しいディスカッションを開始する"
   },
 
-  "landing": {
-    "hero": {
-      "title": "学び、創るための場所",
-      "subtitle": "FutureHub — KUT学生のための実用的なプラットフォーム",
-      "searchPlaceholder": "プロジェクト、記事、コンテストを検索..."
-    },
-    "cta": {
-      "title": "FutureHub を使う",
-      "subtitle": "仲間から学び、一緒に成長する。",
-      "getStarted": "開始"
-    },
-    "stats": {
-      "projects": "プロジェクト",
-      "articles": "記事",
-      "discussions": "Q&A",
-      "contests": "コンテスト"
-    },
-    "features": {
-      "title": "主な機能",
-      "items": [
-        {
-          "title": "プロジェクト紹介",
-          "desc": "計画、卒業研究、チュートリアル系プロジェクトを閲覧できる。"
-        },
-        {
-          "title": "フラッシュカード作成",
-          "desc": "サイト上のテキストから必要な単語を自動で抽出して保存。"
-        },
-        {
-          "title": "コンテスト参加",
-          "desc": "学科が開催するコンテストに参加できる。"
-        },
-        {
-          "title": "記事投稿",
-          "desc": "経験や知識を共有し、他の学生から学ぶ。"
-        },
-        {
-          "title": "多言語対応",
-          "desc": "モンゴル語、日本語、英語で利用可能。"
-        },
-        {
-          "title": "専門用語辞書",
-          "desc": "分野に合わせたモンゴル語訳付きの技術用語辞書。"
-        }
-      ]
-    }
-  },
+  
 
   "articles": {
     "title": "記事",
@@ -487,7 +442,7 @@
   },
 
   "carousel": {
-    "sponsored": "スポンサー",
+    "competition": "コンペティション",
     "event": "イベント",
     "wordOfDay": "今日の単語",
     "devTip": "開発者ヒント",

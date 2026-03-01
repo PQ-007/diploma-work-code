@@ -12,6 +12,7 @@ const protectedPrefixes = [
   "/library",
   "/profile",
   "/article/create",
+  "/setup",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -64,6 +65,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
+  // If profile setup is incomplete, redirect to /setup (unless already there)
+  const profileComplete = user.user_metadata?.profileComplete;
+  if (!profileComplete && pathname !== "/setup") {
+    const setupUrl = request.nextUrl.clone();
+    setupUrl.pathname = "/setup";
+    return NextResponse.redirect(setupUrl);
+  }
+
+  // If profile is complete but user is on /setup, let them through (editing)
   return response;
 }
 
@@ -75,5 +85,6 @@ export const config = {
     "/library/:path*",
     "/profile/:path*",
     "/article/create",
+    "/setup",
   ],
 };

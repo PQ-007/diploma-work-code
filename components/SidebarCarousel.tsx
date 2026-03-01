@@ -5,16 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Megaphone,
   CalendarDays,
   BookOpenText,
   Lightbulb,
+  Trophy,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-type SlideType = "ad" | "event" | "word" | "tip";
+type SlideType = "competition" | "event" | "word" | "tip";
 
 interface CarouselSlide {
   id: string;
@@ -33,14 +33,14 @@ function useSlides() {
   const slides: CarouselSlide[] = [
     {
       id: "1",
-      type: "ad",
-      badgeKey: "carousel.sponsored",
-      title: "Master System Design",
+      type: "competition",
+      badgeKey: "carousel.competition",
+      title: "Код бичлэгийн тэмцээн 2026",
       description:
-        "Join 10,000+ developers in our comprehensive system design course. Limited early-bird pricing!",
-      ctaKey: "carousel.learnMore",
-      accent: "from-blue-500/10 to-cyan-500/10",
-      icon: <Megaphone className="h-5 w-5 text-blue-500" />,
+        "Алгоритм, систем дизайн, UI сорилтой 36 цагийн марафон. Баг бүр 4 хүн, 2 шаттай үнэлгээ.",
+      ctaKey: "carousel.registerNow",
+      accent: "from-cyan-500/10 to-emerald-500/10",
+      icon: <Trophy className="h-5 w-5 text-emerald-500" />,
     },
     {
       id: "2",
@@ -48,7 +48,7 @@ function useSlides() {
       badgeKey: "carousel.event",
       title: "Hackathon 2026 🚀",
       description:
-        "48-hour virtual hackathon starting March 15. Build, compete, and win prizes up to $5,000.",
+        "3-р сарын 15-наас эхлэх 48 цагийн онлайн хакатон. Барь, өрсөлд, $5,000 хүртэл шагнал аваарай.",
       ctaKey: "carousel.registerNow",
       accent: "from-purple-500/10 to-pink-500/10",
       icon: <CalendarDays className="h-5 w-5 text-purple-500" />,
@@ -59,7 +59,7 @@ function useSlides() {
       badgeKey: "carousel.wordOfDay",
       title: "Idempotent",
       description:
-        "An operation that produces the same result no matter how many times it is performed. Essential concept in distributed systems & API design.",
+        "Хэд дахин ажиллуулсан ч ижил үр дүн өгдөг үйлдэл. Түгээмэл систем ба API загварт зайлшгүй ойлголт.",
       accent: "from-amber-500/10 to-orange-500/10",
       icon: <BookOpenText className="h-5 w-5 text-amber-500" />,
     },
@@ -67,9 +67,9 @@ function useSlides() {
       id: "4",
       type: "tip",
       badgeKey: "carousel.devTip",
-      title: "Git Stash Pop vs Apply",
+      title: "Git stash: pop vs apply",
       description:
-        "'git stash pop' removes the stash after applying, while 'git stash apply' keeps it. Use apply when you need the stash in multiple branches.",
+        "'git stash pop' хэрэгжүүлээд хадгаламжийг устгана, 'git stash apply' хадгаламжийг үлдээнэ. Олон салбарт хэрэглэх бол apply-г сонго.",
       accent: "from-green-500/10 to-emerald-500/10",
       icon: <Lightbulb className="h-5 w-5 text-green-500" />,
     },
@@ -103,7 +103,7 @@ export default function SidebarCarousel() {
 
   return (
     <Card
-      className="relative overflow-hidden border-border/50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 hover:-translate-y-1"
+      className="relative overflow-hidden border-border/50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 hover:-translate-y-1 h-48"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
