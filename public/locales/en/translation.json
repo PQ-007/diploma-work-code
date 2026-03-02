@@ -277,9 +277,9 @@
     },
     "postBox": {
       "placeholder": "What's on your mind, {{name}}?",
-      "post": "Post",
-      "code": "Code",
-      "poll": "Poll"
+      "post": "Article",
+      "poll": "Poll",
+      "discussion": "Discussion"
     }
   },
 

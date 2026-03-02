@@ -279,8 +279,8 @@
     "postBox": {
       "placeholder": "何を考えていますか、{{name}}さん？",
       "post": "投稿",
-      "code": "コード",
-      "poll": "アンケート"
+      "poll": "投票",
+      "discussion": "ディスカッション"
     }
   },
 

@@ -4,9 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -17,21 +14,14 @@ import {
   Hash,
   Loader2,
   Plus,
-  X,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 import DiscussionItem, {
   type DiscussionItemData,
 } from "./components/DiscussionItem";
 import DiscussionModal from "./components/DiscussionModal";
 import TrendingTopics from "@/components/TrendingTopics";
+import DiscussionCreateDialog from "@/components/DiscussionCreateDialog";
 
 const tabKeys = [
   { value: "all", labelKey: "discussions.tabs.all", icon: MessageSquare },
@@ -58,11 +48,6 @@ export default function DiscussionsPage() {
 
   // New discussion dialog
   const [createOpen, setCreateOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newBody, setNewBody] = useState("");
-  const [newTagInput, setNewTagInput] = useState("");
-  const [newTags, setNewTags] = useState<string[]>([]);
-  const [creating, setCreating] = useState(false);
 
   const fetchDiscussions = useCallback(async () => {
     setLoading(true);
@@ -198,40 +183,7 @@ export default function DiscussionsPage() {
   };
 
   // ── Create new discussion ──
-  const handleAddTag = () => {
-    const tag = newTagInput.trim();
-    if (tag && !newTags.includes(tag) && newTags.length < 5) {
-      setNewTags([...newTags, tag]);
-      setNewTagInput("");
-    }
-  };
-
-  const handleCreate = async () => {
-    if (!newTitle.trim() || creating) return;
-    setCreating(true);
-    try {
-      const res = await fetch("/api/discussions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newTitle,
-          body: newBody,
-          tags: newTags,
-        }),
-      });
-      if (res.ok) {
-        setCreateOpen(false);
-        setNewTitle("");
-        setNewBody("");
-        setNewTags([]);
-        fetchDiscussions();
-      }
-    } catch {
-      // ignore
-    } finally {
-      setCreating(false);
-    }
-  };
+  // (handled by DiscussionCreateDialog component)
 
   // ── Filter ──
   const filteredDiscussions = discussions.filter((item) => {
@@ -391,87 +343,11 @@ export default function DiscussionsPage() {
       />
 
       {/* ═══ Create Discussion Dialog ═══ */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>New Discussion</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Input
-              placeholder="Title"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-            />
-            <Textarea
-              placeholder="Describe your discussion... (optional)"
-              value={newBody}
-              onChange={(e) => setNewBody(e.target.value)}
-              className="min-h-[100px]"
-            />
-            <div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a tag"
-                  value={newTagInput}
-                  onChange={(e) => setNewTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddTag();
-                    }
-                  }}
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddTag}
-                  disabled={!newTagInput.trim() || newTags.length >= 5}
-                >
-                  Add
-                </Button>
-              </div>
-              {newTags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {newTags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="gap-1 pr-1 text-xs"
-                    >
-                      {tag}
-                      <button
-                        onClick={() =>
-                          setNewTags(newTags.filter((t) => t !== tag))
-                        }
-                        className="hover:text-foreground"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={!newTitle.trim() || creating}
-            >
-              {creating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-              ) : (
-                <MessageSquare className="h-4 w-4 mr-1.5" />
-              )}
-              Post Discussion
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DiscussionCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={fetchDiscussions}
+      />
     </div>
   );
 }

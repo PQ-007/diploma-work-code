@@ -194,6 +194,7 @@ export default function DiscussionModal({
       <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0">
         {loading || !disc ? (
           <div className="flex items-center justify-center py-20">
+            <DialogTitle className="sr-only">Loading discussion</DialogTitle>
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
