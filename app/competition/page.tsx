@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, DollarSign, Trophy } from "lucide-react";
+import { Clock, Trophy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // --- Types ---
@@ -161,16 +161,8 @@ function CompetitionCard({ comp }: { comp: Competition }) {
 
       {/* Content */}
       <CardContent className="p-4 flex flex-col flex-1">
-        {/* Title + Prize */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-base font-semibold leading-tight">{comp.name}</h3>
-          <Badge
-            variant="outline"
-            className="flex-shrink-0 border-primary/40 text-primary text-xs font-semibold gap-1"
-          >
-            <DollarSign className="h-3 w-3" />${comp.prize.toLocaleString()}
-          </Badge>
-        </div>
+        {/* Title */}
+        <h3 className="text-base font-semibold leading-tight mb-2">{comp.name}</h3>
 
         {/* Description */}
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4 flex-1">

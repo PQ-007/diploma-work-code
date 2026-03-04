@@ -675,56 +675,7 @@ export default function ProjectPage() {
 
   return (
     <div className="space-y-10 pb-16">
-      {/* ── Hero stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-            <Layers className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{total}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("project.totalProjects")}
-            </p>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="rounded-lg bg-emerald-500/10 p-2.5 text-emerald-500">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{uniqueLanguages}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("project.languagesCovered")}
-            </p>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="rounded-lg bg-amber-500/10 p-2.5 text-amber-500">
-            <Wand2 className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">
-              {beginnerCount + intermediateCount}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("project.beginnerIntermediate")}
-            </p>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <div className="rounded-lg bg-purple-500/10 p-2.5 text-purple-500">
-            <Laptop className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{advancedCount}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("project.advancedOnly")}
-            </p>
-          </div>
-        </div>
-      </div>
-
+     
       {/* ── Search + Filter Tags ── */}
       <div className="space-y-4">
         <div className="relative max-w-md">
