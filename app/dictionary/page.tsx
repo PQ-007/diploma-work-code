@@ -46,6 +46,9 @@ interface DictionaryEntry {
   };
   tags: string[];
   saved: boolean;
+  translation_languages: string[];
+  display_term: string;
+  display_definition: string;
 }
 
 interface SearchSuggestion {
@@ -63,9 +66,10 @@ function StatusBadge({ status }: { status: string }) {
     { label: string; className: string; icon: React.ReactNode }
   > = {
     approved: {
-      label: "Approved",
-      className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-      icon: <CheckCircle className="h-3 w-3 mr-1" />,
+      label: "",
+      className:
+        "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1",
+      icon: <CheckCircle className="h-3 w-3" />,
     },
     pending_review: {
       label: "Pending",
@@ -131,7 +135,6 @@ const letterTabs = [
 ];
 
 const languageFilters = [
-  { value: "", label: "All" },
   { value: "mn", label: "MN" },
   { value: "ja", label: "JA" },
   { value: "en", label: "EN" },
@@ -144,13 +147,13 @@ const sortOptions = [
 ];
 
 export default function DictionaryPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const [activeLetter, setActiveLetter] = useState("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [languageFilter, setLanguageFilter] = useState("");
+  const [languageFilter, setLanguageFilter] = useState<string>(language);
   const [sortBy, setSortBy] = useState("relevance");
   const [statusFilter, setStatusFilter] = useState("approved");
   const [entries, setEntries] = useState<DictionaryEntry[]>([]);
@@ -160,6 +163,12 @@ export default function DictionaryPage() {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const limit = 18;
+
+  // Sync language filter when site language changes
+  useEffect(() => {
+    setLanguageFilter(language);
+    setPage(1);
+  }, [language]);
 
   // Debounce search input
   useEffect(() => {
@@ -454,7 +463,7 @@ export default function DictionaryPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                              {entry.term}
+                              {entry.display_term || entry.term}
                             </h3>
                             {entry.reading && (
                               <span className="text-xs text-muted-foreground">
@@ -462,13 +471,16 @@ export default function DictionaryPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
                             <LanguageBadge code={entry.language_code} />
+                            {(entry.translation_languages || []).map((lang) => (
+                              <LanguageBadge key={lang} code={lang} />
+                            ))}
                             <StatusBadge status={entry.status} />
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                          {entry.definition}
+                          {entry.display_definition || entry.definition}
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-wrap gap-1">
@@ -524,7 +536,7 @@ export default function DictionaryPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                              {entry.term}
+                              {entry.display_term || entry.term}
                             </h3>
                             {entry.reading && (
                               <span className="text-xs text-muted-foreground">
@@ -532,10 +544,13 @@ export default function DictionaryPage() {
                               </span>
                             )}
                             <LanguageBadge code={entry.language_code} />
+                            {(entry.translation_languages || []).map((lang) => (
+                              <LanguageBadge key={lang} code={lang} />
+                            ))}
                             <StatusBadge status={entry.status} />
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
-                            {entry.definition}
+                            {entry.display_definition || entry.definition}
                           </p>
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   BookOpen,
   Pencil,
@@ -29,6 +30,7 @@ import {
   History,
   CreditCard,
   Flag,
+  Newspaper,
 } from "lucide-react";
 
 // --- Types ---
@@ -79,6 +81,13 @@ interface RelatedEntry {
   term: string;
   slug: string;
   language_code: string;
+}
+
+interface RelatedArticle {
+  article_id: string;
+  title: string;
+  language_code: string;
+  tags: string[];
 }
 
 interface EntryDetail {
@@ -164,6 +173,7 @@ export default function DictionaryTermPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { language } = useLanguage();
 
   const slug = params?.slug ?? "";
 
@@ -172,6 +182,8 @@ export default function DictionaryTermPage() {
   const [notFound, setNotFound] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [savingFlashcard, setSavingFlashcard] = useState(false);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
+  const [mnScript, setMnScript] = useState<string | null>(null);
 
   const fetchEntry = useCallback(async () => {
     if (!slug) return;
@@ -196,6 +208,50 @@ export default function DictionaryTermPage() {
   useEffect(() => {
     fetchEntry();
   }, [fetchEntry]);
+  // --- Fetch related articles by tag overlap ---
+  useEffect(() => {
+    if (!data?.entry.tags.length) return;
+    const entryTagsLower = new Set(data.entry.tags.map((t) => t.toLowerCase()));
+    fetch("/api/articles?status=published")
+      .then((r) => r.json())
+      .then((json) => {
+        const matched: RelatedArticle[] = (json.items || [])
+          .filter((a: RelatedArticle & { tags: string[] }) =>
+            (a.tags || []).some((t) => entryTagsLower.has(t.toLowerCase())),
+          )
+          .slice(0, 5)
+          .map((a: RelatedArticle) => ({
+            article_id: a.article_id,
+            title: a.title || "Untitled",
+            language_code: a.language_code,
+            tags: a.tags || [],
+          }));
+        setRelatedArticles(matched);
+      })
+      .catch(() => {});
+  }, [data?.entry.tags]);
+
+  // --- Convert Cyrillic MN term → traditional Mongolian script via KiMo API ---
+  useEffect(() => {
+    const cyrillicTerm =
+      data?.entry.language_code === "mn"
+        ? data.entry.term
+        : data?.entry
+          ? (data.translations.find((t) => t.language_code === "mn")
+              ?.translated_term ?? null)
+          : null;
+    if (!cyrillicTerm) return;
+    fetch("https://api.kimo.mn/convert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: cyrillicTerm }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.output) setMnScript(json.output as string);
+      })
+      .catch(() => {});
+  }, [data]);
 
   // --- Save toggle ---
   const handleSave = async () => {
@@ -294,6 +350,30 @@ export default function DictionaryTermPage() {
     {},
   );
 
+  // Pick the best translation for the current UI language (if the entry itself isn't in that language)
+  const displayTranslation: Translation | null =
+    language !== entry.language_code
+      ? (translationsByLang[language]?.[0] ?? null)
+      : null;
+
+  // Sort translation sections so the entry's OWN language always appears first,
+  // then UI language, then the rest. The own-language section is rendered as a
+  // synthetic row (from entry.term / entry.definition) so filter it out from the
+  // dynamic list to avoid duplication.
+  const sortedTranslationEntries = Object.entries(translationsByLang)
+    .filter(([lang]) => lang !== entry.language_code)
+    .sort(([a], [b]) => {
+      if (a === language) return -1;
+      if (b === language) return 1;
+      return 0;
+    });
+
+  // Mongolian term for the vertical script accent (native MN entry OR has MN translation)
+  const mnTerm =
+    entry.language_code === "mn"
+      ? entry.term
+      : (translationsByLang["mn"]?.[0]?.translated_term ?? null);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 lg:py-3 max-w-7xl px-4">
@@ -312,15 +392,37 @@ export default function DictionaryTermPage() {
           </span>
         </div>
 
-        <div className="flex gap-8 xl:gap-12 justify-center">
+        <div className="flex gap-4 xl:gap-8 justify-center">
+          {/* MN vertical script accent — shown when a Mongolian term is available */}
+          {mnTerm && (
+            <div className="hidden xl:flex items-start pt-3 w-7 flex-shrink-0 select-none">
+              <span
+                className="text-[13px] font-bold text-violet-400/50 tracking-widest"
+                style={{
+                  writingMode: "vertical-rl",
+                  transform: "rotate(180deg)",
+                  letterSpacing: "0.18em",
+                }}
+                title={`Mongolian: ${mnTerm}`}
+              >
+                {mnScript || mnTerm}
+              </span>
+            </div>
+          )}
+
           {/* Main Content */}
           <div className="flex-1 max-w-3xl space-y-6">
             {/* Title + Meta */}
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-3xl font-bold text-foreground">
-                  {entry.term}
+                  {displayTranslation ? displayTranslation.translated_term : entry.term}
                 </h1>
+                {displayTranslation && (
+                  <span className="text-lg text-muted-foreground font-normal">
+                    {entry.term}
+                  </span>
+                )}
                 <StatusBadge status={entry.status} />
                 <Badge variant="outline" className="text-xs">
                   {LANG_LABELS[entry.language_code] || entry.language_code}
@@ -488,25 +590,69 @@ export default function DictionaryTermPage() {
 
               {/* --- Definition Tab --- */}
               <TabsContent value="definition" className="space-y-4">
-                <section>
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <span className="w-1 h-6 bg-primary rounded-full" />
-                    Definition
-                  </h2>
-                  <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {entry.definition}
-                  </p>
-                </section>
+                {displayTranslation?.explanation ? (
+                  <>
+                    <section>
+                      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-primary rounded-full" />
+                        {LANG_LABELS[language] || language}
+                      </h2>
+                      <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                        {displayTranslation.explanation}
+                      </p>
+                    </section>
+                    <Separator />
+                    <section>
+                      <h2 className="text-sm font-semibold mb-3 text-muted-foreground flex items-center gap-2">
+                        <span className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
+                        Original ({LANG_LABELS[entry.language_code] || entry.language_code})
+                      </h2>
+                      <p className="text-[15px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap">
+                        {entry.definition}
+                      </p>
+                    </section>
+                  </>
+                ) : (
+                  <section>
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <span className="w-1 h-6 bg-primary rounded-full" />
+                      Definition
+                    </h2>
+                    <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {entry.definition}
+                    </p>
+                    {displayTranslation && !displayTranslation.explanation && (
+                      <p className="text-xs text-muted-foreground mt-4 italic">
+                        No {LANG_LABELS[language] || language} explanation available yet.
+                      </p>
+                    )}
+                  </section>
+                )}
               </TabsContent>
 
               {/* --- Translations Tab --- */}
               <TabsContent value="translations" className="space-y-6">
-                {Object.keys(translationsByLang).length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-8 text-center">
+                {/* Original / canonical entry — always first */}
+                <section>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                    <Languages className="h-4 w-4" />
+                    {LANG_LABELS[entry.language_code] || entry.language_code}
+                    <Badge variant="outline" className="text-[10px] normal-case tracking-normal ml-1">original</Badge>
+                  </h3>
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="p-4">
+                      <p className="font-medium text-foreground">{entry.term}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{entry.definition}</p>
+                    </CardContent>
+                  </Card>
+                </section>
+
+                {sortedTranslationEntries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">
                     No translations available yet.
                   </p>
                 ) : (
-                  Object.entries(translationsByLang).map(([lang, items]) => (
+                  sortedTranslationEntries.map(([lang, items]) => (
                     <section key={lang}>
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                         <Languages className="h-4 w-4" />
@@ -611,6 +757,52 @@ export default function DictionaryTermPage() {
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
+            {/* Related Content */}
+            {relatedArticles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
+                  <Newspaper className="h-4 w-4" />
+                  Related Content
+                </h3>
+                <Card className="border-border/40">
+                  <CardContent className="p-0">
+                    {relatedArticles.map((article) => (
+                      <Link
+                        key={article.article_id}
+                        href={`/article/${article.article_id}`}
+                        className="flex items-start gap-3 px-4 py-3 border-b border-border/20 last:border-b-0 hover:bg-muted/50 transition-colors group"
+                      >
+                        <Newspaper className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium group-hover:text-foreground transition-colors line-clamp-2 leading-snug">
+                            {article.title}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {article.tags
+                              .filter((t) =>
+                                entry.tags
+                                  .map((et) => et.toLowerCase())
+                                  .includes(t.toLowerCase()),
+                              )
+                              .slice(0, 2)
+                              .map((t) => (
+                                <Badge
+                                  key={t}
+                                  variant="secondary"
+                                  className="text-[10px] font-normal px-1.5 py-0"
+                                >
+                                  #{t}
+                                </Badge>
+                              ))}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Related Terms */}
             {relatedEntries.length > 0 && (
               <div>

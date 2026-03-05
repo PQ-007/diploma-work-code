@@ -49,9 +49,24 @@ export async function GET(req: NextRequest) {
       query = query.eq("status", "approved");
     }
 
-    // Language filter
+    // Language filter — includes entries written in this language AND entries that have translations in this language
     if (language && ["mn", "ja", "en"].includes(language)) {
-      query = query.eq("language_code", language);
+      const { data: translationLangMatches } = await supabase
+        .from("dictionary_translations")
+        .select("entry_id")
+        .eq("language_code", language);
+      const translationLangIds = [
+        ...new Set(
+          (translationLangMatches || []).map((t) => t.entry_id as number),
+        ),
+      ];
+      if (translationLangIds.length > 0) {
+        query = query.or(
+          `language_code.eq.${language},id.in.(${translationLangIds.join(",")})`,
+        );
+      } else {
+        query = query.eq("language_code", language);
+      }
     }
 
     // Letter filter
@@ -181,9 +196,46 @@ export async function GET(req: NextRequest) {
       saves?.forEach((s) => savedSet.add(s.entry_id));
     }
 
+    // Fetch translation language codes per entry
+    const { data: translationLangRows } = await supabase
+      .from("dictionary_translations")
+      .select("entry_id, language_code")
+      .in("entry_id", entryIds);
+    const translationLangsByEntry = new Map<number, string[]>();
+    (translationLangRows || []).forEach((row) => {
+      const arr = translationLangsByEntry.get(row.entry_id) || [];
+      if (!arr.includes(row.language_code)) arr.push(row.language_code);
+      translationLangsByEntry.set(row.entry_id, arr);
+    });
+
+    // Fetch display-language translations for entries whose native language differs from the filter
+    const displayTransByEntry = new Map<
+      number,
+      { term: string; definition: string }
+    >();
+    if (language) {
+      const nonNativeIds = filteredEntries
+        .filter((e) => e.language_code !== language)
+        .map((e) => e.id);
+      if (nonNativeIds.length > 0) {
+        const { data: displayTrans } = await supabase
+          .from("dictionary_translations")
+          .select("entry_id, translated_term, explanation")
+          .in("entry_id", nonNativeIds)
+          .eq("language_code", language);
+        displayTrans?.forEach((t) => {
+          displayTransByEntry.set(t.entry_id, {
+            term: t.translated_term,
+            definition: t.explanation || "",
+          });
+        });
+      }
+    }
+
     // Assemble response
     const items = filteredEntries.map((e) => {
       const author = profilesById.get(e.created_by);
+      const disp = displayTransByEntry.get(e.id);
       return {
         id: e.id,
         term: e.term,
@@ -191,6 +243,8 @@ export async function GET(req: NextRequest) {
         reading: e.reading,
         language_code: e.language_code,
         definition: e.definition,
+        display_term: disp?.term || e.term,
+        display_definition: disp?.definition || e.definition,
         status: e.status,
         views: e.views,
         saves: e.saves,
@@ -205,6 +259,9 @@ export async function GET(req: NextRequest) {
         },
         tags: tagsByEntry.get(e.id) || [],
         saved: savedSet.has(e.id),
+        translation_languages: (translationLangsByEntry.get(e.id) || []).filter(
+          (lang) => lang !== e.language_code,
+        ),
       };
     });
 

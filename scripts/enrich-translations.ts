@@ -34,12 +34,14 @@ for (const f of [".env.local", ".env"]) {
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-const AUTHOR_UUID  = process.env.SEED_AUTHOR_UUID ?? "";
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const AUTHOR_UUID = process.env.SEED_AUTHOR_UUID ?? "";
 
 if (!SUPABASE_URL || !SERVICE_KEY || !AUTHOR_UUID) {
-  console.error("✗  Missing env vars — check .env.local for NEXT_PUBLIC_SUPABASE_URL, " +
-    "SUPABASE_SERVICE_ROLE_KEY, SEED_AUTHOR_UUID");
+  console.error(
+    "✗  Missing env vars — check .env.local for NEXT_PUBLIC_SUPABASE_URL, " +
+      "SUPABASE_SERVICE_ROLE_KEY, SEED_AUTHOR_UUID",
+  );
   process.exit(1);
 }
 
@@ -48,15 +50,22 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 });
 
 // ── tuning ────────────────────────────────────────────────────────────────────
-const CONCURRENCY   = 4;    // parallel Wikipedia fetches per batch
-const BATCH_PAUSE   = 400;  // ms between concurrent batches (Wikipedia rate limit)
+const CONCURRENCY = 4; // parallel Wikipedia fetches per batch
+const BATCH_PAUSE = 400; // ms between concurrent batches (Wikipedia rate limit)
 const WIKIDATA_PAUSE = 300; // ms between Wikidata calls
-const MAX_EXPL_LEN  = 500;  // max chars for translation explanation
-const MAX_EXAMPLE   = 420;  // max chars for example text
-const PROGRESS_FILE = path.join(process.cwd(), "scripts", ".enrich-progress.json");
+const MAX_EXPL_LEN = 500; // max chars for translation explanation
+const MAX_EXAMPLE = 420; // max chars for example text
+const PROGRESS_FILE = path.join(
+  process.cwd(),
+  "scripts",
+  ".enrich-progress.json",
+);
 
 // ── types ─────────────────────────────────────────────────────────────────────
-interface DBEntry { id: number; term: string }
+interface DBEntry {
+  id: number;
+  term: string;
+}
 
 interface WikiSummary {
   title: string;
@@ -67,13 +76,13 @@ interface WikiSummary {
 interface EnrichResult {
   entryId: number;
   term: string;
-  enExample?:      string;
-  jaTitle?:        string;
-  jaExplanation?:  string;
-  jaExample?:      string;
-  mnTitle?:        string;
-  mnExplanation?:  string;
-  mnExample?:      string;
+  enExample?: string;
+  jaTitle?: string;
+  jaExplanation?: string;
+  jaExample?: string;
+  mnTitle?: string;
+  mnExplanation?: string;
+  mnExample?: string;
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -91,13 +100,15 @@ function truncate(text: string, max: number): string {
  */
 function sentencesAfterFirst(extract: string): string | null {
   const cleaned = extract
-    .replace(/\(\/[^/)]+\/\)/g, "")  // remove IPA
+    .replace(/\(\/[^/)]+\/\)/g, "") // remove IPA
     .replace(/\s+/g, " ")
     .trim();
 
   // Match up to and including the first sentence-ending punctuation
   // followed by a capital or Unicode letter (handles EN, JA, MN)
-  const firstEnd = cleaned.search(/[.!?]\s+[A-Z\u0400-\u04FF\u3040-\u9FFFぁ-ん\u4E00-\u9FFF]/);
+  const firstEnd = cleaned.search(
+    /[.!?]\s+[A-Z\u0400-\u04FF\u3040-\u9FFFぁ-ん\u4E00-\u9FFF]/,
+  );
   if (firstEnd === -1) return null;
 
   const rest = cleaned.substring(firstEnd + 2).trim();
@@ -114,16 +125,21 @@ function firstSentence(extract: string): string | null {
 }
 
 // ── Wikipedia / Wikidata API ──────────────────────────────────────────────────
-async function fetchWikiSummary(lang: string, title: string): Promise<WikiSummary | null> {
+async function fetchWikiSummary(
+  lang: string,
+  title: string,
+): Promise<WikiSummary | null> {
   const url =
     `https://${lang}.wikipedia.org/api/rest_v1/page/summary/` +
     encodeURIComponent(title);
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "FutureHubDictionaryEnricher/1.0 (student project)" },
+      headers: {
+        "User-Agent": "FutureHubDictionaryEnricher/1.0 (student project)",
+      },
     });
     if (!res.ok) return null;
-    const d = await res.json() as {
+    const d = (await res.json()) as {
       type?: string;
       title: string;
       extract?: string;
@@ -139,18 +155,23 @@ async function fetchWikiSummary(lang: string, title: string): Promise<WikiSummar
 }
 
 async function fetchWikidataLinks(
-  qid: string
+  qid: string,
 ): Promise<{ jawiki?: string; mnwiki?: string }> {
   const url =
     `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}` +
     `&props=sitelinks&sitefilter=jawiki%7Cmnwiki&format=json`;
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "FutureHubDictionaryEnricher/1.0 (student project)" },
+      headers: {
+        "User-Agent": "FutureHubDictionaryEnricher/1.0 (student project)",
+      },
     });
     if (!res.ok) return {};
-    const d = await res.json() as {
-      entities?: Record<string, { sitelinks?: Record<string, { title: string }> }>;
+    const d = (await res.json()) as {
+      entities?: Record<
+        string,
+        { sitelinks?: Record<string, { title: string }> }
+      >;
     };
     const sl = d.entities?.[qid]?.sitelinks ?? {};
     return { jawiki: sl.jawiki?.title, mnwiki: sl.mnwiki?.title };
@@ -177,7 +198,7 @@ function saveProgress(done: Set<number>) {
 async function runBatched<T, R>(
   items: T[],
   concurrency: number,
-  fn: (item: T, globalIdx: number) => Promise<R>
+  fn: (item: T, globalIdx: number) => Promise<R>,
 ): Promise<R[]> {
   const out: R[] = [];
   for (let i = 0; i < items.length; i += concurrency) {
@@ -192,7 +213,7 @@ async function runBatched<T, R>(
 async function enrichOne(
   entry: DBEntry,
   idx: number,
-  total: number
+  total: number,
 ): Promise<EnrichResult> {
   const label = `[${String(idx + 1).padStart(4)}/${total}] ${entry.term.substring(0, 44).padEnd(44)}`;
   const result: EnrichResult = { entryId: entry.id, term: entry.term };
@@ -219,9 +240,9 @@ async function enrichOne(
   if (links.jawiki) {
     const ja = await fetchWikiSummary("ja", links.jawiki);
     if (ja) {
-      result.jaTitle       = ja.title;
+      result.jaTitle = ja.title;
       result.jaExplanation = truncate(ja.extract, MAX_EXPL_LEN);
-      result.jaExample     = firstSentence(ja.extract) ?? undefined;
+      result.jaExample = firstSentence(ja.extract) ?? undefined;
     }
   }
 
@@ -229,15 +250,16 @@ async function enrichOne(
   if (links.mnwiki) {
     const mn = await fetchWikiSummary("mn", links.mnwiki);
     if (mn) {
-      result.mnTitle       = mn.title;
+      result.mnTitle = mn.title;
       result.mnExplanation = truncate(mn.extract, MAX_EXPL_LEN);
-      result.mnExample     = firstSentence(mn.extract) ?? undefined;
+      result.mnExample = firstSentence(mn.extract) ?? undefined;
     }
   }
 
-  const langs = [result.jaTitle ? "JA" : "", result.mnTitle ? "MN" : ""]
-    .filter(Boolean)
-    .join("+") || "EN only";
+  const langs =
+    [result.jaTitle ? "JA" : "", result.mnTitle ? "MN" : ""]
+      .filter(Boolean)
+      .join("+") || "EN only";
   process.stdout.write(`${label} ✓ ${langs}\n`);
   return result;
 }
@@ -247,7 +269,7 @@ async function writeToDb(
   results: EnrichResult[],
   alreadyHasJa: Set<number>,
   alreadyHasMn: Set<number>,
-  alreadyHasEnExample: Set<number>
+  alreadyHasEnExample: Set<number>,
 ) {
   const translations: object[] = [];
   const examples: object[] = [];
@@ -327,7 +349,10 @@ async function writeToDb(
     if (error) console.error("  ! examples insert error:", error.message);
   }
 
-  return { transInserted: translations.length, examplesInserted: examples.length };
+  return {
+    transInserted: translations.length,
+    examplesInserted: examples.length,
+  };
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -354,7 +379,11 @@ async function main() {
 
   // 2. Determine which entries already have JA / MN translations and EN examples
   //    (Fetch in batches of 500 because Supabase IN filter has limits)
-  async function fetchExistingSet(lang: string, table: string, col: string): Promise<Set<number>> {
+  async function fetchExistingSet(
+    lang: string,
+    table: string,
+    col: string,
+  ): Promise<Set<number>> {
     const s = new Set<number>();
     for (let i = 0; i < allIds.length; i += 500) {
       const { data } = await supabase
@@ -370,7 +399,7 @@ async function main() {
   const [alreadyHasJa, alreadyHasMn, alreadyHasEnExample] = await Promise.all([
     fetchExistingSet("ja", "dictionary_translations", "entry_id"),
     fetchExistingSet("mn", "dictionary_translations", "entry_id"),
-    fetchExistingSet("en", "dictionary_examples",    "entry_id"),
+    fetchExistingSet("en", "dictionary_examples", "entry_id"),
   ]);
 
   console.log(`   Already have JA translation : ${alreadyHasJa.size}`);
@@ -380,12 +409,12 @@ async function main() {
   // 3. Filter to entries that need at least one thing added
   const progress = loadProgress();
 
-  const toProcess = allEntries.filter((e) =>
-    !progress.has(e.id) && (
-      !alreadyHasJa.has(e.id) ||
-      !alreadyHasMn.has(e.id) ||
-      !alreadyHasEnExample.has(e.id)
-    )
+  const toProcess = allEntries.filter(
+    (e) =>
+      !progress.has(e.id) &&
+      (!alreadyHasJa.has(e.id) ||
+        !alreadyHasMn.has(e.id) ||
+        !alreadyHasEnExample.has(e.id)),
   );
 
   console.log(`   Entries to process now      : ${toProcess.length}\n`);
@@ -405,17 +434,17 @@ async function main() {
     const chunk = toProcess.slice(i, i + CHECKPOINT_SIZE);
 
     const results = await runBatched(chunk, CONCURRENCY, (entry, j) =>
-      enrichOne(entry, i + j, toProcess.length)
+      enrichOne(entry, i + j, toProcess.length),
     );
 
     const { transInserted, examplesInserted } = await writeToDb(
       results,
       alreadyHasJa,
       alreadyHasMn,
-      alreadyHasEnExample
+      alreadyHasEnExample,
     );
 
-    totalTrans    += transInserted;
+    totalTrans += transInserted;
     totalExamples += examplesInserted;
     chunksDone++;
 
@@ -425,7 +454,7 @@ async function main() {
     const sofar = Math.min(i + CHECKPOINT_SIZE, toProcess.length);
     console.log(
       `\n   ✦ Checkpoint ${chunksDone}: ${sofar}/${toProcess.length} processed` +
-      ` (${transInserted} translations, ${examplesInserted} examples this batch)\n`
+        ` (${transInserted} translations, ${examplesInserted} examples this batch)\n`,
     );
   }
 
@@ -434,7 +463,9 @@ async function main() {
   console.log(`✓  Processed        : ${toProcess.length} entries`);
   console.log(`✓  Translations     : ${totalTrans} rows inserted`);
   console.log(`✓  Examples         : ${totalExamples} rows inserted`);
-  console.log(`   JA coverage      : ~${alreadyHasJa.size + toProcess.filter((e) => !alreadyHasJa.has(e.id)).length} entries`);
+  console.log(
+    `   JA coverage      : ~${alreadyHasJa.size + toProcess.filter((e) => !alreadyHasJa.has(e.id)).length} entries`,
+  );
   console.log("─────────────────────────────────────────────────────");
   console.log("\n   Open /dictionary and search in any language to verify.\n");
 }
