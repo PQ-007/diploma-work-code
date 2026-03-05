@@ -162,7 +162,9 @@ function CompetitionCard({ comp }: { comp: Competition }) {
       {/* Content */}
       <CardContent className="p-4 flex flex-col flex-1">
         {/* Title */}
-        <h3 className="text-base font-semibold leading-tight mb-2">{comp.name}</h3>
+        <h3 className="text-base font-semibold leading-tight mb-2">
+          {comp.name}
+        </h3>
 
         {/* Description */}
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4 flex-1">

@@ -318,8 +318,6 @@
     "discussions_disc": "新しいディスカッションを開始する"
   },
 
-  
-
   "articles": {
     "title": "記事",
     "subtitle": "コミュニティの記事を発見",
@@ -372,7 +370,83 @@
     "trendingArticles": "トレンド記事",
     "cantFindTerm": "用語が見つかりませんか？",
     "cantFindTermDesc": "コミュニティに役立つと思う新しい用語を自由に追加してください！",
-    "addNewTerm": "新しい用語を追加"
+    "addNewTerm": "新しい用語を追加",
+    "termNotFound": "用語が見つかりません",
+    "termNotFoundDesc": "お探しの用語は辞書にまだ存在しません。",
+    "backToDictionary": "辞書に戻る",
+    "definition": "定義",
+    "translations": "翻訳",
+    "examples": "例文",
+    "history": "履歴",
+    "suggestEdit": "編集を提案",
+    "editDraft": "下書きを編集",
+    "share": "共有",
+    "save": "保存",
+    "saved": "保存済み",
+    "flashcard": "フラッシュカード",
+    "report": "報告",
+    "entryRejected": "エントリーが却下されました",
+    "relatedTerms": "関連用語",
+    "entryInfo": "エントリー情報",
+    "moderationHistory": "審査履歴",
+    "noTranslations": "翻訳はまだありません。",
+    "noExamples": "例文はまだありません。",
+    "noRevisions": "リビジョン履歴がありません。",
+    "create": {
+      "title": "辞書エントリーを作成",
+      "editTitle": "下書きを編集",
+      "basicInfo": "基本情報",
+      "term": "用語",
+      "termPlaceholder": "例: Machine Learning, 機械学習, Машин сургалт",
+      "reading": "読み / 発音",
+      "readingPlaceholder": "例: きかいがくしゅう",
+      "readingHint": "日本語の用語の場合、ふりがな/ひらがなの読みを入力してください。",
+      "primaryLanguage": "主要言語",
+      "definitionLabel": "定義",
+      "definitionPlaceholder": "明確で簡潔な定義を書いてください...",
+      "tags": "タグ",
+      "tagsPlaceholder": "タグを入力してEnterを押してください",
+      "addTranslation": "翻訳を追加",
+      "noTranslations": "翻訳がまだ追加されていません。他の言語の翻訳を追加してください。",
+      "translatedTerm": "翻訳された用語",
+      "explanation": "説明（任意）",
+      "addExample": "例文を追加",
+      "noExamples": "例文がまだ追加されていません。学習者のために例文を追加してください。",
+      "exampleText": "例文テキスト",
+      "source": "出典（任意）",
+      "context": "文脈（任意）",
+      "saveDraft": "下書きを保存",
+      "submitForReview": "審査に提出",
+      "cancel": "キャンセル",
+      "checkingDuplicates": "重複をチェック中...",
+      "similarTermsExist": "類似の用語がすでに存在します:",
+      "termRequired": "用語は必須です。",
+      "definitionRequired": "定義は必須です。"
+    },
+    "moderation": {
+      "title": "審査キュー",
+      "pending": "保留中",
+      "allClear": "すべてクリア！",
+      "allClearDesc": "現在審査が必要なエントリーはありません。",
+      "newEntry": "新規エントリー",
+      "edit": "編集",
+      "approve": "承認",
+      "reject": "却下",
+      "confirmReject": "却下を確認",
+      "rejectionReason": "却下理由（必須）...",
+      "noPermission": "審査キューにアクセスする権限がありません。"
+    },
+    "status": {
+      "approved": "承認済み",
+      "pending_review": "審査中",
+      "draft": "下書き",
+      "rejected": "却下"
+    },
+    "languages": {
+      "mn": "モンゴル語",
+      "ja": "日本語",
+      "en": "英語"
+    }
   },
 
   "store": {

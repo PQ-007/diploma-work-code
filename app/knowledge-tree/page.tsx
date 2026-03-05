@@ -90,9 +90,19 @@ function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
     { id: "db", label: "Databases", cat: "systems", size: 2 },
     { id: "sql", label: "SQL", cat: "data", size: 1.2 },
     { id: "nosql", label: "NoSQL", cat: "data", size: 1 },
-    { id: "distributed", label: "Distributed Systems", cat: "systems", size: 1.6 },
+    {
+      id: "distributed",
+      label: "Distributed Systems",
+      cat: "systems",
+      size: 1.6,
+    },
     { id: "cloud", label: "Cloud Computing", cat: "systems", size: 1.4 },
-    { id: "containers", label: "Containers & Docker", cat: "systems", size: 1.2 },
+    {
+      id: "containers",
+      label: "Containers & Docker",
+      cat: "systems",
+      size: 1.2,
+    },
     { id: "linux", label: "Linux", cat: "systems", size: 1.4 },
     { id: "process", label: "Processes & Threads", cat: "systems", size: 1 },
     { id: "memory", label: "Memory Management", cat: "systems", size: 1 },
@@ -151,7 +161,12 @@ function buildGraphData(): { nodes: GraphNode[]; edges: GraphEdge[] } {
     { id: "pentest", label: "Penetration Testing", cat: "security", size: 1 },
 
     // Hardware
-    { id: "hardware", label: "Computer Architecture", cat: "hardware", size: 1.8 },
+    {
+      id: "hardware",
+      label: "Computer Architecture",
+      cat: "hardware",
+      size: 1.8,
+    },
     { id: "cpu", label: "CPU & Processors", cat: "hardware", size: 1.2 },
     { id: "gpu", label: "GPU Computing", cat: "hardware", size: 1 },
     { id: "embedded", label: "Embedded Systems", cat: "hardware", size: 1 },
@@ -356,8 +371,7 @@ function simulate(
         const dx = dragged.x - neighbor.x;
         const dy = dragged.y - neighbor.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const pull =
-          Math.max(0, dist - EDGE_LENGTH * 0.8) * DRAG_PULL_STRENGTH;
+        const pull = Math.max(0, dist - EDGE_LENGTH * 0.8) * DRAG_PULL_STRENGTH;
         neighbor.vx += (dx / dist) * pull;
         neighbor.vy += (dy / dist) * pull;
       }
@@ -577,9 +591,7 @@ export default function KnowledgeTreePage() {
         const edgeAlpha = Math.min(alphaA, alphaB);
 
         const isHighlighted =
-          activeId &&
-          neighborSet.has(e.source) &&
-          neighborSet.has(e.target);
+          activeId && neighborSet.has(e.source) && neighborSet.has(e.target);
 
         let lineAlpha: number;
         let lineWidth: number;
@@ -622,11 +634,9 @@ export default function KnowledgeTreePage() {
             n.y,
             glowR,
           );
-          const glowAlpha = alpha * (isHovered ? 0.35 : isSelected ? 0.25 : 0.1);
-          grad.addColorStop(
-            0,
-            `rgba(${rgb.r},${rgb.g},${rgb.b},${glowAlpha})`,
-          );
+          const glowAlpha =
+            alpha * (isHovered ? 0.35 : isSelected ? 0.25 : 0.1);
+          grad.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},${glowAlpha})`);
           grad.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
           ctx.beginPath();
           ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
@@ -660,8 +670,7 @@ export default function KnowledgeTreePage() {
 
         // ── Labels ──
         // Obsidian style: show based on zoom + importance + hover
-        const zoomThreshold =
-          n.size >= 2.4 ? 0.2 : n.size >= 1.6 ? 0.35 : 0.55;
+        const zoomThreshold = n.size >= 2.4 ? 0.2 : n.size >= 1.6 ? 0.35 : 0.55;
         const showLabel =
           cam.zoom >= zoomThreshold ||
           isHovered ||

@@ -12,6 +12,8 @@ const protectedPrefixes = [
   "/library",
   "/profile",
   "/article/create",
+  "/dictionary/create",
+  "/dictionary/moderation",
   "/setup",
 ];
 

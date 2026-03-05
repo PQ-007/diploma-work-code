@@ -318,8 +318,6 @@
     "discussions_disc": "Start a new discussion"
   },
 
- 
-
   "articles": {
     "title": "Articles",
     "subtitle": "Discover articles from the community",
@@ -372,7 +370,83 @@
     "trendingArticles": "Trending Articles",
     "cantFindTerm": "Can't find the term?",
     "cantFindTermDesc": "Feel free to add new terms to the dictionary that you think can help the community!",
-    "addNewTerm": "Add New Term"
+    "addNewTerm": "Add New Term",
+    "termNotFound": "Term Not Found",
+    "termNotFoundDesc": "The term you're looking for doesn't exist in the dictionary yet.",
+    "backToDictionary": "Back to Dictionary",
+    "definition": "Definition",
+    "translations": "Translations",
+    "examples": "Examples",
+    "history": "History",
+    "suggestEdit": "Suggest Edit",
+    "editDraft": "Edit Draft",
+    "share": "Share",
+    "save": "Save",
+    "saved": "Saved",
+    "flashcard": "Flashcard",
+    "report": "Report",
+    "entryRejected": "Entry Rejected",
+    "relatedTerms": "Related Terms",
+    "entryInfo": "Entry Info",
+    "moderationHistory": "Moderation History",
+    "noTranslations": "No translations available yet.",
+    "noExamples": "No examples available yet.",
+    "noRevisions": "No revision history available.",
+    "create": {
+      "title": "Create Dictionary Entry",
+      "editTitle": "Edit Draft Entry",
+      "basicInfo": "Basic Information",
+      "term": "Term",
+      "termPlaceholder": "e.g. Machine Learning, 機械学習, Машин сургалт",
+      "reading": "Reading / Pronunciation",
+      "readingPlaceholder": "e.g. きかいがくしゅう",
+      "readingHint": "For Japanese terms, enter the furigana/hiragana reading.",
+      "primaryLanguage": "Primary Language",
+      "definitionLabel": "Definition",
+      "definitionPlaceholder": "Write a clear, concise definition...",
+      "tags": "Tags",
+      "tagsPlaceholder": "Type a tag and press Enter",
+      "addTranslation": "Add Translation",
+      "noTranslations": "No translations added yet. Add translations in other languages.",
+      "translatedTerm": "Translated term",
+      "explanation": "Explanation (optional)",
+      "addExample": "Add Example",
+      "noExamples": "No examples added yet. Add usage examples to help learners.",
+      "exampleText": "Example text / sentence",
+      "source": "Source (optional)",
+      "context": "Context (optional)",
+      "saveDraft": "Save Draft",
+      "submitForReview": "Submit for Review",
+      "cancel": "Cancel",
+      "checkingDuplicates": "Checking for duplicates...",
+      "similarTermsExist": "Similar terms already exist:",
+      "termRequired": "Term is required.",
+      "definitionRequired": "Definition is required."
+    },
+    "moderation": {
+      "title": "Moderation Queue",
+      "pending": "pending",
+      "allClear": "All clear!",
+      "allClearDesc": "No pending entries need review right now.",
+      "newEntry": "New Entry",
+      "edit": "Edit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmReject": "Confirm Reject",
+      "rejectionReason": "Rejection reason (required)...",
+      "noPermission": "You don't have permission to access the moderation queue."
+    },
+    "status": {
+      "approved": "APPROVED",
+      "pending_review": "PENDING REVIEW",
+      "draft": "DRAFT",
+      "rejected": "REJECTED"
+    },
+    "languages": {
+      "mn": "Монгол",
+      "ja": "日本語",
+      "en": "English"
+    }
   },
 
   "store": {
