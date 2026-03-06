@@ -221,6 +221,15 @@ export function NavUser() {
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem
+            onClick={() => router.push("/library")}
+            className="cursor-pointer"
+          >
+            <div className="flex">
+              <UserRound className="mr-2 h-4 w-4" />
+              <span>{t("nav_user.library")}</span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={() => router.push("/roadmap")}
             className="cursor-pointer"
           >

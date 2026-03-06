@@ -416,7 +416,9 @@ export default function DictionaryTermPage() {
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-3xl font-bold text-foreground">
-                  {displayTranslation ? displayTranslation.translated_term : entry.term}
+                  {displayTranslation
+                    ? displayTranslation.translated_term
+                    : entry.term}
                 </h1>
                 {displayTranslation && (
                   <span className="text-lg text-muted-foreground font-normal">
@@ -605,7 +607,10 @@ export default function DictionaryTermPage() {
                     <section>
                       <h2 className="text-sm font-semibold mb-3 text-muted-foreground flex items-center gap-2">
                         <span className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
-                        Original ({LANG_LABELS[entry.language_code] || entry.language_code})
+                        Original (
+                        {LANG_LABELS[entry.language_code] ||
+                          entry.language_code}
+                        )
                       </h2>
                       <p className="text-[15px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap">
                         {entry.definition}
@@ -623,7 +628,8 @@ export default function DictionaryTermPage() {
                     </p>
                     {displayTranslation && !displayTranslation.explanation && (
                       <p className="text-xs text-muted-foreground mt-4 italic">
-                        No {LANG_LABELS[language] || language} explanation available yet.
+                        No {LANG_LABELS[language] || language} explanation
+                        available yet.
                       </p>
                     )}
                   </section>
@@ -637,12 +643,21 @@ export default function DictionaryTermPage() {
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                     <Languages className="h-4 w-4" />
                     {LANG_LABELS[entry.language_code] || entry.language_code}
-                    <Badge variant="outline" className="text-[10px] normal-case tracking-normal ml-1">original</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] normal-case tracking-normal ml-1"
+                    >
+                      original
+                    </Badge>
                   </h3>
                   <Card className="border-primary/30 bg-primary/5">
                     <CardContent className="p-4">
-                      <p className="font-medium text-foreground">{entry.term}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{entry.definition}</p>
+                      <p className="font-medium text-foreground">
+                        {entry.term}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {entry.definition}
+                      </p>
                     </CardContent>
                   </Card>
                 </section>
