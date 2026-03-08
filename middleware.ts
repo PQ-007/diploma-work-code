@@ -12,6 +12,7 @@ const protectedPrefixes = [
   "/library",
   "/profile",
   "/article/create",
+  "/project/create",
   "/dictionary/create",
   "/dictionary/moderation",
   "/setup",
@@ -87,6 +88,7 @@ export const config = {
     "/library/:path*",
     "/profile/:path*",
     "/article/create",
+    "/project/create",
     "/setup",
   ],
 };

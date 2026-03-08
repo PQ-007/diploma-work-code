@@ -193,10 +193,7 @@ export async function DELETE(req: NextRequest) {
       }
 
       await supabase.from("article_tags").delete().eq("article_id", id);
-      await supabase
-        .from("article_translations")
-        .delete()
-        .eq("article_id", id);
+      await supabase.from("article_translations").delete().eq("article_id", id);
       await supabase.from("articles").delete().eq("id", id);
     } else if (type === "question") {
       const { data: disc } = await supabase
@@ -209,10 +206,7 @@ export async function DELETE(req: NextRequest) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
       }
 
-      await supabase
-        .from("discussion_tags")
-        .delete()
-        .eq("discussion_id", id);
+      await supabase.from("discussion_tags").delete().eq("discussion_id", id);
       await supabase.from("discussions").delete().eq("id", id);
     }
 

@@ -263,7 +263,9 @@ export default function LibraryPage() {
                         role="button"
                         tabIndex={0}
                         onClick={() => setSelectedId(item.id)}
-                        onKeyDown={(e) => e.key === "Enter" && setSelectedId(item.id)}
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && setSelectedId(item.id)
+                        }
                         className={`w-full text-left p-4 transition-colors hover:bg-muted/50 cursor-pointer ${
                           selectedId === item.id
                             ? "bg-primary/5 border-l-2 border-l-primary"

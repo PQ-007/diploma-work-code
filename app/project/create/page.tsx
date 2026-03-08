@@ -1,0 +1,580 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Plus, X, Save, Eye, Send, ImagePlus } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
+import type {
+  ProjectType,
+  ProjectDifficulty,
+  ProjectStatus,
+} from "@/app/project/types";
+
+export default function CreateProjectPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editSlug = searchParams.get("edit");
+  const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
+
+  // Form state
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [projectType, setProjectType] = useState<ProjectType>("coding");
+  const [difficulty, setDifficulty] = useState<ProjectDifficulty>("beginner");
+  const [technologies, setTechnologies] = useState<string[]>([]);
+  const [techInput, setTechInput] = useState("");
+  const [repositoryUrl, setRepositoryUrl] = useState("");
+  const [demoUrl, setDemoUrl] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [status, setStatus] = useState<ProjectStatus>("draft");
+  const [isPublic, setIsPublic] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [error, setError] = useState("");
+
+  // Load project data when editing
+  useEffect(() => {
+    if (!editSlug) return;
+    (async () => {
+      const res = await fetch(`/api/projects/${editSlug}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTitle(data.title || "");
+        setDescription(data.description || "");
+        setCategory(data.category || "");
+        setProjectType(data.project_type || "coding");
+        setDifficulty(data.difficulty || "beginner");
+        setTechnologies(data.technologies || []);
+        setRepositoryUrl(data.repository_url || "");
+        setDemoUrl(data.demo_url || "");
+        setThumbnailUrl(data.thumbnail_url || "");
+        setTags(data.tags || []);
+        setStatus(data.status || "draft");
+        setIsPublic(data.is_public || false);
+      }
+    })();
+  }, [editSlug]);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/signin?redirect=/project/create");
+    }
+  }, [user, authLoading, router]);
+
+  const addTechnology = () => {
+    const trimmed = techInput.trim();
+    if (trimmed && !technologies.includes(trimmed)) {
+      setTechnologies([...technologies, trimmed]);
+    }
+    setTechInput("");
+  };
+
+  const removeTechnology = (tech: string) => {
+    setTechnologies(technologies.filter((t) => t !== tech));
+  };
+
+  const addTag = () => {
+    const trimmed = tagInput.trim().toLowerCase();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+    }
+    setTagInput("");
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
+  };
+
+  const handleThumbnailUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingThumbnail(true);
+    try {
+      const result = await uploadImageToCloudinary(file);
+      setThumbnailUrl(result.secureUrl);
+    } catch (err) {
+      setError("Failed to upload thumbnail");
+    } finally {
+      setUploadingThumbnail(false);
+    }
+  };
+
+  const handleSubmit = useCallback(async () => {
+    if (!title.trim()) {
+      setError(t("project.titleRequired") || "Title is required");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const payload = {
+        title,
+        description,
+        category: category || undefined,
+        project_type: projectType,
+        difficulty,
+        technologies,
+        repository_url: repositoryUrl || undefined,
+        demo_url: demoUrl || undefined,
+        thumbnail_url: thumbnailUrl || undefined,
+        tags,
+        status,
+        is_public: isPublic,
+      };
+
+      let res: Response;
+
+      if (editSlug) {
+        res = await fetch(`/api/projects/${editSlug}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        const targetSlug = editSlug || data.slug;
+        router.push(`/project/${targetSlug}`);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Something went wrong");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    title,
+    description,
+    category,
+    projectType,
+    difficulty,
+    technologies,
+    repositoryUrl,
+    demoUrl,
+    thumbnailUrl,
+    tags,
+    status,
+    isPublic,
+    editSlug,
+    router,
+    t,
+  ]);
+
+  if (authLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-1/3 bg-muted rounded" />
+        <div className="h-64 bg-muted rounded-xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-8 pb-16">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/project")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-2xl font-bold">
+            {editSlug
+              ? t("project.editProject") || "Edit Project"
+              : t("project.createProject") || "Create Project"}
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleSubmit()}
+            disabled={saving}
+          >
+            <Save className="h-4 w-4 mr-1" />
+            {saving
+              ? t("common.saving") || "Saving..."
+              : editSlug
+                ? t("common.save") || "Save"
+                : t("project.createDraft") || "Create Draft"}
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      {/* Form */}
+      <div className="space-y-6">
+        {/* Title */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("project.title") || "Title"} *
+          </label>
+          <Input
+            placeholder={
+              t("project.titlePlaceholder") ||
+              "e.g., AI-Powered Student Dashboard"
+            }
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-lg"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("project.description") || "Description"}
+          </label>
+          <Textarea
+            placeholder={
+              t("project.descriptionPlaceholder") ||
+              "Describe your project, its goals, and what makes it unique..."
+            }
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="min-h-[120px]"
+          />
+        </div>
+
+        {/* Thumbnail */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("project.thumbnail") || "Thumbnail"}
+          </label>
+          <div className="flex items-center gap-4">
+            {thumbnailUrl && (
+              <div className="relative h-24 w-40 rounded-lg overflow-hidden border border-border">
+                <img
+                  src={thumbnailUrl}
+                  alt="Thumbnail"
+                  className="h-full w-full object-cover"
+                />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute top-1 right-1 h-5 w-5 p-0"
+                  onClick={() => setThumbnailUrl("")}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+            <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-border px-4 py-3 hover:bg-muted/50 transition-colors">
+              <ImagePlus className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {uploadingThumbnail
+                  ? t("common.uploading") || "Uploading..."
+                  : t("project.uploadThumbnail") || "Upload thumbnail"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleThumbnailUpload}
+                disabled={uploadingThumbnail}
+              />
+            </label>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Type & Difficulty & Category */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("project.type") || "Project Type"}
+            </label>
+            <Select
+              value={projectType}
+              onValueChange={(v) => setProjectType(v as ProjectType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="coding">
+                  {t("project.type.coding") || "Coding"}
+                </SelectItem>
+                <SelectItem value="research">
+                  {t("project.type.research") || "Research"}
+                </SelectItem>
+                <SelectItem value="design">
+                  {t("project.type.design") || "Design"}
+                </SelectItem>
+                <SelectItem value="other">
+                  {t("project.type.other") || "Other"}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("project.difficulty") || "Difficulty"}
+            </label>
+            <Select
+              value={difficulty}
+              onValueChange={(v) => setDifficulty(v as ProjectDifficulty)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beginner">
+                  {t("project.difficulty.beginner") || "Beginner"}
+                </SelectItem>
+                <SelectItem value="intermediate">
+                  {t("project.difficulty.intermediate") || "Intermediate"}
+                </SelectItem>
+                <SelectItem value="advanced">
+                  {t("project.difficulty.advanced") || "Advanced"}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("project.category") || "Category"}
+            </label>
+            <Input
+              placeholder={
+                t("project.categoryPlaceholder") || "e.g., Web Development"
+              }
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Status (edit only) */}
+        {editSlug && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {t("project.status") || "Status"}
+              </label>
+              <Select
+                value={status}
+                onValueChange={(v) => {
+                  setStatus(v as ProjectStatus);
+                  if (v !== "completed") setIsPublic(false);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">
+                    {t("project.status.draft") || "Draft"}
+                  </SelectItem>
+                  <SelectItem value="in_progress">
+                    {t("project.status.in_progress") || "In Progress"}
+                  </SelectItem>
+                  <SelectItem value="completed">
+                    {t("project.status.completed") || "Completed"}
+                  </SelectItem>
+                  <SelectItem value="archived">
+                    {t("project.status.archived") || "Archived"}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {status === "completed" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  {t("project.visibility") || "Visibility"}
+                </label>
+                <Select
+                  value={isPublic ? "public" : "private"}
+                  onValueChange={(v) => setIsPublic(v === "public")}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">
+                      {t("project.private") || "Private"}
+                    </SelectItem>
+                    <SelectItem value="public">
+                      {t("project.public") || "Public (Showcase)"}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        )}
+
+        <Separator />
+
+        {/* Technologies */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("project.technologies") || "Technologies"}
+          </label>
+          <div className="flex gap-2">
+            <Input
+              placeholder={t("project.addTechnology") || "Add technology..."}
+              value={techInput}
+              onChange={(e) => setTechInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTechnology();
+                }
+              }}
+            />
+            <Button variant="outline" size="sm" onClick={addTechnology}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          {technologies.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {technologies.map((tech) => (
+                <Badge
+                  key={tech}
+                  variant="secondary"
+                  className="gap-1 rounded-full"
+                >
+                  {tech}
+                  <button
+                    onClick={() => removeTechnology(tech)}
+                    className="ml-0.5 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Tags */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("project.tags") || "Tags"}
+          </label>
+          <div className="flex gap-2">
+            <Input
+              placeholder={t("project.addTag") || "Add tag..."}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+            />
+            <Button variant="outline" size="sm" onClick={addTag}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="gap-1 rounded-full"
+                >
+                  #{tag}
+                  <button
+                    onClick={() => removeTag(tag)}
+                    className="ml-0.5 hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Links */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("project.repositoryUrl") || "Repository URL (optional)"}
+            </label>
+            <Input
+              placeholder="https://github.com/..."
+              value={repositoryUrl}
+              onChange={(e) => setRepositoryUrl(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("project.demoUrl") || "Demo URL (optional)"}
+            </label>
+            <Input
+              placeholder="https://..."
+              value={demoUrl}
+              onChange={(e) => setDemoUrl(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Submit buttons */}
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button variant="outline" onClick={() => router.push("/project")}>
+          {t("common.cancel") || "Cancel"}
+        </Button>
+        <Button onClick={handleSubmit} disabled={saving}>
+          <Save className="h-4 w-4 mr-1" />
+          {saving
+            ? t("common.saving") || "Saving..."
+            : editSlug
+              ? t("common.saveChanges") || "Save Changes"
+              : t("project.createProject") || "Create Project"}
+        </Button>
+      </div>
+    </div>
+  );
+}
