@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -12,11 +13,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Folder, Loader2 } from "lucide-react";
+import { Search, Plus, Folder, Layers } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProjectCard from "@/app/project/components/ProjectCard";
 import type { ProjectPayload } from "@/app/project/types";
+
+function CardSkeleton() {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <Skeleton className="aspect-video w-full" />
+      <div className="p-4 space-y-3">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <div className="flex gap-1.5 pt-1">
+          <Skeleton className="h-5 w-14 rounded" />
+          <Skeleton className="h-5 w-14 rounded" />
+          <Skeleton className="h-5 w-14 rounded" />
+        </div>
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-4 w-20" />
+          </div>
+          <Skeleton className="h-4 w-12" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProjectPage() {
   const router = useRouter();
@@ -173,8 +199,10 @@ export default function ProjectPage() {
 
       {/* Projects grid */}
       {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
         </div>
       ) : projects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -183,19 +211,22 @@ export default function ProjectPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
-          <Folder className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="h-20 w-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <Layers className="h-10 w-10 text-muted-foreground/40" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">
             {activeTab === "my"
-              ? t("project.noMyProjects") ||
-                "You haven't created any projects yet."
-              : t("project.noProjectsFound") || "No projects found."}
+              ? t("project.noMyProjects") || "No projects yet"
+              : t("project.noProjectsFound") || "No projects found"}
+          </h3>
+          <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
+            {activeTab === "my"
+              ? t("project.noMyProjectsDesc") || "Start building your portfolio by creating your first project."
+              : t("project.noProjectsFoundDesc") || "Try adjusting your filters or search query."}
           </p>
-          {activeTab === "my" && (
-            <Button
-              className="mt-4"
-              onClick={() => router.push("/project/create")}
-            >
+          {activeTab === "my" && user && (
+            <Button onClick={() => router.push("/project/create")}>
               <Plus className="h-4 w-4 mr-1" />
               {t("project.createFirst") || "Create Your First Project"}
             </Button>

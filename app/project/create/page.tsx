@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, X, Save, Eye, Send, ImagePlus } from "lucide-react";
+import { ArrowLeft, Plus, X, Save, Eye, Send, ImagePlus, Loader2, Code2, LinkIcon, Tag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
@@ -281,31 +281,42 @@ export default function CreateProjectPage() {
           <label className="text-sm font-medium">
             {t("project.thumbnail") || "Thumbnail"}
           </label>
-          <div className="flex items-center gap-4">
-            {thumbnailUrl && (
-              <div className="relative h-24 w-40 rounded-lg overflow-hidden border border-border">
-                <img
-                  src={thumbnailUrl}
-                  alt="Thumbnail"
-                  className="h-full w-full object-cover"
-                />
+          {thumbnailUrl ? (
+            <div className="relative aspect-video max-w-md rounded-xl overflow-hidden border border-border group">
+              <img
+                src={thumbnailUrl}
+                alt="Thumbnail"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                 <Button
                   variant="destructive"
                   size="sm"
-                  className="absolute top-1 right-1 h-5 w-5 p-0"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => setThumbnailUrl("")}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4 mr-1" />
+                  {t("common.remove") || "Remove"}
                 </Button>
               </div>
-            )}
-            <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-dashed border-border px-4 py-3 hover:bg-muted/50 transition-colors">
-              <ImagePlus className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {uploadingThumbnail
-                  ? t("common.uploading") || "Uploading..."
-                  : t("project.uploadThumbnail") || "Upload thumbnail"}
-              </span>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center gap-3 cursor-pointer rounded-xl border-2 border-dashed border-border px-4 py-10 hover:bg-muted/50 hover:border-primary/30 transition-colors">
+              {uploadingThumbnail ? (
+                <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
+              ) : (
+                <ImagePlus className="h-8 w-8 text-muted-foreground" />
+              )}
+              <div className="text-center">
+                <p className="text-sm font-medium">
+                  {uploadingThumbnail
+                    ? t("common.uploading") || "Uploading..."
+                    : t("project.uploadThumbnail") || "Click to upload thumbnail"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PNG, JPG, GIF up to 5MB. Recommended 16:9 ratio.
+                </p>
+              </div>
               <input
                 type="file"
                 accept="image/*"
@@ -314,7 +325,7 @@ export default function CreateProjectPage() {
                 disabled={uploadingThumbnail}
               />
             </label>
-          </div>
+          )}
         </div>
 
         <Separator />
@@ -567,7 +578,11 @@ export default function CreateProjectPage() {
           {t("common.cancel") || "Cancel"}
         </Button>
         <Button onClick={handleSubmit} disabled={saving}>
-          <Save className="h-4 w-4 mr-1" />
+          {saving ? (
+            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4 mr-1" />
+          )}
           {saving
             ? t("common.saving") || "Saving..."
             : editSlug

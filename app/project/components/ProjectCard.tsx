@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, Eye, Calendar, GitBranch } from "lucide-react";
+import { Heart, Eye, Layers } from "lucide-react";
 import Link from "next/link";
 import type { ProjectPayload, ProjectDifficulty } from "@/app/project/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -36,18 +36,28 @@ export default function ProjectCard({ project }: { project: ProjectPayload }) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20">
-              <GitBranch className="h-10 w-10 text-muted-foreground/50" />
+              <Layers className="h-10 w-10 text-muted-foreground/30" />
             </div>
           )}
 
-          {/* Status badge */}
-          <Badge
-            className={`absolute top-2 right-2 text-[10px] font-semibold uppercase ${statusColors[project.status] || ""}`}
-            variant="outline"
-          >
-            {t(`project.status.${project.status}`) ||
-              project.status.replace("_", " ")}
-          </Badge>
+          {/* Overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+
+          {/* Top badges */}
+          <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-semibold uppercase bg-background/80 backdrop-blur-sm ${difficultyColors[project.difficulty]}`}
+            >
+              {t(`project.difficulty.${project.difficulty}`) || project.difficulty}
+            </Badge>
+            <Badge
+              className={`text-[10px] font-semibold uppercase bg-background/80 backdrop-blur-sm ${statusColors[project.status] || ""}`}
+              variant="outline"
+            >
+              {t(`project.status.${project.status}`) || project.status.replace("_", " ")}
+            </Badge>
+          </div>
 
           {/* Progress bar */}
           {project.progress > 0 && (
@@ -109,15 +119,6 @@ export default function ProjectCard({ project }: { project: ProjectPayload }) {
               ))}
             </div>
           )}
-
-          {/* Difficulty */}
-          <Badge
-            variant="outline"
-            className={`w-fit rounded-full px-2 py-0 text-[10px] font-semibold uppercase ${difficultyColors[project.difficulty]}`}
-          >
-            {t(`project.difficulty.${project.difficulty}`) ||
-              project.difficulty}
-          </Badge>
 
           {/* Footer */}
           <div className="mt-auto flex items-center justify-between pt-2 border-t border-border/50">
