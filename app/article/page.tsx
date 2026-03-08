@@ -511,7 +511,7 @@ export default function ArticleBrowsePage() {
               </Card>
             </div>
 
-            <TrendingTopics trendingTopics={trendingTopics} t={t} />
+            
 
             {/* Top Authors */}
             <div>

@@ -1,166 +1,382 @@
-// src/app/FeedPage.tsx (or similar main route file)
+// src/app/FeedPage.tsx
 
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // --- Components Import ---
-import ListItem from "@/app/article/components/ListItem";
+import ListItem, { ListItemData } from "@/app/article/components/ListItem";
+import DiscussionItem, {
+  DiscussionItemData,
+} from "@/app/discussions/components/DiscussionItem";
+import DiscussionModal from "@/app/discussions/components/DiscussionModal";
 import Leaderboard from "@/components/Leaderboard";
 import PostCreationBox from "@/components/PostCreationBox";
 import SidebarCarousel from "@/components/SidebarCarousel";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CheckCircle2 } from "lucide-react";
 
-// --- Data ---
-const feedItems = [
-  {
-    id: "1",
-    type: "project",
-    author: {
-      name: "Sarah Chen",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      username: "@sarahchen",
-      verified: true,
-      reputation: 2450,
-      contributions: 352,
-      ranking_point: 2650,
-    },
-    timestamp: "Dec 1, 2025",
-    readTime: "8 min",
-    content: {
-      title: "AlgoViz - Interactive Algorithm Visualizer",
-      description:
-        "Built a new tool to help students understand sorting algorithms through interactive visualizations. Features include step-by-step execution, code highlighting, and more.",
-      tags: ["React", "D3.js"],
-    },
-    stats: {
-      likes: 234,
-      comments: 45,
-      views: 1200,
-      shares: 23,
-    },
-    featured: false,
-    trending: true,
-  },
-  {
-    id: "2",
-    type: "blog",
-    author: {
-      name: "Mike Rodriguez",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-      username: "@mikecodes",
-      verified: true,
-      reputation: 3200,
-      contributions: 310,
-      ranking_point: 2950,
-    },
-    timestamp: "Dec 2, 2025",
-    readTime: "12 min",
-    content: {
-      title: "10 Advanced React Patterns You Should Know",
-      description:
-        "Dive deep into compound components, render props, custom hooks, and more. Learn how to write cleaner, more maintainable React code with these proven patterns.",
-      tags: ["React", "JavaScript"],
-    },
-    stats: {
-      likes: 567,
-      comments: 89,
-      views: 3400,
-      shares: 78,
-    },
-    featured: true,
-    trending: true,
-  },
-  {
-    id: "3",
-    type: "discussion",
-    author: {
-      name: "Alex Johnson",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      username: "@alexj",
-      verified: false,
-      reputation: 1200,
-      contributions: 245,
-      ranking_point: 1800,
-    },
-    timestamp: "Dec 3, 2025",
-    readTime: "5 min",
-    content: {
-      title:
-        "Best practices for managing state in large-scale Rust applications?",
-      description:
-        "I'm working on a distributed system and debating between different state management libraries. Any recommendations or war stories?",
-      tags: ["Rust", "State Management", "Distributed Systems"],
-    },
-    stats: {
-      likes: 156,
-      comments: 42,
-      views: 890,
-      shares: 12,
-    },
-    featured: false,
-    trending: false,
-  },
-];
+// --- Types ---
+type PollOption = {
+  id: number;
+  option_text: string;
+  display_order: number;
+  votes: number;
+};
 
-const leaderboard = [
-  {
-    rank: 1,
-    name: "Билгүүнтүшиг",
-    avatar: "https://robohash.org/Alexandra",
-    points: 12450,
-    change: 0,
-  },
-  {
-    rank: 2,
-    name: "Батсуурь",
-    avatar: "https://robohash.org/David",
-    points: 11230,
-    change: 2,
-  },
-  {
-    rank: 3,
-    name: "Делгеен",
-    avatar: "https://robohash.org/SarahJ",
-    points: 10890,
-    change: -1,
-  },
-  {
-    rank: 4,
-    name: "Цэлмэг",
-    avatar: "https://robohash.org/MikeZ",
-    points: 9560,
-    change: 1,
-  },
-  {
-    rank: 5,
-    name: "Тегелдер",
-    avatar: "https://robohash.org/Emily",
-    points: 8920,
-    change: -2,
-  },
-];
-// --- End of Data ---
+type PollData = {
+  id: number;
+  question: string;
+  ends_at: string | null;
+  created_at: string;
+  author: {
+    id: string;
+    display_name: string;
+    user_name: string;
+    avatar_url: string;
+  };
+  options: PollOption[];
+  totalVotes: number;
+  userVotedOptionId: number | null;
+};
+
+type FeedEntry =
+  | { kind: "article"; data: ListItemData; sortKey: string }
+  | { kind: "discussion"; data: DiscussionItemData; sortKey: string }
+  | { kind: "poll"; data: PollData; sortKey: string };
+
+// --- Helpers ---
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+// --- PollCard component ---
+function PollCard({
+  poll,
+  onVote,
+}: {
+  poll: PollData;
+  onVote: (pollId: number, optionId: number) => void;
+}) {
+  const hasVoted = poll.userVotedOptionId !== null;
+  const isExpired = poll.ends_at ? new Date(poll.ends_at) < new Date() : false;
+
+  return (
+    <Card className="overflow-hidden border-border/40 p-4 space-y-3">
+      {/* Author row */}
+      <div className="flex items-center gap-2">
+        <Badge variant="secondary" className="px-2 py-0.5 text-xs font-medium">
+          Poll
+        </Badge>
+        <Avatar className="h-6 w-6 border border-border/40">
+          <AvatarImage src={poll.author.avatar_url} />
+          <AvatarFallback className="text-xs">
+            {poll.author.display_name?.[0]?.toUpperCase() || "?"}
+          </AvatarFallback>
+        </Avatar>
+        <span className="text-sm font-medium truncate">
+          {poll.author.display_name}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          @{poll.author.user_name}
+        </span>
+        <span className="text-xs text-muted-foreground ml-auto">
+          {formatDate(poll.created_at)}
+        </span>
+      </div>
+
+      {/* Question */}
+      <p className="text-[15px] font-semibold leading-snug">{poll.question}</p>
+
+      {/* Options */}
+      <div className="space-y-2">
+        {poll.options.map((opt) => {
+          const pct =
+            poll.totalVotes > 0
+              ? Math.round((opt.votes / poll.totalVotes) * 100)
+              : 0;
+          const isChosen = poll.userVotedOptionId === opt.id;
+          return (
+            <button
+              key={opt.id}
+              disabled={hasVoted || isExpired}
+              onClick={() => onVote(poll.id, opt.id)}
+              className="w-full text-left"
+            >
+              <div
+                className={`relative rounded-md border px-3 py-2 text-sm transition-colors ${
+                  isChosen
+                    ? "border-primary bg-primary/10"
+                    : hasVoted || isExpired
+                      ? "border-border/40 bg-muted/30"
+                      : "border-border/40 hover:bg-muted/60 cursor-pointer"
+                }`}
+              >
+                {hasVoted && (
+                  <Progress
+                    value={pct}
+                    className="absolute inset-0 h-full rounded-md opacity-10"
+                  />
+                )}
+                <div className="relative flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    {isChosen && (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                    )}
+                    {opt.option_text}
+                  </span>
+                  {hasVoted && (
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {pct}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <p className="text-xs text-muted-foreground">
+        {poll.totalVotes} vote{poll.totalVotes !== 1 ? "s" : ""}
+        {isExpired && " · Closed"}
+        {!isExpired && poll.ends_at && ` · Ends ${formatDate(poll.ends_at)}`}
+      </p>
+    </Card>
+  );
+}
 
 export default function FeedPage() {
   const { t } = useLanguage();
-  const [likedItems, setLikedItems] = useState(new Set(["2"]));
-  const [bookmarkedItems, setBookmarkedItems] = useState(new Set(["1", "3"]));
 
+  // Feed state
+  const [feed, setFeed] = useState<FeedEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Article interaction state
+  const [likedItems, setLikedItems] = useState(new Set<string>());
+  const [bookmarkedItems, setBookmarkedItems] = useState(new Set<string>());
+
+  // Discussion modal state
+  const [openDiscussionId, setOpenDiscussionId] = useState<string | null>(null);
+
+  // ── Fetch all feed data on mount ──────────────────────────────────────────
+  useEffect(() => {
+    async function loadFeed() {
+      setLoading(true);
+      try {
+        const [articlesRes, discussionsRes, pollsRes] = await Promise.all([
+          fetch("/api/articles"),
+          fetch("/api/discussions"),
+          fetch("/api/polls"),
+        ]);
+
+        const [articlesData, discussionsData, pollsData] = await Promise.all([
+          articlesRes.json(),
+          discussionsRes.json(),
+          pollsRes.json(),
+        ]);
+
+        const entries: FeedEntry[] = [];
+
+        // Convert articles → ListItemData
+        (articlesData.items ?? []).forEach((a: any) => {
+          const item: ListItemData = {
+            id: a.article_id,
+            type: "blog",
+            author: {
+              name: a.author?.user_name ?? "Anonymous",
+              avatar: a.author?.avatar_url ?? "",
+              username: `@${a.author?.user_name ?? "user"}`,
+              contributions: 0,
+              ranking_point: a.author?.ranking_point ?? 0,
+            },
+            timestamp: formatDate(a.published_at),
+            content: {
+              title: a.title,
+              description: a.sub_title ?? "",
+              tags: a.tags ?? [],
+            },
+            stats: { likes: 0, comments: 0, views: 0 },
+          };
+          entries.push({
+            kind: "article",
+            data: item,
+            sortKey: a.published_at ?? "",
+          });
+        });
+
+        // Add discussions directly (already match DiscussionItemData shape)
+        (discussionsData.items ?? []).forEach((d: any) => {
+          entries.push({
+            kind: "discussion",
+            data: d as DiscussionItemData,
+            sortKey: d.created_at ?? "",
+          });
+        });
+
+        // Add polls
+        (pollsData.polls ?? []).forEach((p: any) => {
+          entries.push({
+            kind: "poll",
+            data: p as PollData,
+            sortKey: p.created_at ?? "",
+          });
+        });
+
+        // Sort newest first
+        entries.sort((a, b) => (b.sortKey > a.sortKey ? 1 : -1));
+        setFeed(entries);
+      } catch (err) {
+        console.error("Failed to load feed:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadFeed();
+  }, []);
+
+  // ── Article handlers ──────────────────────────────────────────────────────
   const toggleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
+      const s = new Set(prev);
+      s.has(id) ? s.delete(id) : s.add(id);
+      return s;
     });
   }, []);
 
   const toggleBookmark = useCallback((id: string) => {
     setBookmarkedItems((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
+      const s = new Set(prev);
+      s.has(id) ? s.delete(id) : s.add(id);
+      return s;
     });
   }, []);
+
+  // ── Discussion handlers ───────────────────────────────────────────────────
+  const handleDiscussionVote = useCallback(
+    async (id: string, direction: "up" | "down") => {
+      // Optimistic update
+      setFeed((prev) =>
+        prev.map((entry) => {
+          if (entry.kind !== "discussion" || entry.data.id !== id) return entry;
+          const oldVote = entry.data.userVote;
+          const oldDelta = oldVote === "up" ? 1 : oldVote === "down" ? -1 : 0;
+          const newDelta = direction === "up" ? 1 : -1;
+          const isToggle = oldVote === direction;
+          return {
+            ...entry,
+            data: {
+              ...entry.data,
+              votes: entry.data.votes - oldDelta + (isToggle ? 0 : newDelta),
+              userVote: isToggle ? null : direction,
+            },
+          };
+        }),
+      );
+      try {
+        await fetch("/api/discussions/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ discussionId: id, vote: direction }),
+        });
+      } catch (err) {
+        console.error("Failed to vote on discussion:", err);
+      }
+    },
+    [],
+  );
+
+  const handleDiscussionBookmark = useCallback(async (id: string) => {
+    // Optimistic update
+    setFeed((prev) =>
+      prev.map((entry) => {
+        if (entry.kind !== "discussion" || entry.data.id !== id) return entry;
+        return {
+          ...entry,
+          data: { ...entry.data, bookmarked: !entry.data.bookmarked },
+        };
+      }),
+    );
+    try {
+      await fetch("/api/discussions/bookmark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ discussionId: id }),
+      });
+    } catch (err) {
+      console.error("Failed to bookmark discussion:", err);
+    }
+  }, []);
+
+  // ── Poll handler ──────────────────────────────────────────────────────────
+  const handlePollVote = useCallback(
+    async (pollId: number, optionId: number) => {
+      // Optimistic update
+      setFeed((prev) =>
+        prev.map((entry) => {
+          if (entry.kind !== "poll" || entry.data.id !== pollId) return entry;
+          const alreadyVoted = entry.data.userVotedOptionId !== null;
+          const updatedOptions = entry.data.options.map((o) => ({
+            ...o,
+            votes:
+              o.id === optionId
+                ? o.votes + 1
+                : o.id === entry.data.userVotedOptionId
+                  ? o.votes - 1
+                  : o.votes,
+          }));
+          return {
+            ...entry,
+            data: {
+              ...entry.data,
+              options: updatedOptions,
+              totalVotes: alreadyVoted
+                ? entry.data.totalVotes
+                : entry.data.totalVotes + 1,
+              userVotedOptionId: optionId,
+            },
+          };
+        }),
+      );
+      try {
+        await fetch("/api/polls/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pollId, optionId }),
+        });
+      } catch (err) {
+        console.error("Failed to vote on poll:", err);
+      }
+    },
+    [],
+  );
+
+  // ── Discussion modal vote sync ────────────────────────────────────────────
+  const handleModalVoteChange = useCallback(
+    (id: string, newVotes: number, newUserVote: "up" | "down" | null) => {
+      setFeed((prev) =>
+        prev.map((entry) => {
+          if (entry.kind !== "discussion" || entry.data.id !== id) return entry;
+          return {
+            ...entry,
+            data: { ...entry.data, votes: newVotes, userVote: newUserVote },
+          };
+        }),
+      );
+    },
+    [],
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,32 +384,79 @@ export default function FeedPage() {
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Feed */}
           <div className="flex-1 max-w-2xl">
-            {/* Post Creation Box */}
             <PostCreationBox />
 
-            {/* Feed Items */}
-            <div className="space-y-4">
-              {feedItems.map((item) => (
-                <ListItem
-                  key={item.id}
-                  item={item}
-                  isLiked={likedItems.has(item.id)}
-                  isBookmarked={bookmarkedItems.has(item.id)}
-                  toggleLike={toggleLike}
-                  toggleBookmark={toggleBookmark}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="space-y-4 mt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-40 rounded-xl" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4 mt-4">
+                {feed.map((entry) => {
+                  if (entry.kind === "article") {
+                    return (
+                      <ListItem
+                        key={`article-${entry.data.id}`}
+                        item={entry.data}
+                        isLiked={likedItems.has(entry.data.id)}
+                        isBookmarked={bookmarkedItems.has(entry.data.id)}
+                        toggleLike={toggleLike}
+                        toggleBookmark={toggleBookmark}
+                      />
+                    );
+                  }
+                  if (entry.kind === "discussion") {
+                    return (
+                      <DiscussionItem
+                        key={`discussion-${entry.data.id}`}
+                        item={entry.data}
+                        onVote={handleDiscussionVote}
+                        onBookmark={handleDiscussionBookmark}
+                        onClick={(id) => setOpenDiscussionId(id)}
+                      />
+                    );
+                  }
+                  if (entry.kind === "poll") {
+                    return (
+                      <PollCard
+                        key={`poll-${entry.data.id}`}
+                        poll={entry.data}
+                        onVote={handlePollVote}
+                      />
+                    );
+                  }
+                  return null;
+                })}
+
+                {feed.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-12">
+                    No posts yet. Be the first to share something!
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
             <SidebarCarousel />
-            <Leaderboard isStudent={true} leaderboard={leaderboard} t={t} />
-            <Leaderboard isStudent={false} leaderboard={leaderboard} t={t} />
+            <Leaderboard isStudent={true} t={t} />
+            <Leaderboard isStudent={false} t={t} />
           </aside>
         </div>
       </div>
+
+      {/* Discussion detail modal */}
+      <DiscussionModal
+        discussionId={openDiscussionId}
+        open={openDiscussionId !== null}
+        onOpenChange={(open) => {
+          if (!open) setOpenDiscussionId(null);
+        }}
+        onVoteChange={handleModalVoteChange}
+      />
     </div>
   );
 }

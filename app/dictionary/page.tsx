@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Search,
   Bookmark,
@@ -15,256 +16,272 @@ import {
   LayoutGrid,
   List,
   Clock,
-  CircleHelp,
   Flame,
   Plus,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  FileEdit,
+  BookOpen,
 } from "lucide-react";
 
 // --- Types ---
-interface Term {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  letter: string;
+interface DictionaryEntry {
+  id: number;
+  term: string;
+  slug: string;
+  reading: string | null;
+  language_code: string;
+  definition: string;
+  status: string;
+  views: number;
+  saves: number;
+  created_at: string;
+  updated_at: string;
+  author: {
+    id: string;
+    display_name: string;
+    user_name: string;
+    avatar_url: string;
+  };
+  tags: string[];
+  saved: boolean;
+  translation_languages: string[];
+  display_term: string;
+  display_definition: string;
 }
 
-interface TrendingArticle {
-  id: string;
-  title: string;
-  author: string;
-  avatar: string;
-  readTime: string;
+interface SearchSuggestion {
+  id: number;
+  term: string;
+  slug: string;
+  language_code: string;
+  similarity_score: number;
 }
 
-// --- Mock Data ---
-const featuredTerm = {
-  name: "Quantum Computing",
-  description:
-    "A type of computing that takes advantage of quantum phenomena like superposition and entanglement. Quantum computers can solve problems that are too complex for classical computers by using qubits instead of bits.",
-  image:
-    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&q=80",
-};
+// --- Status badge helper ---
+function StatusBadge({ status }: { status: string }) {
+  const config: Record<
+    string,
+    { label: string; className: string; icon: React.ReactNode }
+  > = {
+    approved: {
+      label: "",
+      className:
+        "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1",
+      icon: <CheckCircle className="h-3 w-3" />,
+    },
+    pending_review: {
+      label: "Pending",
+      className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+      icon: <Clock className="h-3 w-3 mr-1" />,
+    },
+    draft: {
+      label: "Draft",
+      className: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+      icon: <FileEdit className="h-3 w-3 mr-1" />,
+    },
+    rejected: {
+      label: "Rejected",
+      className: "bg-red-500/20 text-red-400 border-red-500/30",
+      icon: <AlertCircle className="h-3 w-3 mr-1" />,
+    },
+  };
+  const c = config[status] || config.draft;
+  return (
+    <Badge className={`${c.className} text-[10px]`}>
+      {c.icon}
+      {c.label}
+    </Badge>
+  );
+}
 
-const allTerms: Term[] = [
-  {
-    id: "1",
-    name: "Artificial Intelligence",
-    description:
-      "Simulation of human intelligence processes by machines, especially computer systems, including learning...",
-    category: "MACHINE LEARNING",
-    letter: "A",
-  },
-  {
-    id: "2",
-    name: "Augmented Reality",
-    description:
-      "An interactive experience of a real-world environment where the objects that reside in the real world are...",
-    category: "VIRTUAL SYSTEMS",
-    letter: "A",
-  },
-  {
-    id: "3",
-    name: "Agile Development",
-    description:
-      "A set of practices intended to improve the effectiveness of software development professionals, tea...",
-    category: "SOFTWARE ENGINEERING",
-    letter: "A",
-  },
-  {
-    id: "4",
-    name: "Application Interface",
-    description:
-      "API is a set of definitions and protocols for building and integrating application software, allowing products to...",
-    category: "WEB SERVICES",
-    letter: "A",
-  },
-  {
-    id: "5",
-    name: "Autonomous Systems",
-    description:
-      "Technology that can perform a series of tasks without human intervention, using sensors and complex decision...",
-    category: "ROBOTICS",
-    letter: "A",
-  },
-  {
-    id: "6",
-    name: "Asymmetric Crypto",
-    description:
-      "Also known as public-key cryptography, it uses a pair — one public and one private — om...",
-    category: "CYBERSECURITY",
-    letter: "A",
-  },
-  {
-    id: "7",
-    name: "Binary Search",
-    description:
-      "A search algorithm that finds the position of a target value within a sorted array by repeatedly dividing the range...",
-    category: "ALGORITHMS",
-    letter: "B",
-  },
-  {
-    id: "8",
-    name: "Blockchain",
-    description:
-      "A decentralized, distributed ledger technology that records transactions across many computers in a verifiable way...",
-    category: "DISTRIBUTED SYSTEMS",
-    letter: "B",
-  },
-  {
-    id: "9",
-    name: "Big O Notation",
-    description:
-      "A mathematical notation that describes the limiting behavior of a function when the argument tends towards infinity...",
-    category: "ALGORITHMS",
-    letter: "B",
-  },
-  {
-    id: "10",
-    name: "Cloud Computing",
-    description:
-      "On-demand availability of computer system resources, especially data storage and computing power, without direct active management...",
-    category: "INFRASTRUCTURE",
-    letter: "C",
-  },
-  {
-    id: "11",
-    name: "Containerization",
-    description:
-      "A lightweight form of virtualization that packages an application and its dependencies together for consistent deployment...",
-    category: "DEVOPS",
-    letter: "C",
-  },
-  {
-    id: "12",
-    name: "CI/CD Pipeline",
-    description:
-      "Continuous Integration and Continuous Deployment — an automated process for building, testing, and deploying software...",
-    category: "DEVOPS",
-    letter: "C",
-  },
-  {
-    id: "13",
-    name: "Data Structure",
-    description:
-      "A specialized format for organizing, processing, retrieving and storing data so that it can be accessed efficiently...",
-    category: "COMPUTER SCIENCE",
-    letter: "D",
-  },
-  {
-    id: "14",
-    name: "Deep Learning",
-    description:
-      "A subset of machine learning based on artificial neural networks with representation learning at multiple levels of abstraction...",
-    category: "MACHINE LEARNING",
-    letter: "D",
-  },
-  {
-    id: "15",
-    name: "Edge Computing",
-    description:
-      "A distributed computing paradigm that brings computation and data storage closer to the sources of data...",
-    category: "INFRASTRUCTURE",
-    letter: "E",
-  },
-  {
-    id: "16",
-    name: "Encryption",
-    description:
-      "The process of converting information into a code to prevent unauthorized access, ensuring data confidentiality...",
-    category: "CYBERSECURITY",
-    letter: "E",
-  },
+function LanguageBadge({ code }: { code: string }) {
+  const labels: Record<string, string> = { mn: "MN", ja: "JA", en: "EN" };
+  return (
+    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+      {labels[code] || code.toUpperCase()}
+    </Badge>
+  );
+}
+const letterTabs = [
+  "ALL",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "O",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "U",
+  "V",
+  "W",
+  "X",
+  "Y",
+  "Z",
 ];
 
-const popularTopics = [
-  "#machine-learning",
-  "#artificial-intelligence",
-  "#cybersecurity",
-  "#blockchain",
-  "#rust",
-  "#web-development",
+const languageFilters = [
+  { value: "mn", label: "MN" },
+  { value: "ja", label: "JA" },
+  { value: "en", label: "EN" },
 ];
 
-const trendingArticles: TrendingArticle[] = [
-  {
-    id: "1",
-    title: "Supabase: Building Modern Backends",
-    author: "Sarah Chen",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    readTime: "8 min",
-  },
-  {
-    id: "2",
-    title: "Understanding LLMs & the Future of AI",
-    author: "dev_master",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=DevMaster",
-    readTime: "12 min",
-  },
-  {
-    id: "3",
-    title: "Rust vs. Go: Performance & Safety Comparison",
-    author: "Mike Rodriguez",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    readTime: "10 min",
-  },
+const sortOptions = [
+  { value: "relevance", label: "Relevance" },
+  { value: "newest", label: "Newest" },
+  { value: "most_saved", label: "Most Saved" },
 ];
-
-const letterTabs = ["A", "B", "C", "D", "E", "AI", "ML", "#"];
-
-// --- End of Data ---
 
 export default function DictionaryPage() {
-  const { t } = useLanguage();
-  const [activeLetter, setActiveLetter] = useState("A");
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const [activeLetter, setActiveLetter] = useState("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [languageFilter, setLanguageFilter] = useState<string>(language);
+  const [sortBy, setSortBy] = useState("relevance");
+  const [statusFilter, setStatusFilter] = useState("approved");
+  const [entries, setEntries] = useState<DictionaryEntry[]>([]);
+  const [totalEntries, setTotalEntries] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const limit = 18;
 
-  const filteredTerms = useMemo(() => {
-    let terms = allTerms;
+  // Sync language filter when site language changes
+  useEffect(() => {
+    setLanguageFilter(language);
+    setPage(1);
+  }, [language]);
 
-    // Search filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      terms = terms.filter(
-        (term) =>
-          term.name.toLowerCase().includes(q) ||
-          term.description.toLowerCase().includes(q) ||
-          term.category.toLowerCase().includes(q),
-      );
-    } else {
-      // Letter/category filter only when not searching
-      if (activeLetter === "AI") {
-        terms = terms.filter(
-          (t) =>
-            t.category.toLowerCase().includes("machine learning") ||
-            t.category.toLowerCase().includes("computer science"),
-        );
-      } else if (activeLetter === "ML") {
-        terms = terms.filter((t) =>
-          t.category.toLowerCase().includes("machine learning"),
-        );
-      } else if (activeLetter === "#") {
-        terms = terms; // show all
-      } else {
-        terms = terms.filter((t) => t.letter === activeLetter);
-      }
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch entries
+  const fetchEntries = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        sort: sortBy,
+        status: statusFilter,
+      });
+      if (languageFilter) params.set("language", languageFilter);
+      if (activeLetter !== "ALL" && !debouncedSearch)
+        params.set("letter", activeLetter);
+      if (debouncedSearch) params.set("search", debouncedSearch);
+
+      const res = await fetch(`/api/dictionary?${params}`);
+      const data = await res.json();
+      setEntries(data.items || []);
+      setTotalEntries(data.total || 0);
+    } catch {
+      setEntries([]);
+    } finally {
+      setLoading(false);
     }
+  }, [
+    page,
+    limit,
+    sortBy,
+    statusFilter,
+    languageFilter,
+    activeLetter,
+    debouncedSearch,
+  ]);
 
-    return terms;
-  }, [activeLetter, searchQuery]);
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+
+  // Fetch search suggestions
+  useEffect(() => {
+    if (!debouncedSearch || debouncedSearch.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const fetchSuggestions = async () => {
+      try {
+        const res = await fetch(
+          `/api/dictionary/search?q=${encodeURIComponent(debouncedSearch)}&limit=5`,
+        );
+        const data = await res.json();
+        setSuggestions(data.suggestions || []);
+      } catch {
+        setSuggestions([]);
+      }
+    };
+    fetchSuggestions();
+  }, [debouncedSearch]);
+
+  // Toggle save
+  const handleToggleSave = async (entryId: number, currentlySaved: boolean) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === entryId ? { ...e, saved: !currentlySaved } : e,
+      ),
+    );
+    try {
+      await fetch("/api/dictionary/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entryId }),
+      });
+    } catch {
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.id === entryId ? { ...e, saved: currentlySaved } : e,
+        ),
+      );
+    }
+  };
+
+  const totalPages = Math.ceil(totalEntries / limit);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+      <div className="mx-auto py-6 lg:py-3 max-w-7xl px-4">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-foreground">
-            {t("dictionary.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {t("dictionary.subtitle")}
-          </p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-foreground">
+              {t("dictionary.title")}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {t("dictionary.subtitle")}
+            </p>
+          </div>
+          {user && (
+            <Link href="/dictionary/create">
+              <Button size="sm" className="text-xs">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                {t("dictionary.addNewTerm")}
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="flex gap-8 xl:gap-12 justify-center">
@@ -276,166 +293,317 @@ export default function DictionaryPage() {
               <Input
                 placeholder={t("dictionary.searchPlaceholder")}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="pl-9 h-10"
               />
-            </div>
-
-            {/* Featured Term of the Day */}
-            <Card className="border-border/40 overflow-hidden">
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-[280px] h-[200px] md:h-auto overflow-hidden flex-shrink-0">
-                  <img
-                    src={featuredTerm.image}
-                    alt={featuredTerm.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <CardContent className="p-5 flex flex-col justify-center flex-1">
-                  <Badge
-                    variant="secondary"
-                    className="w-fit mb-3 text-xs font-semibold tracking-wide uppercase"
-                  >
-                    {t("dictionary.featuredTerm")}
-                  </Badge>
-                  <h2 className="text-xl font-bold mb-2">
-                    {featuredTerm.name}
-                  </h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    {featuredTerm.description}
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <Button size="sm" className="text-xs">
-                      {t("dictionary.fullDefinition")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-muted-foreground"
-                    >
-                      <Bookmark className="h-3.5 w-3.5 mr-1.5" />
-                      {t("dictionary.saveTerm")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
-
-            {/* Browse Glossary */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">
-                  {t("dictionary.browseGlossary")}
-                </h2>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant={viewMode === "grid" ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5 mr-1" />
-                    {t("dictionary.grid")}
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-8 px-3 text-xs"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <List className="h-3.5 w-3.5 mr-1" />
-                    {t("dictionary.list")}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Letter Tabs */}
-              <Tabs
-                value={activeLetter}
-                onValueChange={(val) => {
-                  setActiveLetter(val);
-                  setSearchQuery("");
-                }}
-                className="mb-5"
-              >
-                <TabsList className="h-9 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
-                  {letterTabs.map((letter) => (
-                    <TabsTrigger
-                      key={letter}
-                      value={letter}
-                      className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs font-medium"
-                    >
-                      {letter}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-
-              {/* Terms Grid / List */}
-              {filteredTerms.length === 0 ? (
-                <div className="text-sm text-muted-foreground py-8 text-center">
-                  No terms found
-                  {searchQuery
-                    ? ` ${t("common.for")} "${searchQuery}"`
-                    : ` ${t("dictionary.forThisLetter")}`}
-                  .
-                </div>
-              ) : viewMode === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredTerms.map((term) => (
-                    <Link
-                      key={term.id}
-                      href={`/dictionary/${term.name.toLowerCase().replace(/[\s/]+/g, "-")}`}
-                    >
-                      <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full">
-                        <CardContent className="p-4 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                              {term.name}
-                            </h3>
-                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                            {term.description}
-                          </p>
-                          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                            {term.category}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {filteredTerms.map((term) => (
-                    <Link
-                      key={term.id}
-                      href={`/dictionary/${term.name.toLowerCase().replace(/[\s/]+/g, "-")}`}
-                    >
-                      <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group">
-                        <CardContent className="p-3 flex items-center gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors truncate">
-                                {term.name}
-                              </h3>
-                              <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase flex-shrink-0">
-                                {term.category}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
-                              {term.description}
-                            </p>
-                          </div>
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
+              {/* Autocomplete suggestions */}
+              {showSuggestions && suggestions.length > 0 && (
+                <Card className="absolute z-50 w-full mt-1 border-border/40 shadow-lg">
+                  <CardContent className="p-0">
+                    {suggestions.map((s) => (
+                      <Link
+                        key={s.id}
+                        href={`/dictionary/${s.slug}`}
+                        className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="text-sm">{s.term}</span>
+                        <LanguageBadge code={s.language_code} />
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
               )}
             </div>
+
+            {/* Filters row */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Language filter */}
+              <div className="flex items-center gap-1">
+                {languageFilters.map((lf) => (
+                  <Button
+                    key={lf.value}
+                    variant={
+                      languageFilter === lf.value ? "secondary" : "ghost"
+                    }
+                    size="sm"
+                    className="h-7 px-2.5 text-xs"
+                    onClick={() => {
+                      setLanguageFilter(lf.value);
+                      setPage(1);
+                    }}
+                  >
+                    {lf.label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="h-4 w-px bg-border" />
+
+              {/* Sort */}
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setPage(1);
+                }}
+                className="h-7 px-2 text-xs bg-muted/40 rounded-md border border-border/40 text-foreground"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+
+              {/* My Drafts toggle */}
+              {user && (
+                <>
+                  <div className="h-4 w-px bg-border" />
+                  <Button
+                    variant={
+                      statusFilter === "my_drafts" ? "secondary" : "ghost"
+                    }
+                    size="sm"
+                    className="h-7 px-2.5 text-xs"
+                    onClick={() => {
+                      setStatusFilter(
+                        statusFilter === "my_drafts" ? "approved" : "my_drafts",
+                      );
+                      setPage(1);
+                    }}
+                  >
+                    <FileEdit className="h-3 w-3 mr-1" />
+                    My Drafts
+                  </Button>
+                </>
+              )}
+
+              {/* View mode */}
+              <div className="ml-auto flex items-center gap-1">
+                <Button
+                  variant={viewMode === "grid" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2.5 text-xs"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2.5 text-xs"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Letter Tabs */}
+            <Tabs
+              value={activeLetter}
+              onValueChange={(val) => {
+                setActiveLetter(val);
+                setSearchQuery("");
+                setPage(1);
+              }}
+            >
+              <TabsList className="h-auto bg-muted/40 backdrop-blur-sm flex-wrap gap-0.5 p-1">
+                {letterTabs.map((letter) => (
+                  <TabsTrigger
+                    key={letter}
+                    value={letter}
+                    className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 py-1 text-xs font-medium"
+                  >
+                    {letter}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            {/* Entries Grid / List */}
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : entries.length === 0 ? (
+              <div className="text-center py-16 space-y-3">
+                <BookOpen className="h-10 w-10 mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {debouncedSearch
+                    ? `No entries found for "${debouncedSearch}"`
+                    : statusFilter === "my_drafts"
+                      ? "You have no drafts yet"
+                      : "No entries found for this letter"}
+                </p>
+                {user && (
+                  <Link href="/dictionary/create">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs mt-2"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      Create first entry
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {entries.map((entry) => (
+                  <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
+                    <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full">
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
+                              {entry.display_term || entry.term}
+                            </h3>
+                            {entry.reading && (
+                              <span className="text-xs text-muted-foreground">
+                                ({entry.reading})
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+                            <LanguageBadge code={entry.language_code} />
+                            {(entry.translation_languages || []).map((lang) => (
+                              <LanguageBadge key={lang} code={lang} />
+                            ))}
+                            <StatusBadge status={entry.status} />
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                          {entry.display_definition || entry.definition}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap gap-1">
+                            {entry.tags.slice(0, 2).map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="text-[10px] font-normal px-1.5 py-0"
+                              >
+                                #{tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                            <span>{entry.views} views</span>
+                            {user && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleToggleSave(entry.id, entry.saved);
+                                }}
+                                className="hover:text-foreground transition-colors"
+                              >
+                                <Bookmark
+                                  className={`h-3 w-3 ${entry.saved ? "fill-current" : ""}`}
+                                />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1">
+                          <Avatar className="h-4 w-4">
+                            <AvatarImage src={entry.author.avatar_url} />
+                            <AvatarFallback className="text-[8px]">
+                              {entry.author.display_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-[10px] text-muted-foreground">
+                            {entry.author.display_name}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {entries.map((entry) => (
+                  <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
+                    <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group">
+                      <CardContent className="p-3 flex items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
+                              {entry.display_term || entry.term}
+                            </h3>
+                            {entry.reading && (
+                              <span className="text-xs text-muted-foreground">
+                                ({entry.reading})
+                              </span>
+                            )}
+                            <LanguageBadge code={entry.language_code} />
+                            {(entry.translation_languages || []).map((lang) => (
+                              <LanguageBadge key={lang} code={lang} />
+                            ))}
+                            <StatusBadge status={entry.status} />
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
+                            {entry.display_definition || entry.definition}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="text-[10px] text-muted-foreground">
+                            {entry.views} views
+                          </span>
+                          {user && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleToggleSave(entry.id, entry.saved);
+                              }}
+                            >
+                              <Bookmark
+                                className={`h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors ${entry.saved ? "fill-current" : ""}`}
+                              />
+                            </button>
+                          )}
+                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Right Sidebar */}
@@ -449,13 +617,24 @@ export default function DictionaryPage() {
               <Card className="border-border/40">
                 <CardContent className="p-3">
                   <div className="flex flex-wrap gap-2">
-                    {popularTopics.map((topic) => (
+                    {[
+                      "programming",
+                      "database",
+                      "algorithm",
+                      "math",
+                      "kanji",
+                      "web-dev",
+                    ].map((topic) => (
                       <Badge
                         key={topic}
                         variant="secondary"
                         className="text-xs font-normal cursor-pointer hover:bg-secondary/80 transition-colors"
+                        onClick={() => {
+                          setSearchQuery(topic);
+                          setPage(1);
+                        }}
                       >
-                        {topic}
+                        #{topic}
                       </Badge>
                     ))}
                   </div>
@@ -463,57 +642,45 @@ export default function DictionaryPage() {
               </Card>
             </div>
 
-            {/* Trending Articles */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <Flame className="h-4 w-4" />
-                {t("dictionary.trendingArticles")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-0">
-                  {trendingArticles.map((article) => (
-                    <div
-                      key={article.id}
-                      className="flex items-start gap-3 px-3 py-3 border-b border-border/20 last:border-b-0 hover:bg-muted/50 transition-colors cursor-pointer"
-                    >
-                      <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5">
-                        <AvatarImage src={article.avatar} />
-                        <AvatarFallback className="text-xs">
-                          {article.author.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium leading-snug line-clamp-2">
-                          {article.title}
-                        </p>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                          <span>{article.author}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                        <Clock className="h-3 w-3" />
-                        <span>{article.readTime}</span>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
+            {/* Stats */}
+            <Card className="border-border/40">
+              <CardContent className="p-4 space-y-3">
+                <h3 className="text-sm font-semibold">
+                  {t("dictionary.stats")}
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <p className="text-lg font-bold">{totalEntries}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Total Entries
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold">3</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Languages
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Can't find the term? */}
             <Card className="border-border/40">
               <CardContent className="p-4 text-center space-y-2">
-                <CircleHelp className="h-6 w-6 mx-auto text-muted-foreground" />
+                <BookOpen className="h-6 w-6 mx-auto text-muted-foreground" />
                 <h3 className="text-sm font-semibold">
                   {t("dictionary.cantFindTerm")}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {t("dictionary.cantFindTermDesc")}
                 </p>
-                <Button size="sm" className="text-xs mt-1">
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  {t("dictionary.addNewTerm")}
-                </Button>
+                <Link href="/dictionary/create">
+                  <Button size="sm" className="text-xs mt-1">
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    {t("dictionary.addNewTerm")}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </aside>

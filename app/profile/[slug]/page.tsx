@@ -1,750 +1,512 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import {
-  Award,
-  Bell,
+  Bookmark,
   Calendar,
-  Camera,
-  Code,
-  Edit,
+  CheckCircle2,
+  ChevronRight,
   Eye,
-  Github,
-  Globe,
-  Linkedin,
-  MapPin,
-  Save,
-  Shield,
-  Target,
+  FileText,
+  GraduationCap,
+  Heart,
+  Layers,
+  Loader2,
+  MessageSquare,
+  Star,
   Trophy,
-  Twitter
+  UserPlus,
+  UserMinus,
+  Users,
 } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-  avatar: string;
-  bio: string;
-  location: string;
-  website: string;
-  joinDate: string;
-  socialLinks: {
-    github?: string;
-    linkedin?: string;
-    twitter?: string;
-  };
-  skills: string[];
-  interests: string[];
-  stats: {
-    projectsCompleted: number;
-    coursesCompleted: number;
-    blogPosts: number;
-    contestsParticipated: number;
-    totalPoints: number;
-    currentStreak: number;
-  };
-  achievements: {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    earnedDate: string;
-    category: string;
-  }[];
-  preferences: {
-    emailNotifications: boolean;
-    publicProfile: boolean;
-    showActivity: boolean;
-    darkMode: boolean;
-    weeklyDigest: boolean;
-    contestReminders: boolean;
-  };
+/* ═══════════════════════════════════════════
+   Types matching the API response
+   ═══════════════════════════════════════════ */
+
+interface ProfileStats {
+  articles: number;
+  totalViews: number;
+  totalReactions: number;
+  totalComments: number;
+  totalBookmarks: number;
+  rankingPoint: number;
+  followers: number;
+  following: number;
 }
 
-const userProfile: UserProfile = {
-  id: "1",
-  name: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  username: "alexj_dev",
-  avatar: "/api/placeholder/120/120",
-  bio: "Full-stack developer passionate about creating amazing user experiences. Love working with React, Node.js, and exploring new technologies. Always learning, always building.",
-  location: "San Francisco, CA",
-  website: "https://alexjohnson.dev",
-  joinDate: "2023-03-15",
-  socialLinks: {
-    github: "https://github.com/alexj-dev",
-    linkedin: "https://linkedin.com/in/alexjohnson",
-    twitter: "https://twitter.com/alexj_dev",
-  },
-  skills: [
-    "JavaScript",
-    "React",
-    "Node.js",
-    "TypeScript",
-    "Python",
-    "PostgreSQL",
-    "MongoDB",
-    "AWS",
-    "Docker",
-    "GraphQL",
-  ],
-  interests: [
-    "Web Development",
-    "Machine Learning",
-    "Open Source",
-    "UI/UX Design",
-    "DevOps",
-    "Mobile Development",
-  ],
-  stats: {
-    projectsCompleted: 23,
-    coursesCompleted: 12,
-    blogPosts: 8,
-    contestsParticipated: 15,
-    totalPoints: 2847,
-    currentStreak: 7,
-  },
-  achievements: [
-    {
-      id: "1",
-      name: "First Steps",
-      description: "Completed your first project",
-      icon: "🎯",
-      earnedDate: "2023-03-20",
-      category: "Projects",
-    },
-    {
-      id: "2",
-      name: "Knowledge Seeker",
-      description: "Completed 10 courses",
-      icon: "📚",
-      earnedDate: "2024-01-15",
-      category: "Learning",
-    },
-    {
-      id: "3",
-      name: "Community Contributor",
-      description: "Published 5 blog posts",
-      icon: "✍️",
-      earnedDate: "2024-06-10",
-      category: "Content",
-    },
-    {
-      id: "4",
-      name: "Code Warrior",
-      description: "Participated in 10 coding contests",
-      icon: "⚔️",
-      earnedDate: "2024-08-22",
-      category: "Competition",
-    },
-    {
-      id: "5",
-      name: "Streak Master",
-      description: "Maintained a 7-day learning streak",
-      icon: "🔥",
-      earnedDate: "2024-12-10",
-      category: "Consistency",
-    },
-  ],
-  preferences: {
-    emailNotifications: true,
-    publicProfile: true,
-    showActivity: true,
-    darkMode: true,
-    weeklyDigest: true,
-    contestReminders: true,
-  },
-};
+interface ArticleItem {
+  id: string;
+  title: string;
+  sub_title: string | null;
+  language_code: string;
+  published_at: string | null;
+  views: number;
+  tags: string[];
+}
+
+interface ActivityItem {
+  type: "comment";
+  articleTitle: string;
+  body: string;
+  created_at: string;
+}
+
+interface ProfileInfo {
+  id: string;
+  user_name: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  email: string | null;
+  role: string | null;
+  ranking_point: number;
+  created_at: string | null;
+}
+
+interface ProfileApiResponse {
+  profile: ProfileInfo;
+  stats: ProfileStats;
+  articles: ArticleItem[];
+  recentActivity: ActivityItem[];
+  isFollowing: boolean;
+  isOwner: boolean;
+}
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState(userProfile);
-  const [activeTab, setActiveTab] = useState("overview");
+  const { user, loading: authLoading } = useAuth();
+  const params = useParams();
+  const slug = params?.slug as string;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  const [data, setData] = useState<ProfileApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
-  const formatJoinDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/profile/${encodeURIComponent(slug)}`);
+      if (!res.ok) {
+        setData(null);
+        return;
+      }
+      const json: ProfileApiResponse = await res.json();
+      setData(json);
+      setFollowing(json.isFollowing);
+      setFollowerCount(json.stats.followers);
+    } catch {
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [slug]);
 
-    if (diffDays < 30) {
-      return `${diffDays} days ago`;
-    } else if (diffDays < 365) {
-      const months = Math.floor(diffDays / 30);
-      return `${months} month${months > 1 ? "s" : ""} ago`;
-    } else {
-      const years = Math.floor(diffDays / 365);
-      return `${years} year${years > 1 ? "s" : ""} ago`;
+  useEffect(() => {
+    if (!authLoading) fetchProfile();
+  }, [authLoading, fetchProfile]);
+
+  // Also get banner/skills from user_metadata for owner
+  const meta = user?.user_metadata || {};
+  const bannerGradient =
+    data?.isOwner && meta.bannerGradient
+      ? meta.bannerGradient
+      : "from-violet-600 via-purple-500 to-fuchsia-500";
+  const skills: string[] = data?.isOwner && meta.skills ? meta.skills : [];
+
+  const handleFollow = async () => {
+    if (!data || !user) return;
+    setFollowLoading(true);
+    try {
+      const res = await fetch("/api/profile/follow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetUserId: data.profile.id }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        setFollowing(result.followed);
+        setFollowerCount((c) => (result.followed ? c + 1 : c - 1));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setFollowLoading(false);
     }
   };
 
-  const handleSaveProfile = () => {
-    // In a real app, this would save to backend
-    setIsEditing(false);
-  };
+  if (loading || authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <p className="text-muted-foreground">Profile not found</p>
+        <Button asChild variant="outline">
+          <Link href="/">Go Home</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const { profile, stats, articles, recentActivity, isOwner } = data;
 
   return (
-    <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="edit">Edit Profile</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+    <div className="space-y-5 pb-12 max-w-6xl mx-auto">
+      {/* ════════ Header: Banner + Avatar + Info ════════ */}
+      <div className="relative rounded-2xl overflow-hidden">
+        <div className={`h-32 sm:h-40 bg-gradient-to-r ${bannerGradient}`} />
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Profile Header */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile.avatar} alt={profile.name} />
-                    <AvatarFallback className="text-lg">
-                      {profile.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute -bottom-2 -right-2"
-                    >
-                      <Camera className="h-3 w-3" />
-                    </Button>
-                  )}
+        <div className="relative bg-card border border-border border-t-0 rounded-b-2xl px-6 pb-5 pt-0">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            {/* Avatar */}
+            <div className="-mt-14 relative">
+              <Avatar className="h-24 w-24 border-4 border-card shadow-xl">
+                <AvatarImage src={profile.avatar_url || ""} />
+                <AvatarFallback className="text-2xl bg-muted text-muted-foreground font-bold">
+                  {(profile.display_name ||
+                    profile.user_name)?.[0]?.toUpperCase() || "?"}
+                </AvatarFallback>
+              </Avatar>
+              {profile.role && (
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary-foreground" />
                 </div>
+              )}
+            </div>
 
-                <div className="flex-1">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <h2 className="text-2xl font-bold">{profile.name}</h2>
-                      <p className="text-muted-foreground">
-                        @{profile.username}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{profile.location}</span>
-                        <Calendar className="h-4 w-4 ml-2" />
-                        <span>Joined {formatJoinDate(profile.joinDate)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      {profile.socialLinks.github && (
-                        <Button variant="outline" size="sm">
-                          <Github className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {profile.socialLinks.linkedin && (
-                        <Button variant="outline" size="sm">
-                          <Linkedin className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {profile.socialLinks.twitter && (
-                        <Button variant="outline" size="sm">
-                          <Twitter className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {profile.website && (
-                        <Button variant="outline" size="sm">
-                          <Globe className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-muted-foreground">{profile.bio}</p>
-                </div>
+            {/* Name & bio */}
+            <div className="flex-1 min-w-0 pt-2 sm:pt-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                {profile.display_name || profile.user_name}
+              </h1>
+              {profile.bio && (
+                <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">
+                  {profile.bio}
+                </p>
+              )}
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <Badge className="gap-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                  <GraduationCap className="h-3 w-3" />
+                  NMCT
+                </Badge>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {profile.created_at
+                    ? `Joined ${new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
+                    : "Joined recently"}
+                </span>
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {followerCount} followers · {stats.following} following
+                </span>
               </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 shrink-0">
+              {isOwner ? (
+                <Button variant="outline" size="sm" asChild className="gap-1.5">
+                  <Link href="/setup">
+                    Edit Profile
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              ) : user ? (
+                <Button
+                  variant={following ? "outline" : "default"}
+                  size="sm"
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className="gap-1.5"
+                >
+                  {followLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : following ? (
+                    <UserMinus className="h-3.5 w-3.5" />
+                  ) : (
+                    <UserPlus className="h-3.5 w-3.5" />
+                  )}
+                  {following ? "Unfollow" : "Follow"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ════════ Stats Row ════════ */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          {
+            icon: <FileText className="h-4 w-4" />,
+            label: "Articles Written",
+            value: stats.articles,
+          },
+          {
+            icon: <Eye className="h-4 w-4" />,
+            label: "Total Views",
+            value: stats.totalViews,
+          },
+          {
+            icon: <Heart className="h-4 w-4" />,
+            label: "Reactions",
+            value: stats.totalReactions,
+          },
+          {
+            icon: <Trophy className="h-4 w-4" />,
+            label: "Ranking Points",
+            value: stats.rankingPoint,
+          },
+        ].map((stat) => (
+          <Card key={stat.label} className="border-border/60">
+            <CardContent className="p-4 flex flex-col items-center text-center gap-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {stat.icon}
+                <span>{stat.label}</span>
+              </div>
+              <span className="text-2xl font-bold text-foreground">
+                {stat.value.toLocaleString()}
+              </span>
             </CardContent>
           </Card>
+        ))}
+      </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {profile.stats.projectsCompleted}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Projects</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {profile.stats.coursesCompleted}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Courses</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {profile.stats.blogPosts}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Blog Posts</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-orange-600">
-                  {profile.stats.contestsParticipated}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Contests</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-yellow-600">
-                  {profile.stats.totalPoints}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Points</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-red-600">
-                  {profile.stats.currentStreak}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">Day Streak</p>
-              </CardContent>
-            </Card>
-          </div>
+      {/* ════════ Two-Column Layout ════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+        {/* ─── Left: Tabs ─── */}
+        <div>
+          <Tabs defaultValue="articles" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 mb-4">
+              <TabsTrigger value="articles" className="text-xs sm:text-sm">
+                <FileText className="h-3.5 w-3.5 mr-1.5" />
+                Articles ({stats.articles})
+              </TabsTrigger>
+              <TabsTrigger value="flashcards" className="text-xs sm:text-sm">
+                <Layers className="h-3.5 w-3.5 mr-1.5" />
+                Flashcards
+              </TabsTrigger>
+              <TabsTrigger value="certificates" className="text-xs sm:text-sm">
+                <Star className="h-3.5 w-3.5 mr-1.5" />
+                Certificates
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Skills and Interests */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="h-5 w-5" />
-                  Skills
-                </CardTitle>
+            {/* Articles Tab */}
+            <TabsContent value="articles">
+              {articles.length > 0 ? (
+                <div className="space-y-3">
+                  {articles.map((article) => (
+                    <Link key={article.id} href={`/article/${article.id}`}>
+                      <Card className="border-border/60 hover:shadow-md transition-shadow cursor-pointer">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                                {article.title}
+                              </h3>
+                              {article.sub_title && (
+                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                  {article.sub_title}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-3 flex-wrap">
+                                {article.tags.slice(0, 4).map((tag) => (
+                                  <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="text-[10px] px-2 py-0"
+                                  >
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {article.views}
+                              </span>
+                              {article.published_at && (
+                                <span>
+                                  {new Date(
+                                    article.published_at,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Card className="border-border/60">
+                  <CardContent className="p-8 text-center text-muted-foreground">
+                    <FileText className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">No articles published yet.</p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Flashcards Tab */}
+            <TabsContent value="flashcards">
+              <Card className="border-border/60">
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <Layers className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No flashcard sets created yet.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Certificates Tab */}
+            <TabsContent value="certificates">
+              <Card className="border-border/60">
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  <Star className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No certificates earned yet.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* ─── Right Sidebar ─── */}
+        <div className="space-y-4">
+          {/* Skills */}
+          {skills.length > 0 && (
+            <Card className="border-border/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold">Skills</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {profile.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-1.5">
+                  {skills.map((skill: string) => (
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className="rounded-full px-2.5 py-0.5 text-[11px]"
+                    >
                       {skill}
                     </Badge>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Interests
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {profile.interests.map((interest) => (
-                    <Badge key={interest} variant="outline">
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Achievements */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Recent Achievements
+          {/* Engagement Stats */}
+          <Card className="border-border/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">
+                Engagement
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {profile.achievements.slice(0, 3).map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="text-2xl">{achievement.icon}</div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm">
-                        {achievement.name}
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        {achievement.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatDate(achievement.earnedDate)}
-                      </p>
-                    </div>
+            <CardContent className="pt-0 space-y-2.5">
+              {[
+                {
+                  icon: <MessageSquare className="h-3.5 w-3.5 text-blue-500" />,
+                  label: "Comments received",
+                  value: stats.totalComments,
+                },
+                {
+                  icon: <Heart className="h-3.5 w-3.5 text-rose-500" />,
+                  label: "Reactions received",
+                  value: stats.totalReactions,
+                },
+                {
+                  icon: <Bookmark className="h-3.5 w-3.5 text-amber-500" />,
+                  label: "Bookmarks received",
+                  value: stats.totalBookmarks,
+                },
+                {
+                  icon: <Eye className="h-3.5 w-3.5 text-emerald-500" />,
+                  label: "Total views",
+                  value: stats.totalViews,
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    {item.icon}
+                    <span className="text-xs text-muted-foreground">
+                      {item.label}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="edit" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Update your profile information</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={profile.name}
-                    onChange={(e) =>
-                      setProfile({ ...profile, name: e.target.value })
-                    }
-                  />
+                  <span className="text-xs font-semibold text-foreground">
+                    {item.value.toLocaleString()}
+                  </span>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    value={profile.username}
-                    onChange={(e) =>
-                      setProfile({ ...profile, username: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) =>
-                      setProfile({ ...profile, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={profile.location}
-                    onChange={(e) =>
-                      setProfile({ ...profile, location: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    value={profile.website}
-                    onChange={(e) =>
-                      setProfile({ ...profile, website: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  rows={4}
-                  value={profile.bio}
-                  onChange={(e) =>
-                    setProfile({ ...profile, bio: e.target.value })
-                  }
-                />
-              </div>
+              ))}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Social Links</CardTitle>
-              <CardDescription>
-                Connect your social media accounts
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="github">GitHub</Label>
-                <Input
-                  id="github"
-                  value={profile.socialLinks.github || ""}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      socialLinks: {
-                        ...profile.socialLinks,
-                        github: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="linkedin">LinkedIn</Label>
-                <Input
-                  id="linkedin"
-                  value={profile.socialLinks.linkedin || ""}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      socialLinks: {
-                        ...profile.socialLinks,
-                        linkedin: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="twitter">Twitter</Label>
-                <Input
-                  id="twitter"
-                  value={profile.socialLinks.twitter || ""}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      socialLinks: {
-                        ...profile.socialLinks,
-                        twitter: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="achievements" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                All Achievements
+          {/* Recent Activity */}
+          <Card className="border-border/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">
+                Recent Activity
               </CardTitle>
-              <CardDescription>
-                Track your progress and accomplishments
-              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {profile.achievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg"
-                  >
-                    <div className="text-3xl">{achievement.icon}</div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">{achievement.name}</h4>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {achievement.description}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {achievement.category}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(achievement.earnedDate)}
+            <CardContent className="pt-0 space-y-3">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="mt-0.5 shrink-0">
+                      <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Commented on{" "}
+                        <span className="text-foreground font-medium">
+                          &ldquo;{item.articleTitle}&rdquo;
                         </span>
-                      </div>
+                      </p>
+                      {item.created_at && (
+                        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                          {new Date(item.created_at).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
+                        </p>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No recent activity.
+                </p>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notification Preferences
-              </CardTitle>
-              <CardDescription>
-                Manage how you receive notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.preferences.emailNotifications}
-                  onCheckedChange={(checked) =>
-                    setProfile({
-                      ...profile,
-                      preferences: {
-                        ...profile.preferences,
-                        emailNotifications: checked,
-                      },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Weekly Digest</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Get weekly summary of your activity
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.preferences.weeklyDigest}
-                  onCheckedChange={(checked) =>
-                    setProfile({
-                      ...profile,
-                      preferences: {
-                        ...profile.preferences,
-                        weeklyDigest: checked,
-                      },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Contest Reminders</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Remind me about upcoming contests
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.preferences.contestReminders}
-                  onCheckedChange={(checked) =>
-                    setProfile({
-                      ...profile,
-                      preferences: {
-                        ...profile.preferences,
-                        contestReminders: checked,
-                      },
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Privacy Settings
-              </CardTitle>
-              <CardDescription>Control your profile visibility</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Public Profile</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Make your profile visible to others
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.preferences.publicProfile}
-                  onCheckedChange={(checked) =>
-                    setProfile({
-                      ...profile,
-                      preferences: {
-                        ...profile.preferences,
-                        publicProfile: checked,
-                      },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Show Activity</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Display your recent activity publicly
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.preferences.showActivity}
-                  onCheckedChange={(checked) =>
-                    setProfile({
-                      ...profile,
-                      preferences: {
-                        ...profile.preferences,
-                        showActivity: checked,
-                      },
-                    })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Account Security
-              </CardTitle>
-              <CardDescription>
-                Manage your account security settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full justify-start">
-                Change Password
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                Two-Factor Authentication
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                Download Account Data
-              </Button>
-              <Separator />
-              <Button variant="destructive" className="w-full justify-start">
-                Delete Account
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

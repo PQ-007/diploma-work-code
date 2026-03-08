@@ -29,6 +29,9 @@ import RightPanelCard from "../components/RightPanelCard";
 import TocItem from "../components/TocItem";
 import { ArticlePayload, RelatedLink, TocEntry } from "../type";
 import AuthorBox from "../components/AuthorBox";
+import ArticleCommentSection from "../components/ArticleCommentSection";
+import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSection";
+import { useArticleInteractions } from "@/hooks/useArticleInteractions";
 
 const extractRelatedLinks = (body: string): RelatedLink[] => {
   const matches = [...body.matchAll(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g)];
@@ -48,8 +51,6 @@ const extractRelatedLinks = (body: string): RelatedLink[] => {
 
 export default function ModernArticlePage() {
   const [activeSection, setActiveSection] = useState("");
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [article, setArticle] = useState<ArticlePayload | null>(null);
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +61,11 @@ export default function ModernArticlePage() {
 
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+
+  const articleNumericId = article?.id ? Number(article.id) : null;
+  const commentRef = useRef<ArticleCommentSectionHandle>(null);
+  const { isLiked, likesCount, toggleLike, isBookmarked, toggleBookmark } =
+    useArticleInteractions({ articleId: articleNumericId });
 
   // Sidebar demo content (wireframe: Definitions + Related links)
   const definitions = useMemo(
@@ -357,7 +363,7 @@ export default function ModernArticlePage() {
                         ? "text-red-500 border-red-200 bg-red-50"
                         : "border-border hover:bg-muted"
                     }`}
-                    onClick={() => setIsLiked(!isLiked)}
+                    onClick={toggleLike}
                     aria-label="Like"
                   >
                     <Heart
@@ -373,7 +379,7 @@ export default function ModernArticlePage() {
                         ? "text-blue-500 border-blue-200 bg-blue-50"
                         : "border-border hover:bg-muted"
                     }`}
-                    onClick={() => setIsBookmarked(!isBookmarked)}
+                    onClick={toggleBookmark}
                     aria-label="Bookmark"
                   >
                     <Bookmark
@@ -386,6 +392,7 @@ export default function ModernArticlePage() {
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
                     aria-label="Comment"
+                    onClick={() => commentRef.current?.focus()}
                   >
                     <MessageCircle className="h-5 w-5" />
                   </Button>
@@ -403,7 +410,7 @@ export default function ModernArticlePage() {
 
                   <div className="text-[11px] text-muted-foreground text-center">
                     <div className="font-semibold text-foreground/80">
-                      {isLiked ? 101 : 100}
+                      {likesCount}
                     </div>
                     <div>likes</div>
                   </div>
@@ -497,19 +504,15 @@ export default function ModernArticlePage() {
               </RightPanelCard>
             </div>
 
-            {/* Comment section placeholder (wireframe: big bottom box) */}
-            <div className="mt-6">
-              <Card className="bg-card/50 border-border/60 shadow-sm">
-                <div className="p-6">
-                  <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-                    Comment Section
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Plug your comments UI here (Supabase + RLS fun time).
-                  </div>
-                </div>
-              </Card>
-            </div>
+            {/* Comment section */}
+            {articleNumericId && (
+              <div className="mt-6">
+                <ArticleCommentSection
+                  ref={commentRef}
+                  articleId={articleNumericId}
+                />
+              </div>
+            )}
           </main>
 
           {/* Right panels (wireframe: Author data, TOC, Definitions, Related links) */}
@@ -595,9 +598,9 @@ export default function ModernArticlePage() {
 
       <FloatingActionBar
         isLiked={isLiked}
-        onLike={() => setIsLiked(!isLiked)}
+        onLike={toggleLike}
         isBookmarked={isBookmarked}
-        onBookmark={() => setIsBookmarked(!isBookmarked)}
+        onBookmark={toggleBookmark}
       />
 
       <BackToTopButton />

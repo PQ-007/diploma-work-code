@@ -560,7 +560,7 @@ export function LeftSidebar({
   const pathname = usePathname();
   const isArticleDetail = pathname
     ? /^\/article\/[^/]+$/.test(pathname)
-    : false;
+    || /^\/profile\/[^/]+$/.test(pathname) : false;
 
   return (
     <Sidebar collapsible={isArticleDetail ? "offcanvas" : "icon"} {...props}>

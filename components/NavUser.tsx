@@ -48,14 +48,10 @@ const languages = [
   { code: "ja", name: "日本語", icon: Pi },
 ] as const;
 
-type User = {
-  name: string;
-  email: string;
-  avatar: string;
-};
 
 type ProfileData = {
   user_name: string | null;
+  display_name?: string | null; // Optional, can be derived from user_name if not provided
   avatar_url: string | null;
   bio: string | null;
   role: string | null;
@@ -103,7 +99,7 @@ export function NavUser() {
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("id, user_name, avatar_url, bio, role, email")
+          .select("id, user_name, avatar_url, bio, role, email, display_name")
           .eq("id", authUser.id)
           .single();
 
@@ -114,6 +110,7 @@ export function NavUser() {
           console.log("Profile data fetched:", profile);
           setProfileData({
             user_name: profile.user_name,
+            display_name: profile.display_name,
             avatar_url: profile.avatar_url,
             bio: profile.bio,
             role: profile.role,
@@ -131,16 +128,12 @@ export function NavUser() {
   }, []);
 
   // Use only profile data
-  const displayName = profileData?.user_name || "User";
+  const userName = profileData?.user_name || "User";
+  const displayName = profileData?.display_name || "User";
   const displayAvatar = profileData?.avatar_url || "";
   const displayEmail = profileData?.email || "";
 
-  console.log("Rendering with:", {
-    displayName,
-    displayAvatar,
-    displayEmail,
-    profileData,
-  });
+  
 
   const handleSignOut = async () => {
     try {
@@ -181,7 +174,7 @@ export function NavUser() {
         <Button
           variant="ghost"
           className="relative h-8 w-8 rounded-full focus-visible:ring-2 focus-visible:ring-offset-2"
-          aria-label={`User menu for ${displayName}`}
+          aria-label={`User menu for ${displayName }`}
         >
           <Avatar className="h-8 w-8">
             <AvatarImage src={displayAvatar} alt={displayName} />
@@ -203,7 +196,7 @@ export function NavUser() {
             <Avatar className="h-9 w-9">
               <AvatarImage src={displayAvatar} alt={displayName} />
               <AvatarFallback>
-                {displayName.charAt(0).toUpperCase()}
+                {userName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
@@ -219,12 +212,21 @@ export function NavUser() {
         <DropdownMenuGroup>
           {/* Static Links */}
           <DropdownMenuItem
-            onClick={() => router.push("/profile/user")}
+            onClick={() => router.push("/profile/" + userName)}
             className="cursor-pointer"
           >
             <div className="flex">
               <UserRound className="mr-2 h-4 w-4" />
               <span>{t("nav_user.profile")}</span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push("/library")}
+            className="cursor-pointer"
+          >
+            <div className="flex">
+              <UserRound className="mr-2 h-4 w-4" />
+              <span>{t("nav_user.library")}</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem

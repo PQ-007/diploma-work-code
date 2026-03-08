@@ -32,7 +32,14 @@
     "clearFilters": "Clear filters",
     "tryAgain": "Try Again",
     "noResults": "No results found",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "add": "Add",
+    "adding": "Adding...",
+    "saving": "Saving...",
+    "sending": "Sending...",
+    "uploading": "Uploading...",
+    "reply": "Reply",
+    "saveChanges": "Save Changes"
   },
 
   "sidebar": {
@@ -165,8 +172,8 @@
 
   "competitions": {
     "title": "Competitions",
-    "subtitle": "Join global challenges, solve complex problems, and win amazing prizes.",
-    "description": "Join global challenges, solve complex problems, and win amazing prizes.",
+    "subtitle": "Join challenges, solve complex problems, and win amazing prizes.",
+    "description": "Join challenges, solve complex problems, and win amazing prizes.",
     "upcoming": "Upcoming",
     "active": "Active",
     "completed": "Completed",
@@ -277,9 +284,9 @@
     },
     "postBox": {
       "placeholder": "What's on your mind, {{name}}?",
-      "post": "Post",
-      "code": "Code",
-      "poll": "Poll"
+      "post": "Article",
+      "poll": "Poll",
+      "discussion": "Discussion"
     }
   },
 
@@ -297,6 +304,7 @@
 
   "nav_user": {
     "profile": "Profile",
+    "library": "Library",
     "roadmap": "Roadmap",
     "theme": "Theme",
     "language": "Language",
@@ -315,54 +323,6 @@
     "contest_disc": "Make a contest",
     "discussions": "Discussions",
     "discussions_disc": "Start a new discussion"
-  },
-
-  "landing": {
-    "hero": {
-      "title": "A place to learn and create",
-      "subtitle": "FutureHub — A practical platform for Kosen Computer science students",
-      "searchPlaceholder": "Search projects, articles, contests..."
-    },
-    "cta": {
-      "title": "Use FutureHub",
-      "subtitle": "Learn from others and grow together.",
-      "getStarted": "Get Started"
-    },
-    "stats": {
-      "projects": "Projects",
-      "articles": "Articles",
-      "discussions": "Q&A",
-      "contests": "Contests"
-    },
-    "features": {
-      "title": "Key Features",
-      "items": [
-        {
-          "title": "Showcase Your Projects",
-          "desc": "Browse plans, graduation works, and tutorial projects."
-        },
-        {
-          "title": "Create Flashcards",
-          "desc": "Automatically extract useful words from text on the site."
-        },
-        {
-          "title": "Join Contests",
-          "desc": "Participate in department-hosted competitions."
-        },
-        {
-          "title": "Articles",
-          "desc": "Share your knowledge and experiences, and learn from others."
-        },
-        {
-          "title": "Multilingual Support",
-          "desc": "Use the platform in Mongolian, Japanese, or English."
-        },
-        {
-          "title": "Technical Dictionary",
-          "desc": "A dictionary with Mongolian translations tailored for your field."
-        }
-      ]
-    }
   },
 
   "articles": {
@@ -417,7 +377,83 @@
     "trendingArticles": "Trending Articles",
     "cantFindTerm": "Can't find the term?",
     "cantFindTermDesc": "Feel free to add new terms to the dictionary that you think can help the community!",
-    "addNewTerm": "Add New Term"
+    "addNewTerm": "Add New Term",
+    "termNotFound": "Term Not Found",
+    "termNotFoundDesc": "The term you're looking for doesn't exist in the dictionary yet.",
+    "backToDictionary": "Back to Dictionary",
+    "definition": "Definition",
+    "translations": "Translations",
+    "examples": "Examples",
+    "history": "History",
+    "suggestEdit": "Suggest Edit",
+    "editDraft": "Edit Draft",
+    "share": "Share",
+    "save": "Save",
+    "saved": "Saved",
+    "flashcard": "Flashcard",
+    "report": "Report",
+    "entryRejected": "Entry Rejected",
+    "relatedTerms": "Related Terms",
+    "entryInfo": "Entry Info",
+    "moderationHistory": "Moderation History",
+    "noTranslations": "No translations available yet.",
+    "noExamples": "No examples available yet.",
+    "noRevisions": "No revision history available.",
+    "create": {
+      "title": "Create Dictionary Entry",
+      "editTitle": "Edit Draft Entry",
+      "basicInfo": "Basic Information",
+      "term": "Term",
+      "termPlaceholder": "e.g. Machine Learning, 機械学習, Машин сургалт",
+      "reading": "Reading / Pronunciation",
+      "readingPlaceholder": "e.g. きかいがくしゅう",
+      "readingHint": "For Japanese terms, enter the furigana/hiragana reading.",
+      "primaryLanguage": "Primary Language",
+      "definitionLabel": "Definition",
+      "definitionPlaceholder": "Write a clear, concise definition...",
+      "tags": "Tags",
+      "tagsPlaceholder": "Type a tag and press Enter",
+      "addTranslation": "Add Translation",
+      "noTranslations": "No translations added yet. Add translations in other languages.",
+      "translatedTerm": "Translated term",
+      "explanation": "Explanation (optional)",
+      "addExample": "Add Example",
+      "noExamples": "No examples added yet. Add usage examples to help learners.",
+      "exampleText": "Example text / sentence",
+      "source": "Source (optional)",
+      "context": "Context (optional)",
+      "saveDraft": "Save Draft",
+      "submitForReview": "Submit for Review",
+      "cancel": "Cancel",
+      "checkingDuplicates": "Checking for duplicates...",
+      "similarTermsExist": "Similar terms already exist:",
+      "termRequired": "Term is required.",
+      "definitionRequired": "Definition is required."
+    },
+    "moderation": {
+      "title": "Moderation Queue",
+      "pending": "pending",
+      "allClear": "All clear!",
+      "allClearDesc": "No pending entries need review right now.",
+      "newEntry": "New Entry",
+      "edit": "Edit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmReject": "Confirm Reject",
+      "rejectionReason": "Rejection reason (required)...",
+      "noPermission": "You don't have permission to access the moderation queue."
+    },
+    "status": {
+      "approved": "APPROVED",
+      "pending_review": "PENDING REVIEW",
+      "draft": "DRAFT",
+      "rejected": "REJECTED"
+    },
+    "languages": {
+      "mn": "Монгол",
+      "ja": "日本語",
+      "en": "English"
+    }
   },
 
   "store": {
@@ -487,7 +523,7 @@
   },
 
   "carousel": {
-    "sponsored": "Sponsored",
+    "competition": "Competition",
     "event": "Event",
     "wordOfDay": "Word of the Day",
     "devTip": "Dev Tip",
@@ -511,6 +547,96 @@
     "tutorial": "Tutorial",
     "beginner": "BEGINNER",
     "intermediate": "INTERMEDIATE",
-    "advanced": "ADVANCED"
+    "advanced": "ADVANCED",
+
+    "showcase": "Project Showcase",
+    "showcaseDescription": "Browse student-built projects, share your work, and get feedback from the community.",
+    "showcaseBanner": "Student Project Showcase",
+    "showcaseBannerDesc": "Browse student-built projects, share your work, and get feedback",
+    "viewShowcase": "View Showcase",
+    "newProject": "New Project",
+    "publicProjects": "Public Projects",
+    "myProjects": "My Projects",
+    "searchProjects": "Search projects...",
+    "sortBy": "Sort by",
+    "newest": "Newest",
+    "mostLiked": "Most Liked",
+    "allDifficulties": "All",
+    "allTypes": "All",
+    "noProjectsFound": "No projects found.",
+    "noMyProjects": "You haven't created any projects yet.",
+    "createFirst": "Create Your First Project",
+
+    "createProject": "Create Project",
+    "editProject": "Edit Project",
+    "createDraft": "Create Draft",
+    "titleRequired": "Title is required",
+    "titlePlaceholder": "e.g., AI-Powered Student Dashboard",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe your project...",
+    "thumbnail": "Thumbnail",
+    "uploadThumbnail": "Upload thumbnail",
+    "type": "Project Type",
+    "difficulty": "Difficulty",
+    "category": "Category",
+    "categoryPlaceholder": "e.g., Web Development",
+    "status": "Status",
+    "visibility": "Visibility",
+    "private": "Private",
+    "public": "Public (Showcase)",
+    "technologies": "Technologies",
+    "addTechnology": "Add technology...",
+    "tags": "Tags",
+    "addTag": "Add tag...",
+    "repositoryUrl": "Repository URL (optional)",
+    "demoUrl": "Demo URL (optional)",
+
+    "backToProjects": "Back to Projects",
+    "confirmDelete": "Are you sure you want to delete this project?",
+    "progress": "Progress",
+    "repository": "Repository",
+    "liveDemo": "Live Demo",
+    "files": "Files",
+
+    "status.draft": "Draft",
+    "status.in_progress": "In Progress",
+    "status.completed": "Completed",
+    "status.archived": "Archived",
+    "difficulty.beginner": "Beginner",
+    "difficulty.intermediate": "Intermediate",
+    "difficulty.advanced": "Advanced",
+    "type.coding": "Coding",
+    "type.research": "Research",
+    "type.design": "Design",
+    "type.other": "Other",
+
+    "section.overview": "Overview",
+    "section.goals": "Goals",
+    "section.architecture": "Architecture / Design",
+    "section.implementation": "Implementation",
+    "section.results": "Results",
+    "section.lessonsLearned": "Lessons Learned",
+    "writeContent": "Write content in Markdown...",
+    "clickToEdit": "Click edit to add content...",
+    "noContent": "No content yet.",
+
+    "milestones": "Milestones",
+    "completed": "completed",
+    "addMilestone": "Add Milestone",
+    "milestoneTitle": "Milestone title",
+    "milestoneDescription": "Description (optional)",
+    "noMilestones": "No milestones yet",
+
+    "team": "Team",
+    "addMember": "Add Member",
+    "userIdPlaceholder": "Enter user ID",
+    "contributor": "Contributor",
+    "viewer": "Viewer",
+
+    "comments": "Comments",
+    "writeComment": "Write a comment...",
+    "writeReply": "Write a reply...",
+    "postComment": "Post Comment",
+    "noComments": "No comments yet. Be the first to share your thoughts!"
   }
 }
