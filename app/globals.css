@@ -2,6 +2,21 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Dashtseden – traditional Mongolian calligraphic font.
+   Place Dashtseden.ttf (or .woff2) in public/fonts/. */
+@font-face {
+  font-family: "Dashtseden";
+  src: url("/fonts/Dashtseden.woff2") format("woff2"),
+       url("/fonts/Dashtseden.ttf")  format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.mn-script {
+  font-family: "Dashtseden", "Mongolian Baiti", "Noto Sans Mongolian", serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

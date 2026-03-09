@@ -222,8 +222,10 @@ export default function ProjectPage() {
           </h3>
           <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
             {activeTab === "my"
-              ? t("project.noMyProjectsDesc") || "Start building your portfolio by creating your first project."
-              : t("project.noProjectsFoundDesc") || "Try adjusting your filters or search query."}
+              ? t("project.noMyProjectsDesc") ||
+                "Start building your portfolio by creating your first project."
+              : t("project.noProjectsFoundDesc") ||
+                "Try adjusting your filters or search query."}
           </p>
           {activeTab === "my" && user && (
             <Button onClick={() => router.push("/project/create")}>

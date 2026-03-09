@@ -90,6 +90,16 @@ interface RelatedArticle {
   tags: string[];
 }
 
+interface ConvertRequest {
+  text: string;
+  direction: "to-mng" | "to-cyr";
+}
+
+interface ConvertResponse {
+  result?: string;
+  error?: string;
+}
+
 interface EntryDetail {
   id: number;
   term: string;
@@ -240,17 +250,24 @@ export default function DictionaryTermPage() {
           ? (data.translations.find((t) => t.language_code === "mn")
               ?.translated_term ?? null)
           : null;
-    if (!cyrillicTerm) return;
-    fetch("https://api.kimo.mn/convert", {
+    if (!cyrillicTerm) {
+      setMnScript(null);
+      return;
+    }
+
+    fetch("/api/dictionary/convert", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: cyrillicTerm }),
+      body: JSON.stringify({ text: cyrillicTerm }),
     })
       .then((r) => r.json())
-      .then((json) => {
-        if (json?.output) setMnScript(json.output as string);
+      .then((json: ConvertResponse) => {
+        if (json?.result) setMnScript(json.result);
+        else setMnScript(null);
       })
-      .catch(() => {});
+      .catch(() => {
+        setMnScript(null);
+      });
   }, [data]);
 
   // --- Save toggle ---
@@ -397,10 +414,10 @@ export default function DictionaryTermPage() {
           {mnTerm && (
             <div className="hidden xl:flex items-start pt-3 w-7 flex-shrink-0 select-none">
               <span
-                className="text-[13px] font-bold text-violet-400/50 tracking-widest"
+                className="mn-script text-[30px] font
+                 tracking-widest"
                 style={{
-                  writingMode: "vertical-rl",
-                  transform: "rotate(180deg)",
+                  writingMode: "vertical-lr",
                   letterSpacing: "0.18em",
                 }}
                 title={`Mongolian: ${mnTerm}`}
