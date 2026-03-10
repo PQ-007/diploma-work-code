@@ -58,7 +58,6 @@ interface DuplicateMatch {
 const LANG_OPTIONS = [
   { value: "mn", label: "Монгол" },
   { value: "ja", label: "日本語" },
-  { value: "en", label: "English" },
 ];
 
 export default function DictionaryCreatePage() {
@@ -72,7 +71,7 @@ export default function DictionaryCreatePage() {
   // Form state
   const [term, setTerm] = useState("");
   const [reading, setReading] = useState("");
-  const [languageCode, setLanguageCode] = useState("en");
+  const languageCode = "en";
   const [definition, setDefinition] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -114,7 +113,6 @@ export default function DictionaryCreatePage() {
       }
       setTerm(entry.term);
       setReading(entry.reading || "");
-      setLanguageCode(entry.language_code);
       setDefinition(entry.definition);
       setTags(entry.tags || []);
       setTranslations(
@@ -392,7 +390,7 @@ export default function DictionaryCreatePage() {
               <Label htmlFor="term">Term *</Label>
               <Input
                 id="term"
-                placeholder="e.g. Machine Learning, 機械学習, Машин сургалт"
+                placeholder="e.g. Machine Learning, Application Programming Interface"
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
               />
@@ -439,30 +437,26 @@ export default function DictionaryCreatePage() {
               </Label>
               <Input
                 id="reading"
-                placeholder="e.g. きかいがくしゅう"
+                placeholder="e.g. /ˌæplɪˈkeɪʃən/"
                 value={reading}
                 onChange={(e) => setReading(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                For Japanese terms, enter the furigana/hiragana reading.
+                Phonetic or IPA pronunciation of the English term.
               </p>
             </div>
 
-            {/* Language */}
+            {/* Language — always English, shown as read-only info */}
             <div className="space-y-2">
-              <Label>Primary Language *</Label>
-              <Select value={languageCode} onValueChange={setLanguageCode}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LANG_OPTIONS.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Primary Language</Label>
+              <div className="flex items-center gap-2 h-9 px-3 rounded-md border border-border/50 bg-muted/30 w-[200px]">
+                <span className="text-sm text-muted-foreground">
+                  English (default)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                All entries are recorded in English. Add translations below.
+              </p>
             </div>
 
             {/* Definition */}

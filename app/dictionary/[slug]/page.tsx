@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 import {
   BookOpen,
   Pencil,
@@ -132,7 +133,7 @@ const STATUS_CONFIG: Record<
   { label: string; color: string; icon: typeof CheckCircle }
 > = {
   approved: {
-    label: "APPROVED",
+    label: "Verified",
     color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     icon: CheckCircle,
   },
@@ -160,12 +161,13 @@ const LANG_LABELS: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
   const Icon = cfg.icon;
   return (
     <Badge className={`${cfg.color} hover:${cfg.color}`}>
       <Icon className="h-3.5 w-3.5 mr-1" />
-      {cfg.label}
+      {t(`dictionary.status.${status}`, { defaultValue: cfg.label })}
     </Badge>
   );
 }
@@ -184,6 +186,7 @@ export default function DictionaryTermPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { t } = useTranslation();
 
   const slug = params?.slug ?? "";
 
@@ -198,6 +201,7 @@ export default function DictionaryTermPage() {
   const fetchEntry = useCallback(async () => {
     if (!slug) return;
     setLoading(true);
+    setMnScript(null);
     try {
       const res = await fetch(`/api/dictionary/${encodeURIComponent(slug)}`);
       if (res.status === 404) {
@@ -208,6 +212,26 @@ export default function DictionaryTermPage() {
       const json: EntryResponse = await res.json();
       setData(json);
       setIsSaved(json.entry.saved);
+
+      // --- Convert Cyrillic MN term → traditional Mongolian script ---
+      const cyrillicTerm =
+        json.entry.language_code === "mn"
+          ? json.entry.term
+          : (json.translations.find((t) => t.language_code === "mn")
+              ?.translated_term ?? null);
+      if (cyrillicTerm) {
+        try {
+          const convRes = await fetch("/api/dictionary/convert", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: cyrillicTerm }),
+          });
+          const convJson: ConvertResponse = await convRes.json();
+          if (convJson?.result) setMnScript(convJson.result);
+        } catch {
+          // conversion failure is non-fatal
+        }
+      }
     } catch {
       setNotFound(true);
     } finally {
@@ -241,35 +265,6 @@ export default function DictionaryTermPage() {
       .catch(() => {});
   }, [data?.entry.tags]);
 
-  // --- Convert Cyrillic MN term → traditional Mongolian script via KiMo API ---
-  useEffect(() => {
-    const cyrillicTerm =
-      data?.entry.language_code === "mn"
-        ? data.entry.term
-        : data?.entry
-          ? (data.translations.find((t) => t.language_code === "mn")
-              ?.translated_term ?? null)
-          : null;
-    if (!cyrillicTerm) {
-      setMnScript(null);
-      return;
-    }
-
-    fetch("/api/dictionary/convert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: cyrillicTerm }),
-    })
-      .then((r) => r.json())
-      .then((json: ConvertResponse) => {
-        if (json?.result) setMnScript(json.result);
-        else setMnScript(null);
-      })
-      .catch(() => {
-        setMnScript(null);
-      });
-  }, [data]);
-
   // --- Save toggle ---
   const handleSave = async () => {
     if (!user) return router.push("/signin");
@@ -298,10 +293,10 @@ export default function DictionaryTermPage() {
         body: JSON.stringify({ entry_id: data?.entry.id }),
       });
       const json = await res.json();
-      if (!res.ok) alert(json.error || "Failed to create flashcard");
-      else alert("Flashcard created!");
+      if (!res.ok) alert(json.error || t("dictionary.failedFlashcard"));
+      else alert(t("dictionary.flashcardCreated"));
     } catch {
-      alert("Failed to create flashcard");
+      alert(t("dictionary.failedFlashcard"));
     } finally {
       setSavingFlashcard(false);
     }
@@ -332,14 +327,15 @@ export default function DictionaryTermPage() {
         <div className="mx-auto py-6 lg:py-3 max-w-7xl">
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-            <h1 className="text-xl font-bold mb-2">Term Not Found</h1>
+            <h1 className="text-xl font-bold mb-2">
+              {t("dictionary.termNotFound")}
+            </h1>
             <p className="text-sm text-muted-foreground mb-6">
-              The term you&apos;re looking for doesn&apos;t exist in the
-              dictionary yet.
+              {t("dictionary.termNotFoundDesc")}
             </p>
             <Button size="sm" onClick={() => router.push("/dictionary")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dictionary
+              {t("dictionary.backToDictionary")}
             </Button>
           </div>
         </div>
@@ -373,17 +369,11 @@ export default function DictionaryTermPage() {
       ? (translationsByLang[language]?.[0] ?? null)
       : null;
 
-  // Sort translation sections so the entry's OWN language always appears first,
-  // then UI language, then the rest. The own-language section is rendered as a
-  // synthetic row (from entry.term / entry.definition) so filter it out from the
-  // dynamic list to avoid duplication.
+  // Show translations for all languages except English (the original) and the
+  // current UI language (already displayed as the primary definition above).
   const sortedTranslationEntries = Object.entries(translationsByLang)
-    .filter(([lang]) => lang !== entry.language_code)
-    .sort(([a], [b]) => {
-      if (a === language) return -1;
-      if (b === language) return 1;
-      return 0;
-    });
+    .filter(([lang]) => lang !== entry.language_code && lang !== language)
+    .sort(([a], [b]) => a.localeCompare(b));
 
   // Mongolian term for the vertical script accent (native MN entry OR has MN translation)
   const mnTerm =
@@ -394,35 +384,19 @@ export default function DictionaryTermPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 lg:py-3 max-w-7xl px-4">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <BookOpen className="h-4 w-4" />
-          <Link
-            href="/dictionary"
-            className="hover:text-foreground transition-colors"
-          >
-            Dictionary
-          </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground truncate max-w-[200px]">
-            {entry.term}
-          </span>
-        </div>
-
         <div className="flex gap-4 xl:gap-8 justify-center">
           {/* MN vertical script accent — shown when a Mongolian term is available */}
           {mnTerm && (
             <div className="hidden xl:flex items-start pt-3 w-7 flex-shrink-0 select-none">
               <span
-                className="mn-script text-[30px] font
-                 tracking-widest"
+                className="mn-script text-2xl tracking-widest"
                 style={{
                   writingMode: "vertical-lr",
                   letterSpacing: "0.18em",
                 }}
-                title={`Mongolian: ${mnTerm}`}
+                title={`Mongolian: ${mnScript ?? mnTerm}`}
               >
-                {mnScript || mnTerm}
+                {mnScript ?? mnTerm}
               </span>
             </div>
           )}
@@ -443,9 +417,6 @@ export default function DictionaryTermPage() {
                   </span>
                 )}
                 <StatusBadge status={entry.status} />
-                <Badge variant="outline" className="text-xs">
-                  {LANG_LABELS[entry.language_code] || entry.language_code}
-                </Badge>
               </div>
               {entry.reading && (
                 <p className="text-lg text-muted-foreground mt-1">
@@ -466,9 +437,13 @@ export default function DictionaryTermPage() {
                   <span>{entry.author.display_name}</span>
                 </Link>
                 <span>·</span>
-                <span>Updated {formatDate(entry.updated_at)}</span>
+                <span>
+                  {t("dictionary.updatedAt", {
+                    date: formatDate(entry.updated_at),
+                  })}
+                </span>
                 <span>·</span>
-                <span>{entry.views} views</span>
+                <span>{t("dictionary.views", { count: entry.views })}</span>
               </div>
             </div>
 
@@ -480,14 +455,17 @@ export default function DictionaryTermPage() {
                     <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-red-400">
-                        Entry Rejected
+                        {t("dictionary.entryRejected")}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {latestRejection.reason || "No reason provided."}
+                        {latestRejection.reason ||
+                          t("dictionary.noReasonProvided")}
                       </p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        By {latestRejection.moderator} on{" "}
-                        {formatDate(latestRejection.created_at)}
+                        {t("dictionary.rejectedBy", {
+                          moderator: latestRejection.moderator,
+                          date: formatDate(latestRejection.created_at),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -507,7 +485,7 @@ export default function DictionaryTermPage() {
                   }
                 >
                   <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                  Suggest Edit
+                  {t("dictionary.suggestEdit")}
                 </Button>
               )}
               {isOwner && entry.status === "draft" && (
@@ -520,7 +498,7 @@ export default function DictionaryTermPage() {
                   }
                 >
                   <FileEdit className="h-3.5 w-3.5 mr-1.5" />
-                  Edit Draft
+                  {t("dictionary.editDraft")}
                 </Button>
               )}
               <Button
@@ -530,7 +508,7 @@ export default function DictionaryTermPage() {
                 onClick={handleShare}
               >
                 <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                Share
+                {t("dictionary.share")}
               </Button>
               <Button
                 variant={isSaved ? "default" : "outline"}
@@ -541,7 +519,7 @@ export default function DictionaryTermPage() {
                 <Bookmark
                   className={`h-3.5 w-3.5 mr-1.5 ${isSaved ? "fill-current" : ""}`}
                 />
-                {isSaved ? "Saved" : "Save"}
+                {isSaved ? t("dictionary.saved") : t("dictionary.save")}
               </Button>
               {entry.status === "approved" && (
                 <Button
@@ -556,7 +534,7 @@ export default function DictionaryTermPage() {
                   ) : (
                     <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                   )}
-                  Flashcard
+                  {t("dictionary.flashcard")}
                 </Button>
               )}
               <Button
@@ -565,7 +543,7 @@ export default function DictionaryTermPage() {
                 className="text-xs text-muted-foreground"
               >
                 <Flag className="h-3.5 w-3.5 mr-1.5" />
-                Report
+                {t("dictionary.report")}
               </Button>
             </div>
 
@@ -591,126 +569,87 @@ export default function DictionaryTermPage() {
               <TabsList className="bg-muted/50 mb-4">
                 <TabsTrigger value="definition" className="text-xs gap-1.5">
                   <BookOpen className="h-3.5 w-3.5" />
-                  Definition
-                </TabsTrigger>
-                <TabsTrigger value="translations" className="text-xs gap-1.5">
-                  <Languages className="h-3.5 w-3.5" />
-                  Translations ({translations.length})
+                  {t("dictionary.definition")}
                 </TabsTrigger>
                 <TabsTrigger value="examples" className="text-xs gap-1.5">
                   <MessageSquareQuote className="h-3.5 w-3.5" />
-                  Examples ({examples.length})
+                  {t("dictionary.examples")} ({examples.length})
                 </TabsTrigger>
                 <TabsTrigger value="history" className="text-xs gap-1.5">
                   <History className="h-3.5 w-3.5" />
-                  History ({revisions.length})
+                  {t("dictionary.history")} ({revisions.length})
                 </TabsTrigger>
               </TabsList>
 
-              {/* --- Definition Tab --- */}
-              <TabsContent value="definition" className="space-y-4">
-                {displayTranslation?.explanation ? (
-                  <>
-                    <section>
-                      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                        <span className="w-1 h-6 bg-primary rounded-full" />
-                        {LANG_LABELS[language] || language}
-                      </h2>
-                      <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                        {displayTranslation.explanation}
-                      </p>
-                    </section>
-                    <Separator />
-                    <section>
-                      <h2 className="text-sm font-semibold mb-3 text-muted-foreground flex items-center gap-2">
-                        <span className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
-                        Original (
-                        {LANG_LABELS[entry.language_code] ||
-                          entry.language_code}
-                        )
-                      </h2>
-                      <p className="text-[15px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap">
-                        {entry.definition}
-                      </p>
-                    </section>
-                  </>
-                ) : (
-                  <section>
+              {/* --- Definition + Translations Tab --- */}
+              <TabsContent value="definition" className="space-y-0">
+                {/* 1. UI-language block (shown first when not English) */}
+                {language !== "en" && (
+                  <section className="pb-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                       <span className="w-1 h-6 bg-primary rounded-full" />
-                      Definition
+                      {LANG_LABELS[language] || language}
                     </h2>
-                    <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {entry.definition}
-                    </p>
-                    {displayTranslation && !displayTranslation.explanation && (
-                      <p className="text-xs text-muted-foreground mt-4 italic">
-                        No {LANG_LABELS[language] || language} explanation
-                        available yet.
+                    {displayTranslation ? (
+                      <>
+                        <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                          {displayTranslation.translated_term}
+                        </p>
+                        {displayTranslation.explanation && (
+                          <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap mt-2">
+                            {displayTranslation.explanation}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        {t("dictionary.noTranslationYet", {
+                          lang: LANG_LABELS[language] || language,
+                        })}
                       </p>
                     )}
                   </section>
                 )}
-              </TabsContent>
 
-              {/* --- Translations Tab --- */}
-              <TabsContent value="translations" className="space-y-6">
-                {/* Original / canonical entry — always first */}
-                <section>
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                    <Languages className="h-4 w-4" />
+                {/* 2. English */}
+                {language !== "en" && <Separator className="mb-6" />}
+                <section className="pb-6">
+                  <h2
+                    className={`mb-3 flex items-center gap-2 ${language === "en" ? "text-xl font-semibold" : "text-sm font-semibold text-muted-foreground"}`}
+                  >
+                    <span
+                      className={`rounded-full ${language === "en" ? "w-1 h-6 bg-primary" : "w-1 h-4 bg-muted-foreground/40"}`}
+                    />
                     {LANG_LABELS[entry.language_code] || entry.language_code}
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] normal-case tracking-normal ml-1"
-                    >
-                      original
-                    </Badge>
-                  </h3>
-                  <Card className="border-primary/30 bg-primary/5">
-                    <CardContent className="p-4">
-                      <p className="font-medium text-foreground">
-                        {entry.term}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {entry.definition}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  </h2>
+                  <p
+                    className={`text-[15px] leading-relaxed whitespace-pre-wrap ${language === "en" ? "text-muted-foreground" : "text-muted-foreground/70"}`}
+                  >
+                    {entry.definition}
+                  </p>
                 </section>
 
-                {sortedTranslationEntries.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    No translations available yet.
-                  </p>
-                ) : (
-                  sortedTranslationEntries.map(([lang, items]) => (
-                    <section key={lang}>
-                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                        <Languages className="h-4 w-4" />
-                        {LANG_LABELS[lang] || lang}
-                      </h3>
-                      <div className="space-y-3">
-                        {items.map((tr) => (
-                          <Card key={tr.id} className="border-border/40">
-                            <CardContent className="p-4">
-                              <p className="font-medium text-foreground">
-                                {tr.translated_term}
-                              </p>
-                              {tr.explanation && (
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {tr.explanation}
-                                </p>
-                              )}
-                              <p className="text-xs text-muted-foreground mt-2">
-                                Added {formatDate(tr.created_at)}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </section>
-                  ))
+                {/* 3. Remaining translations (neither UI lang nor English) */}
+                {sortedTranslationEntries.map(([lang, items]) =>
+                  items.map((tr) => (
+                    <div key={tr.id}>
+                      <Separator className="mb-6" />
+                      <section className="pb-6">
+                        <h2 className="text-sm font-semibold mb-3 text-muted-foreground flex items-center gap-2">
+                          <span className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
+                          {LANG_LABELS[lang] || lang}
+                        </h2>
+                        <p className="text-[15px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap">
+                          {tr.translated_term}
+                        </p>
+                        {tr.explanation && (
+                          <p className="text-[15px] text-muted-foreground/70 leading-relaxed whitespace-pre-wrap mt-2">
+                            {tr.explanation}
+                          </p>
+                        )}
+                      </section>
+                    </div>
+                  )),
                 )}
               </TabsContent>
 
@@ -718,7 +657,7 @@ export default function DictionaryTermPage() {
               <TabsContent value="examples" className="space-y-4">
                 {examples.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">
-                    No examples available yet.
+                    {t("dictionary.noExamples")}
                   </p>
                 ) : (
                   examples.map((ex) => (
@@ -733,7 +672,11 @@ export default function DictionaryTermPage() {
                           </p>
                         )}
                         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-                          {ex.source && <span>Source: {ex.source}</span>}
+                          {ex.source && (
+                            <span>
+                              {t("dictionary.source", { source: ex.source })}
+                            </span>
+                          )}
                           <Badge variant="outline" className="text-[10px]">
                             {LANG_LABELS[ex.language_code] || ex.language_code}
                           </Badge>
@@ -748,7 +691,7 @@ export default function DictionaryTermPage() {
               <TabsContent value="history" className="space-y-1">
                 {revisions.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-8 text-center">
-                    No revision history available.
+                    {t("dictionary.noRevisions")}
                   </p>
                 ) : (
                   <div className="relative pl-6 border-l-2 border-border/40 space-y-6">
@@ -763,7 +706,9 @@ export default function DictionaryTermPage() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-medium">
-                                Revision {rev.revision_number}
+                                {t("dictionary.revision", {
+                                  number: rev.revision_number,
+                                })}
                               </span>
                               <Badge variant="outline" className="text-[10px]">
                                 {rev.status.replace("_", " ")}
@@ -775,7 +720,10 @@ export default function DictionaryTermPage() {
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">
-                              by {rev.author} · {formatDate(rev.created_at)}
+                              {t("dictionary.by", {
+                                author: rev.author,
+                                date: formatDate(rev.created_at),
+                              })}
                             </p>
                           </div>
                         </div>
@@ -794,7 +742,7 @@ export default function DictionaryTermPage() {
               <div>
                 <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
                   <Newspaper className="h-4 w-4" />
-                  Related Content
+                  {t("dictionary.relatedContent")}
                 </h3>
                 <Card className="border-border/40">
                   <CardContent className="p-0">
@@ -840,7 +788,7 @@ export default function DictionaryTermPage() {
               <div>
                 <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
                   <LinkIcon className="h-4 w-4" />
-                  Related Terms
+                  {t("dictionary.relatedTerms")}
                 </h3>
                 <Card className="border-border/40">
                   <CardContent className="p-0">
@@ -854,10 +802,6 @@ export default function DictionaryTermPage() {
                           <span className="text-sm font-medium group-hover:text-foreground transition-colors">
                             {related.term}
                           </span>
-                          <Badge variant="outline" className="text-[10px]">
-                            {LANG_LABELS[related.language_code] ||
-                              related.language_code}
-                          </Badge>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </Link>
@@ -871,44 +815,44 @@ export default function DictionaryTermPage() {
             <div>
               <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
                 <FileText className="h-4 w-4" />
-                Entry Info
+                {t("dictionary.entryInfoLabel")}
               </h3>
               <Card className="border-border/40">
                 <CardContent className="p-4 space-y-3">
+                  
+                  
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Status</span>
-                    <StatusBadge status={entry.status} />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Language</span>
-                    <span className="font-medium">
-                      {LANG_LABELS[entry.language_code] || entry.language_code}
+                    <span className="text-muted-foreground">
+                      {t("dictionary.viewsLabel")}
                     </span>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Views</span>
                     <span className="font-medium">{entry.views}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Saves</span>
+                    <span className="text-muted-foreground">
+                      {t("dictionary.savesLabel")}
+                    </span>
                     <span className="font-medium">{entry.saves}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Translations</span>
+                    <span className="text-muted-foreground">
+                      {t("dictionary.translationsLabel")}
+                    </span>
                     <span className="font-medium">{translations.length}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Examples</span>
+                    <span className="text-muted-foreground">
+                      {t("dictionary.examples")}
+                    </span>
                     <span className="font-medium">{examples.length}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Created</span>
+                    <span className="text-muted-foreground">
+                      {t("dictionary.createdLabel")}
+                    </span>
                     <span className="font-medium">
                       {formatDate(entry.created_at)}
                     </span>
@@ -922,7 +866,7 @@ export default function DictionaryTermPage() {
               <div>
                 <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
                   <Flag className="h-4 w-4" />
-                  Moderation History
+                  {t("dictionary.moderationHistory")}
                 </h3>
                 <Card className="border-border/40">
                   <CardContent className="p-0">
@@ -938,7 +882,9 @@ export default function DictionaryTermPage() {
                             <AlertCircle className="h-3.5 w-3.5 text-red-400" />
                           )}
                           <span className="text-sm font-medium capitalize">
-                            {action.action}ed
+                            {action.action === "approve"
+                              ? t("dictionary.moderationApproved")
+                              : t("dictionary.moderationRejected")}
                           </span>
                         </div>
                         {action.reason && (
@@ -947,8 +893,10 @@ export default function DictionaryTermPage() {
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
-                          by {action.moderator} ·{" "}
-                          {formatDate(action.created_at)}
+                          {t("dictionary.by", {
+                            author: action.moderator,
+                            date: formatDate(action.created_at),
+                          })}
                         </p>
                       </div>
                     ))}
