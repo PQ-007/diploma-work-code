@@ -94,6 +94,13 @@ interface ProfileInfo {
   role: string | null;
   ranking_point: number;
   created_at: string | null;
+  skills: string | null;
+  interest: string | null;
+  language_level: unknown;
+  banner_gradient: string;
+  avatar_ring_color: string;
+  pinned_article_ids: string[];
+  pinned_project_ids: number[];
 }
 
 interface ProfileApiResponse {
@@ -104,6 +111,13 @@ interface ProfileApiResponse {
   recentActivity: ActivityItem[];
   isFollowing: boolean;
   isOwner: boolean;
+  languageSkills: {
+    id: number;
+    language_name: string;
+    flag_emoji: string;
+    proficiency_level: string;
+    sort_order: number;
+  }[];
 }
 
 const getRankIcon = (points: number) => {
@@ -167,19 +181,19 @@ export default function ProfilePage() {
     if (!authLoading) fetchProfile();
   }, [authLoading, fetchProfile]);
 
-  // Also get banner/skills from user_metadata for owner
-  const meta = user?.user_metadata || {};
+  // Data derived from API response (stored in DB)
   const bannerGradient =
-    data?.isOwner && meta.bannerGradient
-      ? meta.bannerGradient
-      : "from-violet-600 via-purple-500 to-fuchsia-500";
-  const skills: string[] = data?.isOwner && meta.skills ? meta.skills : [];
-  const languageSkills: any[] =
-    data?.isOwner && meta.languageSkills ? meta.languageSkills : [];
+    data?.profile.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500";
+  const avatarRingColor =
+    data?.profile.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500";
+  const skills: string[] = data?.profile.skills
+    ? data.profile.skills.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const languageSkills = data?.languageSkills ?? [];
 
-  // Pinned items: owner uses meta IDs, visitors see top by views/likes
-  const pinnedArticleIds: string[] = meta.pinnedArticleIds ?? [];
-  const pinnedProjectIds: number[] = meta.pinnedProjectIds ?? [];
+  // Pinned items: use DB-stored IDs, fallback to top by views/likes
+  const pinnedArticleIds: string[] = data?.profile.pinned_article_ids ?? [];
+  const pinnedProjectIds: number[] = data?.profile.pinned_project_ids ?? [];
   const pinnedArticles =
     data && pinnedArticleIds.length > 0
       ? data.articles.filter((a) => pinnedArticleIds.includes(a.id))
@@ -247,7 +261,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Avatar */}
             <div className="-mt-8 relative shrink-0">
-              <div className="rounded-full p-[3px] bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 shadow-[0_0_18px_rgba(251,191,36,0.5)]">
+              <div className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor} shadow-[0_0_18px_rgba(251,191,36,0.5)]` : "bg-border"}`}>
                 <Avatar className="h-24 w-24 border-4 border-card">
                   <AvatarImage src={profile.avatar_url || ""} />
                   <AvatarFallback className="text-2xl bg-muted text-muted-foreground font-bold">
@@ -279,7 +293,7 @@ export default function ProfilePage() {
                 <div className="flex gap-2 shrink-0">
                   {isOwner ? (
                     <Button size="sm" asChild className="gap-1.5">
-                      <Link href="/setup">
+                      <Link href={`/profile/${slug}/edit`}>
                         Edit Profile
                         <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
@@ -370,37 +384,24 @@ export default function ProfilePage() {
             <CardContent className="pt-0">
               {languageSkills.length > 0 ? (
                 <div className="space-y-2">
-                  {languageSkills.map((item: any, i: number) => {
-                    const isObj = typeof item === "object" && item !== null;
-                    const name = isObj ? item.name : item;
-                    const flag = isObj ? item.flag : "";
-                    const level = isObj ? item.level : "";
-                    return (
+                  {languageSkills.map((item, i: number) => (
                       <div
                         key={i}
                         className="flex items-center justify-between gap-2"
                       >
-                        <div className="flex items-center gap-2">
-                          {flag && (
-                            <span className="text-base leading-none">
-                              {flag}
-                            </span>
-                          )}
-                          <span className="text-sm text-foreground">
-                            {name}
-                          </span>
-                        </div>
-                        {level && (
+                        <span className="text-sm text-foreground">
+                          {item.language_name}
+                        </span>
+                        {item.proficiency_level && (
                           <Badge
                             variant="secondary"
                             className="text-[10px] px-2 py-0.5 shrink-0"
                           >
-                            {level}
+                            {item.proficiency_level}
                           </Badge>
                         )}
                       </div>
-                    );
-                  })}
+                  ))}
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
