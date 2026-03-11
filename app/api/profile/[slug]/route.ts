@@ -96,6 +96,24 @@ export async function GET(
       }
     });
 
+    // ─── 5. Reactions count per article ───
+    const articleReactionsMap: Record<string, number> = {};
+    let totalReactions = 0;
+    if (articleIds.length) {
+      const { data: reactionRows } = await supabase
+        .from("article_reactions")
+        .select("article_id")
+        .in("article_id", articleIds);
+      (reactionRows || []).forEach((r) => {
+        articleReactionsMap[r.article_id] =
+          (articleReactionsMap[r.article_id] || 0) + 1;
+      });
+      totalReactions = Object.values(articleReactionsMap).reduce(
+        (s, c) => s + c,
+        0,
+      );
+    }
+
     const userArticles = (articles || [])
       .filter((a) => latestTranslation.has(a.id))
       .map((a) => {
@@ -107,19 +125,10 @@ export async function GET(
           language_code: t.language_code,
           published_at: t.published_at,
           views: t.views ?? 0,
+          reactions: articleReactionsMap[a.id] ?? 0,
           tags: articleTagsMap[a.id] || [],
         };
       });
-
-    // ─── 5. Reactions count (total reactions received on user's articles) ───
-    let totalReactions = 0;
-    if (articleIds.length) {
-      const { count } = await supabase
-        .from("article_reactions")
-        .select("*", { count: "exact", head: true })
-        .in("article_id", articleIds);
-      totalReactions = count ?? 0;
-    }
 
     // ─── 6. Comments count (total comments on user's articles) ───
     let totalComments = 0;
@@ -146,6 +155,16 @@ export async function GET(
       (sum, t) => sum + (t.views ?? 0),
       0,
     );
+
+    // ─── 8b. Projects by this user ───
+    const { data: projectsData } = await supabase
+      .from("projects")
+      .select(
+        "id, title, slug, description, project_type, difficulty, status, technologies, views, likes_count, created_at",
+      )
+      .eq("created_by", userId)
+      .order("created_at", { ascending: false })
+      .limit(12);
 
     // ─── 9. Followers / Following ───
     const { count: followersCount } = await supabase
@@ -232,6 +251,19 @@ export async function GET(
       },
       articles: userArticles,
       recentActivity,
+      projects: (projectsData || []).map((p) => ({
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        description: p.description,
+        project_type: p.project_type,
+        difficulty: p.difficulty,
+        status: p.status,
+        technologies: p.technologies ?? [],
+        views: p.views ?? 0,
+        likes_count: p.likes_count ?? 0,
+        created_at: p.created_at,
+      })),
       isFollowing,
       isOwner: currentUser?.id === userId,
     });
