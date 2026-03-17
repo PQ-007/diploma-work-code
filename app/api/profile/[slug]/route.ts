@@ -13,7 +13,7 @@ export async function GET(
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(
-        "id, user_name, display_name, avatar_url, bio, email, role, ranking_point, created_at",
+        "id, user_name, display_name, avatar_url, bio, email, role, ranking_point, created_at, skills, interest, language_level, banner_gradient, avatar_ring_color, pinned_article_ids, pinned_project_ids",
       )
       .eq("user_name", slug)
       .single();
@@ -173,6 +173,13 @@ export async function GET(
       .order("created_at", { ascending: false })
       .limit(12);
 
+    // ─── 8c. Language skills from dedicated table ───
+    const { data: languageSkillsData } = await supabase
+      .from("language_skills")
+      .select("id, language_name, flag_emoji, proficiency_level, sort_order")
+      .eq("user_id", userId)
+      .order("sort_order", { ascending: true });
+
     // ─── 9. Followers / Following ───
     const { count: followersCount } = await supabase
       .from("user_follows")
@@ -241,6 +248,13 @@ export async function GET(
         role: profile.role,
         ranking_point: profile.ranking_point ?? 0,
         created_at: profile.created_at,
+        skills: profile.skills || "",
+        interest: profile.interest || "",
+        language_level: profile.language_level,
+        banner_gradient: profile.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500",
+        avatar_ring_color: profile.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500",
+        pinned_article_ids: profile.pinned_article_ids || [],
+        pinned_project_ids: profile.pinned_project_ids || [],
       },
       stats: {
         articles: userArticles.length,
@@ -269,6 +283,13 @@ export async function GET(
       })),
       isFollowing,
       isOwner: currentUser?.id === userId,
+      languageSkills: (languageSkillsData || []).map((ls) => ({
+        id: ls.id,
+        language_name: ls.language_name,
+        flag_emoji: ls.flag_emoji,
+        proficiency_level: ls.proficiency_level,
+        sort_order: ls.sort_order,
+      })),
     });
   } catch (err) {
     console.error("Profile API error:", err);
