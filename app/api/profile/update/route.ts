@@ -47,9 +47,7 @@ export async function PATCH(req: NextRequest) {
         );
       }
 
-      const cleanUsername = user_name
-        .toLowerCase()
-        .replace(/[^a-z0-9_-]/g, "");
+      const cleanUsername = user_name.toLowerCase().replace(/[^a-z0-9_-]/g, "");
 
       // Check uniqueness
       const { data: existing } = await supabase
@@ -87,10 +85,16 @@ export async function PATCH(req: NextRequest) {
     if (pinned_article_ids !== undefined)
       profileUpdate.pinned_article_ids = Array.isArray(pinned_article_ids)
         ? pinned_article_ids
+            .map((id) => (typeof id === "string" ? parseInt(id, 10) : id))
+            .filter((id) => !isNaN(id))
         : [];
     if (pinned_project_ids !== undefined)
       profileUpdate.pinned_project_ids = Array.isArray(pinned_project_ids)
         ? pinned_project_ids
+            .map((id) =>
+              typeof id === "number" ? id : parseInt(String(id), 10),
+            )
+            .filter((id) => !isNaN(id))
         : [];
 
     // Update profiles table
@@ -112,19 +116,19 @@ export async function PATCH(req: NextRequest) {
     // Update language skills if provided
     if (Array.isArray(language_skills)) {
       // Delete existing language skills for this user
-      await supabase
-        .from("language_skills")
-        .delete()
-        .eq("user_id", user.id);
+      await supabase.from("language_skills").delete().eq("user_id", user.id);
 
       // Insert new ones
       if (language_skills.length > 0) {
         const rows = language_skills.map(
-          (ls: {
-            language_name: string;
-            flag_emoji?: string;
-            proficiency_level?: string;
-          }, idx: number) => ({
+          (
+            ls: {
+              language_name: string;
+              flag_emoji?: string;
+              proficiency_level?: string;
+            },
+            idx: number,
+          ) => ({
             user_id: user.id,
             language_name: ls.language_name,
             flag_emoji: ls.flag_emoji || "",
@@ -151,14 +155,15 @@ export async function PATCH(req: NextRequest) {
     const metaUpdate: Record<string, unknown> = {};
     if (display_name !== undefined) metaUpdate.displayName = display_name;
     if (user_name !== undefined)
-      metaUpdate.username = user_name
-        .toLowerCase()
-        .replace(/[^a-z0-9_-]/g, "");
+      metaUpdate.username = user_name.toLowerCase().replace(/[^a-z0-9_-]/g, "");
     if (banner_gradient !== undefined)
       metaUpdate.bannerGradient = banner_gradient;
     if (skills !== undefined)
       metaUpdate.skills = skills
-        ? skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+        ? skills
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean)
         : [];
 
     if (Object.keys(metaUpdate).length > 0) {

@@ -106,10 +106,11 @@ export async function GET(_req: NextRequest, context: { params: RouteParams }) {
 
     return NextResponse.json(
       {
-        id: article.id,
+        id: String(article.id),
         status: article.status,
         author,
         ...translation,
+        article_id: String(translation.article_id),
         tags,
       },
       { status: 200 },

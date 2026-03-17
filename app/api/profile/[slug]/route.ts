@@ -33,7 +33,7 @@ export async function GET(
     // ─── 2. Articles by this user (only published) ───
     const { data: articles } = await supabase
       .from("articles")
-      .select("id, status, created_at, edited_at")
+      .select("id, status, created_at")
       .eq("author_id", userId)
       .eq("status", "published")
       .order("created_at", { ascending: false });
@@ -125,7 +125,7 @@ export async function GET(
       .map((a) => {
         const t = latestTranslation.get(a.id)!;
         return {
-          id: a.id,
+          id: String(a.id),
           title: t.title,
           sub_title: t.sub_title,
           language_code: t.language_code,
@@ -251,9 +251,13 @@ export async function GET(
         skills: profile.skills || "",
         interest: profile.interest || "",
         language_level: profile.language_level,
-        banner_gradient: profile.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500",
-        avatar_ring_color: profile.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500",
-        pinned_article_ids: profile.pinned_article_ids || [],
+        banner_gradient:
+          profile.banner_gradient ||
+          "from-violet-600 via-purple-500 to-fuchsia-500",
+        avatar_ring_color:
+          profile.avatar_ring_color ||
+          "from-amber-400 via-yellow-300 to-amber-500",
+        pinned_article_ids: (profile.pinned_article_ids || []).map(String),
         pinned_project_ids: profile.pinned_project_ids || [],
       },
       stats: {

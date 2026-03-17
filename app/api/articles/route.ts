@@ -37,7 +37,9 @@ export async function GET(req: NextRequest) {
 
     const { data: translations, error: translationError } = await supabase
       .from("article_translations")
-      .select("article_id, language_code, title, sub_title, body, published_at, views, created_at, edited_at")
+      .select(
+        "article_id, language_code, title, sub_title, body, published_at, views, created_at, edited_at",
+      )
       .in("article_id", articleIds)
       .order("published_at", { ascending: false });
 
@@ -204,7 +206,7 @@ export async function GET(req: NextRequest) {
       const authorProfile = authorId ? profilesById.get(authorId) : null;
 
       return {
-        article_id: t.article_id,
+        article_id: String(t.article_id),
         title: t.title,
         sub_title: t.sub_title,
         body: t.body,
