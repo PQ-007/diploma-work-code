@@ -64,7 +64,6 @@ CREATE TABLE public.articles (
   author_id uuid NOT NULL,
   status USER-DEFINED NOT NULL,
   created_at timestamp without time zone DEFAULT now(),
-  edited_at timestamp without time zone,
   base_lang_code text,
   series text,
   CONSTRAINT articles_pkey PRIMARY KEY (id),
@@ -229,6 +228,17 @@ CREATE TABLE public.flashcards (
   CONSTRAINT flashcards_pkey PRIMARY KEY (id),
   CONSTRAINT flashcards_user_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.language_skills (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id uuid NOT NULL,
+  language_name text NOT NULL,
+  flag_emoji text DEFAULT ''::text,
+  proficiency_level text DEFAULT 'Beginner'::text,
+  sort_order integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT language_skills_pkey PRIMARY KEY (id),
+  CONSTRAINT language_skills_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.poll_options (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   poll_id bigint NOT NULL,
@@ -269,6 +279,10 @@ CREATE TABLE public.profiles (
   skills text,
   interest text,
   language_level jsonb,
+  banner_gradient text DEFAULT 'from-violet-600 via-purple-500 to-fuchsia-500'::text,
+  avatar_ring_color text DEFAULT 'from-amber-400 via-yellow-300 to-amber-500'::text,
+  pinned_project_ids ARRAY DEFAULT '{}'::bigint[],
+  pinned_article_ids ARRAY DEFAULT '{}'::bigint[],
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );

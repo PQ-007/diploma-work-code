@@ -24,7 +24,13 @@ export async function GET(
 
     const userId = profile.id;
 
-    // ─── 2. Articles by this user ───
+    // ─── 1b. Check if current user is viewing their own profile ───
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+    const isOwner = currentUser?.id === userId;
+
+    // ─── 2. Articles by this user (only published) ───
     const { data: articles } = await supabase
       .from("articles")
       .select("id, status, created_at, edited_at")
@@ -127,6 +133,7 @@ export async function GET(
           views: t.views ?? 0,
           reactions: articleReactionsMap[a.id] ?? 0,
           tags: articleTagsMap[a.id] || [],
+          status: a.status,
         };
       });
 
@@ -212,10 +219,6 @@ export async function GET(
     }));
 
     // ─── 11. Check if current user follows this profile ───
-    const {
-      data: { user: currentUser },
-    } = await supabase.auth.getUser();
-
     let isFollowing = false;
     if (currentUser && currentUser.id !== userId) {
       const { data: followRow } = await supabase

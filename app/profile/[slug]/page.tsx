@@ -61,6 +61,7 @@ interface ArticleItem {
   views: number;
   reactions: number;
   tags: string[];
+  status?: string;
 }
 
 interface ActivityItem {
@@ -569,32 +570,19 @@ export default function ProfilePage() {
 
           <Tabs defaultValue="articles" className="w-full">
             <TabsList className="bg-transparent  border-border w-full rounded-none p-0 h-auto justify-start gap-0 mb-0">
-              <TabsTrigger
-                value="articles"
-                
-              >
+              <TabsTrigger value="articles">
                 <FileText className="h-3.5 w-3.5" />
                 Articles
               </TabsTrigger>
-              <TabsTrigger
-                value="projects">
-                
+              <TabsTrigger value="projects">
                 <FolderGit2 className="h-3.5 w-3.5" />
                 Projects
               </TabsTrigger>
-              <TabsTrigger
-                value="flashcards"
-                
-              >
+              <TabsTrigger value="flashcards">
                 <Layers className="h-3.5 w-3.5" />
                 Flashcards
               </TabsTrigger>
-              <TabsTrigger
-                value="certificates"
-                
-              >
-                Certificates
-              </TabsTrigger>
+              <TabsTrigger value="certificates">Certificates</TabsTrigger>
             </TabsList>
 
             {/* Articles Tab */}

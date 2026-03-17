@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 interface ArticleRequestBody {
   title?: string;
   body?: string;
+  sub_title?: string;
   tags?: string[];
   language_code?: string;
   status?: string;
@@ -18,9 +19,9 @@ export async function GET(req: NextRequest) {
 
     const { data: articles, error: articlesError } = await supabase
       .from("articles")
-      .select("id, author_id, status")
+      .select("id, author_id, status, created_at")
       .eq("status", statusFilter)
-      .order("id", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (articlesError) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     const { data: translations, error: translationError } = await supabase
       .from("article_translations")
-      .select("article_id, language_code, title, sub_title, body, published_at")
+      .select("article_id, language_code, title, sub_title, body, published_at, views, created_at, edited_at")
       .in("article_id", articleIds)
       .order("published_at", { ascending: false });
 
@@ -87,14 +88,57 @@ export async function GET(req: NextRequest) {
       tagsByArticle.set(link.article_id, arr);
     });
 
+    // Get reaction counts per article
+    const { data: reactionRows } = await supabase
+      .from("article_reactions")
+      .select("article_id")
+      .in("article_id", articleIds);
+
+    const reactionsByArticle = new Map<string, number>();
+    (reactionRows || []).forEach((r) => {
+      reactionsByArticle.set(
+        r.article_id,
+        (reactionsByArticle.get(r.article_id) || 0) + 1,
+      );
+    });
+
+    // Get comment counts per article
+    const { data: commentRows } = await supabase
+      .from("article_comments")
+      .select("article_id")
+      .in("article_id", articleIds);
+
+    const commentsByArticle = new Map<string, number>();
+    (commentRows || []).forEach((c) => {
+      commentsByArticle.set(
+        c.article_id,
+        (commentsByArticle.get(c.article_id) || 0) + 1,
+      );
+    });
+
+    // Get bookmark counts per article
+    const { data: bookmarkRows } = await supabase
+      .from("bookmarked_articles")
+      .select("article_id")
+      .in("article_id", articleIds);
+
+    const bookmarksByArticle = new Map<string, number>();
+    (bookmarkRows || []).forEach((b) => {
+      bookmarksByArticle.set(
+        b.article_id,
+        (bookmarksByArticle.get(b.article_id) || 0) + 1,
+      );
+    });
+
     const articleMap = new Map<
       string,
-      { author_id: string | null; status: string }
+      { author_id: string | null; status: string; created_at: string | null }
     >();
     (articles || []).forEach((a) => {
       articleMap.set(a.id, {
         author_id: a.author_id || null,
         status: a.status,
+        created_at: a.created_at,
       });
     });
 
@@ -107,6 +151,9 @@ export async function GET(req: NextRequest) {
         sub_title: string | null;
         body: string;
         published_at: string | null;
+        views: number | null;
+        created_at: string | null;
+        edited_at: string | null;
       }
     >();
 
@@ -152,7 +199,8 @@ export async function GET(req: NextRequest) {
     }
 
     const items = Array.from(latestByArticle.values()).map((t) => {
-      const authorId = articleMap.get(t.article_id)?.author_id || null;
+      const articleData = articleMap.get(t.article_id);
+      const authorId = articleData?.author_id || null;
       const authorProfile = authorId ? profilesById.get(authorId) : null;
 
       return {
@@ -162,6 +210,12 @@ export async function GET(req: NextRequest) {
         body: t.body,
         language_code: t.language_code,
         published_at: t.published_at,
+        created_at: articleData?.created_at || t.created_at,
+        edited_at: t.edited_at,
+        views: t.views ?? 0,
+        reactions: reactionsByArticle.get(t.article_id) || 0,
+        comments: commentsByArticle.get(t.article_id) || 0,
+        bookmarks: bookmarksByArticle.get(t.article_id) || 0,
         author_id: authorId,
         author: authorProfile
           ? {
@@ -194,6 +248,7 @@ export async function POST(req: NextRequest) {
   const {
     title,
     body,
+    sub_title,
     tags = [],
     language_code = "en",
     status = "draft",
@@ -223,6 +278,7 @@ export async function POST(req: NextRequest) {
     article_id: article.id,
     language_code,
     title,
+    sub_title,
     body,
     published_at: status === "published" ? new Date().toISOString() : null,
   };

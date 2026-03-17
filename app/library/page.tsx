@@ -34,6 +34,7 @@ interface LibraryItem {
   tags: string[];
   createdAt: string;
   editUrl: string;
+  status?: string;
 }
 
 const TAB_CONFIG = [
@@ -94,7 +95,10 @@ export default function LibraryPage() {
     setLoading(true);
     try {
       const typeParam = activeTab === "all" ? "all" : activeTab;
-      const res = await fetch(`/api/library?type=${typeParam}`);
+      const statusParam = unpublishedOnly ? "draft" : "all";
+      const res = await fetch(
+        `/api/library?type=${typeParam}&status=${statusParam}`,
+      );
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
@@ -104,7 +108,7 @@ export default function LibraryPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, unpublishedOnly]);
 
   useEffect(() => {
     if (user) fetchItems();
@@ -272,7 +276,7 @@ export default function LibraryPage() {
                             : "border-l-2 border-l-transparent"
                         }`}
                       >
-                        {/* Type badge + time */}
+                        {/* Type badge + status + time */}
                         <div className="flex items-center gap-2 mb-1.5">
                           <Badge
                             variant="secondary"
@@ -280,6 +284,14 @@ export default function LibraryPage() {
                           >
                             {TYPE_LABELS[item.type] || item.type}
                           </Badge>
+                          {item.status === "published" && (
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] px-1.5 py-0 font-medium bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                            >
+                              Published
+                            </Badge>
+                          )}
                           <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {relativeTime(item.createdAt)}

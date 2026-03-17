@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArticleCreateHeader } from "./ArticleCreateHeader";
 // --- Shadcn Breadcrumb Imports ---
 import Link from "next/link";
 import {
@@ -155,12 +154,8 @@ export function SiteHeader() {
         {/* LEFT SECTION: Sidebar Trigger */}
         <SidebarTrigger />
 
-       
-
         {/* RIGHT SECTION: Search and User Actions */}
         <div className="flex items-center space-x-2 text-sm font-medium">
-          
-
           {/* User Utility Buttons */}
           <div className="flex items-center gap-2">
             {user ? (
@@ -193,8 +188,9 @@ export function SiteHeader() {
 export function ResolvedHeader() {
   const pathname = usePathname() || "/";
 
+  // Article create page renders its own header inside the context provider
   if (pathname.startsWith("/article/create")) {
-    return <ArticleCreateHeader />;
+    return null;
   }
 
   return <SiteHeader />;
