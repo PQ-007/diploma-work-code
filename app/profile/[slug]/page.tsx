@@ -184,11 +184,16 @@ export default function ProfilePage() {
 
   // Data derived from API response (stored in DB)
   const bannerGradient =
-    data?.profile.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500";
+    data?.profile.banner_gradient ||
+    "from-violet-600 via-purple-500 to-fuchsia-500";
   const avatarRingColor =
-    data?.profile.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500";
+    data?.profile.avatar_ring_color ||
+    "from-amber-400 via-yellow-300 to-amber-500";
   const skills: string[] = data?.profile.skills
-    ? data.profile.skills.split(",").map((s) => s.trim()).filter(Boolean)
+    ? data.profile.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : [];
   const languageSkills = data?.languageSkills ?? [];
 
@@ -262,7 +267,9 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Avatar */}
             <div className="-mt-8 relative shrink-0">
-              <div className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor} shadow-[0_0_18px_rgba(251,191,36,0.5)]` : "bg-border"}`}>
+              <div
+                className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor} shadow-[0_0_18px_rgba(251,191,36,0.5)]` : "bg-border"}`}
+              >
                 <Avatar className="h-24 w-24 border-4 border-card">
                   <AvatarImage src={profile.avatar_url || ""} />
                   <AvatarFallback className="text-2xl bg-muted text-muted-foreground font-bold">
@@ -386,22 +393,22 @@ export default function ProfilePage() {
               {languageSkills.length > 0 ? (
                 <div className="space-y-2">
                   {languageSkills.map((item, i: number) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span className="text-sm text-foreground">
-                          {item.language_name}
-                        </span>
-                        {item.proficiency_level && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] px-2 py-0.5 shrink-0"
-                          >
-                            {item.proficiency_level}
-                          </Badge>
-                        )}
-                      </div>
+                    <div
+                      key={i}
+                      className="flex items-center justify-between gap-2"
+                    >
+                      <span className="text-sm text-foreground">
+                        {item.language_name}
+                      </span>
+                      {item.proficiency_level && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] px-2 py-0.5 shrink-0"
+                        >
+                          {item.proficiency_level}
+                        </Badge>
+                      )}
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -592,7 +599,7 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   {articles.map((article) => (
                     <Link key={article.id} href={`/article/${article.id}`}>
-                      <div className="group rounded-lg border border-border/60 bg-card hover:border-border transition-colors p-4 space-y-2.5">
+                      <div className="group rounded-lg border border-border/60 bg-card hover:border-border transition-colors p-4 mt-3 space-y-2.5">
                         {/* type + title + menu */}
                         <div className="flex items-start gap-2">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -667,76 +674,91 @@ export default function ProfilePage() {
             {/* Projects Tab */}
             <TabsContent value="projects" className="mt-2">
               {projects.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {projects.map((project) => (
                     <Link key={project.id} href={`/project/${project.slug}`}>
-                      <Card className="border-border/60 hover:shadow-md transition-shadow cursor-pointer">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="min-w-0 flex-1 space-y-1.5">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="font-semibold text-sm text-foreground line-clamp-1">
-                                  {project.title}
-                                </h3>
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] px-2 py-0 capitalize ${
-                                    project.status === "completed"
-                                      ? "border-emerald-500 text-emerald-600"
-                                      : project.status === "in_progress"
-                                        ? "border-blue-500 text-blue-600"
-                                        : project.status === "archived"
-                                          ? "border-muted-foreground text-muted-foreground"
-                                          : ""
-                                  }`}
-                                >
-                                  {project.status.replace("_", " ")}
-                                </Badge>
-                              </div>
-                              {project.description && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                  {project.description}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <Badge
-                                  variant="secondary"
-                                  className={`text-[10px] px-2 py-0 capitalize ${
-                                    project.difficulty === "beginner"
-                                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                      : project.difficulty === "intermediate"
-                                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                  }`}
-                                >
-                                  {project.difficulty}
-                                </Badge>
-                                {project.technologies
-                                  .slice(0, 4)
-                                  .map((tech) => (
-                                    <Badge
-                                      key={tech}
-                                      variant="secondary"
-                                      className="text-[10px] px-2 py-0"
-                                    >
-                                      {tech}
-                                    </Badge>
-                                  ))}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
-                              <span className="flex items-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                {project.views}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <ThumbsUp className="h-3 w-3" />
-                                {project.likes_count}
-                              </span>
-                            </div>
+                      <div className="group rounded-lg border border-border/60 bg-card hover:border-border transition-colors p-4 mt-3 space-y-2.5">
+                        {/* type + title + menu */}
+                        <div className="flex items-start gap-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+                              <FolderGit2 className="h-3 w-3" />
+                              Project
+                            </span>
+                            <span className="text-muted-foreground/40 text-xs shrink-0">
+                              ·
+                            </span>
+                            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                              {project.title}
+                            </h3>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <button
+                            onClick={(e) => e.preventDefault()}
+                            className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {/* badges */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] px-2 py-0 capitalize ${
+                              project.status === "completed"
+                                ? "border-emerald-500 text-emerald-600"
+                                : project.status === "in_progress"
+                                  ? "border-blue-500 text-blue-600"
+                                  : project.status === "archived"
+                                    ? "border-muted-foreground text-muted-foreground"
+                                    : ""
+                            }`}
+                          >
+                            {project.status.replace("_", " ")}
+                          </Badge>
+                          <Badge
+                            variant="secondary"
+                            className={`text-[10px] px-2 py-0 capitalize ${
+                              project.difficulty === "beginner"
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                : project.difficulty === "intermediate"
+                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}
+                          >
+                            {project.difficulty}
+                          </Badge>
+                          {project.technologies.slice(0, 4).map((tech) => (
+                            <Badge
+                              key={tech}
+                              variant="secondary"
+                              className="text-[10px] px-2 py-0"
+                            >
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        {/* description */}
+                        {project.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {project.description}
+                          </p>
+                        )}
+
+                        {/* stats */}
+                        <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {project.views}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ThumbsUp className="h-3 w-3" />
+                            {project.likes_count}
+                          </span>
+                          <span>{relativeTime(project.created_at)}</span>
+                        </div>
+                      </div>
                     </Link>
                   ))}
                 </div>

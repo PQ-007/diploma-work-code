@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useState, useRef, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  ReactNode,
+  useEffect,
+} from "react";
+import { useSearchParams } from "next/navigation";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
 
 type ViewMode = "split" | "editor" | "preview";
@@ -24,6 +32,8 @@ interface ArticleEditorState {
   isPublishing: boolean;
   justSaved: boolean;
   saveError: string | null;
+  isEditHydrating: boolean;
+  isEditAccessDenied: boolean;
   fileInputRef: React.RefObject<HTMLInputElement>;
 }
 
@@ -51,6 +61,7 @@ const ArticleEditorContext = createContext<
 >(null);
 
 export function ArticleEditorProvider({ children }: { children: ReactNode }) {
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [mdx, setMdx] = useState(`# Hello MDX Editor
@@ -74,8 +85,60 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const [isPublishing, setIsPublishing] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isEditHydrating, setIsEditHydrating] = useState(false);
+  const [isEditAccessDenied, setIsEditAccessDenied] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null!);
+
+  const articleIdFromQuery = searchParams.get("id");
+
+  useEffect(() => {
+    if (!articleIdFromQuery) return;
+
+    const loadArticleForEdit = async () => {
+      setIsEditHydrating(true);
+      setIsEditAccessDenied(false);
+      setSaveError(null);
+      try {
+        const res = await fetch(
+          `/api/articles/${encodeURIComponent(articleIdFromQuery)}?mode=edit`,
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            setIsEditAccessDenied(true);
+          }
+          throw new Error(data?.error || "Failed to load article");
+        }
+
+        setArticleId(data?.id ? String(data.id) : articleIdFromQuery);
+        setTitle(typeof data?.title === "string" ? data.title : "");
+        setSubtitle(typeof data?.sub_title === "string" ? data.sub_title : "");
+        setMdx(typeof data?.body === "string" ? data.body : "");
+        setTags(Array.isArray(data?.tags) ? data.tags.filter(Boolean) : []);
+
+        const lang =
+          typeof data?.language_code === "string" ? data.language_code : "en";
+        if (lang === "en" || lang === "es" || lang === "mn" || lang === "jp") {
+          setContentLang(lang);
+        }
+      } catch (err) {
+        setArticleId(null);
+        setTitle("");
+        setSubtitle("");
+        setMdx("");
+        setTags([]);
+        setSaveError(
+          err instanceof Error ? err.message : "Failed to load article",
+        );
+      } finally {
+        setIsEditHydrating(false);
+      }
+    };
+
+    loadArticleForEdit();
+  }, [articleIdFromQuery]);
 
   const handleSaveDraft = async () => {
     if (isSaving) return;
@@ -192,6 +255,8 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         isPublishing,
         justSaved,
         saveError,
+        isEditHydrating,
+        isEditAccessDenied,
         fileInputRef,
         setTitle,
         setSubtitle,

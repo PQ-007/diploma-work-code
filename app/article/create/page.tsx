@@ -14,9 +14,11 @@ import {
   Languages,
   Loader2,
   MessageCircleMore,
+  ShieldAlert,
   X,
 } from "lucide-react";
 import React from "react";
+import Link from "next/link";
 import ArticleSettingsButton from "@/components/button-collection/ArticleSettingsButton";
 import { ArticleCreateHeader } from "@/components/header-collection/ArticleCreateHeader";
 import { useArticleEditor } from "./ArticleEditorContext";
@@ -43,6 +45,9 @@ export default function ArticleCreatePage() {
     setLangMenuOpen,
     imageUploading,
     imageError,
+    saveError,
+    isEditHydrating,
+    isEditAccessDenied,
     fileInputRef,
     handleExport,
     handleImageButtonClick,
@@ -67,15 +72,52 @@ export default function ArticleCreatePage() {
     }
   };
 
+  if (isEditHydrating) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground gap-2">
+        <Loader2 size={18} className="animate-spin" />
+        Checking article access...
+      </div>
+    );
+  }
+
+  if (isEditAccessDenied) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-xl border border-destructive/30 bg-card p-6 text-center space-y-3">
+          <ShieldAlert className="h-8 w-8 text-destructive mx-auto" />
+          <h2 className="text-lg font-semibold">Access denied</h2>
+          <p className="text-sm text-muted-foreground">
+            You can only edit your own articles.
+          </p>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/article">Back to articles</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background text-foreground flex flex-col">
       <ArticleCreateHeader />
 
       <div className="flex-1">
         <div className="p-4 md:p-6 px-4 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_72px] gap-4 lg:gap-6">
+          <div
+            className={`grid grid-cols-1 gap-4 lg:gap-6 ${
+              viewMode === "split"
+                ? "lg:grid-cols-[minmax(0,1fr)_72px]"
+                : "lg:grid-cols-[minmax(0,48rem)_72px] lg:justify-center"
+            }`}
+          >
             <main className="min-w-0 space-y-4">
               <div className="space-y-3">
+                {saveError && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                    {saveError}
+                  </div>
+                )}
                 <input
                   type="text"
                   className="w-full px-4 py-2 bg-background border border-border rounded-full text-lg font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"

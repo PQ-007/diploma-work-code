@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +19,7 @@ import {
   Loader2,
   Library as LibraryIcon,
   Clock,
+  MessageSquare,
 } from "lucide-react";
 
 // ── Types ──
@@ -39,22 +38,29 @@ interface LibraryItem {
 
 const TAB_CONFIG = [
   { value: "all", label: "All", icon: LibraryIcon },
-  { value: "articles", label: "Articles", icon: FileText },
-  { value: "questions", label: "Questions", icon: HelpCircle },
+  { value: "articles", label: "Article", icon: FileText },
+  { value: "questions", label: "Q&A", icon: HelpCircle },
   { value: "projects", label: "Projects", icon: FolderKanban },
   { value: "flashcards", label: "Flashcards", icon: Brain },
 ] as const;
 
 const TYPE_COLORS: Record<string, string> = {
-  article: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
-  question: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
-  project: "bg-green-500/15 text-green-600 dark:text-green-400",
-  flashcard: "bg-purple-500/15 text-purple-600 dark:text-purple-400",
+  article: "bg-blue-500/20 text-blue-400",
+  question: "bg-orange-500/20 text-orange-400",
+  project: "bg-green-500/20 text-green-400",
+  flashcard: "bg-purple-500/20 text-purple-400",
+};
+
+const TYPE_ICONS: Record<string, React.ElementType> = {
+  article: FileText,
+  question: MessageSquare,
+  project: FolderKanban,
+  flashcard: Brain,
 };
 
 const TYPE_LABELS: Record<string, string> = {
   article: "Article",
-  question: "Question",
+  question: "Discussion",
   project: "Project",
   flashcard: "Flashcard",
 };
@@ -81,21 +87,24 @@ function relativeTime(dateStr: string): string {
 
 export default function LibraryPage() {
   const { user } = useAuth();
-  const { t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState("all");
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [unpublishedOnly, setUnpublishedOnly] = useState(true);
+  const [draftsOnly, setDraftsOnly] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  // draftsOnly toggle only affects articles (discussions have no draft status)
+  const showDraftFilter =
+    activeTab === "all" || activeTab === "articles";
 
   // ── Fetch library items ──
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const typeParam = activeTab === "all" ? "all" : activeTab;
-      const statusParam = unpublishedOnly ? "draft" : "all";
+      const statusParam = showDraftFilter && draftsOnly ? "draft" : "all";
       const res = await fetch(
         `/api/library?type=${typeParam}&status=${statusParam}`,
       );
@@ -108,7 +117,7 @@ export default function LibraryPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, unpublishedOnly]);
+  }, [activeTab, draftsOnly, showDraftFilter]);
 
   useEffect(() => {
     if (user) fetchItems();
@@ -121,7 +130,6 @@ export default function LibraryPage() {
       if (deleting) return;
       setDeleting(item.id);
 
-      // Optimistic removal
       const prevItems = items;
       setItems((prev) => prev.filter((i) => i.id !== item.id));
       if (selectedId === item.id) setSelectedId(null);
@@ -132,9 +140,7 @@ export default function LibraryPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: item.id, type: item.type }),
         });
-        if (!res.ok) {
-          setItems(prevItems);
-        }
+        if (!res.ok) setItems(prevItems);
       } catch {
         setItems(prevItems);
       } finally {
@@ -172,180 +178,161 @@ export default function LibraryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
-        {/* Page Header */}
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-foreground">Draft List</h1>
-          <div className="flex items-center gap-3 mt-1">
+      <div className="mx-auto py-6 lg:py-5 max-w-7xl px-4">
+        {/* ── Header ── */}
+        <div className="mb-4">
+          <h1 className="text-lg font-bold text-foreground">Drafts List</h1>
+          <div className="flex items-center gap-4 mt-2">
             <button
-              onClick={() => setUnpublishedOnly((p) => !p)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setDraftsOnly((p) => !p)}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              {unpublishedOnly ? (
+              {draftsOnly ? (
                 <EyeOff className="h-3.5 w-3.5" />
               ) : (
                 <Eye className="h-3.5 w-3.5" />
               )}
-              Show unpublished drafts only
+              Show only unposted drafts
             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-5">
-          <TabsList className="h-9 bg-muted/40 backdrop-blur-sm gap-1">
-            {TAB_CONFIG.map((tab) => {
-              const Icon = tab.icon;
-              const count =
-                tab.value === "all"
-                  ? items.length
-                  : items.filter((i) =>
-                      tab.value === "articles"
-                        ? i.type === "article"
-                        : tab.value === "questions"
-                          ? i.type === "question"
-                          : tab.value === "projects"
-                            ? i.type === "project"
-                            : i.type === "flashcard",
-                    ).length;
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs"
-                >
-                  <Icon className="h-3.5 w-3.5 mr-1.5" />
-                  {tab.label}
-                  {count > 0 && (
-                    <span className="ml-1.5 text-[10px] bg-muted-foreground/15 rounded-full px-1.5">
-                      {count}
-                    </span>
-                  )}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+        {/* ── Underline Tabs ── */}
+        <div className="flex items-center gap-0 border-b border-border mb-0">
+          {TAB_CONFIG.map((tab) => {
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => {
+                  setActiveTab(tab.value);
+                  setSelectedId(null);
+                }}
+                className={`relative px-5 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t" />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-        {/* Two-column layout */}
-        <div className="flex gap-0 border border-border rounded-lg overflow-hidden bg-card min-h-[70vh]">
+        {/* ── Two-column layout ── */}
+        <div className="flex border-x border-b border-border overflow-hidden bg-card min-h-[72vh]">
           {/* ─── Left Panel: Item List ─── */}
-          <div className="w-full md:w-[420px] lg:w-[460px] border-r border-border flex-shrink-0">
-            <ScrollArea className="h-[70vh]">
+          <div className="w-full md:w-[440px] lg:w-[480px] border-r border-border flex-shrink-0">
+            <ScrollArea className="h-[72vh]">
               {loading ? (
-                <div className="p-3 space-y-2">
+                <div className="divide-y divide-border">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="p-3 space-y-2">
+                    <div key={i} className="p-4 space-y-2.5">
                       <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 w-16 rounded" />
-                        <Skeleton className="h-3 w-20 rounded" />
+                        <Skeleton className="h-5 w-20 rounded" />
+                        <Skeleton className="h-3.5 w-20 rounded" />
                       </div>
                       <Skeleton className="h-4 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-full rounded" />
+                      <Skeleton className="h-3.5 w-full rounded" />
                       <div className="flex gap-2 pt-1">
-                        <Skeleton className="h-7 w-20 rounded" />
-                        <Skeleton className="h-7 w-28 rounded" />
+                        <Skeleton className="h-8 w-20 rounded" />
+                        <Skeleton className="h-8 w-28 rounded" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : filteredItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[50vh] text-center p-6">
-                  <LibraryIcon className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                  <LibraryIcon className="h-10 w-10 text-muted-foreground/30 mb-3" />
                   <p className="text-sm text-muted-foreground">
                     No drafts found
                   </p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
+                  <p className="text-xs text-muted-foreground/50 mt-1">
                     Create an article, question, or project to see it here
                   </p>
                 </div>
               ) : (
-                <div>
-                  {filteredItems.map((item, idx) => (
-                    <div key={item.id}>
+                <div className="divide-y divide-border">
+                  {filteredItems.map((item) => {
+                    const isSelected = selectedId === item.id;
+                    const Icon = TYPE_ICONS[item.type] || FileText;
+                    return (
                       <div
+                        key={item.id}
                         role="button"
                         tabIndex={0}
                         onClick={() => setSelectedId(item.id)}
                         onKeyDown={(e) =>
                           e.key === "Enter" && setSelectedId(item.id)
                         }
-                        className={`w-full text-left p-4 transition-colors hover:bg-muted/50 cursor-pointer ${
-                          selectedId === item.id
-                            ? "bg-primary/5 border-l-2 border-l-primary"
-                            : "border-l-2 border-l-transparent"
+                        className={`w-full text-left p-4 cursor-pointer transition-colors ${
+                          isSelected
+                            ? "bg-emerald-500/10"
+                            : "hover:bg-muted/40"
                         }`}
                       >
-                        {/* Type badge + status + time */}
-                        <div className="flex items-center gap-2 mb-1.5">
+                        {/* Type badge + time */}
+                        <div className="flex items-center gap-2.5 mb-2">
                           <Badge
                             variant="secondary"
-                            className={`text-[10px] px-1.5 py-0 font-medium ${TYPE_COLORS[item.type] || ""}`}
+                            className={`text-[11px] px-2 py-0.5 font-medium gap-1 ${TYPE_COLORS[item.type] || ""}`}
                           >
+                            <Icon className="h-3 w-3" />
                             {TYPE_LABELS[item.type] || item.type}
                           </Badge>
                           {item.status === "published" && (
                             <Badge
                               variant="secondary"
-                              className="text-[10px] px-1.5 py-0 font-medium bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                              className="text-[10px] px-1.5 py-0 font-medium bg-emerald-500/15 text-emerald-500"
                             >
                               Published
                             </Badge>
                           )}
-                          <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                          <span className="text-xs text-muted-foreground">
                             {relativeTime(item.createdAt)}
                           </span>
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-1">
-                          {item.title || "Untitled"}
+                        <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-1 mb-1">
+                          {item.title || (
+                            <span className="text-muted-foreground font-normal">
+                              Title not set
+                            </span>
+                          )}
                         </h3>
 
                         {/* Preview */}
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                          {item.preview || "No content yet"}
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
+                          {item.preview || (
+                            <span className="text-muted-foreground/50">
+                              Body not set
+                            </span>
+                          )}
                         </p>
 
-                        {/* Tags */}
-                        {item.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {item.tags.slice(0, 3).map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="outline"
-                                className="text-[10px] px-1.5 py-0 font-normal"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            {item.tags.length > 3 && (
-                              <span className="text-[10px] text-muted-foreground">
-                                +{item.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
                         {/* Action buttons */}
-                        <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-7 text-xs px-3"
+                            className="h-8 text-xs px-4 gap-1.5"
                             onClick={(e) => {
                               e.stopPropagation();
                               window.location.href = item.editUrl;
                             }}
                           >
-                            <Pencil className="h-3 w-3 mr-1" />
+                            <Pencil className="h-3 w-3" />
                             Edit
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-7 text-xs px-3 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                            className="h-8 text-xs px-4 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
                             disabled={deleting === item.id}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -353,17 +340,16 @@ export default function LibraryPage() {
                             }}
                           >
                             {deleting === item.id ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
-                              <Trash2 className="h-3 w-3 mr-1" />
+                              <Trash2 className="h-3 w-3" />
                             )}
                             Delete Draft
                           </Button>
                         </div>
                       </div>
-                      {idx < filteredItems.length - 1 && <Separator />}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>
@@ -372,31 +358,36 @@ export default function LibraryPage() {
           {/* ─── Right Panel: Preview ─── */}
           <div className="hidden md:flex flex-1 flex-col">
             {selectedItem ? (
-              <ScrollArea className="h-[70vh]">
-                <div className="p-6 lg:p-8">
+              <ScrollArea className="h-[72vh]">
+                <div className="p-8">
                   {/* Type badge */}
-                  <div className="mb-4">
+                  <div className="mb-5">
                     <Badge
                       variant="secondary"
-                      className={`text-xs px-2 py-0.5 ${TYPE_COLORS[selectedItem.type] || ""}`}
+                      className={`text-xs px-2.5 py-1 font-medium gap-1.5 ${TYPE_COLORS[selectedItem.type] || ""}`}
                     >
+                      {(() => {
+                        const Icon =
+                          TYPE_ICONS[selectedItem.type] || FileText;
+                        return <Icon className="h-3.5 w-3.5" />;
+                      })()}
                       {TYPE_LABELS[selectedItem.type] || selectedItem.type}
                     </Badge>
                   </div>
 
                   {/* Title */}
-                  <h1 className="text-2xl font-bold text-foreground leading-tight mb-4">
+                  <h1 className="text-2xl font-bold text-foreground leading-tight mb-5">
                     {selectedItem.title || "Untitled"}
                   </h1>
 
                   {/* Tags */}
                   {selectedItem.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-6">
                       {selectedItem.tags.map((tag) => (
                         <Badge
                           key={tag}
                           variant="secondary"
-                          className="text-xs"
+                          className="text-xs px-3 py-1 rounded-md"
                         >
                           {tag}
                         </Badge>
@@ -406,7 +397,7 @@ export default function LibraryPage() {
 
                   <Separator className="mb-6" />
 
-                  {/* Body content rendered as simple markdown-like text */}
+                  {/* Body content */}
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     {selectedItem.body ? (
                       <MarkdownPreview content={selectedItem.body} />
@@ -421,7 +412,7 @@ export default function LibraryPage() {
             ) : (
               <div className="flex items-center justify-center h-full text-center p-6">
                 <div>
-                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/20 mb-3" />
                   <p className="text-sm text-muted-foreground">
                     Select an item to preview
                   </p>
@@ -436,7 +427,6 @@ export default function LibraryPage() {
 }
 
 // ── Simple Markdown Preview ──
-// Renders markdown body with basic formatting for preview purposes
 
 function MarkdownPreview({ content }: { content: string }) {
   const lines = content.split("\n");
@@ -446,7 +436,6 @@ function MarkdownPreview({ content }: { content: string }) {
       {lines.map((line, i) => {
         const trimmed = line.trim();
 
-        // Headings
         if (trimmed.startsWith("### ")) {
           return (
             <h3 key={i} className="text-lg font-bold mt-6 mb-2">
@@ -469,7 +458,6 @@ function MarkdownPreview({ content }: { content: string }) {
           );
         }
 
-        // Code block markers
         if (trimmed.startsWith("```")) {
           return (
             <div
@@ -481,7 +469,6 @@ function MarkdownPreview({ content }: { content: string }) {
           );
         }
 
-        // Blockquote
         if (trimmed.startsWith("> ")) {
           return (
             <blockquote
@@ -493,7 +480,6 @@ function MarkdownPreview({ content }: { content: string }) {
           );
         }
 
-        // List items
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           return (
             <li key={i} className="ml-4 list-disc">
@@ -502,12 +488,10 @@ function MarkdownPreview({ content }: { content: string }) {
           );
         }
 
-        // Empty line
         if (!trimmed) {
           return <div key={i} className="h-2" />;
         }
 
-        // Regular paragraph
         return (
           <p key={i} className="leading-relaxed">
             {trimmed}

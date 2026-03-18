@@ -3,10 +3,12 @@ import { createClient } from "@/utils/supabase/server";
 
 type RouteParams = { slug?: string } | Promise<{ slug?: string }>;
 
-export async function GET(_req: NextRequest, context: { params: RouteParams }) {
+export async function GET(req: NextRequest, context: { params: RouteParams }) {
   const resolvedParams =
     "then" in context.params ? await context.params : context.params;
   const articleId = resolvedParams?.slug ? String(resolvedParams.slug) : "";
+  const mode = req.nextUrl.searchParams.get("mode");
+  const isEditMode = mode === "edit";
 
   if (!articleId) {
     return NextResponse.json({ error: "Missing slug" }, { status: 400 });
@@ -24,6 +26,23 @@ export async function GET(_req: NextRequest, context: { params: RouteParams }) {
     if (articleError || !article) {
       const message = articleError?.message || "Article not found";
       return NextResponse.json({ error: message }, { status: 404 });
+    }
+
+    if (isEditMode) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      if (article.author_id !== user.id) {
+        return NextResponse.json(
+          { error: "You can only edit your own article." },
+          { status: 403 },
+        );
+      }
     }
 
     const { data: translation, error: translationError } = await supabase
