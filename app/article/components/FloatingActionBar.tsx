@@ -4,11 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Bookmark, Heart, MessageCircle, Share2 } from "lucide-react";
 
+type ArticleLangCode = "mn" | "en" | "jp";
+
+const ARTICLE_LANGS: Array<{ code: ArticleLangCode; label: string }> = [
+  { code: "mn", label: "MN" },
+  { code: "en", label: "EN" },
+  { code: "jp", label: "JP" },
+];
+
 type FloatingActionBarProps = {
   isLiked: boolean;
   onLike: () => void;
   isBookmarked: boolean;
   onBookmark: () => void;
+  selectedLanguage: ArticleLangCode;
+  availableTranslations: ArticleLangCode[];
+  onLanguageChange: (lang: ArticleLangCode) => void;
 };
 
 export default function FloatingActionBar({
@@ -16,10 +27,14 @@ export default function FloatingActionBar({
   onLike,
   isBookmarked,
   onBookmark,
+  selectedLanguage,
+  availableTranslations,
+  onLanguageChange,
 }: FloatingActionBarProps) {
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-4 duration-500 lg:hidden">
       <div className="flex items-center gap-1 p-1.5 bg-background/80 backdrop-blur-md border shadow-2xl rounded-full ring-1 ring-black/5">
+        {/* Like action */}
         <Button
           variant="ghost"
           size="icon"
@@ -31,7 +46,8 @@ export default function FloatingActionBar({
         >
           <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
         </Button>
-        <Separator orientation="vertical" className="h-6" />
+
+        {/* Comment action */}
         <Button
           variant="ghost"
           size="icon"
@@ -40,6 +56,8 @@ export default function FloatingActionBar({
         >
           <MessageCircle className="h-5 w-5" />
         </Button>
+
+        {/* Bookmark action */}
         <Button
           variant="ghost"
           size="icon"
@@ -53,7 +71,38 @@ export default function FloatingActionBar({
             className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`}
           />
         </Button>
-        <Separator orientation="vertical" className="h-6" />
+
+        {/* Language selector */}
+        <div className="flex items-center">
+          {ARTICLE_LANGS.map((lang) => {
+            const isAvailable = availableTranslations.includes(lang.code);
+            const isSelected = selectedLanguage === lang.code;
+
+            return (
+              <Button
+                key={lang.code}
+                type="button"
+                size="icon"
+                variant={isSelected ? "default" : "outline"}
+                className={`h-5 w-5 rounded-full tracking-wide ${
+                  !isAvailable
+                    ? "opacity-50 text-muted-foreground cursor-not-allowed"
+                    : ""
+                }`}
+                disabled={!isAvailable}
+                onClick={() => {
+                  if (isAvailable && !isSelected) {
+                    onLanguageChange(lang.code);
+                  }
+                }}
+              >
+                {lang.label }
+              </Button>
+            );
+          })}
+        </div>
+
+        {/* Share action */}
         <Button
           variant="ghost"
           size="icon"

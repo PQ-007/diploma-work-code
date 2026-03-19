@@ -9,13 +9,17 @@ import { Separator } from "@/components/ui/separator";
 import { components as mdxComponents } from "@/mdx/mdx-components";
 import {
   Bookmark,
+  Boxes,
   Calendar,
   Check,
   ExternalLink,
+  Globe,
   Hash,
   Heart,
+  Languages,
   Link as LinkIcon,
   MessageCircle,
+  MoreHorizontal,
   Share2,
 } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote";
@@ -32,6 +36,21 @@ import AuthorBox from "../components/AuthorBox";
 import ArticleCommentSection from "../components/ArticleCommentSection";
 import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSection";
 import { useArticleInteractions } from "@/hooks/useArticleInteractions";
+
+type ArticleLangCode = "mn" | "en" | "jp";
+
+const ARTICLE_LANGS: Array<{ code: ArticleLangCode; label: string }> = [
+  { code: "mn", label: "MN" },
+  { code: "en", label: "EN" },
+  { code: "jp", label: "JP" },
+];
+
+const normalizeLanguageCode = (raw: string | null | undefined) => {
+  const code = (raw || "").trim().toLowerCase();
+  if (code === "ja") return "jp";
+  if (code === "mn" || code === "en" || code === "jp") return code;
+  return "";
+};
 
 const extractRelatedLinks = (body: string): RelatedLink[] => {
   const matches = [...body.matchAll(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g)];
@@ -57,7 +76,15 @@ export default function ModernArticlePage() {
   const [loading, setLoading] = useState(true);
   const [tocItems, setTocItems] = useState<TocEntry[]>([]);
   const [showAllLinks, setShowAllLinks] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<ArticleLangCode>("mn");
+  const [isDesktopLanguageMenuOpen, setIsDesktopLanguageMenuOpen] =
+    useState(false);
+  const [availableTranslations, setAvailableTranslations] = useState<
+    ArticleLangCode[]
+  >([]);
   const articleRef = useRef<HTMLDivElement | null>(null);
+  const desktopLanguageMenuRef = useRef<HTMLDivElement | null>(null);
 
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
@@ -86,6 +113,20 @@ export default function ModernArticlePage() {
     () => (showAllLinks ? relatedLinks : relatedLinks.slice(0, 2)),
     [relatedLinks, showAllLinks],
   );
+
+  useEffect(() => {
+    if (!isDesktopLanguageMenuOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!desktopLanguageMenuRef.current?.contains(target)) {
+        setIsDesktopLanguageMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isDesktopLanguageMenuOpen]);
 
   const PageSkeleton = () => (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -202,7 +243,7 @@ export default function ModernArticlePage() {
         }
 
         const response = await fetch(
-          `/api/articles/${encodeURIComponent(slug)}`,
+          `/api/articles/${encodeURIComponent(slug)}?lang=${selectedLanguage}`,
         );
         const data = await response.json();
 
@@ -212,6 +253,34 @@ export default function ModernArticlePage() {
           throw new Error(
             data?.error || `Failed to load article: ${response.statusText}`,
           );
+        }
+
+        const activeLanguage = normalizeLanguageCode(data?.language_code);
+        const apiAvailableLanguages = Array.isArray(
+          data?.available_translations,
+        )
+          ? data.available_translations
+              .map((code: string) => normalizeLanguageCode(code))
+              .filter(Boolean)
+          : [];
+
+        const nextAvailable = Array.from(
+          new Set([
+            ...(apiAvailableLanguages as ArticleLangCode[]),
+            activeLanguage,
+          ]),
+        ).filter(Boolean) as ArticleLangCode[];
+
+        setAvailableTranslations(nextAvailable);
+
+        if (
+          activeLanguage &&
+          (activeLanguage === "mn" ||
+            activeLanguage === "en" ||
+            activeLanguage === "jp") &&
+          activeLanguage !== selectedLanguage
+        ) {
+          setSelectedLanguage(activeLanguage);
         }
 
         const body =
@@ -230,7 +299,9 @@ export default function ModernArticlePage() {
           definitions: data?.definitions,
           body,
           tags: Array.isArray(data?.tags) ? data.tags : [],
-          language_code: data?.language_code || "en",
+          language_code: activeLanguage || "mn",
+          base_lang_code: data?.base_lang_code || null,
+          available_translations: nextAvailable,
           published_at: data?.published_at || null,
           edited_at: data?.edited_at || null,
           author: data?.author || null,
@@ -246,7 +317,7 @@ export default function ModernArticlePage() {
     };
 
     loadMDX();
-  }, [slug]);
+  }, [slug, selectedLanguage]);
 
   const publishedAtText = article?.published_at
     ? new Date(article.published_at).toLocaleDateString()
@@ -355,6 +426,7 @@ export default function ModernArticlePage() {
               <div className="flex">
                 {/* Action stack */}
                 <div className="flex flex-col items-center gap-3">
+                  {/* Like action */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -371,6 +443,7 @@ export default function ModernArticlePage() {
                     />
                   </Button>
 
+                  {/* Bookmark action */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -387,6 +460,7 @@ export default function ModernArticlePage() {
                     />
                   </Button>
 
+                  {/* Comment action */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -397,14 +471,86 @@ export default function ModernArticlePage() {
                     <MessageCircle className="h-5 w-5" />
                   </Button>
 
+                  {/* Language selector */}
+                  <div className="relative" ref={desktopLanguageMenuRef}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full border border-border hover:bg-muted"
+                      aria-label="Language selector"
+                      onClick={() =>
+                        setIsDesktopLanguageMenuOpen((prev) => !prev)
+                      }
+                    >
+                      <Languages className="h-5 w-5" />
+                    </Button>
+
+                    {isDesktopLanguageMenuOpen && (
+                      <div className="absolute left-14 top-1/2 z-50 w-28 -translate-y-1/2 rounded-2xl border border-border/70 bg-background/95 p-2 shadow-2xl backdrop-blur-md">
+                        <div className="space-y-1">
+                          {ARTICLE_LANGS.map((lang) => {
+                            const isAvailable = availableTranslations.includes(
+                              lang.code,
+                            );
+                            const isSelected = selectedLanguage === lang.code;
+
+                            return (
+                              <Button
+                                key={lang.code}
+                                type="button"
+                                variant="ghost"
+                                className={`h-8 w-full justify-between rounded-lg px-3 text-sm font-semibold ${
+                                  isSelected
+                                    ? "bg-blue-600 text-white hover:bg-blue-600"
+                                    : "text-foreground hover:bg-muted"
+                                } ${
+                                  !isAvailable
+                                    ? "opacity-50 text-muted-foreground cursor-not-allowed hover:bg-transparent"
+                                    : ""
+                                }`}
+                                disabled={!isAvailable || loading}
+                                onClick={() => {
+                                  if (isAvailable && !loading && !isSelected) {
+                                    setSelectedLanguage(lang.code);
+                                    setLoading(true);
+                                  }
+                                  setIsDesktopLanguageMenuOpen(false);
+                                }}
+                              >
+                                <span>{lang.label}</span>
+                                {isSelected && <Check className="h-4 w-4" />}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                   {/* Share action */}
                   <Button
                     variant="ghost"
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
                     aria-label="Share"
+                    onClick={() => commentRef.current?.focus()}
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
+
+                  {/* More action */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full border border-border hover:bg-muted"
+                    aria-label="Share"
+                    onClick={() => commentRef.current?.focus()}
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+
+
+                 
 
                   <div className="h-px w-10 bg-border my-1" />
 
@@ -601,6 +747,14 @@ export default function ModernArticlePage() {
         onLike={toggleLike}
         isBookmarked={isBookmarked}
         onBookmark={toggleBookmark}
+        selectedLanguage={selectedLanguage}
+        availableTranslations={availableTranslations}
+        onLanguageChange={(lang) => {
+          if (lang !== selectedLanguage) {
+            setSelectedLanguage(lang);
+            setLoading(true);
+          }
+        }}
       />
 
       <BackToTopButton />

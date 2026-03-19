@@ -7,7 +7,6 @@ export type AuthorPayload = {
   role?: string | null;
   bio?: string | null;
   ranking_point?: number;
-  
 };
 
 export type ArticlePayload = {
@@ -20,6 +19,8 @@ export type ArticlePayload = {
   tags: string[];
   definitions?: { term: string; definition: string }[];
   language_code: string;
+  base_lang_code?: string | null;
+  available_translations?: string[];
   published_at: string | null;
   edited_at?: string | null;
   author?: AuthorPayload | null;

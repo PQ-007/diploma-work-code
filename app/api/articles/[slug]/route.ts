@@ -16,11 +16,22 @@ interface ArticlePatchBody {
 
 const ALLOWED_STATUSES = new Set(["draft", "published"]);
 
+const normalizeLanguageCode = (raw: string | null, fallback = "") => {
+  const code = (raw || "").trim().toLowerCase();
+  if (code === "ja") return "jp";
+  if (code === "mn" || code === "en" || code === "jp") return code;
+  return fallback;
+};
+
 export async function GET(req: NextRequest, context: { params: RouteParams }) {
   const resolvedParams =
     "then" in context.params ? await context.params : context.params;
   const articleId = resolvedParams?.slug ? String(resolvedParams.slug) : "";
   const mode = req.nextUrl.searchParams.get("mode");
+  const requestedLang = normalizeLanguageCode(
+    req.nextUrl.searchParams.get("lang"),
+    "",
+  );
   const isEditMode = mode === "edit";
 
   if (!articleId) {
@@ -32,7 +43,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
 
     const { data: article, error: articleError } = await supabase
       .from("articles")
-      .select("id, author_id, status, created_at")
+      .select("id, author_id, status, created_at, base_lang_code")
       .eq("id", articleId)
       .single();
 
@@ -58,20 +69,31 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
       }
     }
 
-    const { data: translation, error: translationError } = await supabase
+    const { data: translations, error: translationError } = await supabase
       .from("article_translations")
       .select(
         "article_id, language_code, title, sub_title, edited_at, body, published_at, views",
       )
       .eq("article_id", articleId)
-      .order("published_at", { ascending: false })
-      .limit(1)
-      .single();
+      .order("published_at", { ascending: false, nullsFirst: false });
 
-    if (translationError || !translation) {
+    if (translationError || !translations || translations.length < 1) {
       const message = translationError?.message || "Article not found";
       return NextResponse.json({ error: message }, { status: 404 });
     }
+
+    const selectedTranslation =
+      (requestedLang
+        ? translations.find((item) => item.language_code === requestedLang)
+        : null) || translations[0];
+
+    const availableTranslations = Array.from(
+      new Set(
+        translations
+          .map((item) => normalizeLanguageCode(item.language_code, ""))
+          .filter(Boolean),
+      ),
+    );
 
     const { data: tagLinks, error: tagLinkError } = await supabase
       .from("article_tags")
@@ -141,8 +163,10 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
         id: String(article.id),
         status: article.status,
         author,
-        ...translation,
-        article_id: String(translation.article_id),
+        ...selectedTranslation,
+        article_id: String(selectedTranslation.article_id),
+        base_lang_code: article.base_lang_code || null,
+        available_translations: availableTranslations,
         tags,
       },
       { status: 200 },
