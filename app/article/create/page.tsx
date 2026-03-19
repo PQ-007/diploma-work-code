@@ -14,10 +14,12 @@ import {
   Loader2,
   MessageCircleMore,
   ShieldAlert,
+  Trash2,
   X,
 } from "lucide-react";
 import React from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import ArticleSettingsButton from "@/components/button-collection/ArticleSettingsButton";
 import { ArticleCreateHeader } from "@/components/header-collection/ArticleCreateHeader";
 import { useArticleEditor } from "./ArticleEditorContext";
@@ -43,9 +45,14 @@ export default function ArticleCreatePage() {
     imageUploading,
     imageError,
     saveError,
+    status,
+    isEditMode,
+    articleId,
+    isDeleting,
     isEditHydrating,
     isEditAccessDenied,
     fileInputRef,
+    handleDeleteArticle,
     handleExport,
     handleImageButtonClick,
     handleImageFileChange,
@@ -61,6 +68,24 @@ export default function ArticleCreatePage() {
       setViewMode("split");
     }
   }, [viewMode, setViewMode]);
+
+  const lastSaveErrorRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (!saveError) {
+      lastSaveErrorRef.current = null;
+      return;
+    }
+
+    if (lastSaveErrorRef.current === saveError) {
+      return;
+    }
+
+    toast.error(saveError, {
+      description: "Please review your article fields and try again.",
+    });
+    lastSaveErrorRef.current = saveError;
+  }, [saveError]);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (
@@ -115,12 +140,6 @@ export default function ArticleCreatePage() {
           >
             <main className="min-w-0 space-y-4">
               <div className="space-y-3">
-                {saveError && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                    {saveError}
-                  </div>
-                )}
-
                 <input
                   type="text"
                   className="w-full px-4 py-1 bg-background border border-border rounded-full text-sm font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
@@ -213,7 +232,7 @@ export default function ArticleCreatePage() {
 
                   {langMenuOpen && (
                     <div className="absolute right-14 top-1/2 -translate-y-1/2 z-20 w-28 rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-col gap-1">
-                      {(["en", "mn", "jp"] as const).map((lang) => (
+                      {(["mn", "en", "jp"] as const).map((lang) => (
                         <button
                           key={lang}
                           className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
@@ -277,6 +296,22 @@ export default function ArticleCreatePage() {
                   aria-label="Export"
                 >
                   <Download size={16} />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 rounded-full text-destructive hover:text-destructive"
+                  onClick={handleDeleteArticle}
+                  disabled={!articleId || isDeleting}
+                  aria-label="Delete article"
+                  title={!articleId ? "Save article first" : "Delete article"}
+                >
+                  {isDeleting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
                 </Button>
 
                 <Button

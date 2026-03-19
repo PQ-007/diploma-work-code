@@ -300,6 +300,13 @@ export async function POST(req: NextRequest) {
     ? tags.map((t) => t?.trim()).filter(Boolean)
     : [];
 
+  if (status === "draft" && tagNames.length < 1) {
+    return NextResponse.json(
+      { error: "Draft article must contain at least one tag" },
+      { status: 400 },
+    );
+  }
+
   if (tagNames.length) {
     const { data: tagRows, error: tagError } = await supabase
       .from("tags")
