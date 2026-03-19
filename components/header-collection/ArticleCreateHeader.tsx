@@ -10,6 +10,8 @@ import { useArticleEditor } from "@/app/article/create/ArticleEditorContext";
 
 export function ArticleCreateHeader() {
   const {
+    title,
+    setTitle,
     isSaving,
     isPublishing,
     justSaved,
@@ -20,12 +22,20 @@ export function ArticleCreateHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center border-b bg-background/95 px-4 transition-all ease-linear supports-[backdrop-filter]:backdrop-blur-sm -mx-4 -mt-4 md:-mx-6 md:-mt-6 lg:-mx-8 lg:-mt-8">
-      <div className="flex w-full items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex w-full items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <SidebarTrigger />
+          <input
+            autoFocus
+            type="text"
+            className="w-full px-4 py-1.5 bg-background rounded-lg text-lg font-semibold "
+            placeholder="Enter article title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-medium">
+        <div className="flex items-center gap-2 text-sm font-medium shrink-0">
           <div className="h-6 w-px bg-border mx-1" aria-hidden />
 
           <Button
@@ -40,7 +50,7 @@ export function ArticleCreateHeader() {
             ) : (
               <CheckCircle2 size={16} />
             )}
-            <span>{justSaved ? "Saved" : "Save draft"}</span>
+            <span>{justSaved ? "Saved" : "Save"}</span>
           </Button>
 
           <Button

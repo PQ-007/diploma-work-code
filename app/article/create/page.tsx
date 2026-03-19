@@ -9,7 +9,6 @@ import {
   Columns2,
   Download,
   Eye,
-  FileText,
   Image,
   Languages,
   Loader2,
@@ -25,8 +24,6 @@ import { useArticleEditor } from "./ArticleEditorContext";
 
 export default function ArticleCreatePage() {
   const {
-    title,
-    setTitle,
     subtitle,
     setSubtitle,
     mdx,
@@ -56,9 +53,14 @@ export default function ArticleCreatePage() {
 
   const viewIcon = {
     split: <Columns2 size={16} />,
-    editor: <FileText size={16} />,
     preview: <Eye size={16} />,
-  }[viewMode];
+  }[viewMode as "split" | "preview"];
+
+  React.useEffect(() => {
+    if (viewMode === "editor") {
+      setViewMode("split");
+    }
+  }, [viewMode, setViewMode]);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (
@@ -118,13 +120,6 @@ export default function ArticleCreatePage() {
                     {saveError}
                   </div>
                 )}
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 bg-background border border-border rounded-full text-lg font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                  placeholder="Enter article title..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
 
                 <input
                   type="text"
@@ -183,7 +178,7 @@ export default function ArticleCreatePage() {
 
                   {viewMenuOpen && (
                     <div className="absolute right-14 top-1/2 -translate-y-1/2 z-20 rounded-full border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-row gap-1">
-                      {(["split", "editor", "preview"] as const).map((mode) => (
+                      {(["split", "preview"] as const).map((mode) => (
                         <button
                           key={mode}
                           className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
@@ -198,7 +193,6 @@ export default function ArticleCreatePage() {
                           aria-label={`${mode} view`}
                         >
                           {mode === "split" && <Columns2 size={16} />}
-                          {mode === "editor" && <FileText size={16} />}
                           {mode === "preview" && <Eye size={16} />}
                         </button>
                       ))}

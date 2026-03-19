@@ -172,6 +172,7 @@ export function MdxEditor({
             verticalSliderSize: 8,
             horizontalSliderSize: 8,
             useShadows: false,
+            alwaysConsumeMouseWheel: false,
           },
           quickSuggestions: false,
         }}
