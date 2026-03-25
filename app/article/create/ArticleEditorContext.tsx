@@ -436,7 +436,12 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     }
 
     // Don't auto-save if content is too short or no tags provided
-    if (!title.trim() || !mdx.trim() || mdx.trim().length < 10 || tags.length === 0) {
+    if (
+      !title.trim() ||
+      !mdx.trim() ||
+      mdx.trim().length < 10 ||
+      tags.length === 0
+    ) {
       return;
     }
 
@@ -473,7 +478,10 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         setLastAutoSave(new Date());
         setHasUnsavedChanges(false);
       } else {
-        console.error("Auto-save succeeded but no article_id returned:", result);
+        console.error(
+          "Auto-save succeeded but no article_id returned:",
+          result,
+        );
       }
     } catch (error) {
       console.error("Auto-save failed:", error);
@@ -672,7 +680,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const handleSaveDraft = async () => {
     // Use ref as synchronous guard to prevent double-submission
     if (isSavingRef.current || isSaving) return;
-    
+
     isSavingRef.current = true;
     setIsSaving(true);
     setSaveError(null);
@@ -747,7 +755,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
 
   const handlePublish = async () => {
     if (!articleId || isPublishingRef.current || isPublishing) return;
-    
+
     isPublishingRef.current = true;
     setIsPublishing(true);
     try {
