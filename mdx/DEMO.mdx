@@ -1,0 +1,346 @@
+---
+title: "MDX Components Demo"
+description: "A showcase of all available MDX components"
+---
+
+# MDX Components Demo
+
+This page demonstrates all available MDX components in action.
+
+<Alert variant="info" title="Welcome!">
+  This is a comprehensive demo of production-quality MDX components designed for
+  modern web applications.
+</Alert>
+
+## Getting Started
+
+Let's explore each component with real examples.
+
+<Steps>
+
+### Installation
+
+First, ensure all components are imported in your MDX file:
+
+```typescript
+import {
+  Alert,
+  Badge,
+  Card,
+  Steps,
+  Tabs,
+  Accordion,
+  Quote,
+  Timeline,
+  Kbd,
+} from "@/components/mdx";
+```
+
+### Using Components
+
+Simply use them in your MDX content like regular React components:
+
+```mdx
+<Alert variant="success">Your component is ready to use!</Alert>
+```
+
+### Customization
+
+All components support theme-aware styling and can be customized via props.
+
+</Steps>
+
+---
+
+## Interactive Components
+
+### Tabs
+
+<Tabs
+  items={[
+    {
+      label: "Overview",
+      content: (
+        <>
+          <p>Tabs allow you to organize content into multiple sections.</p>
+          <Badge variant="primary">Interactive</Badge>
+        </>
+      ),
+    },
+    {
+      label: "Features",
+      content: (
+        <ul>
+          <li>Smooth transitions</li>
+          <li>Keyboard navigation</li>
+          <li>Mobile responsive</li>
+        </ul>
+      ),
+    },
+    {
+      label: "Usage",
+      content: (
+        <>
+          <code>Pass an array of items with label and content properties.</code>
+        </>
+      ),
+    },
+  ]}
+/>
+
+### Accordion
+
+<Accordion
+  items={[
+    {
+      title: "What makes these components special?",
+      content:
+        "They're built with accessibility, performance, and design consistency in mind. Every component adapts to your theme automatically.",
+    },
+    {
+      title: "Are they mobile-friendly?",
+      content:
+        "Absolutely! All components are fully responsive and work beautifully on mobile devices.",
+    },
+    {
+      title: "Can I customize the styling?",
+      content:
+        "Yes! Components use your theme's CSS variables and can be customized through props and standard Tailwind classes.",
+    },
+  ]}
+/>
+
+---
+
+## Content Display
+
+### Feature Grid
+
+<FeatureGrid
+  features={[
+    {
+      icon: "zap",
+      title: "Blazing Fast",
+      description:
+        "Optimized for performance with minimal bundle impact and smooth animations.",
+    },
+    {
+      icon: "shield",
+      title: "Accessible",
+      description:
+        "WCAG compliant with proper ARIA labels and keyboard navigation support.",
+    },
+    {
+      icon: "palette",
+      title: "Theme-Aware",
+      description:
+        "Seamlessly adapts to light and dark modes using your design system.",
+    },
+    {
+      icon: "code",
+      title: "Developer-Friendly",
+      description:
+        "Clean API with TypeScript support and comprehensive documentation.",
+    },
+  ]}
+/>
+
+### Timeline
+
+<Timeline
+  items={[
+    {
+      date: "Step 1",
+      title: "Design System Integration",
+      description:
+        "Components automatically adopt your theme colors, spacing, and typography.",
+    },
+    {
+      date: "Step 2",
+      title: "Component Development",
+      description:
+        "Built with modern React patterns and best practices for maintainability.",
+    },
+    {
+      date: "Step 3",
+      title: "Production Ready",
+      description:
+        "Tested for performance, accessibility, and cross-browser compatibility.",
+    },
+  ]}
+/>
+
+---
+
+## Alerts & Callouts
+
+<Alert variant="success" title="Success!">
+  Your configuration has been saved successfully.
+</Alert>
+
+<Alert variant="warning" title="Important Notice">
+  Please review the changes before proceeding.
+</Alert>
+
+<Callout type="tip">
+  💡 **Pro Tip**: Use keyboard shortcuts to navigate faster. Press{" "}
+  <Kbd>Cmd+K</Kbd> to open the command palette.
+</Callout>
+
+<Callout type="danger">
+  🚨 **Warning**: This action will permanently delete all associated data and
+  cannot be undone.
+</Callout>
+
+---
+
+## Cards & Badges
+
+<div className="grid md:grid-cols-2 gap-6 my-8">
+  <Card icon="rocket" title="Quick Start" variant="primary">
+    Get up and running in minutes with our step-by-step guide. <Badge variant="success">New</Badge>
+  </Card>
+
+  <Card icon="database" title="API Reference">
+    Comprehensive API documentation with code examples. <Badge variant="outline">Docs</Badge>
+  </Card>
+</div>
+
+---
+
+## Code Examples
+
+### Regular Code Block
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+async function getUser(id: string): Promise<User> {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+```
+
+### Code Comparison
+
+<CodeComparison
+  language="typescript"
+  beforeLabel="❌ Don't do this"
+  afterLabel="✅ Do this instead"
+  before={`// Nested callbacks
+fetchUser((user) => {
+  fetchPosts(user.id, (posts) => {
+    fetchComments(posts[0].id, (comments) => {
+      console.log(comments);
+    });
+  });
+});`}
+  after={`// Async/await
+const user = await fetchUser();
+const posts = await fetchPosts(user.id);
+const comments = await fetchComments(posts[0].id);
+console.log(comments);`}
+/>
+
+---
+
+## File Structure
+
+<FileTree
+  tree={[
+    {
+      name: "app",
+      type: "folder",
+      children: [
+        { name: "layout.tsx", type: "file" },
+        { name: "page.tsx", type: "file" },
+        {
+          name: "api",
+          type: "folder",
+          children: [{ name: "route.ts", type: "file" }],
+        },
+      ],
+    },
+    {
+      name: "components",
+      type: "folder",
+      children: [
+        { name: "Button.tsx", type: "file" },
+        { name: "Card.tsx", type: "file" },
+      ],
+    },
+    { name: "package.json", type: "file" },
+  ]}
+/>
+
+---
+
+## Quotes
+
+<Quote author="Dieter Rams" role="Industrial Designer">
+  Good design is as little design as possible. Less, but better – because it
+  concentrates on the essential aspects, and the products are not burdened with
+  non-essentials.
+</Quote>
+
+---
+
+## Comparison Table
+
+<ComparisonTable
+  columns={[
+    { name: "Basic" },
+    { name: "Pro", highlight: true },
+    { name: "Enterprise" },
+  ]}
+  rows={[
+    { feature: "MDX Components", values: [true, true, true] },
+    { feature: "Custom Themes", values: [false, true, true] },
+    { feature: "Priority Support", values: [false, false, true] },
+    { feature: "Users", values: ["5", "50", "Unlimited"] },
+    { feature: "Storage", values: ["10 GB", "100 GB", "1 TB"] },
+  ]}
+/>
+
+---
+
+## Keyboard Shortcuts
+
+Common keyboard shortcuts for navigation:
+
+- <Kbd>Ctrl+K</Kbd> - Open command palette
+- <Kbd>Cmd+B</Kbd> - Toggle sidebar
+- <Kbd>Ctrl+Shift+P</Kbd> - Open preferences
+- <Kbd>/</Kbd> - Focus search
+
+---
+
+## Best Practices
+
+<Card variant="primary">
+
+### Design Principles
+
+1. **Consistency**: Use components consistently across your application
+2. **Accessibility**: Always provide alt text, labels, and proper semantics
+3. **Performance**: Lazy load images and optimize content
+4. **Responsiveness**: Test on multiple screen sizes
+
+</Card>
+
+---
+
+## Conclusion
+
+<Alert variant="success" title="You're All Set!">
+  You now have access to a complete set of production-quality MDX components.
+  Start building beautiful, accessible content today!
+</Alert>
+
+---
+
+**Need help?** Check out the [full documentation](./MDX_COMPONENTS_GUIDE.md) for detailed usage examples and API reference.

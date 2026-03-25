@@ -1,90 +1,29 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  Search,
-  RefreshCw,
-  FileText,
   AlertCircle,
+  FileText,
   Flame,
-  Users,
-  ExternalLink,
+  RefreshCw,
+  Search
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCallback, useEffect, useState } from "react";
 
 // --- Components Import ---
-import ListItem from "@/app/article/components/ListItem";
 import {
-  ArticlePageSkeleton,
   ArticleFeedSkeleton,
+  ArticlePageSkeleton,
 } from "@/app/article/components/ArticleSkeleton";
-import TrendingTopics from "@/components/TrendingTopics";
+import ListItem from "@/app/article/components/ListItem";
 import ReadingList from "@/components/ReadingList";
-interface ApiArticle {
-  article_id: string;
-  title: string;
-  sub_title: string | null;
-  body: string;
-  language_code: string;
-  published_at: string | null;
-  author_id: string | null;
-  author: {
-    user_name: string | null;
-    avatar_url: string | null;
-    ranking_point: number | null;
-  } | null;
-  tags: string[];
-}
+import { ApiArticle, FeedItem } from "./type";
 
-interface FeedItem {
-  id: string;
-  type: string;
-  day: number;
-  author: {
-    name: string;
-    avatar: string;
-    username: string;
-    verified: boolean;
-    reputation: number;
-    contributions: number;
-    ranking_point: number;
-  };
-  timestamp: string;
-  readTime: string;
-  content: {
-    title: string;
-    description: string;
-    image?: string;
-    tags: string[];
-  };
-  stats: {
-    likes: number;
-    comments: number;
-    views: number;
-    shares?: number;
-  };
-  featured: boolean;
-  trending: boolean;
-}
 
-const trendingTopics: Array<{
-  id: string;
-  name: string;
-  posts: number;
-  trend: "up" | "stable" | "down";
-}> = [
-  // ... (Your original trendingTopics array) ...
-  { id: "1", name: "React 19", posts: 1234, trend: "up" },
-  { id: "2", name: "Machine Learning", posts: 987, trend: "up" },
-  { id: "3", name: "Web3", posts: 756, trend: "stable" },
-  { id: "4", name: "TypeScript", posts: 654, trend: "up" },
-  { id: "5", name: "System Design", posts: 543, trend: "down" },
-];
 const popularTags = [
   { name: "React", count: 128 },
   { name: "TypeScript", count: 96 },
@@ -95,34 +34,6 @@ const popularTags = [
   { name: "System Design", count: 48 },
   { name: "DevOps", count: 41 },
 ];
-
-const topAuthors = [
-  {
-    name: "Sarah Chen",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    username: "@sarahchen",
-    articles: 24,
-  },
-  {
-    name: "Mike Rodriguez",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    username: "@mikecodes",
-    articles: 19,
-  },
-  {
-    name: "Emma Wilson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
-    username: "@emmawilson",
-    articles: 15,
-  },
-  {
-    name: "Alex Kim",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-    username: "@alexkim",
-    articles: 12,
-  },
-];
-// --- End of Data ---
 
 const stripMarkdown = (value: string) =>
   value
@@ -146,7 +57,6 @@ export default function ArticleBrowsePage() {
   const [likedItems, setLikedItems] = useState(new Set<string>());
   const [bookmarkedItems, setBookmarkedItems] = useState(new Set<string>());
   const [readingList, setReadingList] = useState(new Set<string>());
-  const [showQuickActions, setShowQuickActions] = useState<string | null>(null);
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -244,19 +154,6 @@ export default function ArticleBrowsePage() {
       newSet.has(id) ? newSet.delete(id) : newSet.add(id);
       return newSet;
     });
-  }, []);
-
-  const toggleReadingList = useCallback((id: string) => {
-    setReadingList((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
-    });
-    setShowQuickActions(null);
-  }, []);
-
-  const handleMoreClick = useCallback((id: string | null) => {
-    setShowQuickActions((prev) => (prev === id ? null : id));
   }, []);
 
   const filteredFeedItems = feedItems.filter((item) => {
@@ -513,41 +410,6 @@ export default function ArticleBrowsePage() {
 
             
 
-            {/* Top Authors */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <Users className="h-4 w-4" />
-                {t("articles.topAuthors")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-0">
-                  {topAuthors.map((author, i) => (
-                    <div
-                      key={author.username}
-                      className="flex items-center justify-between px-3 py-2.5 border-b border-border/20 last:border-b-0 hover:bg-muted/50 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 flex-1">
-                        <Avatar className="h-7 w-7">
-                          <AvatarImage src={author.avatar} />
-                          <AvatarFallback className="text-xs">
-                            {author.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">
-                            {author.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {author.articles} {t("common.articles")}
-                          </p>
-                        </div>
-                      </div>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
 
             <ReadingList readingListCount={readingList.size} />
           </aside>

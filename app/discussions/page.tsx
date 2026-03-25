@@ -295,37 +295,7 @@ export default function DiscussionsPage() {
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[300px] space-y-5 sticky top-8 h-fit">
-            {/* Discussion Stats */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <MessageSquare className="h-4 w-4" />
-                {t("discussions.stats")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-3 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.totalThreads")}
-                    </span>
-                    <span className="font-medium">{totalThreads}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.answered")}
-                    </span>
-                    <span className="font-medium text-green-600 dark:text-green-400">
-                      {answeredCount}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.unanswered")}
-                    </span>
-                    <span className="font-medium">{unansweredCount}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            
 
             <TrendingTopics trendingTopics={[]} t={t} />
           </aside>

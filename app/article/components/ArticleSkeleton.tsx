@@ -40,8 +40,7 @@ function ArticleItemSkeleton() {
             </div>
           </div>
         </div>
-        {/* Image placeholder (shown on ~40% of skeletons) */}
-        <Skeleton className="hidden sm:block flex-shrink-0 w-48 h-32 rounded-md" />
+        
       </div>
     </Card>
   );

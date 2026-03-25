@@ -28,7 +28,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import BackToTopButton from "../components/BackToTopButton";
-import FloatingActionBar from "../components/FloatingActionBar";
+
 import RightPanelCard from "../components/RightPanelCard";
 import TocItem from "../components/TocItem";
 import { ArticlePayload, RelatedLink, TocEntry } from "../type";
@@ -742,20 +742,7 @@ export default function ModernArticlePage() {
         </div>
       </div>
 
-      <FloatingActionBar
-        isLiked={isLiked}
-        onLike={toggleLike}
-        isBookmarked={isBookmarked}
-        onBookmark={toggleBookmark}
-        selectedLanguage={selectedLanguage}
-        availableTranslations={availableTranslations}
-        onLanguageChange={(lang) => {
-          if (lang !== selectedLanguage) {
-            setSelectedLanguage(lang);
-            setLoading(true);
-          }
-        }}
-      />
+      
 
       <BackToTopButton />
     </div>
