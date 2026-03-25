@@ -7,6 +7,7 @@ import {
   useRef,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
@@ -15,16 +16,40 @@ import {
   type ArticleSavePayload,
   type ArticleStatus,
 } from "./articleSave.utils";
+import {
+  type PartialTranslation,
+  type TranslationCompleteness,
+  validateTranslation,
+  calculateTranslationCompleteness,
+  hasTranslationContent,
+  createEmptyTranslation,
+} from "@/lib/validation/translation";
 
 type ViewMode = "split" | "editor" | "preview";
 type ContentLang = "mn" | "en" | "jp";
+
+export interface ArticleSettings {
+  series?: string | null;
+  baseLangCode?: ContentLang;
+  tags?: string[];
+  isSerial?: boolean;
+}
+
+type TranslationInfo = {
+  lang: string;
+  title?: string;
+  subTitle?: string;
+};
 
 function getFriendlyApiError(raw: string, fallback: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return fallback;
 
   try {
-    const parsed = JSON.parse(trimmed) as { error?: unknown; message?: unknown };
+    const parsed = JSON.parse(trimmed) as {
+      error?: unknown;
+      message?: unknown;
+    };
     if (typeof parsed.error === "string" && parsed.error.trim()) {
       return parsed.error;
     }
@@ -63,6 +88,20 @@ interface ArticleEditorState {
   tags: string[];
   tagInput: string;
   contentLang: ContentLang;
+  // Series management
+  seriesName: string | null;
+  isSerial: boolean;
+  // Auto-save state
+  isAutoSaving: boolean;
+  lastAutoSave: Date | null;
+  autoSaveEnabled: boolean;
+  hasUnsavedChanges: boolean;
+  // Translation management
+  translations: Record<ContentLang, PartialTranslation>;
+  hasUnsavedTranslations: boolean;
+  translationSyncInProgress: boolean;
+  translationCompleteness: TranslationCompleteness[];
+  // UI state
   viewMode: ViewMode;
   viewMenuOpen: boolean;
   langMenuOpen: boolean;
@@ -88,10 +127,37 @@ interface ArticleEditorActions {
   setMdx: (v: string) => void;
   setTags: (v: string[]) => void;
   setTagInput: (v: string) => void;
+  // Enhanced language switching with translation management
   setContentLang: (v: ContentLang) => void;
+  handleLanguageSwitch: (newLang: ContentLang) => Promise<void>;
+  // Translation management
+  getCurrentTranslation: () => PartialTranslation;
+  updateTranslation: (
+    lang: ContentLang,
+    translation: Partial<PartialTranslation>,
+  ) => void;
+  getTranslationStatus: (lang: ContentLang) => {
+    hasContent: boolean;
+    completeness: number;
+    errors: string[];
+  };
+  // Settings management
+  handleSettingsChange: (settings: ArticleSettings) => Promise<void>;
+  updateSeriesSettings: (isSerial: boolean, seriesName?: string) => void;
+  // Auto-save management
+  toggleAutoSave: (enabled: boolean) => void;
+  performManualSave: () => Promise<void>;
+  getAutoSaveStatus: () => {
+    isAutoSaving: boolean;
+    lastAutoSave: Date | null;
+    hasUnsavedChanges: boolean;
+    autoSaveEnabled: boolean;
+  };
+  // UI actions
   setViewMode: (v: ViewMode) => void;
   setViewMenuOpen: (v: boolean) => void;
   setLangMenuOpen: (v: boolean) => void;
+  // Article operations
   handleSaveDraft: () => Promise<void>;
   handlePublish: () => Promise<void>;
   handleDeleteArticle: () => Promise<void>;
@@ -106,9 +172,21 @@ const ArticleEditorContext = createContext<
   (ArticleEditorState & ArticleEditorActions) | null
 >(null);
 
+export function useArticleEditor() {
+  const context = useContext(ArticleEditorContext);
+  if (!context) {
+    throw new Error(
+      "useArticleEditor must be used within an ArticleEditorProvider",
+    );
+  }
+  return context;
+}
+
 export function ArticleEditorProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Core content state
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [mdx, setMdx] = useState(`# Hello MDX Editor
@@ -121,6 +199,36 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [contentLang, setContentLang] = useState<ContentLang>("mn");
+
+  // Series management state
+  const [seriesName, setSeriesName] = useState<string | null>(null);
+  const [isSerial, setIsSerial] = useState(false);
+
+  // Auto-save state
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastAutoSave, setLastAutoSave] = useState<Date | null>(null);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Translation management state
+  const [translations, setTranslations] = useState<
+    Record<ContentLang, PartialTranslation>
+  >({
+    mn: createEmptyTranslation(),
+    en: createEmptyTranslation(),
+    jp: createEmptyTranslation(),
+  });
+  const [hasUnsavedTranslations, setHasUnsavedTranslations] = useState(false);
+
+  // Function ref for save draft to avoid forward reference issues
+  const saveDraftRef = useRef<(() => Promise<void>) | null>(null);
+  const [translationSyncInProgress, setTranslationSyncInProgress] =
+    useState(false);
+  const [translationCompleteness, setTranslationCompleteness] = useState<
+    TranslationCompleteness[]
+  >([]);
+
+  // UI state
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [viewMenuOpen, setViewMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -128,6 +236,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const [imageError, setImageError] = useState<string | null>(null);
   const [status, setStatus] = useState<ArticleStatus>("draft");
 
+  // Article operations state
   const [articleId, setArticleId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -138,9 +247,316 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const [isEditAccessDenied, setIsEditAccessDenied] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null!);
+  const isSavingRef = useRef(false);
+  const isPublishingRef = useRef(false);
+  const isDeletingRef = useRef(false);
 
   const articleIdFromQuery = searchParams.get("id");
   const isEditMode = Boolean(articleIdFromQuery);
+
+  // Translation management functions
+  const updateTranslationCompleteness = useCallback(() => {
+    const completeness = calculateTranslationCompleteness(translations);
+    setTranslationCompleteness(completeness);
+  }, [translations]);
+
+  const getCurrentTranslation = useCallback(
+    (): PartialTranslation => ({
+      title,
+      subtitle,
+      body: mdx,
+      lastModified: new Date(),
+      wordCount: mdx.split(/\s+/).filter((word) => word.length > 0).length,
+      isComplete: Boolean(title.trim() && mdx.trim()),
+    }),
+    [title, subtitle, mdx],
+  );
+
+  const updateTranslation = useCallback(
+    (lang: ContentLang, translation: Partial<PartialTranslation>) => {
+      setTranslations((prev) => ({
+        ...prev,
+        [lang]: {
+          ...prev[lang],
+          ...translation,
+          lastModified: new Date(),
+        },
+      }));
+      setHasUnsavedTranslations(true);
+    },
+    [],
+  );
+
+  const getTranslationStatus = useCallback(
+    (lang: ContentLang) => {
+      const translation = translations[lang];
+      const validation = validateTranslation(translation);
+      const completeness =
+        translationCompleteness.find((tc) => tc.language === lang)
+          ?.completeness || 0;
+
+      return {
+        hasContent: hasTranslationContent(translation),
+        completeness,
+        errors: validation.errors,
+      };
+    },
+    [translations, translationCompleteness],
+  );
+
+  const handleLanguageSwitch = useCallback(
+    async (newLang: ContentLang) => {
+      if (newLang === contentLang) return;
+
+      setTranslationSyncInProgress(true);
+
+      try {
+        // Save current language content to translations state
+        const currentTranslation = getCurrentTranslation();
+        setTranslations((prev) => ({
+          ...prev,
+          [contentLang]: currentTranslation,
+        }));
+
+        // Load content for new language
+        const existingTranslation = translations[newLang];
+        if (hasTranslationContent(existingTranslation)) {
+          setTitle(existingTranslation.title || "");
+          setSubtitle(existingTranslation.subtitle || "");
+          setMdx(existingTranslation.body || "");
+        } else {
+          // Clear fields for empty translation
+          setTitle("");
+          setSubtitle("");
+          setMdx("");
+        }
+
+        // Update current language
+        setContentLang(newLang);
+        setLangMenuOpen(false);
+
+        // Mark as having unsaved changes if there are translations
+        const hasAnyContent = Object.values(translations).some(
+          hasTranslationContent,
+        );
+        if (hasAnyContent) {
+          setHasUnsavedTranslations(true);
+        }
+      } catch (error) {
+        console.error("Error switching languages:", error);
+        setSaveError("Failed to switch languages. Please try again.");
+      } finally {
+        setTranslationSyncInProgress(false);
+      }
+    },
+    [contentLang, getCurrentTranslation, translations],
+  );
+
+  // Settings management functions
+  const handleSettingsChange = useCallback(
+    async (settings: ArticleSettings) => {
+      try {
+        if (settings.series !== undefined) {
+          setSeriesName(settings.series);
+        }
+
+        if (settings.isSerial !== undefined) {
+          setIsSerial(settings.isSerial);
+        }
+
+        if (settings.baseLangCode && settings.baseLangCode !== contentLang) {
+          await handleLanguageSwitch(settings.baseLangCode);
+        }
+
+        if (settings.tags) {
+          setTags(settings.tags);
+        }
+
+        // Mark as having unsaved changes
+        setHasUnsavedTranslations(true);
+      } catch (error) {
+        console.error("Error applying settings changes:", error);
+        setSaveError("Failed to apply settings changes");
+      }
+    },
+    [contentLang, handleLanguageSwitch],
+  );
+
+  const updateSeriesSettings = useCallback(
+    (isSerialUpdate: boolean, seriesNameUpdate?: string) => {
+      setIsSerial(isSerialUpdate);
+      if (seriesNameUpdate !== undefined) {
+        setSeriesName(seriesNameUpdate);
+      }
+    },
+    [],
+  );
+
+  const handleTranslationSave = useCallback(
+    async (savedTranslations: TranslationInfo[]) => {
+      try {
+        // Update translations state with the saved translations
+        const updatedTranslations = { ...translations };
+
+        savedTranslations.forEach((translation) => {
+          const lang = translation.lang as ContentLang;
+          if (lang === "mn" || lang === "en" || lang === "jp") {
+            updatedTranslations[lang] = {
+              ...updatedTranslations[lang],
+              title: translation.title || "",
+              subtitle: translation.subTitle || "",
+              lastModified: new Date(),
+            };
+          }
+        });
+
+        setTranslations(updatedTranslations);
+        setHasUnsavedTranslations(true);
+
+        // If current language translation was updated, sync to main editor
+        const currentLangTranslation = savedTranslations.find(
+          (t) => t.lang === contentLang,
+        );
+        if (currentLangTranslation) {
+          setTitle(currentLangTranslation.title || "");
+          setSubtitle(currentLangTranslation.subTitle || "");
+        }
+      } catch (error) {
+        console.error("Error saving translations:", error);
+        setSaveError("Failed to save translations");
+      }
+    },
+    [translations, contentLang],
+  );
+
+  // Auto-save functionality - simplified version without full validation
+  const performAutoSave = useCallback(async () => {
+    if (!autoSaveEnabled || !hasUnsavedChanges || isSaving || isAutoSaving) {
+      return;
+    }
+
+    // Don't auto-save if content is too short or no tags provided
+    if (!title.trim() || !mdx.trim() || mdx.trim().length < 10 || tags.length === 0) {
+      return;
+    }
+
+    setIsAutoSaving(true);
+
+    try {
+      // Simplified auto-save payload (less validation than manual save)
+      const autoSavePayload = {
+        title: title.trim(),
+        sub_title: subtitle,
+        body: mdx.trim(),
+        tags: Array.from(
+          new Set(tags.map((tag) => tag.trim()).filter(Boolean)),
+        ),
+        language_code: contentLang,
+        status: "draft", // Auto-save always saves as draft
+      };
+
+      const res = await fetch("/api/articles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(autoSavePayload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Auto-save API error:", res.status, errorText);
+        throw new Error(`Auto-save failed: ${res.status}`);
+      }
+
+      const result = await res.json();
+      if (result.article_id) {
+        setArticleId(result.article_id);
+        setLastAutoSave(new Date());
+        setHasUnsavedChanges(false);
+      } else {
+        console.error("Auto-save succeeded but no article_id returned:", result);
+      }
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+      // Don't show error for auto-save failure to user
+      // They can manually save if needed
+    } finally {
+      setIsAutoSaving(false);
+    }
+  }, [
+    autoSaveEnabled,
+    hasUnsavedChanges,
+    isSaving,
+    isAutoSaving,
+    title,
+    subtitle,
+    mdx,
+    tags,
+    contentLang,
+  ]);
+
+  const toggleAutoSave = useCallback((enabled: boolean) => {
+    setAutoSaveEnabled(enabled);
+  }, []);
+
+  const performManualSave = useCallback(async () => {
+    if (saveDraftRef.current) {
+      await saveDraftRef.current();
+      setHasUnsavedChanges(false);
+    } else {
+      throw new Error("Save function not yet initialized");
+    }
+  }, []);
+
+  const getAutoSaveStatus = useCallback(
+    () => ({
+      isAutoSaving,
+      lastAutoSave,
+      hasUnsavedChanges,
+      autoSaveEnabled,
+    }),
+    [isAutoSaving, lastAutoSave, hasUnsavedChanges, autoSaveEnabled],
+  );
+
+  // Auto-save timer with debouncing
+  useEffect(() => {
+    if (!autoSaveEnabled || !hasUnsavedChanges) return;
+
+    const autoSaveTimer = setTimeout(() => {
+      performAutoSave();
+    }, 30000); // Auto-save every 30 seconds
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [autoSaveEnabled, hasUnsavedChanges, performAutoSave]);
+
+  // Track content changes for unsaved changes
+  useEffect(() => {
+    if (title || subtitle || mdx || tags.length > 0) {
+      setHasUnsavedChanges(true);
+    }
+  }, [title, subtitle, mdx, tags]);
+
+  // Update translation completeness when translations change
+  useEffect(() => {
+    updateTranslationCompleteness();
+  }, [translations, updateTranslationCompleteness]);
+
+  // Sync current content to translations on content changes
+  useEffect(() => {
+    if (!translationSyncInProgress) {
+      const currentTranslation = getCurrentTranslation();
+      setTranslations((prev) => ({
+        ...prev,
+        [contentLang]: currentTranslation,
+      }));
+    }
+  }, [
+    title,
+    subtitle,
+    mdx,
+    contentLang,
+    getCurrentTranslation,
+    translationSyncInProgress,
+  ]);
 
   useEffect(() => {
     if (!articleIdFromQuery) return;
@@ -171,6 +587,34 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         const translations = Array.isArray(data?.translations)
           ? data.translations
           : [];
+
+        // Initialize translations state with all available translations
+        const initialTranslations: Record<ContentLang, PartialTranslation> = {
+          mn: createEmptyTranslation(),
+          en: createEmptyTranslation(),
+          jp: createEmptyTranslation(),
+        };
+
+        // Populate with actual translation data
+        translations.forEach((translation) => {
+          const langCode = translation.language_code;
+          if (langCode === "mn" || langCode === "en" || langCode === "jp") {
+            initialTranslations[langCode] = {
+              title: translation.title || "",
+              subtitle: translation.sub_title || "",
+              body: translation.body || "",
+              lastModified: new Date(),
+              wordCount:
+                translation.body?.split(/\s+/).filter((word) => word.length > 0)
+                  .length || 0,
+              isComplete: Boolean(
+                translation.title?.trim() && translation.body?.trim(),
+              ),
+            };
+          }
+        });
+
+        setTranslations(initialTranslations);
 
         const selectedTranslation =
           translations.find((t) => t.language_code === preferredLanguage) ||
@@ -226,7 +670,10 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   }, [articleIdFromQuery]);
 
   const handleSaveDraft = async () => {
-    if (isSaving) return;
+    // Use ref as synchronous guard to prevent double-submission
+    if (isSavingRef.current || isSaving) return;
+    
+    isSavingRef.current = true;
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -263,7 +710,9 @@ This is a **Zenn/Qiita-style** editor for technical writing.
 
       if (!res.ok) {
         const errorText = await res.text();
-        throw new Error(getFriendlyApiError(errorText, "Failed to save article."));
+        throw new Error(
+          getFriendlyApiError(errorText, "Failed to save article."),
+        );
       }
 
       if (plan.method === "POST") {
@@ -284,14 +733,22 @@ This is a **Zenn/Qiita-style** editor for technical writing.
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 2000);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save article.");
+      setSaveError(
+        err instanceof Error ? err.message : "Failed to save article.",
+      );
     } finally {
+      isSavingRef.current = false;
       setIsSaving(false);
     }
   };
 
+  // Assign the save function to ref for use by manual save
+  saveDraftRef.current = handleSaveDraft;
+
   const handlePublish = async () => {
-    if (!articleId || isPublishing) return;
+    if (!articleId || isPublishingRef.current || isPublishing) return;
+    
+    isPublishingRef.current = true;
     setIsPublishing(true);
     try {
       const res = await fetch(`/api/articles/${articleId}/status`, {
@@ -311,18 +768,20 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         err instanceof Error ? err.message : "Failed to publish article.",
       );
     } finally {
+      isPublishingRef.current = false;
       setIsPublishing(false);
     }
   };
 
   const handleDeleteArticle = async () => {
-    if (!articleId || isDeleting) return;
+    if (!articleId || isDeletingRef.current || isDeleting) return;
 
     const confirmed = window.confirm(
       "Delete this article permanently? This action cannot be undone.",
     );
     if (!confirmed) return;
 
+    isDeletingRef.current = true;
     setIsDeleting(true);
     setSaveError(null);
 
@@ -355,6 +814,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         err instanceof Error ? err.message : "Failed to delete article.",
       );
     } finally {
+      isDeletingRef.current = false;
       setIsDeleting(false);
     }
   };
@@ -412,12 +872,27 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   return (
     <ArticleEditorContext.Provider
       value={{
+        // Core content state
         title,
         subtitle,
         mdx,
         tags,
         tagInput,
         contentLang,
+        // Series management state
+        seriesName,
+        isSerial,
+        // Auto-save state
+        isAutoSaving,
+        lastAutoSave,
+        autoSaveEnabled,
+        hasUnsavedChanges,
+        // Translation management state
+        translations,
+        hasUnsavedTranslations,
+        translationSyncInProgress,
+        translationCompleteness,
+        // UI state
         viewMode,
         viewMenuOpen,
         langMenuOpen,
@@ -425,6 +900,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         imageError,
         status,
         isEditMode,
+        // Article operations state
         articleId,
         isSaving,
         isPublishing,
@@ -434,15 +910,31 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         isEditHydrating,
         isEditAccessDenied,
         fileInputRef,
+        // Core actions
         setTitle,
         setSubtitle,
         setMdx,
         setTags,
         setTagInput,
-        setContentLang,
+        setContentLang, // Keep for backward compatibility
+        // Enhanced language switching
+        handleLanguageSwitch, // New enhanced language switching
+        // Translation management actions
+        getCurrentTranslation,
+        updateTranslation,
+        getTranslationStatus,
+        // Settings management actions
+        handleSettingsChange,
+        updateSeriesSettings,
+        // Auto-save management actions
+        toggleAutoSave,
+        performManualSave,
+        getAutoSaveStatus,
+        // UI actions
         setViewMode,
         setViewMenuOpen,
         setLangMenuOpen,
+        // Article operations
         handleSaveDraft,
         handlePublish,
         handleDeleteArticle,
@@ -454,13 +946,4 @@ This is a **Zenn/Qiita-style** editor for technical writing.
       {children}
     </ArticleEditorContext.Provider>
   );
-}
-
-export function useArticleEditor() {
-  const ctx = useContext(ArticleEditorContext);
-  if (!ctx)
-    throw new Error(
-      "useArticleEditor must be used inside ArticleEditorProvider",
-    );
-  return ctx;
 }

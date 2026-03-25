@@ -23,5 +23,11 @@ export { RImage } from "./Image";
 export { CLink } from "./CustomLink";
 export { Table } from "./Table";
 
+// Export new data visualization components
+export { Chart } from "./Chart";
+export { DataTable } from "./DataTable";
+export { MetricCard, MetricGrid } from "./MetricCard";
+export { ProgressBar, MultiProgress } from "./ProgressBar";
+
 // Export icon utilities
 export { iconMap, getIcon, type IconName } from "./iconMap";

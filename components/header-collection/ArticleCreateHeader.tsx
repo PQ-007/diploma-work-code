@@ -4,8 +4,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Clock } from "lucide-react";
 import { useArticleEditor } from "@/app/article/create/ArticleEditorContext";
+import { formatDistanceToNow } from "date-fns";
 
 // --- ArticleCreateHeader Main Component ---
 
@@ -21,6 +22,12 @@ export function ArticleCreateHeader() {
     articleId,
     handleSaveDraft,
     handlePublish,
+    // Auto-save state
+    isAutoSaving,
+    lastAutoSave,
+    autoSaveEnabled,
+    hasUnsavedChanges,
+    getAutoSaveStatus,
   } = useArticleEditor();
 
   const statusChipClass =
@@ -54,6 +61,31 @@ export function ArticleCreateHeader() {
             />
             {status === "published" ? "Published" : "Draft"}
           </Badge>
+
+          {/* Auto-save status indicator */}
+          {autoSaveEnabled && (
+            <>
+              <div className="h-6 w-px bg-border mx-1" aria-hidden />
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {isAutoSaving ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Auto-saving...</span>
+                  </>
+                ) : lastAutoSave ? (
+                  <>
+                    <CheckCircle2 size={12} className="text-green-600" />
+                    <span>Saved {formatDistanceToNow(lastAutoSave)} ago</span>
+                  </>
+                ) : hasUnsavedChanges ? (
+                  <>
+                    <Clock size={12} className="text-orange-500" />
+                    <span>Unsaved changes</span>
+                  </>
+                ) : null}
+              </div>
+            </>
+          )}
 
           <div className="h-6 w-px bg-border mx-1" aria-hidden />
 

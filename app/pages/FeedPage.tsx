@@ -364,13 +364,13 @@ export default function FeedPage() {
 
   // ── Discussion modal vote sync ────────────────────────────────────────────
   const handleModalVoteChange = useCallback(
-    (id: string, newVotes: number, newUserVote: "up" | "down" | null) => {
+    (id: string, newVote: "up" | "down" | null, newTotal: number) => {
       setFeed((prev) =>
         prev.map((entry) => {
           if (entry.kind !== "discussion" || entry.data.id !== id) return entry;
           return {
             ...entry,
-            data: { ...entry.data, votes: newVotes, userVote: newUserVote },
+            data: { ...entry.data, votes: newTotal, userVote: newVote },
           };
         }),
       );

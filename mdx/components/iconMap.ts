@@ -57,7 +57,9 @@ export const iconMap: Record<string, LucideIcon> = {
 
 export type IconName = keyof typeof iconMap;
 
-export function getIcon(iconOrName: LucideIcon | IconName | string): LucideIcon | null {
+export function getIcon(
+  iconOrName: LucideIcon | IconName | string,
+): LucideIcon | null {
   // If it's already a component, return it
   if (typeof iconOrName === "function") {
     return iconOrName as LucideIcon;

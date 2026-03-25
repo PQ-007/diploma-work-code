@@ -48,7 +48,14 @@ type ArticleSettingsButtonProps = {
   likes?: number;
   comments?: number;
   translations?: TranslationInfo[];
+  seriesName?: string | null;
+  isSerial?: boolean;
   onSaveTranslations?: (translations: TranslationInfo[]) => void;
+  onSettingsChange?: (settings: {
+    isSerial: boolean;
+    seriesName?: string | null;
+    baseLangCode?: Lang;
+  }) => void;
 };
 
 const LANGS: Lang[] = ["en", "jp", "mn"];
@@ -96,7 +103,10 @@ export function ArticleSettingsButton({
   likes,
   comments,
   translations = [],
+  seriesName,
+  isSerial: initialIsSerial = false,
   onSaveTranslations,
+  onSettingsChange,
 }: ArticleSettingsButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -109,13 +119,20 @@ export function ArticleSettingsButton({
     useState<TranslationInfo[]>(initial);
 
   const [activeLang, setActiveLang] = useState<Lang>(language);
-  const [isSerial, setIsSerial] = useState(false);
+  const [isSerial, setIsSerial] = useState(initialIsSerial);
   const [serialOptions, setSerialOptions] = useState<string[]>([
     "Season 1",
     "Season 2",
   ]);
   const [serialInput, setSerialInput] = useState("");
-  const [selectedSerial, setSelectedSerial] = useState<string | null>(null);
+  const [selectedSerial, setSelectedSerial] = useState<string | null>(
+    seriesName || null,
+  );
+  const [originalSettings, setOriginalSettings] = useState({
+    isSerial: initialIsSerial,
+    seriesName,
+    language,
+  });
   const prevOpen = useRef(open);
 
   useEffect(() => {
@@ -123,12 +140,12 @@ export function ArticleSettingsButton({
       const reset = normalize(language, title, subTitle, translations);
       setDraftTranslations(reset);
       setActiveLang(language);
-      setIsSerial(false);
-      setSelectedSerial(null);
+      setIsSerial(originalSettings.isSerial);
+      setSelectedSerial(originalSettings.seriesName || null);
       setSerialInput("");
     }
     prevOpen.current = open;
-  }, [open, language, title, subTitle, translations]);
+  }, [open, language, title, subTitle, translations, originalSettings]);
 
   useEffect(() => {
     if (!isSerial) {
@@ -204,6 +221,37 @@ export function ArticleSettingsButton({
     setSerialOptions((prev) => [...prev, next]);
     setSelectedSerial(next);
     setSerialInput("");
+  };
+
+  const hasSettingsChanged = () => {
+    return (
+      isSerial !== originalSettings.isSerial ||
+      selectedSerial !== originalSettings.seriesName ||
+      language !== originalSettings.language
+    );
+  };
+
+  const handleSaveAll = () => {
+    // Save translations
+    onSaveTranslations?.(draftTranslations);
+
+    // Save settings if changed
+    if (hasSettingsChanged() && onSettingsChange) {
+      onSettingsChange({
+        isSerial,
+        seriesName: selectedSerial,
+        baseLangCode: language,
+      });
+
+      // Update original settings to new state
+      setOriginalSettings({
+        isSerial,
+        seriesName: selectedSerial,
+        language,
+      });
+    }
+
+    setOpen(false);
   };
 
   const statusTone =
@@ -422,7 +470,9 @@ export function ArticleSettingsButton({
             </div>
 
             <div className="lg:col-span-5 space-y-3 ">
-              <div className="p-2 pl-4 text-xl items-center space-between border rounded-lg bg-card">Stats</div>
+              <div className="p-2 pl-4 text-xl items-center space-between border rounded-lg bg-card">
+                Stats
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border bg-card p-4">
                   <p className="text-xs text-muted-foreground">Word count</p>
@@ -472,18 +522,23 @@ export function ArticleSettingsButton({
         </div>
 
         <DialogFooter className="px-6 py-4 border-t bg-muted/10">
-          <div className="flex w-full items-center justify-end gap-2">
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Close
-            </Button>
-            <Button
-              onClick={() => {
-                onSaveTranslations?.(draftTranslations);
-                setOpen(false);
-              }}
-            >
-              Save
-            </Button>
+          <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center text-xs text-muted-foreground">
+              {hasSettingsChanged() && (
+                <span className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                  Settings changed
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" onClick={() => setOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={handleSaveAll}>
+                {hasSettingsChanged() ? "Save Settings" : "Save"}
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>

@@ -118,7 +118,7 @@ function sentencesAfterFirst(extract: string): string | null {
 /** Returns just the first sentence of any language extract. */
 function firstSentence(extract: string): string | null {
   // Match up to the first . ! ? 。
-  const m = extract.trim().match(/^.+?[.!?。]/s);
+  const m = extract.trim().match(/^[\s\S]+?[.!?。]/);
   if (!m) return null;
   const s = m[0].trim();
   return s.length >= 20 ? truncate(s, MAX_EXAMPLE) : null;
@@ -391,7 +391,7 @@ async function main() {
         .select(col)
         .in("entry_id", allIds.slice(i, i + 500))
         .eq("language_code", lang);
-      (data ?? []).forEach((r) => s.add(r[col] as number));
+      (data ?? []).forEach((r) => s.add(r[col as keyof typeof r] as number));
     }
     return s;
   }

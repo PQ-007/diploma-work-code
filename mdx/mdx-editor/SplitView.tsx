@@ -8,9 +8,23 @@ interface SplitViewProps {
   mdx: string;
   setMdx: (value: string) => void;
   viewMode: "split" | "editor" | "preview";
+  onSave?: () => void;
+  onFormatBold?: () => void;
+  onFormatItalic?: () => void;
+  onInsertImage?: () => void;
+  onTogglePreview?: () => void;
 }
 
-export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
+export default function SplitView({
+  mdx,
+  setMdx,
+  viewMode,
+  onSave,
+  onFormatBold,
+  onFormatItalic,
+  onInsertImage,
+  onTogglePreview,
+}: SplitViewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [syncedHeight, setSyncedHeight] = useState<number>(560);
   const minHeight = 560;
@@ -73,6 +87,11 @@ export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
           value={mdx}
           onChange={setMdx}
           height={isEditorOnly ? "100%" : syncedHeight}
+          onSave={onSave}
+          onFormatBold={onFormatBold}
+          onFormatItalic={onFormatItalic}
+          onInsertImage={onInsertImage}
+          onTogglePreview={onTogglePreview}
         />
       </div>
 

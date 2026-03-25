@@ -189,8 +189,8 @@ export default function FeedPage() {
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
             <SidebarCarousel />
-            <Leaderboard isStudent={true} leaderboard={leaderboard} t={t} />
-            <Leaderboard isStudent={false} leaderboard={leaderboard} t={t} />
+            <Leaderboard isStudent={true} t={t} />
+            <Leaderboard isStudent={false} t={t} />
           </aside>
         </div>
       </div>

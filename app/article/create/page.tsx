@@ -1,16 +1,17 @@
 "use client";
 
+// Force dynamic rendering for pages using search params
+export const dynamic = "force-dynamic";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import SplitView from "@/mdx/mdx-editor/SplitView";
 import {
-  CheckCircle2,
   CircleQuestionMark,
   Columns2,
   Download,
   Eye,
   Image,
-  Languages,
   Loader2,
   MessageCircleMore,
   ShieldAlert,
@@ -23,9 +24,12 @@ import { toast } from "sonner";
 import ArticleSettingsButton from "@/components/button-collection/ArticleSettingsButton";
 import { ArticleCreateHeader } from "@/components/header-collection/ArticleCreateHeader";
 import { useArticleEditor } from "./ArticleEditorContext";
+import { TranslationToggle } from "@/components/editor/TranslationToggle";
+import { useArticleMetrics } from "@/hooks/useArticleMetrics";
 
 export default function ArticleCreatePage() {
   const {
+    title,
     subtitle,
     setSubtitle,
     mdx,
@@ -56,7 +60,42 @@ export default function ArticleCreatePage() {
     handleExport,
     handleImageButtonClick,
     handleImageFileChange,
+    handleSaveDraft,
+    // Translation data
+    translations,
+    translationCompleteness,
+    // Series and settings data
+    seriesName,
+    isSerial,
+    handleSettingsChange,
   } = useArticleEditor();
+
+  // Calculate real-time article metrics
+  const { analytics, isLoadingStats } = useArticleMetrics(
+    mdx,
+    title,
+    subtitle,
+    articleId,
+  );
+
+  // Keyboard shortcut handlers
+  const handleKeyboardSave = () => {
+    handleSaveDraft();
+  };
+
+  const handleTogglePreview = () => {
+    setViewMode(viewMode === "split" ? "preview" : "split");
+  };
+
+  const handleFormatBold = () => {
+    // Visual feedback for formatting actions could be added here
+    console.log("Bold formatting applied");
+  };
+
+  const handleFormatItalic = () => {
+    // Visual feedback for formatting actions could be added here
+    console.log("Italic formatting applied");
+  };
 
   const viewIcon = {
     split: <Columns2 size={16} />,
@@ -178,7 +217,16 @@ export default function ArticleCreatePage() {
               </div>
 
               <div className="min-w-0">
-                <SplitView mdx={mdx} setMdx={setMdx} viewMode={viewMode} />
+                <SplitView
+                  mdx={mdx}
+                  setMdx={setMdx}
+                  viewMode={viewMode}
+                  onSave={handleKeyboardSave}
+                  onFormatBold={handleFormatBold}
+                  onFormatItalic={handleFormatItalic}
+                  onInsertImage={handleImageButtonClick}
+                  onTogglePreview={handleTogglePreview}
+                />
               </div>
             </main>
 
@@ -219,40 +267,7 @@ export default function ArticleCreatePage() {
                   )}
                 </div>
 
-                <div className="relative">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-10 w-10 rounded-full"
-                    onClick={() => setLangMenuOpen(!langMenuOpen)}
-                    aria-label={`Switch language (current ${contentLang})`}
-                  >
-                    <Languages size={16} />
-                  </Button>
-
-                  {langMenuOpen && (
-                    <div className="absolute right-14 top-1/2 -translate-y-1/2 z-20 w-28 rounded-lg border border-border/80 bg-card/95 shadow-lg shadow-black/15 py-2 px-2 flex flex-col gap-1">
-                      {(["mn", "en", "jp"] as const).map((lang) => (
-                        <button
-                          key={lang}
-                          className={`flex h-9 w-full items-center justify-between rounded-md px-3 text-sm transition-colors ${
-                            contentLang === lang
-                              ? "bg-accent text-accent-foreground"
-                              : "hover:bg-muted"
-                          }`}
-                          onClick={() => {
-                            setContentLang(lang);
-                            setLangMenuOpen(false);
-                          }}
-                          aria-label={`Switch to ${lang}`}
-                        >
-                          <span>{lang.toUpperCase()}</span>
-                          {contentLang === lang && <CheckCircle2 size={14} />}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <TranslationToggle />
 
                 <Separator orientation="horizontal" className="w-10" />
 
@@ -277,7 +292,35 @@ export default function ArticleCreatePage() {
                   </span>
                 )}
 
-                <ArticleSettingsButton />
+                <ArticleSettingsButton
+                  title={title}
+                  subTitle={subtitle}
+                  status={status}
+                  language={contentLang}
+                  tags={tags}
+                  seriesName={seriesName}
+                  isSerial={isSerial}
+                  wordCount={analytics.wordCount}
+                  views={analytics.liveStats.views}
+                  lastEdited={articleId ? new Date().toISOString() : undefined}
+                  createdAt={isEditMode ? undefined : new Date().toISOString()}
+                  publishedAt={
+                    status === "published"
+                      ? new Date().toISOString()
+                      : undefined
+                  }
+                  likes={analytics.liveStats.likes}
+                  comments={analytics.liveStats.comments}
+                  translations={Object.entries(translations).map(
+                    ([lang, translation]) => ({
+                      lang,
+                      title: translation.title,
+                      subTitle: translation.subtitle,
+                    }),
+                  )}
+                  onSaveTranslations={handleSaveDraft}
+                  onSettingsChange={handleSettingsChange}
+                />
 
                 <Button
                   variant="outline"
