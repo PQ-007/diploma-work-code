@@ -89,6 +89,19 @@ export default function ModernArticlePage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
 
+  // Redirect to create page if slug is "create" to prevent routing conflict
+  useEffect(() => {
+    if (slug === "create") {
+      window.location.href = "/article/create";
+      return;
+    }
+  }, [slug]);
+
+  // Early return if slug is "create" to prevent API calls and errors
+  if (slug === "create") {
+    return <div>Redirecting...</div>;
+  }
+
   const articleNumericId = article?.id ? Number(article.id) : null;
   const commentRef = useRef<ArticleCommentSectionHandle>(null);
   const { isLiked, likesCount, toggleLike, isBookmarked, toggleBookmark } =

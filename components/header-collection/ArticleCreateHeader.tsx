@@ -75,7 +75,9 @@ export function ArticleCreateHeader() {
                 ) : lastAutoSave ? (
                   <>
                     <CheckCircle2 size={14} className="text-green-600" />
-                    <span className="text-green-600">Auto-saved {formatDistanceToNow(lastAutoSave)} ago</span>
+                    <span className="text-green-600">
+                      Auto-saved {formatDistanceToNow(lastAutoSave)} ago
+                    </span>
                   </>
                 ) : hasUnsavedChanges ? (
                   <>
@@ -85,7 +87,9 @@ export function ArticleCreateHeader() {
                 ) : (
                   <>
                     <CheckCircle2 size={14} className="text-muted-foreground" />
-                    <span className="text-muted-foreground">Auto-save enabled</span>
+                    <span className="text-muted-foreground">
+                      Auto-save enabled
+                    </span>
                   </>
                 )}
               </div>

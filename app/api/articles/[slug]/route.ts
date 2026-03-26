@@ -38,6 +38,14 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
     return NextResponse.json({ error: "Missing slug" }, { status: 400 });
   }
 
+  // Validate that articleId is numeric (article IDs should be numbers)
+  if (!/^\d+$/.test(articleId)) {
+    return NextResponse.json(
+      { error: "Invalid article ID format" },
+      { status: 400 }
+    );
+  }
+
   try {
     const supabase = await createClient();
 
@@ -187,6 +195,14 @@ export async function PATCH(
 
   if (!articleId) {
     return NextResponse.json({ error: "Missing article id" }, { status: 400 });
+  }
+
+  // Validate that articleId is numeric (article IDs should be numbers)
+  if (!/^\d+$/.test(articleId)) {
+    return NextResponse.json(
+      { error: "Invalid article ID format" },
+      { status: 400 }
+    );
   }
 
   try {
@@ -410,6 +426,28 @@ export async function PATCH(
           );
         }
 
+        // Update usage count for existing tags
+        if (tagRows) {
+          for (const tag of tagRows) {
+            // Get current usage count
+            const { data: currentTag } = await supabase
+              .from("tags")
+              .select("usage_count")
+              .eq("id", tag.id)
+              .single();
+
+            const currentCount = currentTag?.usage_count || 0;
+
+            await supabase
+              .from("tags")
+              .update({
+                usage_count: currentCount + 1,
+                last_used_at: new Date().toISOString()
+              })
+              .eq("id", tag.id);
+          }
+        }
+
         const tagLinks = (tagRows || []).map((tag) => ({
           article_id: articleId,
           tag_id: tag.id,
@@ -529,6 +567,14 @@ export async function DELETE(_: NextRequest, context: { params: RouteParams }) {
 
   if (!articleId) {
     return NextResponse.json({ error: "Missing article id" }, { status: 400 });
+  }
+
+  // Validate that articleId is numeric (article IDs should be numbers)
+  if (!/^\d+$/.test(articleId)) {
+    return NextResponse.json(
+      { error: "Invalid article ID format" },
+      { status: 400 }
+    );
   }
 
   try {

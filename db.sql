@@ -64,8 +64,8 @@ CREATE TABLE public.articles (
   author_id uuid NOT NULL,
   status USER-DEFINED NOT NULL,
   created_at timestamp without time zone DEFAULT now(),
-  base_lang_code text,
   series text,
+  base_lang_code text,
   CONSTRAINT articles_pkey PRIMARY KEY (id),
   CONSTRAINT article_author FOREIGN KEY (author_id) REFERENCES public.profiles(id)
 );
@@ -386,9 +386,23 @@ CREATE TABLE public.projects (
   CONSTRAINT projects_pkey PRIMARY KEY (id),
   CONSTRAINT projects_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
 );
+CREATE TABLE public.tag_similarities (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  tag_a_id bigint NOT NULL,
+  tag_b_id bigint NOT NULL,
+  similarity_score numeric NOT NULL,
+  similarity_type text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT tag_similarities_pkey PRIMARY KEY (id),
+  CONSTRAINT tag_similarities_tag_a_fkey FOREIGN KEY (tag_a_id) REFERENCES public.tags(id),
+  CONSTRAINT tag_similarities_tag_b_fkey FOREIGN KEY (tag_b_id) REFERENCES public.tags(id)
+);
 CREATE TABLE public.tags (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   name text NOT NULL UNIQUE,
+  usage_count integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT tags_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.translation_requests (

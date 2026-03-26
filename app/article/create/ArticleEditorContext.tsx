@@ -457,7 +457,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
           new Set(tags.map((tag) => tag.trim()).filter(Boolean)),
         ),
         language_code: contentLang,
-        status: "draft", // Auto-save always saves as draft
+        status: "draft" as ArticleStatus, // Auto-save always saves as draft
       };
 
       // Use the same save strategy as manual save to determine method and URL

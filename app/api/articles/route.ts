@@ -321,6 +321,27 @@ export async function POST(req: NextRequest) {
     }
 
     if (tagRows && tagRows.length) {
+      // TODO: Re-enable usage tracking after schema migration
+      // Update usage count for existing tags
+      // for (const tag of tagRows) {
+      //   // Get current usage count
+      //   const { data: currentTag } = await supabase
+      //     .from("tags")
+      //     .select("usage_count")
+      //     .eq("id", tag.id)
+      //     .single();
+
+      //   const currentCount = currentTag?.usage_count || 0;
+
+      //   await supabase
+      //     .from("tags")
+      //     .update({
+      //       usage_count: currentCount + 1,
+      //       last_used_at: new Date().toISOString()
+      //     })
+      //     .eq("id", tag.id);
+      // }
+
       const tagLinks = tagRows.map((tag) => ({
         article_id: article.id,
         tag_id: tag.id,
