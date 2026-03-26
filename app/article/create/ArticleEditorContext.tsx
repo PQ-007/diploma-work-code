@@ -460,10 +460,16 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         status: "draft", // Auto-save always saves as draft
       };
 
-      const res = await fetch("/api/articles", {
-        method: "POST",
+      // Use the same save strategy as manual save to determine method and URL
+      const { method, url, body } = buildArticleSaveRequest({
+        articleId,
+        payload: autoSavePayload,
+      });
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(autoSavePayload),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -473,16 +479,14 @@ This is a **Zenn/Qiita-style** editor for technical writing.
       }
 
       const result = await res.json();
-      if (result.article_id) {
+
+      // For new articles (POST), we get back an article_id
+      if (result.article_id && !articleId) {
         setArticleId(result.article_id);
-        setLastAutoSave(new Date());
-        setHasUnsavedChanges(false);
-      } else {
-        console.error(
-          "Auto-save succeeded but no article_id returned:",
-          result,
-        );
       }
+
+      setLastAutoSave(new Date());
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Auto-save failed:", error);
       // Don't show error for auto-save failure to user
@@ -500,6 +504,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     mdx,
     tags,
     contentLang,
+    articleId, // Add articleId to dependencies
   ]);
 
   const toggleAutoSave = useCallback((enabled: boolean) => {

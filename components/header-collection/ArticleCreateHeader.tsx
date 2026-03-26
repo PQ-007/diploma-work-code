@@ -66,23 +66,28 @@ export function ArticleCreateHeader() {
           {autoSaveEnabled && (
             <>
               <div className="h-6 w-px bg-border mx-1" aria-hidden />
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-sm font-medium">
                 {isAutoSaving ? (
                   <>
-                    <Loader2 size={12} className="animate-spin" />
-                    <span>Auto-saving...</span>
+                    <Loader2 size={14} className="animate-spin text-blue-600" />
+                    <span className="text-blue-600">Auto-saving...</span>
                   </>
                 ) : lastAutoSave ? (
                   <>
-                    <CheckCircle2 size={12} className="text-green-600" />
-                    <span>Saved {formatDistanceToNow(lastAutoSave)} ago</span>
+                    <CheckCircle2 size={14} className="text-green-600" />
+                    <span className="text-green-600">Auto-saved {formatDistanceToNow(lastAutoSave)} ago</span>
                   </>
                 ) : hasUnsavedChanges ? (
                   <>
-                    <Clock size={12} className="text-orange-500" />
-                    <span>Unsaved changes</span>
+                    <Clock size={14} className="text-orange-500" />
+                    <span className="text-orange-500">Unsaved changes</span>
                   </>
-                ) : null}
+                ) : (
+                  <>
+                    <CheckCircle2 size={14} className="text-muted-foreground" />
+                    <span className="text-muted-foreground">Auto-save enabled</span>
+                  </>
+                )}
               </div>
             </>
           )}
