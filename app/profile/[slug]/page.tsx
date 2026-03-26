@@ -37,6 +37,19 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+// --- Unified Content System ---
+import {
+  PinnedContentCard,
+  CompactContentCard,
+} from "@/components/content/ProfileContentCards";
+import {
+  transformProfileArticle,
+  transformProfileProject,
+  ProfileArticleAPI,
+  ProfileProjectAPI,
+} from "@/lib/api/transformers/profile";
+import { Author } from "@/lib/types/author";
+
 /* ═══════════════════════════════════════════
    Types matching the API response
    ═══════════════════════════════════════════ */
@@ -473,106 +486,44 @@ export default function ProfilePage() {
           {/* ── Pinned Section ── */}
           {(pinnedArticles.length > 0 || pinnedProjects.length > 0) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {pinnedArticles.map((article) => (
-                <Link key={`a-${article.id}`} href={`/article/${article.id}`}>
-                  <div className="relative overflow-hidden group flex flex-col justify-between h-full rounded-lg border border-border/70 bg-card hover:border-border transition-colors p-4 gap-3 min-h-[110px]">
-                    {/* Pinned ribbon */}
-                    <div className="absolute top-0 right-0 flex items-center gap-1 bg-amber-500/90 text-white text-[9px] font-semibold px-2 py-0.5 rounded-bl-lg ">
-                      <Pin className="h-2.5 w-2.5 -rotate-45" />
-                      Pinned
-                    </div>
-                    {/* Header */}
-                    <div className="flex items-start gap-2.5">
-                      <div className="mt-0.5 shrink-0 h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
-                        <FileText className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-tight">
-                          {article.title}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                          {article.sub_title || "Article"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Footer */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                        {article.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"
-                          >
-                            <span className="h-2 w-2 rounded-full bg-primary/60 shrink-0" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-                        <Eye className="h-3 w-3" />
-                        {article.views.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-              {pinnedProjects.map((project) => (
-                <Link key={`p-${project.id}`} href={`/project/${project.slug}`}>
-                  <div className="relative overflow-hidden group flex flex-col justify-between h-full rounded-lg border border-border/70 bg-card hover:border-border transition-colors p-4 gap-3 min-h-[110px]">
-                    {/* Pinned ribbon */}
-                    <div className="absolute top-0 right-0 flex items-center gap-1 bg-amber-500/90 text-white text-[9px] font-semibold px-2 py-0.5 rounded-bl-lg">
-                      <Pin className="h-2.5 w-2.5 -rotate-45" />
-                      Pinned
-                    </div>
-                    {/* Header */}
-                    <div className="flex items-start gap-2.5">
-                      <div className="mt-0.5 shrink-0 h-8 w-8 rounded-md bg-violet-500/10 flex items-center justify-center">
-                        <FolderGit2 className="h-4 w-4 text-violet-500" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-tight">
-                          {project.title}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                          {project.description || project.project_type}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Footer */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                        {project.technologies.slice(0, 2).map((tech) => (
-                          <span
-                            key={tech}
-                            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"
-                          >
-                            <span
-                              className={`h-2 w-2 rounded-full shrink-0 ${
-                                project.difficulty === "beginner"
-                                  ? "bg-emerald-400"
-                                  : project.difficulty === "intermediate"
-                                    ? "bg-amber-400"
-                                    : "bg-red-400"
-                              }`}
-                            />
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground shrink-0">
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {project.views.toLocaleString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <ThumbsUp className="h-3 w-3" />
-                          {project.likes_count}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+              {pinnedArticles.map((article) => {
+                const author: Author = {
+                  id: profile.id,
+                  username: profile.user_name,
+                  displayName: profile.display_name || profile.user_name,
+                  avatarUrl: profile.avatar_url,
+                  rankingPoint: profile.ranking_point,
+                };
+                const transformedArticle = transformProfileArticle(
+                  article as ProfileArticleAPI,
+                  author,
+                );
+                return (
+                  <PinnedContentCard
+                    key={`a-${article.id}`}
+                    item={transformedArticle}
+                  />
+                );
+              })}
+              {pinnedProjects.map((project) => {
+                const author: Author = {
+                  id: profile.id,
+                  username: profile.user_name,
+                  displayName: profile.display_name || profile.user_name,
+                  avatarUrl: profile.avatar_url,
+                  rankingPoint: profile.ranking_point,
+                };
+                const transformedProject = transformProfileProject(
+                  project as ProfileProjectAPI,
+                  author,
+                );
+                return (
+                  <PinnedContentCard
+                    key={`p-${project.id}`}
+                    item={transformedProject}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -597,61 +548,25 @@ export default function ProfilePage() {
             <TabsContent value="articles" className="mt-2">
               {articles.length > 0 ? (
                 <div className="space-y-2">
-                  {articles.map((article) => (
-                    <Link key={article.id} href={`/article/${article.id}`}>
-                      <div className="group rounded-lg border border-border/60 bg-card hover:border-border transition-colors p-4 mt-3 space-y-2.5">
-                        {/* type + title + menu */}
-                        <div className="flex items-start gap-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-                              <FileText className="h-3 w-3" />
-                              Article
-                            </span>
-                            <span className="text-muted-foreground/40 text-xs shrink-0">
-                              ·
-                            </span>
-                            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                              {article.title}
-                            </h3>
-                          </div>
-                          <button
-                            onClick={(e) => e.preventDefault()}
-                            className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        </div>
-                        {/* tags */}
-                        {article.tags.length > 0 && (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {article.tags.slice(0, 4).map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="secondary"
-                                className="text-[10px] px-2 py-0 rounded-md font-normal"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                        {/* stats */}
-                        <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {article.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Heart className="h-3 w-3" />
-                            {article.reactions}
-                          </span>
-                          {article.published_at && (
-                            <span>{relativeTime(article.published_at)}</span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                  {articles.map((article) => {
+                    const author: Author = {
+                      id: profile.id,
+                      username: profile.user_name,
+                      displayName: profile.display_name || profile.user_name,
+                      avatarUrl: profile.avatar_url,
+                      rankingPoint: profile.ranking_point,
+                    };
+                    const transformedArticle = transformProfileArticle(
+                      article as ProfileArticleAPI,
+                      author,
+                    );
+                    return (
+                      <CompactContentCard
+                        key={article.id}
+                        item={transformedArticle}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="rounded-lg border border-border/60 bg-card p-8 text-center text-muted-foreground">
@@ -675,92 +590,25 @@ export default function ProfilePage() {
             <TabsContent value="projects" className="mt-2">
               {projects.length > 0 ? (
                 <div className="space-y-2">
-                  {projects.map((project) => (
-                    <Link key={project.id} href={`/project/${project.slug}`}>
-                      <div className="group rounded-lg border border-border/60 bg-card hover:border-border transition-colors p-4 mt-3 space-y-2.5">
-                        {/* type + title + menu */}
-                        <div className="flex items-start gap-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-                              <FolderGit2 className="h-3 w-3" />
-                              Project
-                            </span>
-                            <span className="text-muted-foreground/40 text-xs shrink-0">
-                              ·
-                            </span>
-                            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                              {project.title}
-                            </h3>
-                          </div>
-                          <button
-                            onClick={(e) => e.preventDefault()}
-                            className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        </div>
-
-                        {/* badges */}
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] px-2 py-0 capitalize ${
-                              project.status === "completed"
-                                ? "border-emerald-500 text-emerald-600"
-                                : project.status === "in_progress"
-                                  ? "border-blue-500 text-blue-600"
-                                  : project.status === "archived"
-                                    ? "border-muted-foreground text-muted-foreground"
-                                    : ""
-                            }`}
-                          >
-                            {project.status.replace("_", " ")}
-                          </Badge>
-                          <Badge
-                            variant="secondary"
-                            className={`text-[10px] px-2 py-0 capitalize ${
-                              project.difficulty === "beginner"
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                : project.difficulty === "intermediate"
-                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                            }`}
-                          >
-                            {project.difficulty}
-                          </Badge>
-                          {project.technologies.slice(0, 4).map((tech) => (
-                            <Badge
-                              key={tech}
-                              variant="secondary"
-                              className="text-[10px] px-2 py-0"
-                            >
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        {/* description */}
-                        {project.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {project.description}
-                          </p>
-                        )}
-
-                        {/* stats */}
-                        <div className="flex items-center justify-end gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {project.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="h-3 w-3" />
-                            {project.likes_count}
-                          </span>
-                          <span>{relativeTime(project.created_at)}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                  {projects.map((project) => {
+                    const author: Author = {
+                      id: profile.id,
+                      username: profile.user_name,
+                      displayName: profile.display_name || profile.user_name,
+                      avatarUrl: profile.avatar_url,
+                      rankingPoint: profile.ranking_point,
+                    };
+                    const transformedProject = transformProfileProject(
+                      project as ProfileProjectAPI,
+                      author,
+                    );
+                    return (
+                      <CompactContentCard
+                        key={project.id}
+                        item={transformedProject}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <Card className="border-border/60">

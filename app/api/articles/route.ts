@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { fetchTagsForContent } from "@/lib/api/queries/tags";
+import { fetchAuthorProfiles } from "@/lib/api/queries/profiles";
+import { fetchInteractionCounts } from "@/lib/api/queries/interactions";
 
 interface ArticleRequestBody {
   title?: string;
@@ -17,6 +20,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get("status") || "published";
 
+    // 1. Fetch base articles
     const { data: articles, error: articlesError } = await supabase
       .from("articles")
       .select("id, author_id, status, created_at")
@@ -35,6 +39,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ items: [] }, { status: 200 });
     }
 
+    // 2. Fetch translations
     const { data: translations, error: translationError } = await supabase
       .from("article_translations")
       .select(
@@ -50,88 +55,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { data: tagLinks, error: tagLinkError } = await supabase
-      .from("article_tags")
-      .select("article_id, tag_id")
-      .in("article_id", articleIds);
+    // 3. Use shared query functions to fetch related data in parallel
+    const authorIds = Array.from(
+      new Set(
+        (articles || [])
+          .map((a) => a.author_id)
+          .filter((id): id is string => !!id),
+      ),
+    );
 
-    if (tagLinkError) {
-      return NextResponse.json(
-        { error: tagLinkError.message },
-        { status: 500 },
-      );
-    }
+    const [tagsByArticle, profilesById, interactionCounts] = await Promise.all([
+      fetchTagsForContent(supabase, articleIds, "article_tags"),
+      fetchAuthorProfiles(supabase, authorIds),
+      fetchInteractionCounts(supabase, articleIds, "article"),
+    ]);
 
-    const tagIds = (tagLinks || [])
-      .map((t) => String(t.tag_id))
-      .filter(Boolean);
-    let tagsById = new Map<string, string>();
-    if (tagIds.length) {
-      const { data: tagRows, error: tagError } = await supabase
-        .from("tags")
-        .select("id, name")
-        .in("id", tagIds);
-
-      if (tagError) {
-        return NextResponse.json({ error: tagError.message }, { status: 500 });
-      }
-
-      (tagRows || []).forEach((t) => {
-        if (t.id && t.name) tagsById.set(String(t.id), t.name);
-      });
-    }
-
-    const tagsByArticle = new Map<string, string[]>();
-    (tagLinks || []).forEach((link) => {
-      const tagName = tagsById.get(String(link.tag_id));
-      if (!tagName) return;
-      const arr = tagsByArticle.get(link.article_id) || [];
-      arr.push(tagName);
-      tagsByArticle.set(link.article_id, arr);
-    });
-
-    // Get reaction counts per article
-    const { data: reactionRows } = await supabase
-      .from("article_reactions")
-      .select("article_id")
-      .in("article_id", articleIds);
-
-    const reactionsByArticle = new Map<string, number>();
-    (reactionRows || []).forEach((r) => {
-      reactionsByArticle.set(
-        r.article_id,
-        (reactionsByArticle.get(r.article_id) || 0) + 1,
-      );
-    });
-
-    // Get comment counts per article
-    const { data: commentRows } = await supabase
-      .from("article_comments")
-      .select("article_id")
-      .in("article_id", articleIds);
-
-    const commentsByArticle = new Map<string, number>();
-    (commentRows || []).forEach((c) => {
-      commentsByArticle.set(
-        c.article_id,
-        (commentsByArticle.get(c.article_id) || 0) + 1,
-      );
-    });
-
-    // Get bookmark counts per article
-    const { data: bookmarkRows } = await supabase
-      .from("bookmarked_articles")
-      .select("article_id")
-      .in("article_id", articleIds);
-
-    const bookmarksByArticle = new Map<string, number>();
-    (bookmarkRows || []).forEach((b) => {
-      bookmarksByArticle.set(
-        b.article_id,
-        (bookmarksByArticle.get(b.article_id) || 0) + 1,
-      );
-    });
-
+    // 4. Build article map for quick lookup
     const articleMap = new Map<
       string,
       { author_id: string | null; status: string; created_at: string | null }
@@ -144,6 +83,7 @@ export async function GET(req: NextRequest) {
       });
     });
 
+    // 5. Get latest translation per article
     const latestByArticle = new Map<
       string,
       {
@@ -165,45 +105,12 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Fetch author profiles
-    const authorIds = Array.from(
-      new Set(
-        (articles || [])
-          .map((a) => a.author_id)
-          .filter((id): id is string => !!id),
-      ),
-    );
-
-    const profilesById = new Map<
-      string,
-      {
-        user_name: string | null;
-        avatar_url: string | null;
-        ranking_point: number | null;
-      }
-    >();
-
-    if (authorIds.length) {
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, user_name, avatar_url, ranking_point")
-        .in("id", authorIds);
-
-      if (!profilesError && profiles) {
-        profiles.forEach((p) => {
-          profilesById.set(p.id, {
-            user_name: p.user_name,
-            avatar_url: p.avatar_url,
-            ranking_point: p.ranking_point,
-          });
-        });
-      }
-    }
-
+    // 6. Build response items
     const items = Array.from(latestByArticle.values()).map((t) => {
       const articleData = articleMap.get(t.article_id);
       const authorId = articleData?.author_id || null;
-      const authorProfile = authorId ? profilesById.get(authorId) : null;
+      const author = authorId ? profilesById.get(authorId) : null;
+      const interactions = interactionCounts.get(t.article_id);
 
       return {
         article_id: String(t.article_id),
@@ -215,15 +122,16 @@ export async function GET(req: NextRequest) {
         created_at: articleData?.created_at || t.created_at,
         edited_at: t.edited_at,
         views: t.views ?? 0,
-        reactions: reactionsByArticle.get(t.article_id) || 0,
-        comments: commentsByArticle.get(t.article_id) || 0,
-        bookmarks: bookmarksByArticle.get(t.article_id) || 0,
+        reactions: interactions?.likes || 0,
+        comments: interactions?.comments || 0,
+        bookmarks: interactions?.bookmarks || 0,
         author_id: authorId,
-        author: authorProfile
+        author: author
           ? {
-              user_name: authorProfile.user_name,
-              avatar_url: authorProfile.avatar_url,
-              ranking_point: authorProfile.ranking_point,
+              user_name: author.username,
+              display_name: author.displayName,
+              avatar_url: author.avatarUrl,
+              ranking_point: author.rankingPoint,
             }
           : null,
         tags: tagsByArticle.get(t.article_id) || [],

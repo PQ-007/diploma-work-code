@@ -5,24 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  AlertCircle,
-  FileText,
-  Flame,
-  RefreshCw,
-  Search
-} from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { AlertCircle, FileText, Flame, RefreshCw, Search } from "lucide-react";
+import { useState } from "react";
+
+// --- New Unified System ---
+import { useArticles } from "@/lib/hooks/queries/useArticles";
+import { ArticleCardWrapper } from "./components/ArticleCardWrapper";
 
 // --- Components Import ---
 import {
   ArticleFeedSkeleton,
   ArticlePageSkeleton,
 } from "@/app/article/components/ArticleSkeleton";
-import ListItem from "@/app/article/components/ListItem";
 import ReadingList from "@/components/ReadingList";
-import { ApiArticle, FeedItem } from "./type";
-
 
 const popularTags = [
   { name: "React", count: 128 },
@@ -54,109 +49,20 @@ const calcReadTime = (body: string) => {
 export default function ArticleBrowsePage() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
-  const [likedItems, setLikedItems] = useState(new Set<string>());
-  const [bookmarkedItems, setBookmarkedItems] = useState(new Set<string>());
-  const [readingList, setReadingList] = useState(new Set<string>());
-  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [readingList, setReadingList] = useState(new Set<string>());
 
-  const fetchArticles = useCallback(async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
+  // Use React Query hook - automatic caching and state management!
+  const {
+    data: articles,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  } = useArticles("published");
 
-      const res = await fetch("/api/articles?status=published");
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.error || t("articles.failedToLoad"));
-      }
-
-      const items: ApiArticle[] = Array.isArray(data?.items) ? data.items : [];
-
-      const mapped = items.map((article, index) => {
-        const authorName = article.author?.user_name || t("articles.anonymous");
-        const username = article.author?.user_name
-          ? `@${article.author.user_name}`
-          : "@anonymous";
-        const avatarUrl =
-          article.author?.avatar_url ||
-          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(authorName)}`;
-        const published = article.published_at
-          ? new Date(article.published_at).toLocaleDateString()
-          : t("articles.unpublished");
-
-        const description = article.sub_title || "";
-
-        return {
-          id: article.article_id,
-          type: "article",
-          day: index + 1,
-          author: {
-            name: authorName,
-            avatar: avatarUrl,
-            username,
-            verified: false,
-            reputation: 0,
-            contributions: 0,
-            ranking_point: article.author?.ranking_point ?? 0,
-          },
-          timestamp: published,
-          readTime: calcReadTime(article.body || ""),
-          content: {
-            title: article.title || t("articles.untitled"),
-            description,
-            tags: article.tags || [],
-          },
-          stats: {
-            likes: 0,
-            comments: 0,
-            views: 0,
-          },
-          featured: index === 0,
-          trending: index < 3,
-        } as FeedItem;
-      });
-
-      setFeedItems(mapped);
-    } catch (err: any) {
-      console.error("Error loading articles", err);
-      setError(err?.message || t("articles.failedToLoad"));
-      setFeedItems([]);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
-
-  const toggleLike = useCallback((id: string) => {
-    setLikedItems((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
-    });
-  }, []);
-
-  const toggleBookmark = useCallback((id: string) => {
-    setBookmarkedItems((prev) => {
-      const newSet = new Set(prev);
-      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
-      return newSet;
-    });
-  }, []);
-
-  const filteredFeedItems = feedItems.filter((item) => {
+  // Filter articles based on tab and search
+  const filteredArticles = (articles || []).filter((item) => {
     // Tab filter
     const matchesTab =
       activeTab === "all" ||
@@ -167,18 +73,18 @@ export default function ArticleBrowsePage() {
     const matchesSearch =
       !q ||
       item.content.title.toLowerCase().includes(q) ||
-      item.content.description.toLowerCase().includes(q) ||
-      item.author.name.toLowerCase().includes(q) ||
+      (item.content.description?.toLowerCase() || "").includes(q) ||
+      item.content.author.displayName.toLowerCase().includes(q) ||
       item.content.tags.some((tag) => tag.toLowerCase().includes(q));
 
     return matchesTab && matchesSearch;
   });
 
-  const totalCount = feedItems.length;
-  const filteredCount = filteredFeedItems.length;
+  const totalCount = articles?.length || 0;
+  const filteredCount = filteredArticles.length;
 
   // Initial full-page skeleton
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto py-6 lg:py-3 max-w-7xl">
@@ -215,12 +121,12 @@ export default function ArticleBrowsePage() {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              onClick={() => fetchArticles(true)}
-              disabled={isRefreshing}
+              onClick={() => refetch()}
+              disabled={isRefetching}
               title={t("articles.refreshArticles")}
             >
               <RefreshCw
-                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
               />
             </Button>
           </div>
@@ -288,10 +194,10 @@ export default function ArticleBrowsePage() {
             )}
 
             {/* Refresh indicator */}
-            {isRefreshing && <ArticleFeedSkeleton count={2} />}
+            {isRefetching && <ArticleFeedSkeleton count={2} />}
 
             {/* Error State */}
-            {!isRefreshing && error && (
+            {!isRefetching && error && (
               <Card className="border-destructive/30">
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-3">
                   <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -302,14 +208,14 @@ export default function ArticleBrowsePage() {
                       {t("articles.failedToLoad")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {error}
+                      {error instanceof Error ? error.message : String(error)}
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     className="text-xs"
-                    onClick={() => fetchArticles(false)}
+                    onClick={() => refetch()}
                   >
                     <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
                     Try Again
@@ -319,7 +225,7 @@ export default function ArticleBrowsePage() {
             )}
 
             {/* Empty State */}
-            {!isRefreshing && !error && filteredCount === 0 && (
+            {!isRefetching && !error && filteredCount === 0 && (
               <Card className="border-border/40">
                 <CardContent className="p-8 flex flex-col items-center text-center space-y-3">
                   <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
@@ -359,18 +265,11 @@ export default function ArticleBrowsePage() {
               </Card>
             )}
 
-            {/* Feed Items */}
-            {!isRefreshing && !error && filteredCount > 0 && (
+            {/* Feed Items - Using new unified ContentCard! */}
+            {!isRefetching && !error && filteredCount > 0 && (
               <div className="space-y-4">
-                {filteredFeedItems.map((item) => (
-                  <ListItem
-                    key={item.id}
-                    item={item}
-                    isLiked={likedItems.has(item.id)}
-                    isBookmarked={bookmarkedItems.has(item.id)}
-                    toggleLike={toggleLike}
-                    toggleBookmark={toggleBookmark}
-                  />
+                {filteredArticles.map((item) => (
+                  <ArticleCardWrapper key={item.content.id} item={item} />
                 ))}
               </div>
             )}
@@ -407,9 +306,6 @@ export default function ArticleBrowsePage() {
                 </CardContent>
               </Card>
             </div>
-
-            
-
 
             <ReadingList readingListCount={readingList.size} />
           </aside>

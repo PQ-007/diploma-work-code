@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Share } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getRankIcon } from "@/lib/utils/rankIcons";
 
 export interface ListItemData {
   id: string;
@@ -69,13 +70,11 @@ export default function ListItem({
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-1">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-1 min-w-0">
                   <span className="text-sm font-medium truncate">
                     {item.author.name}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate">
-                    {item.author.username}
-                  </span>
+                  {getRankIcon(item.author.ranking_point || 0)}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{item.timestamp}</span>
@@ -86,8 +85,8 @@ export default function ListItem({
                     </>
                   )}
                   <span className="hidden sm:inline">
-                    &middot; {item.author.contributions}{" "}
-                    {t("common.contributions")}
+                    &middot; {item.author.ranking_point || 0}{" "}
+                    {t("common.points")}
                   </span>
                 </div>
               </div>

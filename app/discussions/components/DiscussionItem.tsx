@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Pin,
 } from "lucide-react";
+import { getRankIcon } from "@/lib/utils/rankIcons";
 
 export interface DiscussionItemData {
   id: string;
@@ -23,6 +24,7 @@ export interface DiscussionItemData {
     display_name: string;
     user_name: string;
     avatar_url: string;
+    ranking_point?: number;
   };
   tags: string[];
   votes: number;
@@ -76,6 +78,7 @@ export default function DiscussionItem({
             <span className="text-sm font-semibold truncate">
               {item.author.display_name}
             </span>
+            {getRankIcon(item.author.ranking_point || 0)}
             {item.pinned && (
               <Pin className="h-3 w-3 text-muted-foreground shrink-0" />
             )}
@@ -90,9 +93,9 @@ export default function DiscussionItem({
             )}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>@{item.author.user_name}</span>
-            <span>·</span>
             <span>{timeAgo(item.created_at)}</span>
+            <span>·</span>
+            <span>{item.author.ranking_point || 0} points</span>
           </div>
         </div>
       </div>

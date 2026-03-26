@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2 } from "lucide-react";
+import { getRankIcon } from "@/lib/utils/rankIcons";
 
 // --- Types ---
 type PollOption = {
@@ -38,6 +39,7 @@ type PollData = {
     display_name: string;
     user_name: string;
     avatar_url: string;
+    ranking_point?: number;
   };
   options: PollOption[];
   totalVotes: number;
@@ -83,11 +85,9 @@ function PollCard({
             {poll.author.display_name?.[0]?.toUpperCase() || "?"}
           </AvatarFallback>
         </Avatar>
-        <span className="text-sm font-medium truncate">
+        <span className="text-sm font-medium truncate flex items-center gap-1">
           {poll.author.display_name}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          @{poll.author.user_name}
+          {getRankIcon(poll.author.ranking_point || 0)}
         </span>
         <span className="text-xs text-muted-foreground ml-auto">
           {formatDate(poll.created_at)}
@@ -151,6 +151,7 @@ function PollCard({
         {poll.totalVotes} vote{poll.totalVotes !== 1 ? "s" : ""}
         {isExpired && " · Closed"}
         {!isExpired && poll.ends_at && ` · Ends ${formatDate(poll.ends_at)}`}
+        {` · Author: ${poll.author.ranking_point || 0} points`}
       </p>
     </Card>
   );
@@ -195,9 +196,10 @@ export default function FeedPage() {
             id: a.article_id,
             type: "blog",
             author: {
-              name: a.author?.user_name ?? "Anonymous",
+              name:
+                a.author?.display_name ?? a.author?.user_name ?? "Anonymous",
               avatar: a.author?.avatar_url ?? "",
-              username: `@${a.author?.user_name ?? "user"}`,
+              username: a.author?.user_name ?? "user",
               contributions: 0,
               ranking_point: a.author?.ranking_point ?? 0,
             },
