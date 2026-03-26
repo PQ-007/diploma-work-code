@@ -43,12 +43,14 @@ export function TagInputWithSuggestions({
 
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/tags/suggestions?q=${encodeURIComponent(query)}&limit=8`);
+        const response = await fetch(
+          `/api/tags/suggestions?q=${encodeURIComponent(query)}&limit=8`,
+        );
         if (response.ok) {
           const data = await response.json();
           // Filter out tags that are already selected
           const filteredSuggestions = data.suggestions.filter(
-            (suggestion: TagSuggestion) => !tags.includes(suggestion.name)
+            (suggestion: TagSuggestion) => !tags.includes(suggestion.name),
           );
           setSuggestions(filteredSuggestions);
         }
@@ -59,7 +61,7 @@ export function TagInputWithSuggestions({
         setIsLoading(false);
       }
     }, 300),
-    [tags]
+    [tags],
   );
 
   // Handle input change (exact same logic as SmartTagInput)
@@ -112,13 +114,13 @@ export function TagInputWithSuggestions({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+      setSelectedIndex((prev) => Math.min(prev + 1, suggestions.length - 1));
       return;
     }
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, -1));
+      setSelectedIndex((prev) => Math.max(prev - 1, -1));
       return;
     }
 
@@ -167,7 +169,9 @@ export function TagInputWithSuggestions({
             ref={inputRef}
             type="text"
             className="w-full px-3 py-2.5 bg-background border border-border rounded-full text-sm transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder={tags.length >= maxTags ? "Maximum tags reached" : placeholder}
+            placeholder={
+              tags.length >= maxTags ? "Maximum tags reached" : placeholder
+            }
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -184,9 +188,13 @@ export function TagInputWithSuggestions({
           {showSuggestions && (suggestions.length > 0 || isLoading) && (
             <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
               {isLoading ? (
-                <div className="px-4 py-3 text-sm text-muted-foreground">Loading suggestions...</div>
+                <div className="px-4 py-3 text-sm text-muted-foreground">
+                  Loading suggestions...
+                </div>
               ) : suggestions.length === 0 ? (
-                <div className="px-4 py-3 text-sm text-muted-foreground">No tags found</div>
+                <div className="px-4 py-3 text-sm text-muted-foreground">
+                  No tags found
+                </div>
               ) : (
                 suggestions.map((suggestion, index) => (
                   <div
@@ -194,11 +202,13 @@ export function TagInputWithSuggestions({
                     onClick={() => addTag(suggestion.name)}
                     className={`px-4 py-2.5 cursor-pointer text-sm flex items-center justify-between transition-colors ${
                       index === selectedIndex
-                        ? 'bg-accent text-accent-foreground'
-                        : 'hover:bg-accent/50'
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent/50"
                     }`}
                   >
-                    <span className="font-medium truncate">{suggestion.name}</span>
+                    <span className="font-medium truncate">
+                      {suggestion.name}
+                    </span>
                     {suggestion.usageCount > 0 && (
                       <span className="text-xs text-muted-foreground ml-2 shrink-0">
                         ({suggestion.usageCount})
@@ -218,7 +228,7 @@ export function TagInputWithSuggestions({
 // Debounce utility function (exact same as SmartTagInput)
 function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return function executedFunction(...args: Parameters<T>) {
