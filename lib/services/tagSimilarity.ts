@@ -5,7 +5,7 @@ interface SimilarityResult {
   tagId: number;
   tagName: string;
   similarity: number;
-  similarityType: 'exact' | 'fuzzy' | 'semantic' | 'popular';
+  similarityType: "exact" | "fuzzy" | "semantic" | "popular";
   usageCount: number;
 }
 
@@ -21,7 +21,9 @@ export class TagSimilarityService {
    * Calculate Levenshtein distance between two strings
    */
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+    const matrix = Array(str2.length + 1)
+      .fill(null)
+      .map(() => Array(str1.length + 1).fill(null));
 
     for (let i = 0; i <= str1.length; i += 1) {
       matrix[0][i] = i;
@@ -37,7 +39,7 @@ export class TagSimilarityService {
         matrix[j][i] = Math.min(
           matrix[j][i - 1] + 1, // deletion
           matrix[j - 1][i] + 1, // insertion
-          matrix[j - 1][i - 1] + indicator // substitution
+          matrix[j - 1][i - 1] + indicator, // substitution
         );
       }
     }
@@ -65,13 +67,13 @@ export class TagSimilarityService {
    * Check if one tag is an abbreviation of another
    */
   private isAbbreviation(short: string, long: string): boolean {
-    const shortLower = short.toLowerCase().replace(/[^a-z]/g, '');
+    const shortLower = short.toLowerCase().replace(/[^a-z]/g, "");
     const longLower = long.toLowerCase();
 
     // Check if short is acronym of long (e.g., "AI" -> "Artificial Intelligence")
     const words = longLower.split(/\s+/);
     if (words.length > 1) {
-      const acronym = words.map(w => w[0]).join('');
+      const acronym = words.map((w) => w[0]).join("");
       if (acronym === shortLower) return true;
     }
 
@@ -94,10 +96,10 @@ export class TagSimilarityService {
     }
 
     // Word overlap scoring
-    const words1 = new Set(s1.split(/\s+/).filter(w => w.length > 2));
-    const words2 = new Set(s2.split(/\s+/).filter(w => w.length > 2));
+    const words1 = new Set(s1.split(/\s+/).filter((w) => w.length > 2));
+    const words2 = new Set(s2.split(/\s+/).filter((w) => w.length > 2));
 
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const intersection = new Set([...words1].filter((x) => words2.has(x)));
     const union = new Set([...words1, ...words2]);
 
     if (union.size === 0) return 0;
@@ -121,19 +123,19 @@ export class TagSimilarityService {
     query: string,
     existingTags: TagData[],
     limit: number = 10,
-    threshold: number = 0.3
+    threshold: number = 0.3,
   ): Promise<SimilarityResult[]> {
     if (!query || query.trim().length < 2) {
       // Return popular tags for short queries
       return existingTags
         .sort((a, b) => b.usage_count - a.usage_count)
         .slice(0, limit)
-        .map(tag => ({
+        .map((tag) => ({
           tagId: tag.id,
           tagName: tag.name,
           similarity: 0.0,
-          similarityType: 'popular' as const,
-          usageCount: tag.usage_count
+          similarityType: "popular" as const,
+          usageCount: tag.usage_count,
         }));
     }
 
@@ -149,21 +151,27 @@ export class TagSimilarityService {
           tagId: tag.id,
           tagName: tag.name,
           similarity: 1.0,
-          similarityType: 'exact',
-          usageCount: tag.usage_count
+          similarityType: "exact",
+          usageCount: tag.usage_count,
         });
         continue;
       }
 
       // Skip if already have exact match and this is too different
-      const exactMatch = results.find(r => r.similarityType === 'exact');
+      const exactMatch = results.find((r) => r.similarityType === "exact");
       if (exactMatch) continue;
 
       // Fuzzy matching
-      const fuzzyScore = this.fuzzyMatchScore(queryNormalized, tagNameNormalized);
+      const fuzzyScore = this.fuzzyMatchScore(
+        queryNormalized,
+        tagNameNormalized,
+      );
 
       // Semantic matching
-      const semanticScore = this.semanticMatchScore(queryNormalized, tagNameNormalized);
+      const semanticScore = this.semanticMatchScore(
+        queryNormalized,
+        tagNameNormalized,
+      );
 
       // Use the higher of the two scores
       const bestScore = Math.max(fuzzyScore, semanticScore);
@@ -173,14 +181,15 @@ export class TagSimilarityService {
       const finalScore = Math.min(1.0, bestScore + popularityBonus);
 
       if (finalScore >= threshold) {
-        const similarityType = semanticScore > fuzzyScore ? 'semantic' : 'fuzzy';
+        const similarityType =
+          semanticScore > fuzzyScore ? "semantic" : "fuzzy";
 
         results.push({
           tagId: tag.id,
           tagName: tag.name,
           similarity: finalScore,
           similarityType,
-          usageCount: tag.usage_count
+          usageCount: tag.usage_count,
         });
       }
     }
@@ -201,13 +210,15 @@ export class TagSimilarityService {
    */
   async batchCalculateSimilarities(
     tags: TagData[],
-    threshold: number = 0.5
-  ): Promise<Array<{
-    tagAId: number;
-    tagBId: number;
-    similarityScore: number;
-    similarityType: string;
-  }>> {
+    threshold: number = 0.5,
+  ): Promise<
+    Array<{
+      tagAId: number;
+      tagBId: number;
+      similarityScore: number;
+      similarityType: string;
+    }>
+  > {
     const similarities: Array<{
       tagAId: number;
       tagBId: number;
@@ -226,13 +237,14 @@ export class TagSimilarityService {
         const bestScore = Math.max(fuzzyScore, semanticScore);
 
         if (bestScore >= threshold) {
-          const similarityType = semanticScore > fuzzyScore ? 'semantic' : 'fuzzy';
+          const similarityType =
+            semanticScore > fuzzyScore ? "semantic" : "fuzzy";
 
           similarities.push({
             tagAId: tagA.id,
             tagBId: tagB.id,
             similarityScore: Math.round(bestScore * 100) / 100, // Round to 2 decimals
-            similarityType
+            similarityType,
           });
         }
       }

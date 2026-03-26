@@ -42,7 +42,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
   if (!/^\d+$/.test(articleId)) {
     return NextResponse.json(
       { error: "Invalid article ID format" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -201,7 +201,7 @@ export async function PATCH(
   if (!/^\d+$/.test(articleId)) {
     return NextResponse.json(
       { error: "Invalid article ID format" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -442,7 +442,7 @@ export async function PATCH(
               .from("tags")
               .update({
                 usage_count: currentCount + 1,
-                last_used_at: new Date().toISOString()
+                last_used_at: new Date().toISOString(),
               })
               .eq("id", tag.id);
           }
@@ -573,7 +573,7 @@ export async function DELETE(_: NextRequest, context: { params: RouteParams }) {
   if (!/^\d+$/.test(articleId)) {
     return NextResponse.json(
       { error: "Invalid article ID format" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

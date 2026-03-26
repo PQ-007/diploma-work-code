@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,12 +54,14 @@ export function SmartTagInput({
 
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/tags/suggestions?q=${encodeURIComponent(query)}&limit=8`);
+        const response = await fetch(
+          `/api/tags/suggestions?q=${encodeURIComponent(query)}&limit=8`,
+        );
         if (response.ok) {
           const data = await response.json();
           // Filter out tags that are already selected
           const filteredSuggestions = data.suggestions.filter(
-            (suggestion: TagSuggestion) => !tags.includes(suggestion.name)
+            (suggestion: TagSuggestion) => !tags.includes(suggestion.name),
           );
           setSuggestions(filteredSuggestions);
         }
@@ -63,7 +72,7 @@ export function SmartTagInput({
         setIsLoading(false);
       }
     }, 300),
-    [tags]
+    [tags],
   );
 
   // Handle input change
@@ -84,11 +93,7 @@ export function SmartTagInput({
   const addTag = (tagName: string) => {
     const trimmedTag = tagName.trim();
 
-    if (
-      trimmedTag &&
-      !tags.includes(trimmedTag) &&
-      tags.length < maxTags
-    ) {
+    if (trimmedTag && !tags.includes(trimmedTag) && tags.length < maxTags) {
       onTagsChange([...tags, trimmedTag]);
     }
 
@@ -120,13 +125,13 @@ export function SmartTagInput({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+      setSelectedIndex((prev) => Math.min(prev + 1, suggestions.length - 1));
       return;
     }
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, -1));
+      setSelectedIndex((prev) => Math.max(prev - 1, -1));
       return;
     }
 
@@ -186,7 +191,9 @@ export function SmartTagInput({
               // Delay hiding suggestions to allow for clicks
               setTimeout(() => setShowSuggestions(false), 200);
             }}
-            placeholder={tags.length >= maxTags ? "Maximum tags reached" : placeholder}
+            placeholder={
+              tags.length >= maxTags ? "Maximum tags reached" : placeholder
+            }
             disabled={disabled || tags.length >= maxTags}
             className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
@@ -196,9 +203,13 @@ export function SmartTagInput({
             <div className="absolute top-full left-0 right-0 z-50 mt-1">
               <CommandList className="max-h-48 overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md">
                 {isLoading ? (
-                  <CommandEmpty className="py-3 text-sm text-muted-foreground">Loading...</CommandEmpty>
+                  <CommandEmpty className="py-3 text-sm text-muted-foreground">
+                    Loading...
+                  </CommandEmpty>
                 ) : suggestions.length === 0 ? (
-                  <CommandEmpty className="py-3 text-sm text-muted-foreground">No suggestions found</CommandEmpty>
+                  <CommandEmpty className="py-3 text-sm text-muted-foreground">
+                    No suggestions found
+                  </CommandEmpty>
                 ) : (
                   <CommandGroup>
                     {suggestions.map((suggestion, index) => (
@@ -209,7 +220,8 @@ export function SmartTagInput({
                         className={cn(
                           "flex items-center justify-between px-3 py-2 cursor-pointer text-sm",
                           "hover:bg-accent hover:text-accent-foreground",
-                          index === selectedIndex && "bg-accent text-accent-foreground"
+                          index === selectedIndex &&
+                            "bg-accent text-accent-foreground",
                         )}
                       >
                         <span className="truncate">{suggestion.name}</span>
@@ -239,7 +251,7 @@ export function SmartTagInput({
 // Debounce utility function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return function executedFunction(...args: Parameters<T>) {

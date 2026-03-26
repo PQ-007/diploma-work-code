@@ -540,7 +540,7 @@ export default function ModernArticlePage() {
                       </div>
                     )}
                   </div>
-                   {/* Share action */}
+                  {/* Share action */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -561,9 +561,6 @@ export default function ModernArticlePage() {
                   >
                     <MoreHorizontal className="h-5 w-5" />
                   </Button>
-
-
-                 
 
                   <div className="h-px w-10 bg-border my-1" />
 
@@ -754,8 +751,6 @@ export default function ModernArticlePage() {
           </aside>
         </div>
       </div>
-
-      
 
       <BackToTopButton />
     </div>

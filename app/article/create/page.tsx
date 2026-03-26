@@ -23,6 +23,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import ArticleSettingsButton from "@/components/button-collection/ArticleSettingsButton";
 import { ArticleCreateHeader } from "@/components/header-collection/ArticleCreateHeader";
+import { TagInputWithSuggestions } from "@/components/form/TagInputWithSuggestions";
 import { useArticleEditor } from "./ArticleEditorContext";
 import { TranslationToggle } from "@/components/editor/TranslationToggle";
 import { useArticleMetrics } from "@/hooks/useArticleMetrics";
@@ -187,33 +188,12 @@ export default function ArticleCreatePage() {
                   onChange={(e) => setSubtitle(e.target.value)}
                 />
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-2 px-2 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-sm"
-                    >
-                      {tag}
-                      <button
-                        onClick={() => setTags(tags.filter((t) => t !== tag))}
-                        className="flex items-center rounded-full transition-colors hover:bg-white/20 px-1 py-0.5"
-                        aria-label={`Remove ${tag}`}
-                      >
-                        <X size={14} />
-                      </button>
-                    </span>
-                  ))}
-
-                  <input
-                    type="text"
-                    className="flex-1 min-w-[220px] px-3 py-2.5 bg-background border border-border rounded-full text-sm transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Add tags (press Enter, max 5)..."
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={handleAddTag}
-                    disabled={tags.length >= 5}
-                  />
-                </div>
+                <TagInputWithSuggestions
+                  tags={tags}
+                  onTagsChange={setTags}
+                  maxTags={5}
+                  placeholder="Add tags (press Enter, max 5)..."
+                />
               </div>
 
               <div className="min-w-0">
