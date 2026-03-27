@@ -14,17 +14,24 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "all";
+    const statusFilter = searchParams.get("status") || "draft";
 
     const items: LibraryItem[] = [];
 
-    // ── Articles (drafts) ──
+    // ── Articles (drafts or all) ──
     if (type === "all" || type === "articles") {
-      const { data: articles } = await supabase
+      let articlesQuery = supabase
         .from("articles")
         .select("id, author_id, status, created_at")
         .eq("author_id", user.id)
-        .eq("status", "draft")
         .order("created_at", { ascending: false });
+
+      // Apply status filter if specified
+      if (statusFilter === "draft") {
+        articlesQuery = articlesQuery.eq("status", "draft");
+      }
+
+      const { data: articles } = await articlesQuery;
 
       if (articles?.length) {
         const articleIds = articles.map((a) => a.id);
@@ -88,6 +95,7 @@ export async function GET(req: NextRequest) {
             tags: tagsByArticle.get(article.id) || [],
             createdAt: article.created_at,
             editUrl: `/article/create?id=${article.id}`,
+            status: article.status,
           });
         }
       }
@@ -228,6 +236,7 @@ interface LibraryItem {
   tags: string[];
   createdAt: string;
   editUrl: string;
+  status?: string;
 }
 
 function stripToPreview(markdown: string): string {

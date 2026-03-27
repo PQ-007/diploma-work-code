@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering for pages using search params
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -14,7 +17,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, X, Save, Eye, Send, ImagePlus, Loader2, Code2, LinkIcon, Tag } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  X,
+  Save,
+  Eye,
+  Send,
+  ImagePlus,
+  Loader2,
+  Code2,
+  LinkIcon,
+  Tag,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
@@ -311,7 +326,8 @@ export default function CreateProjectPage() {
                 <p className="text-sm font-medium">
                   {uploadingThumbnail
                     ? t("common.uploading") || "Uploading..."
-                    : t("project.uploadThumbnail") || "Click to upload thumbnail"}
+                    : t("project.uploadThumbnail") ||
+                      "Click to upload thumbnail"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   PNG, JPG, GIF up to 5MB. Recommended 16:9 ratio.

@@ -8,15 +8,34 @@ interface SplitViewProps {
   mdx: string;
   setMdx: (value: string) => void;
   viewMode: "split" | "editor" | "preview";
+  onSave?: () => void;
+  onFormatBold?: () => void;
+  onFormatItalic?: () => void;
+  onInsertImage?: () => void;
+  onTogglePreview?: () => void;
 }
 
-export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
+export default function SplitView({
+  mdx,
+  setMdx,
+  viewMode,
+  onSave,
+  onFormatBold,
+  onFormatItalic,
+  onInsertImage,
+  onTogglePreview,
+}: SplitViewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [syncedHeight, setSyncedHeight] = useState<number>(560);
   const minHeight = 560;
+  const isSplit = viewMode === "split";
+  const isEditorOnly = viewMode === "editor";
+  const editorPaneHeight = "max(560px, calc(100vh - 220px))";
 
   // Observe preview height and sync editor to match
   useEffect(() => {
+    if (isEditorOnly) return;
+
     const previewEl = previewRef.current;
     if (!previewEl) return;
 
@@ -29,9 +48,13 @@ export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
         return total + Math.max(1, Math.ceil(line.length / 90));
       }, 0);
       const editorContentHeight = lines * lineHeight + padding;
-      
+
       // Use the larger of preview height or editor content height
-      const maxContentHeight = Math.max(previewHeight, editorContentHeight, minHeight);
+      const maxContentHeight = Math.max(
+        previewHeight,
+        editorContentHeight,
+        minHeight,
+      );
       setSyncedHeight(maxContentHeight);
     };
 
@@ -47,16 +70,29 @@ export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [mdx]);
+  }, [isEditorOnly, mdx]);
 
   return (
     <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col md:flex-row md:divide-x md:divide-border min-w-0 overflow-hidden">
       {/* Editor side */}
       <div
         className={`flex-1 flex flex-col min-w-0 ${viewMode === "preview" ? "hidden" : ""}`}
-        style={{ minHeight: syncedHeight, height: syncedHeight }}
+        style={
+          isEditorOnly
+            ? { minHeight, height: editorPaneHeight }
+            : { minHeight: syncedHeight, height: syncedHeight }
+        }
       >
-        <MdxEditor value={mdx} onChange={setMdx} height={syncedHeight} />
+        <MdxEditor
+          value={mdx}
+          onChange={setMdx}
+          height={isEditorOnly ? "100%" : syncedHeight}
+          onSave={onSave}
+          onFormatBold={onFormatBold}
+          onFormatItalic={onFormatItalic}
+          onInsertImage={onInsertImage}
+          onTogglePreview={onTogglePreview}
+        />
       </div>
 
       {viewMode === "split" && <div className="md:hidden h-px bg-border" />}
@@ -66,7 +102,10 @@ export default function SplitView({ mdx, setMdx, viewMode }: SplitViewProps) {
         className={`flex-1 flex flex-col min-w-0 overflow-hidden ${viewMode === "editor" ? "hidden" : ""}`}
         style={{ minHeight: syncedHeight }}
       >
-        <div ref={previewRef} className="bg-card px-8 pt-4 pb-8 overflow-x-auto">
+        <div
+          ref={previewRef}
+          className="bg-card px-8 pt-4 pb-8 overflow-x-auto"
+        >
           <MdxPreview source={mdx} />
         </div>
       </div>

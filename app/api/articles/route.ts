@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { fetchTagsForContent } from "@/lib/api/queries/tags";
+import { fetchAuthorProfiles } from "@/lib/api/queries/profiles";
+import { fetchInteractionCounts } from "@/lib/api/queries/interactions";
 
 interface ArticleRequestBody {
   title?: string;
   body?: string;
+  sub_title?: string;
   tags?: string[];
   language_code?: string;
   status?: string;
@@ -16,11 +20,12 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get("status") || "published";
 
+    // 1. Fetch base articles
     const { data: articles, error: articlesError } = await supabase
       .from("articles")
-      .select("id, author_id, status")
+      .select("id, author_id, status, created_at")
       .eq("status", statusFilter)
-      .order("id", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (articlesError) {
       return NextResponse.json(
@@ -34,9 +39,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ items: [] }, { status: 200 });
     }
 
+    // 2. Fetch translations
     const { data: translations, error: translationError } = await supabase
       .from("article_translations")
-      .select("article_id, language_code, title, sub_title, body, published_at")
+      .select(
+        "article_id, language_code, title, sub_title, body, published_at, views, created_at, edited_at",
+      )
       .in("article_id", articleIds)
       .order("published_at", { ascending: false });
 
@@ -47,57 +55,35 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { data: tagLinks, error: tagLinkError } = await supabase
-      .from("article_tags")
-      .select("article_id, tag_id")
-      .in("article_id", articleIds);
+    // 3. Use shared query functions to fetch related data in parallel
+    const authorIds = Array.from(
+      new Set(
+        (articles || [])
+          .map((a) => a.author_id)
+          .filter((id): id is string => !!id),
+      ),
+    );
 
-    if (tagLinkError) {
-      return NextResponse.json(
-        { error: tagLinkError.message },
-        { status: 500 },
-      );
-    }
+    const [tagsByArticle, profilesById, interactionCounts] = await Promise.all([
+      fetchTagsForContent(supabase, articleIds, "article_tags"),
+      fetchAuthorProfiles(supabase, authorIds),
+      fetchInteractionCounts(supabase, articleIds, "article"),
+    ]);
 
-    const tagIds = (tagLinks || [])
-      .map((t) => String(t.tag_id))
-      .filter(Boolean);
-    let tagsById = new Map<string, string>();
-    if (tagIds.length) {
-      const { data: tagRows, error: tagError } = await supabase
-        .from("tags")
-        .select("id, name")
-        .in("id", tagIds);
-
-      if (tagError) {
-        return NextResponse.json({ error: tagError.message }, { status: 500 });
-      }
-
-      (tagRows || []).forEach((t) => {
-        if (t.id && t.name) tagsById.set(String(t.id), t.name);
-      });
-    }
-
-    const tagsByArticle = new Map<string, string[]>();
-    (tagLinks || []).forEach((link) => {
-      const tagName = tagsById.get(String(link.tag_id));
-      if (!tagName) return;
-      const arr = tagsByArticle.get(link.article_id) || [];
-      arr.push(tagName);
-      tagsByArticle.set(link.article_id, arr);
-    });
-
+    // 4. Build article map for quick lookup
     const articleMap = new Map<
       string,
-      { author_id: string | null; status: string }
+      { author_id: string | null; status: string; created_at: string | null }
     >();
     (articles || []).forEach((a) => {
       articleMap.set(a.id, {
         author_id: a.author_id || null,
         status: a.status,
+        created_at: a.created_at,
       });
     });
 
+    // 5. Get latest translation per article
     const latestByArticle = new Map<
       string,
       {
@@ -107,6 +93,9 @@ export async function GET(req: NextRequest) {
         sub_title: string | null;
         body: string;
         published_at: string | null;
+        views: number | null;
+        created_at: string | null;
+        edited_at: string | null;
       }
     >();
 
@@ -116,58 +105,33 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Fetch author profiles
-    const authorIds = Array.from(
-      new Set(
-        (articles || [])
-          .map((a) => a.author_id)
-          .filter((id): id is string => !!id),
-      ),
-    );
-
-    const profilesById = new Map<
-      string,
-      {
-        user_name: string | null;
-        avatar_url: string | null;
-        ranking_point: number | null;
-      }
-    >();
-
-    if (authorIds.length) {
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, user_name, avatar_url, ranking_point")
-        .in("id", authorIds);
-
-      if (!profilesError && profiles) {
-        profiles.forEach((p) => {
-          profilesById.set(p.id, {
-            user_name: p.user_name,
-            avatar_url: p.avatar_url,
-            ranking_point: p.ranking_point,
-          });
-        });
-      }
-    }
-
+    // 6. Build response items
     const items = Array.from(latestByArticle.values()).map((t) => {
-      const authorId = articleMap.get(t.article_id)?.author_id || null;
-      const authorProfile = authorId ? profilesById.get(authorId) : null;
+      const articleData = articleMap.get(t.article_id);
+      const authorId = articleData?.author_id || null;
+      const author = authorId ? profilesById.get(authorId) : null;
+      const interactions = interactionCounts.get(t.article_id);
 
       return {
-        article_id: t.article_id,
+        article_id: String(t.article_id),
         title: t.title,
         sub_title: t.sub_title,
         body: t.body,
         language_code: t.language_code,
         published_at: t.published_at,
+        created_at: articleData?.created_at || t.created_at,
+        edited_at: t.edited_at,
+        views: t.views ?? 0,
+        reactions: interactions?.likes || 0,
+        comments: interactions?.comments || 0,
+        bookmarks: interactions?.bookmarks || 0,
         author_id: authorId,
-        author: authorProfile
+        author: author
           ? {
-              user_name: authorProfile.user_name,
-              avatar_url: authorProfile.avatar_url,
-              ranking_point: authorProfile.ranking_point,
+              user_name: author.username,
+              display_name: author.displayName,
+              avatar_url: author.avatarUrl,
+              ranking_point: author.rankingPoint,
             }
           : null,
         tags: tagsByArticle.get(t.article_id) || [],
@@ -194,6 +158,7 @@ export async function POST(req: NextRequest) {
   const {
     title,
     body,
+    sub_title,
     tags = [],
     language_code = "en",
     status = "draft",
@@ -223,6 +188,7 @@ export async function POST(req: NextRequest) {
     article_id: article.id,
     language_code,
     title,
+    sub_title,
     body,
     published_at: status === "published" ? new Date().toISOString() : null,
   };
@@ -242,6 +208,13 @@ export async function POST(req: NextRequest) {
     ? tags.map((t) => t?.trim()).filter(Boolean)
     : [];
 
+  if (status === "draft" && tagNames.length < 1) {
+    return NextResponse.json(
+      { error: "Draft article must contain at least one tag" },
+      { status: 400 },
+    );
+  }
+
   if (tagNames.length) {
     const { data: tagRows, error: tagError } = await supabase
       .from("tags")
@@ -256,6 +229,27 @@ export async function POST(req: NextRequest) {
     }
 
     if (tagRows && tagRows.length) {
+      // TODO: Re-enable usage tracking after schema migration
+      // Update usage count for existing tags
+      // for (const tag of tagRows) {
+      //   // Get current usage count
+      //   const { data: currentTag } = await supabase
+      //     .from("tags")
+      //     .select("usage_count")
+      //     .eq("id", tag.id)
+      //     .single();
+
+      //   const currentCount = currentTag?.usage_count || 0;
+
+      //   await supabase
+      //     .from("tags")
+      //     .update({
+      //       usage_count: currentCount + 1,
+      //       last_used_at: new Date().toISOString()
+      //     })
+      //     .eq("id", tag.id);
+      // }
+
       const tagLinks = tagRows.map((tag) => ({
         article_id: article.id,
         tag_id: tag.id,

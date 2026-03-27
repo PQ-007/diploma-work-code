@@ -95,7 +95,7 @@ export function NavUser() {
           return;
         }
 
-        console.log("Fetching profile for user ID:", authUser.id);
+       
 
         const { data: profile, error: profileError } = await supabase
           .from("profiles")

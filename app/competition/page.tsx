@@ -144,7 +144,7 @@ function CompetitionCard({ comp }: { comp: Competition }) {
   const { t } = useLanguage();
 
   return (
-    <Card className="border-border/40 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col">
+    <Card className="border-border/40 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col ">
       {/* Image */}
       <div className="relative h-40 overflow-hidden bg-muted">
         <img
@@ -160,14 +160,14 @@ function CompetitionCard({ comp }: { comp: Competition }) {
       </div>
 
       {/* Content */}
-      <CardContent className="p-4 flex flex-col flex-1">
+      <CardContent className=" flex flex-col flex-1 py-0">
         {/* Title */}
-        <h3 className="text-base font-semibold leading-tight mb-2">
+        <h3 className="text-base font-semibold leading-tight">
           {comp.name}
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4 flex-1">
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mb-2 flex-1">
           {comp.description}
         </p>
 
@@ -207,7 +207,7 @@ export default function CompetitionPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+      <div className="mx-auto py-6 lg:py-3 max-w-6xl">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">
@@ -253,8 +253,8 @@ export default function CompetitionPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Trophy className="h-10 w-10 text-muted-foreground mb-3" />
+          <div className="flex flex-col items-center justify-center text-center">
+            <Trophy className="h-10 w-10 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               {t("competitions.noCompetitions")}
             </p>

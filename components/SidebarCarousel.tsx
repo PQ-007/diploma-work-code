@@ -102,8 +102,8 @@ export default function SidebarCarousel() {
   const slide = slides[current];
 
   return (
-    <Card
-      className="relative overflow-hidden border-border/50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 hover:-translate-y-1 h-48"
+    <div
+      className="relative overflow-hidden border-border/50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-transform duration-300 hover:-translate-y-1 rounded-2xl"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -160,16 +160,7 @@ export default function SidebarCarousel() {
             </p>
           </div>
 
-          {/* CTA */}
-          {slide.ctaKey && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full h-8 text-xs font-medium shadow-sm"
-            >
-              {t(slide.ctaKey)}
-            </Button>
-          )}
+        
 
           {/* Dots */}
           <div className="mt-auto flex items-center justify-center gap-1.5 pt-1">
@@ -188,6 +179,6 @@ export default function SidebarCarousel() {
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 }

@@ -10,7 +10,7 @@ export function Table({
     const headers = data.headers.map((header, index) => (
       <th
         key={index}
-        className="px-4 py-3 text-left text-sm font-semibold text-foreground bg-muted/50 border-b-2 border-border"
+        className="px-3 sm:px-4 py-2.5 text-left text-xs sm:text-sm font-semibold text-foreground bg-muted/60 border-b border-border/70 whitespace-normal break-words"
       >
         {header}
       </th>
@@ -19,10 +19,13 @@ export function Table({
     const rows = data.rows.map((row, index) => (
       <tr
         key={index}
-        className="border-t border-border/50 hover:bg-muted/30 transition-colors"
+        className="border-t border-border/60 odd:bg-muted/20 even:bg-card hover:bg-muted/30 transition-colors"
       >
         {row.map((cell, cellIndex) => (
-          <td key={cellIndex} className="px-4 py-3 text-sm text-foreground">
+          <td
+            key={cellIndex}
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-foreground align-top whitespace-normal break-words leading-snug"
+          >
             {cell}
           </td>
         ))}
@@ -30,12 +33,12 @@ export function Table({
     ));
 
     return (
-      <div className="my-8 overflow-x-auto rounded-lg border border-border shadow-sm">
-        <table className="w-full min-w-full divide-y divide-border/50">
-          <thead>
-            <tr>{headers}</tr>
+      <div className="my-8 overflow-x-auto rounded-lg border border-border/60 shadow-sm">
+        <table className="w-full table-auto border-collapse text-xs sm:text-sm text-foreground min-w-0">
+          <thead className="bg-muted/50 text-foreground">
+            <tr className="align-middle">{headers}</tr>
           </thead>
-          <tbody className="divide-y divide-border/30 bg-card">{rows}</tbody>
+          <tbody className="bg-card">{rows}</tbody>
         </table>
       </div>
     );
@@ -43,8 +46,8 @@ export function Table({
 
   // Fallback for markdown tables using native markup
   return (
-    <div className="my-8 overflow-x-auto rounded-lg border border-border shadow-sm">
-      <table className="w-full min-w-full divide-y divide-border/50 prose-table:my-0 prose-th:px-4 prose-td:px-4 prose-th:py-3 prose-td:py-3">
+    <div className="my-8 overflow-x-auto rounded-lg border border-border/60 shadow-sm">
+      <table className="w-full table-auto border-collapse text-xs sm:text-sm text-foreground min-w-0">
         {children}
       </table>
     </div>

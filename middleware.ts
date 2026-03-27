@@ -41,7 +41,9 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: Array<{ name: string; value: string; options?: any }>,
+        ) {
           // Forward refreshed cookies to the browser
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);

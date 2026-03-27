@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,11 @@ import {
   Plus,
 } from "lucide-react";
 
-import DiscussionItem, {
-  type DiscussionItemData,
-} from "./components/DiscussionItem";
+// --- New Unified System ---
+import { useDiscussions } from "@/lib/hooks/queries/useDiscussions";
+import { DiscussionCardWrapper } from "./components/DiscussionCardWrapper";
+
+// --- Components Import ---
 import DiscussionModal from "./components/DiscussionModal";
 import TrendingTopics from "@/components/TrendingTopics";
 import DiscussionCreateDialog from "@/components/DiscussionCreateDialog";
@@ -39,8 +41,6 @@ export default function DiscussionsPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
-  const [discussions, setDiscussions] = useState<DiscussionItemData[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Modal state
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -49,105 +49,8 @@ export default function DiscussionsPage() {
   // New discussion dialog
   const [createOpen, setCreateOpen] = useState(false);
 
-  const fetchDiscussions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/discussions");
-      if (res.ok) {
-        const data = await res.json();
-        setDiscussions(data.items || []);
-      }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDiscussions();
-  }, [fetchDiscussions]);
-
-  // ── Inline vote (optimistic + API) ──
-  const handleVote = useCallback(
-    async (id: string, direction: "up" | "down") => {
-      if (!user) return;
-      const disc = discussions.find((d) => d.id === id);
-      if (!disc) return;
-
-      // Optimistic update
-      const oldVote = disc.userVote;
-      let newUserVote: "up" | "down" | null;
-      let delta = 0;
-
-      if (oldVote === direction) {
-        newUserVote = null;
-        delta = direction === "up" ? -1 : 1;
-      } else if (oldVote) {
-        newUserVote = direction;
-        delta = direction === "up" ? 2 : -2;
-      } else {
-        newUserVote = direction;
-        delta = direction === "up" ? 1 : -1;
-      }
-
-      setDiscussions((prev) =>
-        prev.map((d) =>
-          d.id === id
-            ? { ...d, userVote: newUserVote, votes: d.votes + delta }
-            : d,
-        ),
-      );
-
-      try {
-        await fetch("/api/discussions/vote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ discussionId: id, vote: direction }),
-        });
-      } catch {
-        // Revert on error
-        setDiscussions((prev) =>
-          prev.map((d) =>
-            d.id === id
-              ? { ...d, userVote: oldVote, votes: d.votes - delta }
-              : d,
-          ),
-        );
-      }
-    },
-    [discussions, user],
-  );
-
-  // ── Inline bookmark (optimistic + API) ──
-  const handleBookmark = useCallback(
-    async (id: string) => {
-      if (!user) return;
-      const disc = discussions.find((d) => d.id === id);
-      if (!disc) return;
-
-      setDiscussions((prev) =>
-        prev.map((d) =>
-          d.id === id ? { ...d, bookmarked: !d.bookmarked } : d,
-        ),
-      );
-
-      try {
-        await fetch("/api/discussions/bookmark", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ discussionId: id }),
-        });
-      } catch {
-        setDiscussions((prev) =>
-          prev.map((d) =>
-            d.id === id ? { ...d, bookmarked: !d.bookmarked } : d,
-          ),
-        );
-      }
-    },
-    [discussions, user],
-  );
+  // Use React Query hook - automatic caching and state management!
+  const { data: discussions, isLoading, error, refetch } = useDiscussions();
 
   // ── Open modal ──
   const handleOpenModal = (id: string) => {
@@ -155,60 +58,49 @@ export default function DiscussionsPage() {
     setModalOpen(true);
   };
 
-  // ── Sync modal changes back to list ──
+  // ── Sync modal changes back to cache ──
   const handleModalVoteChange = (
     id: string,
     newVote: "up" | "down" | null,
     newTotal: number,
   ) => {
-    setDiscussions((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, userVote: newVote, votes: newTotal } : d,
-      ),
-    );
+    // React Query will handle cache updates automatically
+    // when mutations are triggered
   };
 
   const handleModalBookmarkChange = (id: string, bookmarked: boolean) => {
-    setDiscussions((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, bookmarked } : d)),
-    );
+    // React Query will handle cache updates automatically
   };
 
   const handleModalCommentCountChange = (id: string, delta: number) => {
-    setDiscussions((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, commentCount: d.commentCount + delta } : d,
-      ),
-    );
+    // React Query will handle cache updates automatically
   };
 
-  // ── Create new discussion ──
-  // (handled by DiscussionCreateDialog component)
-
-  // ── Filter ──
-  const filteredDiscussions = discussions.filter((item) => {
+  // ── Filter discussions ──
+  const filteredDiscussions = (discussions || []).filter((item) => {
     if (activeTab === "all") return true;
-    if (activeTab === "unanswered") return !item.answered;
-    return item.tags.some((tag) =>
+    if (activeTab === "unanswered") return !item.content.answered;
+    return item.content.tags.some((tag) =>
       tag.toLowerCase().includes(activeTab.toLowerCase()),
     );
   });
 
   // Sort: pinned first, then by votes
   const sortedDiscussions = [...filteredDiscussions].sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    return b.votes - a.votes;
+    if (a.content.pinned && !b.content.pinned) return -1;
+    if (!a.content.pinned && b.content.pinned) return 1;
+    return b.stats.likes - a.stats.likes;
   });
 
   // Stats computed from real data
-  const totalThreads = discussions.length;
-  const answeredCount = discussions.filter((d) => d.answered).length;
+  const totalThreads = discussions?.length || 0;
+  const answeredCount =
+    discussions?.filter((d) => d.content.answered).length || 0;
   const unansweredCount = totalThreads - answeredCount;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+    <div className="min-h-screen bg-background max-w-6xl mx-auto">
+      <div className="mx-auto py-6 lg:py-3 ">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -233,7 +125,7 @@ export default function DiscussionsPage() {
 
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Content */}
-          <div className="flex-1 max-w-3xl">
+          <div className="flex-1 ">
             {/* Category Tabs */}
             <Tabs
               value={activeTab}
@@ -258,10 +150,34 @@ export default function DiscussionsPage() {
             </Tabs>
 
             {/* Discussion Feed */}
-            {loading ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
+            ) : error ? (
+              <Card className="border-destructive/30">
+                <CardContent className="p-6 flex flex-col items-center text-center space-y-3">
+                  <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      Failed to load discussions
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {error instanceof Error ? error.message : String(error)}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => refetch()}
+                  >
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
             ) : sortedDiscussions.length === 0 ? (
               <div className="text-sm text-muted-foreground py-16 text-center">
                 <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -280,13 +196,10 @@ export default function DiscussionsPage() {
             ) : (
               <div className="space-y-3">
                 {sortedDiscussions.map((item) => (
-                  <DiscussionItem
-                    key={item.id}
+                  <DiscussionCardWrapper
+                    key={item.content.id}
                     item={item}
-                    onVote={handleVote}
-                    onBookmark={handleBookmark}
-                    onClick={handleOpenModal}
-                    disabled={!user}
+                    onComment={() => handleOpenModal(item.content.id)}
                   />
                 ))}
               </div>
@@ -295,38 +208,6 @@ export default function DiscussionsPage() {
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[300px] space-y-5 sticky top-8 h-fit">
-            {/* Discussion Stats */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <MessageSquare className="h-4 w-4" />
-                {t("discussions.stats")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-3 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.totalThreads")}
-                    </span>
-                    <span className="font-medium">{totalThreads}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.answered")}
-                    </span>
-                    <span className="font-medium text-green-600 dark:text-green-400">
-                      {answeredCount}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {t("discussions.unanswered")}
-                    </span>
-                    <span className="font-medium">{unansweredCount}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             <TrendingTopics trendingTopics={[]} t={t} />
           </aside>
         </div>
@@ -346,7 +227,7 @@ export default function DiscussionsPage() {
       <DiscussionCreateDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={fetchDiscussions}
+        onCreated={() => refetch()}
       />
     </div>
   );

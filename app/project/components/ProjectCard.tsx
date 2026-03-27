@@ -49,13 +49,15 @@ export default function ProjectCard({ project }: { project: ProjectPayload }) {
               variant="outline"
               className={`text-[10px] font-semibold uppercase bg-background/80 backdrop-blur-sm ${difficultyColors[project.difficulty]}`}
             >
-              {t(`project.difficulty.${project.difficulty}`) || project.difficulty}
+              {t(`project.difficulty.${project.difficulty}`) ||
+                project.difficulty}
             </Badge>
             <Badge
               className={`text-[10px] font-semibold uppercase bg-background/80 backdrop-blur-sm ${statusColors[project.status] || ""}`}
               variant="outline"
             >
-              {t(`project.status.${project.status}`) || project.status.replace("_", " ")}
+              {t(`project.status.${project.status}`) ||
+                project.status.replace("_", " ")}
             </Badge>
           </div>
 

@@ -2,6 +2,20 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Dashtseden – traditional Mongolian calligraphic font.
+   Place Dashtseden.ttf (or .woff2) in public/fonts/. */
+@font-face {
+  font-family: "Dashtseden";
+  src: url("/fonts/cmdashitseden.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.mn-script {
+  font-family: "Dashtseden", "Mongolian Baiti", "Noto Sans Mongolian", serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -310,6 +324,15 @@ body {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Utility animations */
 .animate-float {
   animation: float 6s ease-in-out infinite;
@@ -329,6 +352,10 @@ body {
 
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
 }
 
 /* Hover effects */

@@ -43,7 +43,7 @@ export default function PostCreationBox() {
           onClick={() => setDiscussionOpen(true)}
         >
           <MessageSquare className="h-4 w-4" />
-          Discussion
+          {t("feed.postBox.discussion")}
         </Button>
       </div>
 

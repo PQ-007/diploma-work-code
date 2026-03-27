@@ -10,12 +10,22 @@ type MdxEditorProps = {
   value: string;
   onChange: (v: string) => void;
   height?: number | string;
+  onSave?: () => void;
+  onFormatBold?: () => void;
+  onFormatItalic?: () => void;
+  onInsertImage?: () => void;
+  onTogglePreview?: () => void;
 };
 
 export function MdxEditor({
   value,
   onChange,
   height = "100%",
+  onSave,
+  onFormatBold,
+  onFormatItalic,
+  onInsertImage,
+  onTogglePreview,
 }: MdxEditorProps) {
   // resolvedTheme ensures "system" is converted to "light" or "dark"
   const { resolvedTheme } = useTheme();
@@ -58,6 +68,81 @@ export function MdxEditor({
       }
     },
     [onChange, value],
+  );
+
+  // Text formatting helpers
+  const wrapSelectionWith = useCallback(
+    (prefix: string, suffix?: string) => {
+      const editor = editorRef.current;
+      const monaco = monacoRef.current;
+      const model = editor?.getModel?.();
+
+      if (!editor || !monaco || !model) return;
+
+      const selection = editor.getSelection();
+      if (!selection) return;
+
+      const selectedText = model.getValueInRange(selection);
+      const wrapper = suffix || prefix;
+      const newText = `${prefix}${selectedText}${wrapper}`;
+
+      editor.executeEdits("format", [
+        {
+          range: selection,
+          text: newText,
+        },
+      ]);
+
+      // Update selection to be inside the wrapped text
+      const startPos = selection.getStartPosition();
+      const newSelectionStart = model.getPositionAt(
+        model.getOffsetAt(startPos) + prefix.length
+      );
+      const newSelectionEnd = model.getPositionAt(
+        model.getOffsetAt(startPos) + prefix.length + selectedText.length
+      );
+
+      editor.setSelection(
+        new monaco.Selection(
+          newSelectionStart.lineNumber,
+          newSelectionStart.column,
+          newSelectionEnd.lineNumber,
+          newSelectionEnd.column
+        )
+      );
+    },
+    []
+  );
+
+  const insertAtLineBeginning = useCallback(
+    (prefix: string) => {
+      const editor = editorRef.current;
+      const monaco = monacoRef.current;
+      const model = editor?.getModel?.();
+
+      if (!editor || !monaco || !model) return;
+
+      const position = editor.getPosition();
+      if (!position) return;
+
+      const lineText = model.getLineContent(position.lineNumber);
+
+      // Check if line already has the prefix and toggle it
+      if (lineText.startsWith(prefix)) {
+        const newText = lineText.substring(prefix.length);
+        const range = new monaco.Range(
+          position.lineNumber,
+          1,
+          position.lineNumber,
+          lineText.length + 1
+        );
+        editor.executeEdits("format", [{ range, text: newText }]);
+      } else {
+        const range = new monaco.Range(position.lineNumber, 1, position.lineNumber, 1);
+        editor.executeEdits("format", [{ range, text: prefix }]);
+      }
+    },
+    []
   );
 
   const { onPaste, onDrop, onDragOver, uploading, error } = useImagePasteUpload(
@@ -117,6 +202,145 @@ export function MdxEditor({
   }, [onDragOver, onDrop, onPaste]);
 
   /**
+   * Register custom keyboard shortcuts for markdown editing
+   */
+  const registerKeyboardShortcuts = useCallback(
+    (editor: any, monaco: any) => {
+      // Save document (Ctrl/Cmd + S)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+        () => {
+          onSave?.();
+        }
+      );
+
+      // Bold text (Ctrl/Cmd + B)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,
+        () => {
+          wrapSelectionWith('**');
+          onFormatBold?.();
+        }
+      );
+
+      // Italic text (Ctrl/Cmd + I)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+        () => {
+          wrapSelectionWith('*');
+          onFormatItalic?.();
+        }
+      );
+
+      // Insert image (Ctrl/Cmd + Shift + I)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
+        () => {
+          onInsertImage?.();
+        }
+      );
+
+      // Toggle preview (Ctrl/Cmd + Shift + P)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyP,
+        () => {
+          onTogglePreview?.();
+        }
+      );
+
+      // Insert code block (Ctrl/Cmd + Shift + C)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyC,
+        () => {
+          insertAtCursor('\n```\n\n```\n');
+        }
+      );
+
+      // Insert inline code (Ctrl/Cmd + `)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backquote,
+        () => {
+          wrapSelectionWith('`');
+        }
+      );
+
+      // Insert link (Ctrl/Cmd + K)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+        () => {
+          wrapSelectionWith('[', '](url)');
+        }
+      );
+
+      // Heading shortcuts
+      // H1 (Ctrl/Cmd + 1)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit1,
+        () => {
+          insertAtLineBeginning('# ');
+        }
+      );
+
+      // H2 (Ctrl/Cmd + 2)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit2,
+        () => {
+          insertAtLineBeginning('## ');
+        }
+      );
+
+      // H3 (Ctrl/Cmd + 3)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit3,
+        () => {
+          insertAtLineBeginning('### ');
+        }
+      );
+
+      // Insert horizontal rule (Ctrl/Cmd + Shift + -)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Minus,
+        () => {
+          insertAtCursor('\n---\n');
+        }
+      );
+
+      // Insert unordered list (Ctrl/Cmd + Shift + 8)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Digit8,
+        () => {
+          insertAtLineBeginning('- ');
+        }
+      );
+
+      // Insert ordered list (Ctrl/Cmd + Shift + 7)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Digit7,
+        () => {
+          insertAtLineBeginning('1. ');
+        }
+      );
+
+      // Insert blockquote (Ctrl/Cmd + Shift + >)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Period,
+        () => {
+          insertAtLineBeginning('> ');
+        }
+      );
+
+      // Strikethrough text (Ctrl/Cmd + Shift + X)
+      editor.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyX,
+        () => {
+          wrapSelectionWith('~~');
+        }
+      );
+    },
+    [wrapSelectionWith, insertAtCursor, insertAtLineBeginning, onSave, onFormatBold, onFormatItalic, onInsertImage, onTogglePreview]
+  );
+
+  /**
    * beforeMount runs before the editor instance is created.
    * This is the correct place to define custom themes so they
    * are available for the initial render.
@@ -146,6 +370,9 @@ export function MdxEditor({
         onMount={(editor, monaco) => {
           editorRef.current = editor;
           monacoRef.current = monaco;
+
+          // Register custom keyboard shortcuts
+          registerKeyboardShortcuts(editor, monaco);
         }}
         theme={resolvedTheme === "dark" ? "my-dark-theme" : "my-light-theme"}
         options={{
@@ -172,6 +399,7 @@ export function MdxEditor({
             verticalSliderSize: 8,
             horizontalSliderSize: 8,
             useShadows: false,
+            alwaysConsumeMouseWheel: false,
           },
           quickSuggestions: false,
         }}

@@ -39,18 +39,20 @@ export async function GET() {
         user_name: string | null;
         display_name: string | null;
         avatar_url: string | null;
+        ranking_point: number | null;
       }
     >();
     if (authorIds.length) {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, user_name, display_name, avatar_url")
+        .select("id, user_name, display_name, avatar_url, ranking_point")
         .in("id", authorIds);
       profiles?.forEach((p) =>
         profilesById.set(p.id, {
           user_name: p.user_name,
           display_name: p.display_name,
           avatar_url: p.avatar_url,
+          ranking_point: p.ranking_point,
         }),
       );
     }
@@ -150,6 +152,7 @@ export async function GET() {
             author?.display_name || author?.user_name || "Anonymous",
           user_name: author?.user_name || "user",
           avatar_url: author?.avatar_url || "",
+          ranking_point: author?.ranking_point || 0,
         },
         tags: tagsByDisc.get(d.id) || [],
         votes: voteMap.get(d.id) || 0,

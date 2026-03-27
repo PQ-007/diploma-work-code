@@ -60,6 +60,28 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    if (status === "draft") {
+      const { data: tagLinks, error: tagLinksError } = await supabase
+        .from("article_tags")
+        .select("tag_id")
+        .eq("article_id", articleId)
+        .limit(1);
+
+      if (tagLinksError) {
+        return NextResponse.json(
+          { error: tagLinksError.message },
+          { status: 500 },
+        );
+      }
+
+      if (!tagLinks || tagLinks.length < 1) {
+        return NextResponse.json(
+          { error: "Draft article must contain at least one tag" },
+          { status: 400 },
+        );
+      }
+    }
+
     // Update status
     const { error: updateError } = await supabase
       .from("articles")
