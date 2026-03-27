@@ -15,9 +15,7 @@ const TranslationStatus: React.FC<{
   errors: string[];
 }> = ({ lang, hasContent, completeness, isActive, errors }) => {
   const getStatusIcon = () => {
-    if (errors.length > 0) {
-      return <AlertCircle className="w-4 h-4 text-red-500" />;
-    }
+    
 
     if (completeness >= 80) {
       return <CheckCircle2 className="w-4 h-4 text-green-500" />;
@@ -41,7 +39,7 @@ const TranslationStatus: React.FC<{
   };
 
   const getStatusText = () => {
-    if (errors.length > 0) return "Has errors";
+    if (errors.length > 0) return "Not added";
     if (completeness >= 80) return "Complete";
     if (hasContent) return `${completeness}%`;
     return "Empty";
@@ -173,14 +171,7 @@ export const TranslationToggle: React.FC = () => {
             })}
           </div>
 
-          {/* Footer with tips */}
-          {hasContentCount > 0 && (
-            <div className="px-3 py-2 border-t border-border/60 mt-2">
-              <p className="text-xs text-muted-foreground">
-                💡 Content is automatically saved when switching languages
-              </p>
-            </div>
-          )}
+          
         </div>
       )}
     </div>

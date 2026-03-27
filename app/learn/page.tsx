@@ -131,7 +131,7 @@ export default function LearnPage() {
     totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
 
   return (
-    <div className="space-y-10 pb-16">
+    <div className="space-y-10 pb-16 max-w-6xl items-center mx-auto">
       {/* ── Hero Header ── */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-border p-6 md:p-8">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">

@@ -263,7 +263,7 @@ export default function DictionaryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl px-4">
+      <div className="mx-auto py-6 lg:py-3 max-w-6xl px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -458,8 +458,8 @@ export default function DictionaryPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {entries.map((entry) => (
                   <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
-                    <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full">
-                      <CardContent className="p-4 space-y-2">
+                    <div className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full bg-card rounded-md p-4 flex flex-col">
+                     
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
@@ -522,8 +522,8 @@ export default function DictionaryPage() {
                             {entry.author.display_name}
                           </span>
                         </div>
-                      </CardContent>
-                    </Card>
+                    
+                    </div>
                   </Link>
                 ))}
               </div>

@@ -85,7 +85,7 @@ export default function ProjectPage() {
   }, [fetchProjects]);
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-6 pb-16 max-w-6xl items-center mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

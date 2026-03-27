@@ -99,8 +99,8 @@ export default function DiscussionsPage() {
   const unansweredCount = totalThreads - answeredCount;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+    <div className="min-h-screen bg-background max-w-6xl mx-auto">
+      <div className="mx-auto py-6 lg:py-3 ">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -125,7 +125,7 @@ export default function DiscussionsPage() {
 
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Content */}
-          <div className="flex-1 max-w-3xl">
+          <div className="flex-1 ">
             {/* Category Tabs */}
             <Tabs
               value={activeTab}

@@ -100,7 +100,7 @@ export default function ArticleBrowsePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+      <div className="mx-auto py-6 lg:py-3 max-w-6xl">
         {/* Page Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>

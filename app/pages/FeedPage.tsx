@@ -385,7 +385,7 @@ export default function FeedPage() {
       <div className="mx-auto py-6 lg:py-3 max-w-7xl">
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Feed */}
-          <div className="flex-1 max-w-2xl">
+          <div className="flex-1 max-w-3xl">
             <PostCreationBox />
 
             {loading ? (
