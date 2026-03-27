@@ -7,10 +7,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CheckCircle2, Loader2, Clock } from "lucide-react";
 import { useArticleEditor } from "@/app/article/create/ArticleEditorContext";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // --- ArticleCreateHeader Main Component ---
 
 export function ArticleCreateHeader() {
+  const { t } = useLanguage();
   const {
     title,
     setTitle,
@@ -47,7 +49,7 @@ export function ArticleCreateHeader() {
             autoFocus
             type="text"
             className="w-full px-4 py-1.5 bg-background rounded-lg text-lg font-semibold "
-            placeholder="Enter article title..."
+            placeholder={t("articles.create.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -59,7 +61,9 @@ export function ArticleCreateHeader() {
               className={`h-1.5 w-1.5 rounded-full ${statusDotClass}`}
               aria-hidden
             />
-            {status === "published" ? "Published" : "Draft"}
+            {status === "published"
+              ? t("articles.create.published")
+              : t("articles.create.draft")}
           </Badge>
 
           {/* Auto-save status indicator */}
@@ -70,25 +74,31 @@ export function ArticleCreateHeader() {
                 {isAutoSaving ? (
                   <>
                     <Loader2 size={14} className="animate-spin text-blue-600" />
-                    <span className="text-blue-600">Auto-saving...</span>
+                    <span className="text-blue-600">
+                      {t("articles.create.autoSaving")}
+                    </span>
                   </>
                 ) : lastAutoSave ? (
                   <>
                     <CheckCircle2 size={14} className="text-green-600" />
                     <span className="text-green-600">
-                      Auto-saved {formatDistanceToNow(lastAutoSave)} ago
+                      {t("articles.create.autoSaved", {
+                        time: formatDistanceToNow(lastAutoSave),
+                      })}
                     </span>
                   </>
                 ) : hasUnsavedChanges ? (
                   <>
                     <Clock size={14} className="text-orange-500" />
-                    <span className="text-orange-500">Unsaved changes</span>
+                    <span className="text-orange-500">
+                      {t("articles.create.unsavedChanges")}
+                    </span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 size={14} className="text-muted-foreground" />
                     <span className="text-muted-foreground">
-                      Auto-save enabled
+                      {t("articles.create.autoSaveEnabled")}
                     </span>
                   </>
                 )}
@@ -111,7 +121,11 @@ export function ArticleCreateHeader() {
               <CheckCircle2 size={16} />
             )}
             <span>
-              {justSaved ? "Saved" : isEditMode ? "Save changes" : "Save draft"}
+              {justSaved
+                ? t("articles.create.saved")
+                : isEditMode
+                  ? t("articles.create.saveChanges")
+                  : t("articles.create.saveDraft")}
             </span>
           </Button>
 
@@ -127,7 +141,11 @@ export function ArticleCreateHeader() {
               ) : (
                 <CheckCircle2 size={16} />
               )}
-              <span>{isPublishing ? "Publishing…" : "Publish"}</span>
+              <span>
+                {isPublishing
+                  ? t("articles.create.publishing")
+                  : t("articles.create.publish")}
+              </span>
             </Button>
           )}
         </div>

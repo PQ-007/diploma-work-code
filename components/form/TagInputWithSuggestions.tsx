@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TagSuggestion {
   id: number;
@@ -26,6 +27,7 @@ export function TagInputWithSuggestions({
   placeholder = "Add tags (press Enter, max 5)...",
   disabled = false,
 }: TagInputWithSuggestionsProps) {
+  const { t } = useLanguage();
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState<TagSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -156,7 +158,7 @@ export function TagInputWithSuggestions({
             <button
               onClick={() => removeTag(tag)}
               className="flex items-center rounded-full transition-colors hover:bg-white/20 px-1 py-0.5"
-              aria-label={`Remove ${tag}`}
+              aria-label={t("articles.create.removeTag", { tag })}
             >
               <X size={14} />
             </button>
@@ -170,7 +172,9 @@ export function TagInputWithSuggestions({
             type="text"
             className="w-full px-3 py-2.5 bg-background border border-border rounded-full text-sm transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder={
-              tags.length >= maxTags ? "Maximum tags reached" : placeholder
+              tags.length >= maxTags
+                ? t("articles.create.maxTagsReached")
+                : placeholder
             }
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
@@ -189,11 +193,11 @@ export function TagInputWithSuggestions({
             <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
               {isLoading ? (
                 <div className="px-4 py-3 text-sm text-muted-foreground">
-                  Loading suggestions...
+                  {t("articles.create.loadingSuggestions")}
                 </div>
               ) : suggestions.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-muted-foreground">
-                  No tags found
+                  {t("articles.create.noTagsFound")}
                 </div>
               ) : (
                 suggestions.map((suggestion, index) => (

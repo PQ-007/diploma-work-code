@@ -27,8 +27,10 @@ import { TagInputWithSuggestions } from "@/components/form/TagInputWithSuggestio
 import { useArticleEditor } from "./ArticleEditorContext";
 import { TranslationToggle } from "@/components/editor/TranslationToggle";
 import { useArticleMetrics } from "@/hooks/useArticleMetrics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ArticleCreatePage() {
+  const { t } = useLanguage();
   const {
     title,
     subtitle,
@@ -122,7 +124,7 @@ export default function ArticleCreatePage() {
     }
 
     toast.error(saveError, {
-      description: "Please review your article fields and try again.",
+      description: t("articles.create.reviewFieldsError"),
     });
     lastSaveErrorRef.current = saveError;
   }, [saveError]);
@@ -143,7 +145,7 @@ export default function ArticleCreatePage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-muted-foreground gap-2">
         <Loader2 size={18} className="animate-spin" />
-        Checking article access...
+        {t("articles.create.checkingAccess")}
       </div>
     );
   }
@@ -153,12 +155,14 @@ export default function ArticleCreatePage() {
       <div className="min-h-[60vh] flex items-center justify-center p-4">
         <div className="w-full max-w-md rounded-xl border border-destructive/30 bg-card p-6 text-center space-y-3">
           <ShieldAlert className="h-8 w-8 text-destructive mx-auto" />
-          <h2 className="text-lg font-semibold">Access denied</h2>
+          <h2 className="text-lg font-semibold">
+            {t("articles.create.accessDenied")}
+          </h2>
           <p className="text-sm text-muted-foreground">
-            You can only edit your own articles.
+            {t("articles.create.accessDeniedMessage")}
           </p>
           <Button asChild variant="outline" size="sm">
-            <Link href="/article">Back to articles</Link>
+            <Link href="/article">{t("articles.create.backToArticles")}</Link>
           </Button>
         </div>
       </div>
@@ -183,7 +187,7 @@ export default function ArticleCreatePage() {
                 <input
                   type="text"
                   className="w-full px-4 py-1 bg-background border border-border rounded-full text-sm font-semibold transition-all placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                  placeholder="Sub title / Description"
+                  placeholder={t("articles.create.subtitlePlaceholder")}
                   value={subtitle}
                   onChange={(e) => setSubtitle(e.target.value)}
                 />
@@ -192,7 +196,7 @@ export default function ArticleCreatePage() {
                   tags={tags}
                   onTagsChange={setTags}
                   maxTags={5}
-                  placeholder="Add tags (press Enter, max 5)..."
+                  placeholder={t("articles.create.tagsPlaceholder")}
                 />
               </div>
 
@@ -218,7 +222,7 @@ export default function ArticleCreatePage() {
                     size="icon"
                     className="h-10 w-10 rounded-full"
                     onClick={() => setViewMenuOpen(!viewMenuOpen)}
-                    aria-label="Change view"
+                    aria-label={t("articles.create.changeView")}
                   >
                     {viewIcon}
                   </Button>
@@ -237,7 +241,7 @@ export default function ArticleCreatePage() {
                             setViewMode(mode);
                             setViewMenuOpen(false);
                           }}
-                          aria-label={`${mode} view`}
+                          aria-label={t(`articles.create.${mode}View`)}
                         >
                           {mode === "split" && <Columns2 size={16} />}
                           {mode === "preview" && <Eye size={16} />}
@@ -257,7 +261,7 @@ export default function ArticleCreatePage() {
                   className="h-10 w-10 rounded-full"
                   onClick={handleImageButtonClick}
                   disabled={imageUploading}
-                  aria-label="Insert image"
+                  aria-label={t("articles.create.insertImage")}
                 >
                   {imageUploading ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -306,17 +310,8 @@ export default function ArticleCreatePage() {
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 rounded-full"
-                  aria-label="Comments"
-                >
-                  <MessageCircleMore size={16} />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-10 w-10 rounded-full"
                   onClick={handleExport}
-                  aria-label="Export"
+                  aria-label={t("articles.create.export")}
                 >
                   <Download size={16} />
                 </Button>
@@ -327,8 +322,12 @@ export default function ArticleCreatePage() {
                   className="h-10 w-10 rounded-full text-destructive hover:text-destructive"
                   onClick={handleDeleteArticle}
                   disabled={!articleId || isDeleting}
-                  aria-label="Delete article"
-                  title={!articleId ? "Save article first" : "Delete article"}
+                  aria-label={t("articles.create.deleteArticle")}
+                  title={
+                    !articleId
+                      ? t("articles.create.saveArticleFirst")
+                      : t("articles.create.deleteArticle")
+                  }
                 >
                   {isDeleting ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -341,7 +340,7 @@ export default function ArticleCreatePage() {
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 rounded-full"
-                  aria-label="Help"
+                  aria-label={t("articles.create.help")}
                 >
                   <CircleQuestionMark size={20} />
                 </Button>

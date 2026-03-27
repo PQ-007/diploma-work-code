@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/server";
 import { tagSimilarityService } from "@/lib/services/tagSimilarity";
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q");
     const limit = parseInt(searchParams.get("limit") || "10", 10);
@@ -63,7 +58,6 @@ export async function GET(request: NextRequest) {
       id: tag.id,
       name: tag.name,
       usage_count: tag.usage_count || 0,
-      
     }));
 
     // Get suggestions using similarity service

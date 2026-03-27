@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Settings2, Plus, Check } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import {
   Select,
@@ -108,6 +109,7 @@ export function ArticleSettingsButton({
   onSaveTranslations,
   onSettingsChange,
 }: ArticleSettingsButtonProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   const initial = useMemo(
@@ -268,7 +270,7 @@ export function ArticleSettingsButton({
           variant="outline"
           size="icon"
           className="h-10 w-10 rounded-full"
-          aria-label="Article settings"
+          aria-label={t("articles.create.articleSettings")}
         >
           <Settings2 size={16} />
         </Button>
@@ -276,16 +278,16 @@ export function ArticleSettingsButton({
 
       <DialogContent className="sm:max-w-5xl p-0 overflow-hidden">
         <DialogHeader className="sr-only">
-          <DialogTitle>Article settings</DialogTitle>
+          <DialogTitle>{t("articles.create.articleSettings")}</DialogTitle>
           <DialogDescription>
-            Manage translations and metadata.
+            {t("articles.create.settingsDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="p-3 pl-6 border-b ">
           <div className="min-w-0">
             <DialogTitle className="text-lg truncate">
-              Article settings
+              {t("articles.create.articleSettings")}
             </DialogTitle>
           </div>
         </div>
@@ -315,7 +317,7 @@ export function ArticleSettingsButton({
               <div className="flex items-center gap-2">
                 <Select onValueChange={(v) => addTranslation(v as Lang)}>
                   <SelectTrigger className="h-8 w-auto rounded-full">
-                    <SelectValue placeholder="Add translation" />
+                    <SelectValue placeholder={t("articles.create.addTranslation")} />
                   </SelectTrigger>
                   <SelectContent>
                     {remainingLangs.map((l) => (
@@ -328,7 +330,7 @@ export function ArticleSettingsButton({
               </div>
             ) : (
               <Badge variant="secondary" className="rounded-full">
-                All translations added
+                {t("articles.create.allTranslationsAdded")}
               </Badge>
             )}
           </div>
@@ -340,14 +342,14 @@ export function ArticleSettingsButton({
               <div className="rounded-xl border bg-card p-4 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold">Series</p>
+                    <p className="text-sm font-semibold">{t("articles.create.series")}</p>
                     <p className="text-xs text-muted-foreground">
-                      Mark if this belongs to a series.
+                      {t("articles.create.seriesDescription")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] text-muted-foreground">
-                      Serial
+                      {t("articles.create.serial")}
                     </span>
                     <Switch checked={isSerial} onCheckedChange={setIsSerial} />
                   </div>
@@ -357,14 +359,14 @@ export function ArticleSettingsButton({
                   <CollapsibleContent className="space-y-3 pt-2">
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">
-                        Select entry
+                        {t("articles.create.selectEntry")}
                       </p>
                       <Select
                         value={selectedSerial ?? ""}
                         onValueChange={(v) => setSelectedSerial(v)}
                       >
                         <SelectTrigger className="h-9 w-full">
-                          <SelectValue placeholder="Choose or add a series" />
+                          <SelectValue placeholder={t("articles.create.chooseOrAddSeries")} />
                         </SelectTrigger>
                         <SelectContent>
                           {serialOptions.map((opt) => (
@@ -380,7 +382,7 @@ export function ArticleSettingsButton({
                       <Input
                         value={serialInput}
                         onChange={(e) => setSerialInput(e.target.value)}
-                        placeholder="Custom series name"
+                        placeholder={t("articles.create.customSeriesName")}
                         className="sm:flex-1"
                       />
                       <Button
@@ -388,14 +390,13 @@ export function ArticleSettingsButton({
                         size="sm"
                         onClick={handleAddSerial}
                       >
-                        Add
+                        {t("articles.create.add")}
                       </Button>
                     </div>
 
                     {selectedSerial && (
                       <p className="text-xs text-muted-foreground">
-                        Selected:{" "}
-                        <span className="font-medium">{selectedSerial}</span>
+                        {t("articles.create.selectedSeries", { series: selectedSerial })}
                       </p>
                     )}
                   </CollapsibleContent>
@@ -404,7 +405,7 @@ export function ArticleSettingsButton({
               <div className="rounded-xl border bg-card p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold">
-                    {LANG_LABEL[activeLang]} translation
+                    {t("articles.create.languageTranslation", { language: LANG_LABEL[activeLang] })}
                   </p>
                   <p className="text-xs text-muted-foreground uppercase">
                     {activeLang}
@@ -413,44 +414,44 @@ export function ArticleSettingsButton({
 
                 {!activeTranslation ? (
                   <div className="rounded-lg border border-dashed p-4">
-                    <p className="text-sm font-medium">Not added yet</p>
+                    <p className="text-sm font-medium">{t("articles.create.notAddedYet")}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Use “Add translation” to create this language.
+                      {t("articles.create.addTranslationHelp")}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="space-y-1.5">
-                      <p className="text-xs text-muted-foreground">Title</p>
+                      <p className="text-xs text-muted-foreground">{t("articles.create.title")}</p>
                       <Input
                         value={activeTranslation.title ?? ""}
                         onChange={(e) =>
                           upsert(activeLang, "title", e.target.value)
                         }
-                        placeholder="Translated title"
+                        placeholder={t("articles.create.translatedTitle")}
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <p className="text-xs text-muted-foreground">Subtitle</p>
+                      <p className="text-xs text-muted-foreground">{t("articles.create.subtitle")}</p>
                       <Input
                         value={activeTranslation.subTitle ?? ""}
                         onChange={(e) =>
                           upsert(activeLang, "subTitle", e.target.value)
                         }
-                        placeholder="Translated subtitle"
+                        placeholder={t("articles.create.translatedSubtitle")}
                       />
                     </div>
 
                     <p className="text-[11px] text-muted-foreground">
-                      Saved translations are up to your save flow.
+                      {t("articles.create.translationSaveFlow")}
                     </p>
                   </div>
                 )}
               </div>
 
               <div className="rounded-xl border bg-card p-4 space-y-2">
-                <p className="text-sm font-semibold">Tags</p>
+                <p className="text-sm font-semibold">{t("articles.create.tags")}</p>
                 {tags.length ? (
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
@@ -464,32 +465,32 @@ export function ArticleSettingsButton({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">No tags set.</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.noTagsSet")}</p>
                 )}
               </div>
             </div>
 
             <div className="lg:col-span-5 space-y-3 ">
               <div className="p-2 pl-4 text-xl items-center space-between border rounded-lg bg-card">
-                Stats
+                {t("articles.create.stats")}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border bg-card p-4">
-                  <p className="text-xs text-muted-foreground">Word count</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.wordCount")}</p>
                   <p className="mt-2 text-2xl font-semibold">
                     {wordCount ?? "—"}
                   </p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                  <p className="text-xs text-muted-foreground">Views</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.views")}</p>
                   <p className="mt-2 text-2xl font-semibold">{views ?? "—"}</p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                  <p className="text-xs text-muted-foreground">Likes</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.likes")}</p>
                   <p className="mt-2 text-2xl font-semibold">{likes ?? "—"}</p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                  <p className="text-xs text-muted-foreground">Comments</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.comments")}</p>
                   <p className="mt-2 text-2xl font-semibold">
                     {comments ?? "—"}
                   </p>
@@ -497,21 +498,21 @@ export function ArticleSettingsButton({
               </div>
 
               <div className="rounded-xl border bg-card p-4 space-y-3">
-                <p className="text-sm font-semibold">Timestamps</p>
+                <p className="text-sm font-semibold">{t("articles.create.timestamps")}</p>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Last edited</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.lastEdited")}</p>
                   <p className="text-sm font-medium text-right">
                     {lastEdited || "—"}
                   </p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Created</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.created")}</p>
                   <p className="text-sm font-medium text-right">
                     {createdAt || "—"}
                   </p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Published</p>
+                  <p className="text-xs text-muted-foreground">{t("articles.create.published")}</p>
                   <p className="text-sm font-medium text-right">
                     {publishedAt || "—"}
                   </p>
@@ -527,16 +528,16 @@ export function ArticleSettingsButton({
               {hasSettingsChanged() && (
                 <span className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                  Settings changed
+                  {t("articles.create.settingsChanged")}
                 </span>
               )}
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setOpen(false)}>
-                Close
+                {t("articles.create.close")}
               </Button>
               <Button onClick={handleSaveAll}>
-                {hasSettingsChanged() ? "Save Settings" : "Save"}
+                {hasSettingsChanged() ? t("articles.create.saveSettings") : t("articles.create.save")}
               </Button>
             </div>
           </div>

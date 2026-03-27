@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Languages, CheckCircle2, Circle, AlertCircle } from "lucide-react";
 import { useArticleEditor } from "@/app/article/create/ArticleEditorContext";
 import { LANGUAGE_NAMES } from "@/lib/validation/translation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /**
  * TranslationStatus component shows visual indicators for translation completeness
@@ -14,9 +15,8 @@ const TranslationStatus: React.FC<{
   isActive: boolean;
   errors: string[];
 }> = ({ lang, hasContent, completeness, isActive, errors }) => {
+  const { t } = useLanguage();
   const getStatusIcon = () => {
-    
-
     if (completeness >= 80) {
       return <CheckCircle2 className="w-4 h-4 text-green-500" />;
     }
@@ -39,10 +39,10 @@ const TranslationStatus: React.FC<{
   };
 
   const getStatusText = () => {
-    if (errors.length > 0) return "Not added";
-    if (completeness >= 80) return "Complete";
+    if (errors.length > 0) return t("articles.create.notAdded");
+    if (completeness >= 80) return t("articles.create.complete");
     if (hasContent) return `${completeness}%`;
-    return "Empty";
+    return t("articles.create.empty");
   };
 
   return (
@@ -67,6 +67,7 @@ const TranslationStatus: React.FC<{
  * Enhanced TranslationToggle component with visual status indicators
  */
 export const TranslationToggle: React.FC = () => {
+  const { t } = useLanguage();
   const {
     contentLang,
     langMenuOpen,
@@ -108,7 +109,7 @@ export const TranslationToggle: React.FC = () => {
         className="h-10 w-10 rounded-full relative"
         onClick={() => setLangMenuOpen(!langMenuOpen)}
         disabled={translationSyncInProgress}
-        aria-label={`Switch language (current ${contentLang})`}
+        aria-label={t("articles.create.switchLanguage", { lang: contentLang })}
       >
         <Languages size={16} className={getButtonIconColor()} />
 
@@ -132,9 +133,14 @@ export const TranslationToggle: React.FC = () => {
           {/* Header */}
           <div className="px-3 py-2 border-b border-border/60 mb-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Translations</span>
+              <span className="text-sm font-medium">
+                {t("articles.create.translations")}
+              </span>
               <span className="text-xs text-muted-foreground">
-                {completedCount}/{languages.length} complete
+                {t("articles.create.translationProgress", {
+                  completed: completedCount,
+                  total: languages.length,
+                })}
               </span>
             </div>
           </div>
@@ -157,7 +163,9 @@ export const TranslationToggle: React.FC = () => {
                   }`}
                   onClick={() => handleLanguageSwitch(lang)}
                   disabled={translationSyncInProgress}
-                  aria-label={`Switch to ${LANGUAGE_NAMES[lang]}`}
+                  aria-label={t("articles.create.switchToLanguage", {
+                    language: LANGUAGE_NAMES[lang],
+                  })}
                 >
                   <TranslationStatus
                     lang={lang}
@@ -170,8 +178,6 @@ export const TranslationToggle: React.FC = () => {
               );
             })}
           </div>
-
-          
         </div>
       )}
     </div>
