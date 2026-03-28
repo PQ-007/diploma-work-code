@@ -260,7 +260,7 @@ export default function ModernArticlePage() {
         );
         const data = await response.json();
 
-        console.log("Fetched article data", data);
+      
 
         if (!response.ok) {
           throw new Error(

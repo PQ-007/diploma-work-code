@@ -107,7 +107,7 @@ export function NavUser() {
           console.warn("Profile fetch failed:", profileError.message);
           setProfileData(null);
         } else if (profile) {
-          console.log("Profile data fetched:", profile);
+          
           setProfileData({
             user_name: profile.user_name,
             display_name: profile.display_name,
