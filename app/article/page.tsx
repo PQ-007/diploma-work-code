@@ -87,7 +87,7 @@ export default function ArticleBrowsePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+        <div className="page-shell-wide py-6 lg:py-3">
           <div className="mb-6">
             <div className="h-6 w-32 bg-muted-foreground/15 animate-pulse rounded-md mb-1" />
             <div className="h-4 w-56 bg-muted-foreground/15 animate-pulse rounded-md" />
@@ -100,7 +100,7 @@ export default function ArticleBrowsePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-6xl">
+      <div className="page-shell py-6 lg:py-3">
         {/* Page Header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>

@@ -382,7 +382,7 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl">
+      <div className="page-shell-wide py-6 lg:py-3">
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Feed */}
           <div className="flex-1 max-w-3xl">

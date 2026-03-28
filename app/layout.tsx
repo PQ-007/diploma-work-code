@@ -30,7 +30,9 @@ export default function RootLayout({
             <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
               <ResolvedHeader />
               <main className="flex-1 overflow-y-auto relative ">
-                <div className="h-full p-4 md:p-6 lg:p-8 ">{children}</div>
+                <div className="h-full py-4 md:py-6 lg:py-8 px-[clamp(10px,1.8vw,28px)]">
+                  {children}
+                </div>
               </main>
               <Toaster />
             </div>
