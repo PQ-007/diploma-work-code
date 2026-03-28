@@ -2,6 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -134,7 +135,7 @@ const ShadcnBreadcrumbNav = ({ items }: { items: BreadcrumbItemType[] }) => {
 export function SiteHeader() {
   const router = useRouter();
   const pathname = usePathname() || "/";
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { t } = useLanguage();
   const [isSearchOpen, setIsSearchOpen] = useState(true);
 
@@ -158,7 +159,11 @@ export function SiteHeader() {
         <div className="flex items-center space-x-2 text-sm font-medium">
           {/* User Utility Buttons */}
           <div className="flex items-center gap-2">
-            {user ? (
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            ) : user ? (
               <>
                 <CreateButton />
                 <NotificationButton />
