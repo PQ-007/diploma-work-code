@@ -592,6 +592,55 @@ body {
   padding-right: 16px;
 }
 
+/* Responsive app containers for sub-pages */
+.page-shell {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;
+  padding-left: clamp(10px, 1.8vw, 24px);
+  padding-right: clamp(10px, 1.8vw, 24px);
+}
+
+.page-shell-wide {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 56rem;
+  padding-left: clamp(10px, 1.8vw, 24px);
+  padding-right: clamp(10px, 1.8vw, 24px);
+}
+
+@media (min-width: 768px) {
+  .page-shell {
+    max-width: 56rem;
+  }
+
+  .page-shell-wide {
+    max-width: 64rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    max-width: 64rem;
+  }
+
+  .page-shell-wide {
+    max-width: 72rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page-shell {
+    max-width: 72rem;
+  }
+
+  .page-shell-wide {
+    max-width: 84rem;
+  }
+}
+
 @media (min-width: 640px) {
   .container-mobile {
     max-width: 640px;

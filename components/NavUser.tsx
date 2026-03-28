@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
@@ -24,6 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
   Globe,
+  Library,
   LogOut,
   Monitor,
   Moon,
@@ -48,7 +50,6 @@ const languages = [
   { code: "ja", name: "日本語", icon: Pi },
 ] as const;
 
-
 type ProfileData = {
   user_name: string | null;
   display_name?: string | null; // Optional, can be derived from user_name if not provided
@@ -64,6 +65,7 @@ export function NavUser() {
   const router = useRouter();
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
+  const { user } = useAuth();
   const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();
 
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
@@ -85,29 +87,22 @@ export function NavUser() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const {
-          data: { user: authUser },
-        } = await supabase.auth.getUser();
-
-        if (!authUser) {
-          console.log("No authenticated user");
+        if (!user) {
+          setProfileData(null);
           setLoading(false);
           return;
         }
 
-       
-
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("id, user_name, avatar_url, bio, role, email, display_name")
-          .eq("id", authUser.id)
+          .eq("id", user.id)
           .single();
 
         if (profileError) {
           console.warn("Profile fetch failed:", profileError.message);
           setProfileData(null);
         } else if (profile) {
-          console.log("Profile data fetched:", profile);
           setProfileData({
             user_name: profile.user_name,
             display_name: profile.display_name,
@@ -125,15 +120,13 @@ export function NavUser() {
     };
 
     fetchProfile();
-  }, []);
+  }, [supabase, user]);
 
   // Use only profile data
   const userName = profileData?.user_name || "User";
   const displayName = profileData?.display_name || "User";
   const displayAvatar = profileData?.avatar_url || "";
   const displayEmail = profileData?.email || "";
-
-  
 
   const handleSignOut = async () => {
     try {
@@ -174,13 +167,11 @@ export function NavUser() {
         <Button
           variant="ghost"
           className="relative h-8 w-8 rounded-full focus-visible:ring-2 focus-visible:ring-offset-2"
-          aria-label={`User menu for ${displayName }`}
+          aria-label={`User menu for ${displayName}`}
         >
           <Avatar className="h-8 w-8">
             <AvatarImage src={displayAvatar} alt={displayName} />
-            <AvatarFallback>
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
+            <AvatarFallback></AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -195,9 +186,7 @@ export function NavUser() {
           <div className="flex items-center gap-2 px-3 py-2">
             <Avatar className="h-9 w-9">
               <AvatarImage src={displayAvatar} alt={displayName} />
-              <AvatarFallback>
-                {userName.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback></AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
               <p className="text-sm font-medium truncate">{displayName}</p>
@@ -225,7 +214,7 @@ export function NavUser() {
             className="cursor-pointer"
           >
             <div className="flex">
-              <UserRound className="mr-2 h-4 w-4" />
+              <Library className="mr-2 h-4 w-4" />
               <span>{t("nav_user.library")}</span>
             </div>
           </DropdownMenuItem>

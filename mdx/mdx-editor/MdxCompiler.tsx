@@ -1,5 +1,5 @@
 import { compile } from "@mdx-js/mdx";
-import * as runtime from "react/jsx-dev-runtime";
+import * as runtime from "react/jsx-runtime";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
@@ -56,7 +56,7 @@ export async function compileMdx(source: string) {
 
     const compiled = await compile(preprocessed, {
       outputFormat: "function-body",
-      development: true,
+      development: false,
       remarkPlugins: [remarkGfm, remarkDirective, remarkMath],
       rehypePlugins: [
         [
