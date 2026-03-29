@@ -54,9 +54,12 @@ export function Chart({
   showLegend = true,
   showTooltip = true,
 }: ChartProps) {
-  const axisTick = { fill: "hsl(var(--muted-foreground))", fontSize: 12 };
+  const axisTick = {
+    className: "fill-muted-foreground",
+    fontSize: 12,
+  };
   const axisLine = { stroke: "hsl(var(--border))" };
-  const gridStroke = "hsl(var(--border))";
+  const gridStroke = "hsl(var(--border) / 0.6)";
   const tooltipStyle = {
     backgroundColor: "hsl(var(--background))",
     border: "1px solid hsl(var(--border))",
@@ -64,7 +67,10 @@ export function Chart({
     fontSize: "14px",
     color: "hsl(var(--foreground))",
   };
-  const legendStyle = { color: "hsl(var(--foreground))", fontSize: "12px" };
+  const legendStyle = {
+    color: "hsl(var(--muted-foreground))",
+    fontSize: "12px",
+  };
 
   const renderChart = () => {
     const commonProps = {
@@ -84,8 +90,14 @@ export function Chart({
               tick={axisTick}
               axisLine={axisLine}
               tickLine={false}
+              tickMargin={8}
             />
-            <YAxis tick={axisTick} axisLine={axisLine} tickLine={false} />
+            <YAxis
+              tick={axisTick}
+              axisLine={axisLine}
+              tickLine={false}
+              tickMargin={8}
+            />
             {showTooltip && (
               <Tooltip
                 contentStyle={tooltipStyle}
@@ -109,8 +121,14 @@ export function Chart({
               tick={axisTick}
               axisLine={axisLine}
               tickLine={false}
+              tickMargin={8}
             />
-            <YAxis tick={axisTick} axisLine={axisLine} tickLine={false} />
+            <YAxis
+              tick={axisTick}
+              axisLine={axisLine}
+              tickLine={false}
+              tickMargin={8}
+            />
             {showTooltip && (
               <Tooltip
                 contentStyle={tooltipStyle}
@@ -146,8 +164,14 @@ export function Chart({
               tick={axisTick}
               axisLine={axisLine}
               tickLine={false}
+              tickMargin={8}
             />
-            <YAxis tick={axisTick} axisLine={axisLine} tickLine={false} />
+            <YAxis
+              tick={axisTick}
+              axisLine={axisLine}
+              tickLine={false}
+              tickMargin={8}
+            />
             {showTooltip && (
               <Tooltip
                 contentStyle={tooltipStyle}

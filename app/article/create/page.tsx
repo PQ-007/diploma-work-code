@@ -8,8 +8,6 @@ import { Separator } from "@/components/ui/separator";
 import SplitView from "@/mdx/mdx-editor/SplitView";
 import {
   CircleQuestionMark,
-  ChevronDown,
-  ChevronRight,
   Columns2,
   Download,
   Eye,
@@ -149,9 +147,6 @@ export default function ArticleCreatePage() {
     line: number;
     token: number;
   } | null>(null);
-  const [collapsedTocGroups, setCollapsedTocGroups] = React.useState<
-    Record<string, boolean>
-  >({});
 
   const tocItems = React.useMemo(() => {
     const lines = mdx.split("\n");
@@ -229,46 +224,6 @@ export default function ArticleCreatePage() {
       return true;
     });
   }, [mdx]);
-
-  const tocGroups = React.useMemo(() => {
-    const groups: Array<{
-      key: string;
-      parent: { line: number; level: number; text: string };
-      children: Array<{ line: number; level: number; text: string }>;
-    }> = [];
-
-    let currentGroup: {
-      key: string;
-      parent: { line: number; level: number; text: string };
-      children: Array<{ line: number; level: number; text: string }>;
-    } | null = null;
-
-    tocItems.forEach((item) => {
-      if (item.level <= 2 || !currentGroup) {
-        currentGroup = {
-          key: `toc-group-${item.line}`,
-          parent: item,
-          children: [],
-        };
-        groups.push(currentGroup);
-        return;
-      }
-
-      currentGroup.children.push(item);
-    });
-
-    return groups;
-  }, [tocItems]);
-
-  React.useEffect(() => {
-    setCollapsedTocGroups((previous) => {
-      const next: Record<string, boolean> = {};
-      tocGroups.forEach((group) => {
-        next[group.key] = previous[group.key] ?? false;
-      });
-      return next;
-    });
-  }, [tocGroups]);
 
   // Keep rail popovers mutually exclusive to prevent stacking.
   React.useEffect(() => {
@@ -414,85 +369,27 @@ export default function ArticleCreatePage() {
 
                   {tocMenuOpen && (
                     <div className="absolute right-14 top-0 z-20 max-h-80 w-72 overflow-y-auto rounded-2xl border border-border/80 bg-card/95 p-2 shadow-lg shadow-black/15 backdrop-blur">
-                      {tocGroups.length ? (
+                      {tocItems.length ? (
                         <div className="space-y-1">
-                          {tocGroups.map((group) => {
-                            const isCollapsed =
-                              collapsedTocGroups[group.key] ?? false;
-                            const hasChildren = group.children.length > 0;
-
-                            return (
-                              <div key={group.key} className="space-y-1">
-                                <div className="flex items-start gap-1">
-                                  <button
-                                    type="button"
-                                    className="flex-1 rounded-lg px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                                    style={{
-                                      paddingLeft: `${8 + (group.parent.level - 1) * 12}px`,
-                                    }}
-                                    onClick={() => {
-                                      setJumpToLineRequest({
-                                        line: group.parent.line,
-                                        token: Date.now(),
-                                      });
-                                      setTocMenuOpen(false);
-                                    }}
-                                  >
-                                    <span className="line-clamp-2">
-                                      {group.parent.text}
-                                    </span>
-                                  </button>
-
-                                  {hasChildren && (
-                                    <button
-                                      type="button"
-                                      className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                                      onClick={() =>
-                                        setCollapsedTocGroups((prev) => ({
-                                          ...prev,
-                                          [group.key]: !isCollapsed,
-                                        }))
-                                      }
-                                      aria-label={
-                                        isCollapsed
-                                          ? "Expand section"
-                                          : "Collapse section"
-                                      }
-                                    >
-                                      {isCollapsed ? (
-                                        <ChevronRight size={14} />
-                                      ) : (
-                                        <ChevronDown size={14} />
-                                      )}
-                                    </button>
-                                  )}
-                                </div>
-
-                                {!isCollapsed &&
-                                  group.children.map((item) => (
-                                    <button
-                                      key={`${item.line}-${item.text}`}
-                                      type="button"
-                                      className="flex w-full items-start rounded-lg px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                                      style={{
-                                        paddingLeft: `${8 + (item.level - 1) * 12}px`,
-                                      }}
-                                      onClick={() => {
-                                        setJumpToLineRequest({
-                                          line: item.line,
-                                          token: Date.now(),
-                                        });
-                                        setTocMenuOpen(false);
-                                      }}
-                                    >
-                                      <span className="line-clamp-2">
-                                        {item.text}
-                                      </span>
-                                    </button>
-                                  ))}
-                              </div>
-                            );
-                          })}
+                          {tocItems.map((item) => (
+                            <button
+                              key={`${item.line}-${item.text}`}
+                              type="button"
+                              className="flex w-full items-start rounded-lg px-2 py-1.5 text-left text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                              style={{
+                                paddingLeft: `${8 + (item.level - 1) * 12}px`,
+                              }}
+                              onClick={() => {
+                                setJumpToLineRequest({
+                                  line: item.line,
+                                  token: Date.now(),
+                                });
+                                setTocMenuOpen(false);
+                              }}
+                            >
+                              <span className="line-clamp-2">{item.text}</span>
+                            </button>
+                          ))}
                         </div>
                       ) : (
                         <div className="px-2 py-3 text-xs text-muted-foreground">

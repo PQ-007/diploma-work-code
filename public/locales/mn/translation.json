@@ -426,6 +426,27 @@
       "notAdded": "Нэмэгдээгүй",
       "complete": "Дуусгасан",
       "empty": "Хоосон"
+    },
+    "detail": {
+      "redirecting": "Чиглүүлж байна...",
+      "missingArticleId": "Нийтлэлийн ID олдсонгүй.",
+      "failedToLoadContent": "Нийтлэлийн агуулгыг ачаалж чадсангүй.",
+      "noDate": "Огноо байхгүй",
+      "editedOn": "Засварласан: {{date}}",
+      "readTime": "{{minutes}} минутын уншлага",
+      "views": "{{count}} үзэлт",
+      "expandSection": "Хэсгийг дэлгэх",
+      "collapseSection": "Хэсгийг хураах",
+      "expandAll": "Бүгдийг дэлгэх",
+      "collapseAll": "Бүгдийг хураах",
+      "noHeadingsFound": "Гарчиг олдсонгүй.",
+      "languageSelector": "Хэл сонгогч",
+      "moreActions": "Нэмэлт үйлдлүүд",
+      "tableOfContents": "Агуулга",
+      "definitions": "Тодорхойлолтууд",
+      "relatedLinks": "Холбоосууд",
+      "showLess": "Бага харуулах",
+      "showMoreLinks": "{{count}} холбоосыг нэмж харуулах"
     }
   },
 

@@ -427,6 +427,27 @@
       "notAdded": "Not added",
       "complete": "Complete",
       "empty": "Empty"
+    },
+    "detail": {
+      "redirecting": "Redirecting...",
+      "missingArticleId": "Missing article id.",
+      "failedToLoadContent": "Failed to load article content.",
+      "noDate": "No date",
+      "editedOn": "Edited {{date}}",
+      "readTime": "{{minutes}} min read",
+      "views": "{{count}} views",
+      "expandSection": "Expand section",
+      "collapseSection": "Collapse section",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "noHeadingsFound": "No headings found.",
+      "languageSelector": "Language selector",
+      "moreActions": "More actions",
+      "tableOfContents": "Table of Contents",
+      "definitions": "Definitions",
+      "relatedLinks": "Related links",
+      "showLess": "Show less",
+      "showMoreLinks": "Show {{count}} more links"
     }
   },
 

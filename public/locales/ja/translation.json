@@ -427,6 +427,27 @@
       "notAdded": "追加されていません",
       "complete": "完了",
       "empty": "空"
+    },
+    "detail": {
+      "redirecting": "リダイレクト中...",
+      "missingArticleId": "記事IDが見つかりません。",
+      "failedToLoadContent": "記事コンテンツの読み込みに失敗しました。",
+      "noDate": "日付なし",
+      "editedOn": "編集日: {{date}}",
+      "readTime": "{{minutes}}分で読めます",
+      "views": "{{count}} 閲覧",
+      "expandSection": "セクションを展開",
+      "collapseSection": "セクションを折りたたむ",
+      "expandAll": "すべて展開",
+      "collapseAll": "すべて折りたたむ",
+      "noHeadingsFound": "見出しが見つかりません。",
+      "languageSelector": "言語セレクター",
+      "moreActions": "その他の操作",
+      "tableOfContents": "目次",
+      "definitions": "定義",
+      "relatedLinks": "関連リンク",
+      "showLess": "少なく表示",
+      "showMoreLinks": "さらに{{count}}件のリンクを表示"
     }
   },
 

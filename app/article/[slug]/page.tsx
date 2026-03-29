@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { components as mdxComponents } from "@/mdx/mdx-components";
 import { compileMdx } from "@/mdx/mdx-editor/MdxCompiler";
 import {
@@ -71,6 +72,7 @@ const extractRelatedLinks = (body: string): RelatedLink[] => {
 // --- Main Page ---
 
 export default function ModernArticlePage() {
+  const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState("");
   const [article, setArticle] = useState<ArticlePayload | null>(null);
   const [MdxContent, setMdxContent] = useState<React.ComponentType<any> | null>(
@@ -106,7 +108,7 @@ export default function ModernArticlePage() {
 
   // Early return if slug is "create" to prevent API calls and errors
   if (slug === "create") {
-    return <div>Redirecting...</div>;
+    return <div>{t("articles.detail.redirecting")}</div>;
   }
 
   const articleNumericId = article?.id ? Number(article.id) : null;
@@ -192,52 +194,6 @@ export default function ModernArticlePage() {
       return next;
     });
   }, [tocGroups]);
-
-  useEffect(() => {
-    if (!activeSection) return;
-
-    const activeGroup = tocGroups.find(
-      (group) =>
-        group.parent.id === activeSection ||
-        group.children.some((child) => child.id === activeSection),
-    );
-
-    if (!activeGroup) return;
-
-    setCollapsedTocGroups((previous) => {
-      if (!previous[activeGroup.parent.id]) return previous;
-      return {
-        ...previous,
-        [activeGroup.parent.id]: false,
-      };
-    });
-  }, [activeSection, tocGroups]);
-
-  useEffect(() => {
-    if (!activeSection || !tocGroups.length) return;
-
-    const activeGroup = tocGroups.find(
-      (group) =>
-        group.parent.id === activeSection ||
-        group.children.some((child) => child.id === activeSection),
-    );
-
-    if (!activeGroup) return;
-
-    setCollapsedTocGroups((previous) => {
-      let changed = false;
-      const next: Record<string, boolean> = {};
-
-      tocGroups.forEach((group) => {
-        const shouldCollapse = group.parent.id !== activeGroup.parent.id;
-        const current = previous[group.parent.id] ?? false;
-        next[group.parent.id] = shouldCollapse;
-        if (current !== shouldCollapse) changed = true;
-      });
-
-      return changed ? next : previous;
-    });
-  }, [activeSection, tocGroups]);
 
   const PageSkeleton = () => (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -348,7 +304,7 @@ export default function ModernArticlePage() {
     const loadMDX = async () => {
       try {
         if (!slug) {
-          setError("Missing article id.");
+          setError(t("articles.detail.missingArticleId"));
           setLoading(false);
           return;
         }
@@ -402,7 +358,7 @@ export default function ModernArticlePage() {
         setArticle({
           id: data?.id,
           status: data?.status,
-          title: data?.title || "Untitled article",
+          title: data?.title || t("articles.untitled"),
           sub_title: data?.sub_title,
           is_serial: data?.is_serial,
           definitions: data?.definitions,
@@ -419,7 +375,7 @@ export default function ModernArticlePage() {
         setMdxContent(() => compiled.default);
       } catch (e) {
         console.error("Error loading MDX:", e);
-        setError("Failed to load article content.");
+        setError(t("articles.detail.failedToLoadContent"));
         setMdxContent(null);
       } finally {
         setLoading(false);
@@ -427,17 +383,17 @@ export default function ModernArticlePage() {
     };
 
     loadMDX();
-  }, [slug, selectedLanguage]);
+  }, [slug, selectedLanguage, t]);
 
   const publishedAtText = article?.published_at
     ? new Date(article.published_at).toLocaleDateString()
-    : "No date";
+    : t("articles.detail.noDate");
 
   const editedAtText = article?.edited_at
     ? new Date(article.edited_at).toLocaleDateString()
     : null;
 
-  const displayTitle = article?.title || "Untitled article";
+  const displayTitle = article?.title || t("articles.untitled");
   const displaySubtitle = article?.sub_title || null;
   const displayTags = article?.tags ?? [];
 
@@ -546,18 +502,6 @@ export default function ModernArticlePage() {
     <nav className="flex flex-col gap-1">
       {tocGroups.length ? (
         <>
-          {hasExpandableTocGroups && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mb-1 h-7 justify-start px-2 text-xs text-muted-foreground"
-              onClick={() => setAllTocGroupsCollapsed(!hasCollapsedTocGroups)}
-            >
-              {hasCollapsedTocGroups ? "Expand all" : "Collapse all"}
-            </Button>
-          )}
-
           {tocGroups.map((group) => {
             const isCollapsed = collapsedTocGroups[group.parent.id] ?? false;
             const isExpandable = group.children.length > 0;
@@ -574,7 +518,11 @@ export default function ModernArticlePage() {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      aria-label={isCollapsed ? "Expand section" : "Collapse section"}
+                      aria-label={
+                        isCollapsed
+                          ? t("articles.detail.expandSection")
+                          : t("articles.detail.collapseSection")
+                      }
                       className="mt-0.5 h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
                       onClick={() => toggleTocGroup(group.parent.id)}
                     >
@@ -589,14 +537,34 @@ export default function ModernArticlePage() {
 
                 {!isCollapsed &&
                   group.children.map((child) => (
-                    <TocItem key={child.id} item={child} activeId={activeSection} />
+                    <TocItem
+                      key={child.id}
+                      item={child}
+                      activeId={activeSection}
+                    />
                   ))}
               </div>
             );
           })}
+
+          {hasExpandableTocGroups && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2 h-7 justify-start px-2 text-xs text-muted-foreground"
+              onClick={() => setAllTocGroupsCollapsed(!hasCollapsedTocGroups)}
+            >
+              {hasCollapsedTocGroups
+                ? t("articles.detail.expandAll")
+                : t("articles.detail.collapseAll")}
+            </Button>
+          )}
         </>
       ) : (
-        <div className="text-sm text-muted-foreground">No headings found.</div>
+        <div className="text-sm text-muted-foreground">
+          {t("articles.detail.noHeadingsFound")}
+        </div>
       )}
     </nav>
   );
@@ -622,7 +590,7 @@ export default function ModernArticlePage() {
                         : "border-border hover:bg-muted"
                     }`}
                     onClick={toggleLike}
-                    aria-label="Like"
+                    aria-label={t("feed.actions.like")}
                   >
                     <Heart
                       className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`}
@@ -639,7 +607,7 @@ export default function ModernArticlePage() {
                         : "border-border hover:bg-muted"
                     }`}
                     onClick={toggleBookmark}
-                    aria-label="Bookmark"
+                    aria-label={t("feed.actions.bookmark")}
                   >
                     <Bookmark
                       className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`}
@@ -651,7 +619,7 @@ export default function ModernArticlePage() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
-                    aria-label="Comment"
+                    aria-label={t("feed.actions.comment")}
                     onClick={() => commentRef.current?.focus()}
                   >
                     <MessageCircle className="h-5 w-5" />
@@ -664,7 +632,7 @@ export default function ModernArticlePage() {
                       variant="ghost"
                       size="icon"
                       className="rounded-full border border-border hover:bg-muted"
-                      aria-label="Language selector"
+                      aria-label={t("articles.detail.languageSelector")}
                       onClick={() =>
                         setIsDesktopLanguageMenuOpen((prev) => !prev)
                       }
@@ -718,7 +686,7 @@ export default function ModernArticlePage() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
-                    aria-label="Share"
+                    aria-label={t("common.share")}
                     onClick={() => commentRef.current?.focus()}
                   >
                     <Share2 className="h-5 w-5" />
@@ -729,7 +697,7 @@ export default function ModernArticlePage() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
-                    aria-label="Share"
+                    aria-label={t("articles.detail.moreActions")}
                     onClick={() => commentRef.current?.focus()}
                   >
                     <MoreHorizontal className="h-5 w-5" />
@@ -741,7 +709,7 @@ export default function ModernArticlePage() {
                     <div className="font-semibold text-foreground/80">
                       {likesCount}
                     </div>
-                    <div>likes</div>
+                    <div>{t("feed.stats.likes")}</div>
                   </div>
                 </div>
               </div>
@@ -763,13 +731,19 @@ export default function ModernArticlePage() {
                   <span>•</span>
                   {editedAtText && (
                     <span className="flex items-center gap-1">
-                      Edited {editedAtText}
+                      {t("articles.detail.editedOn", { date: editedAtText })}
                     </span>
                   )}
                   {editedAtText && <span>•</span>}
-                  <span>{articleData.readTime} min read</span>
+                  <span>
+                    {t("articles.detail.readTime", {
+                      minutes: articleData.readTime,
+                    })}
+                  </span>
                   <span>•</span>
-                  <span>{articleData.views} views</span>
+                  <span>
+                    {t("articles.detail.views", { count: articleData.views })}
+                  </span>
                 </div>
 
                 <h1 className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-foreground">
@@ -799,7 +773,7 @@ export default function ModernArticlePage() {
                   </article>
                 ) : (
                   <div className="text-center py-16 text-muted-foreground">
-                    Failed to load article content
+                    {t("articles.detail.failedToLoadContent")}
                   </div>
                 )}
               </div>
@@ -807,7 +781,7 @@ export default function ModernArticlePage() {
 
             {/* Mobile TOC (because your right sidebar disappears) */}
             <div className="xl:hidden mt-6">
-              <RightPanelCard title="Table of Contents">
+              <RightPanelCard title={t("articles.detail.tableOfContents")}>
                 {renderToc()}
               </RightPanelCard>
             </div>
@@ -827,11 +801,11 @@ export default function ModernArticlePage() {
           <aside className="hidden xl:block">
             <AuthorBox author={articleData.author} />
             <div className="sticky top-6 mt-6 space-y-6">
-              <RightPanelCard title="Table of Contents">
+              <RightPanelCard title={t("articles.detail.tableOfContents")}>
                 {renderToc()}
               </RightPanelCard>
               {definitions && definitions.length > 0 && (
-                <RightPanelCard title="Definitions">
+                <RightPanelCard title={t("articles.detail.definitions")}>
                   <div className="space-y-3">
                     {definitions.map((d) => (
                       <div key={d.term} className="text-sm">
@@ -849,7 +823,7 @@ export default function ModernArticlePage() {
                 </RightPanelCard>
               )}
               {relatedLinks && relatedLinks.length > 0 && (
-                <RightPanelCard title="Related links">
+                <RightPanelCard title={t("articles.detail.relatedLinks")}>
                   <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                     {visibleRelatedLinks.map((l) => (
                       <a
@@ -877,8 +851,10 @@ export default function ModernArticlePage() {
                           className="w-full justify-start text-xs text-muted-foreground"
                         >
                           {showAllLinks
-                            ? "Show less"
-                            : `Show ${relatedLinks.length - 4} more links`}
+                            ? t("articles.detail.showLess")
+                            : t("articles.detail.showMoreLinks", {
+                                count: relatedLinks.length - 4,
+                              })}
                         </Button>
                       </div>
                     )}
