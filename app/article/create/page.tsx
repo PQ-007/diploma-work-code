@@ -380,10 +380,16 @@ export default function ArticleCreatePage() {
                                 paddingLeft: `${8 + (item.level - 1) * 12}px`,
                               }}
                               onClick={() => {
+                                const token = Date.now();
                                 setJumpToLineRequest({
                                   line: item.line,
-                                  token: Date.now(),
+                                  token,
                                 });
+                                setTimeout(() => {
+                                  setJumpToLineRequest((prev) =>
+                                    prev?.token === token ? null : prev,
+                                  );
+                                }, 300);
                                 setTocMenuOpen(false);
                               }}
                             >

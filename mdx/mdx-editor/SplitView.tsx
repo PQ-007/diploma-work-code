@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdxEditor } from "./MonacoEditor";
 import { MdxPreview } from "./PreviewRenderer";
 
@@ -32,6 +32,17 @@ export default function SplitView({
     line: number;
     token: number;
   } | null>(null);
+  useEffect(() => {
+    if (!previewJumpToLineRequest) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setPreviewJumpToLineRequest(null);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [previewJumpToLineRequest]);
   const minHeight = 560;
   const isSplit = viewMode === "split";
   const isEditorOnly = viewMode === "editor";
