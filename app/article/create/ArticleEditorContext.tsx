@@ -160,6 +160,7 @@ interface ArticleEditorActions {
   // Article operations
   handleSaveDraft: () => Promise<void>;
   handlePublish: () => Promise<void>;
+  handleUnpublish: () => Promise<void>;
   handleDeleteArticle: () => Promise<void>;
   handleExport: () => void;
   handleImageButtonClick: () => void;
@@ -189,8 +190,9 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
   // Core content state
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [mdx, setMdx] =
-    useState(`>**There is no magic—just abstraction layers built on top of one another.**`);
+  const [mdx, setMdx] = useState(
+    `>**There is no magic—just abstraction layers built on top of one another.**`,
+  );
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [contentLang, setContentLang] = useState<ContentLang>("mn");
@@ -739,6 +741,9 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
       }
 
       setJustSaved(true);
+      setLastAutoSave(new Date());
+      setHasUnsavedChanges(false);
+      setHasUnsavedTranslations(false);
       setTimeout(() => setJustSaved(false), 2000);
     } catch (err) {
       setSaveError(
@@ -774,6 +779,34 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       setSaveError(
         err instanceof Error ? err.message : "Failed to publish article.",
+      );
+    } finally {
+      isPublishingRef.current = false;
+      setIsPublishing(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!articleId || isPublishingRef.current || isPublishing) return;
+
+    isPublishingRef.current = true;
+    setIsPublishing(true);
+    try {
+      const res = await fetch(`/api/articles/${articleId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "draft" }),
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(
+          getFriendlyApiError(errorText, "Failed to unpublish article."),
+        );
+      }
+      setStatus("draft");
+    } catch (err) {
+      setSaveError(
+        err instanceof Error ? err.message : "Failed to unpublish article.",
       );
     } finally {
       isPublishingRef.current = false;
@@ -945,6 +978,7 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
         // Article operations
         handleSaveDraft,
         handlePublish,
+        handleUnpublish,
         handleDeleteArticle,
         handleExport,
         handleImageButtonClick,

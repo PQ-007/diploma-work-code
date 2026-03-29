@@ -383,6 +383,8 @@
       "saveDraft": "Save draft",
       "publishing": "Publishing…",
       "publish": "Publish",
+      "unpublishing": "Unpublishing…",
+      "unpublish": "Unpublish",
       "loadingSuggestions": "Loading suggestions...",
       "noTagsFound": "No tags found",
       "articleSettings": "Article settings",

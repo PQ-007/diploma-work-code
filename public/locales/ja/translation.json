@@ -340,8 +340,7 @@
     "topAuthors": "トップ著者",
     "untitled": "無題の記事",
     "anonymous": "匿名",
-    "unpublished": "未公開"
-,
+    "unpublished": "未公開",
     "create": {
       "checkingAccess": "記事へのアクセスを確認中...",
       "accessDenied": "アクセスが拒否されました",
@@ -384,6 +383,8 @@
       "saveDraft": "下書きを保存",
       "publishing": "公開中…",
       "publish": "公開",
+      "unpublishing": "公開を取り消し中…",
+      "unpublish": "公開を取り消す",
       "loadingSuggestions": "候補を読み込み中...",
       "noTagsFound": "タグが見つかりません",
       "articleSettings": "記事設定",
@@ -426,7 +427,8 @@
       "notAdded": "追加されていません",
       "complete": "完了",
       "empty": "空"
-    }  },
+    }
+  },
 
   "discussions": {
     "title": "ディスカッション",
@@ -480,7 +482,7 @@
     "report": "報告",
     "entryRejected": "エントリーが却下されました",
     "relatedTerms": "関連用語",
-   
+
     "moderationHistory": "審査履歴",
     "noTranslations": "翻訳はまだありません。",
     "noExamples": "例文はまだありません。",
