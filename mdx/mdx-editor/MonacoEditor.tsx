@@ -60,7 +60,9 @@ export function MdxEditor({
       return false;
     }
 
-    const taskMatch = lineContent.match(/^(\s*)([-+*])\s+\[(?: |x|X)\]\s+(.*)$/);
+    const taskMatch = lineContent.match(
+      /^(\s*)([-+*])\s+\[(?: |x|X)\]\s+(.*)$/,
+    );
     const taskEmptyMatch = lineContent.match(
       /^(\s*)([-+*])\s+\[(?: |x|X)\]\s*$/,
     );
@@ -81,7 +83,10 @@ export function MdxEditor({
     // If current item is already empty, pressing Enter exits the list item.
     if (taskEmptyMatch || bulletEmptyMatch || orderedEmptyMatch) {
       const indent =
-        taskEmptyMatch?.[1] || bulletEmptyMatch?.[1] || orderedEmptyMatch?.[1] || "";
+        taskEmptyMatch?.[1] ||
+        bulletEmptyMatch?.[1] ||
+        orderedEmptyMatch?.[1] ||
+        "";
 
       editor.executeEdits("markdown-list-exit", [
         {
@@ -411,9 +416,15 @@ export function MdxEditor({
 
     if (currentPosition) {
       const maxLine = Math.max(1, model.getLineCount());
-      const safeLine = Math.min(maxLine, Math.max(1, currentPosition.lineNumber));
+      const safeLine = Math.min(
+        maxLine,
+        Math.max(1, currentPosition.lineNumber),
+      );
       const maxColumn = model.getLineMaxColumn(safeLine);
-      const safeColumn = Math.min(maxColumn, Math.max(1, currentPosition.column));
+      const safeColumn = Math.min(
+        maxColumn,
+        Math.max(1, currentPosition.column),
+      );
       editor.setPosition({ lineNumber: safeLine, column: safeColumn });
     }
 
@@ -586,7 +597,9 @@ export function MdxEditor({
           onCursorLineChange?.(editor.getPosition()?.lineNumber ?? 1);
 
           if (pendingJumpRef.current) {
-            if (pendingJumpRef.current.token > lastHandledJumpTokenRef.current) {
+            if (
+              pendingJumpRef.current.token > lastHandledJumpTokenRef.current
+            ) {
               jumpEditorToLine(pendingJumpRef.current.line);
               lastHandledJumpTokenRef.current = pendingJumpRef.current.token;
             }
@@ -608,7 +621,12 @@ export function MdxEditor({
           enterKeyListenerRef.current?.dispose?.();
           enterKeyListenerRef.current = editor.onKeyDown((event: any) => {
             if (event.keyCode !== monaco.KeyCode.Enter) return;
-            if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) {
+            if (
+              event.shiftKey ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.altKey
+            ) {
               return;
             }
 
