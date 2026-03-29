@@ -443,11 +443,37 @@
       "noHeadingsFound": "No headings found.",
       "languageSelector": "Language selector",
       "moreActions": "More actions",
+      "requestTranslation": "Request translation",
+      "reportArticle": "Report this article",
+      "reportAuthor": "Report author",
+      "requestTranslationDescription": "Tell us which language you need or what should be translated.",
+      "reportArticleDescription": "Share details about the issue with this article.",
+      "reportAuthorDescription": "Share details about your concern regarding this author.",
+      "actionMessagePlaceholder": "Write your message...",
+      "submitRequest": "Submit",
+      "requestSubmitted": "Your request has been submitted.",
+      "shareLinkCopied": "Link copied to clipboard",
+      "shareFailed": "Unable to share this article right now",
       "tableOfContents": "Table of Contents",
       "definitions": "Definitions",
       "relatedLinks": "Related links",
       "showLess": "Show less",
-      "showMoreLinks": "Show {{count}} more links"
+      "showMoreLinks": "Show {{count}} more links",
+      "comments": {
+        "title": "Comments ({{count}})",
+        "reply": "Reply",
+        "delete": "Delete",
+        "replyingTo": "Replying to",
+        "writeComment": "Write a comment...",
+        "submitHint": "Enter to submit · Shift+Enter for new line",
+        "comment": "Comment",
+        "signInToComment": "Sign in to leave a comment",
+        "noComments": "No comments yet. Be the first to start the conversation!",
+        "justNow": "just now",
+        "minutesAgo": "{{count}}m ago",
+        "hoursAgo": "{{count}}h ago",
+        "daysAgo": "{{count}}d ago"
+      }
     }
   },
 

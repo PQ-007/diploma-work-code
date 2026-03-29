@@ -247,6 +247,7 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
   const isSavingRef = useRef(false);
   const isPublishingRef = useRef(false);
   const isDeletingRef = useRef(false);
+  const suppressUnsavedTrackingRef = useRef(true);
 
   const articleIdFromQuery = searchParams.get("id");
   const isEditMode = Boolean(articleIdFromQuery);
@@ -454,7 +455,8 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
           new Set(tags.map((tag) => tag.trim()).filter(Boolean)),
         ),
         language_code: contentLang,
-        status: "draft" as ArticleStatus, // Auto-save always saves as draft
+        // Preserve current article status to avoid unpublishing on autosave.
+        status,
       };
 
       // Use the same save strategy as manual save to determine method and URL
@@ -501,6 +503,7 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
     mdx,
     tags,
     contentLang,
+    status,
     articleId, // Add articleId to dependencies
   ]);
 
@@ -540,10 +543,21 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
 
   // Track content changes for unsaved changes
   useEffect(() => {
+    if (suppressUnsavedTrackingRef.current) return;
+
     if (title || subtitle || mdx || tags.length > 0) {
       setHasUnsavedChanges(true);
     }
   }, [title, subtitle, mdx, tags]);
+
+  // Enable unsaved-change tracking after the first paint.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      suppressUnsavedTrackingRef.current = false;
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Update translation completeness when translations change
   useEffect(() => {
@@ -572,6 +586,7 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
     if (!articleIdFromQuery) return;
 
     const loadArticleForEdit = async () => {
+      suppressUnsavedTrackingRef.current = true;
       setIsEditHydrating(true);
       setIsEditAccessDenied(false);
       setSaveError(null);
@@ -653,6 +668,8 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
         setStatus(
           data?.article?.status === "published" ? "published" : "draft",
         );
+        setHasUnsavedChanges(false);
+        setHasUnsavedTranslations(false);
 
         const lang =
           typeof selectedTranslation?.language_code === "string"
@@ -673,6 +690,9 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
         );
       } finally {
         setIsEditHydrating(false);
+        setTimeout(() => {
+          suppressUnsavedTrackingRef.current = false;
+        }, 0);
       }
     };
 

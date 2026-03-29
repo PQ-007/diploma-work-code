@@ -443,11 +443,37 @@
       "noHeadingsFound": "見出しが見つかりません。",
       "languageSelector": "言語セレクター",
       "moreActions": "その他の操作",
+      "requestTranslation": "翻訳をリクエスト",
+      "reportArticle": "この記事を報告",
+      "reportAuthor": "著者を報告",
+      "requestTranslationDescription": "必要な言語や翻訳してほしい内容を入力してください。",
+      "reportArticleDescription": "この記事の問題点を入力してください。",
+      "reportAuthorDescription": "この著者に関する懸念事項を入力してください。",
+      "actionMessagePlaceholder": "メッセージを入力してください...",
+      "submitRequest": "送信",
+      "requestSubmitted": "リクエストを送信しました。",
+      "shareLinkCopied": "リンクをクリップボードにコピーしました",
+      "shareFailed": "現在この記事を共有できません",
       "tableOfContents": "目次",
       "definitions": "定義",
       "relatedLinks": "関連リンク",
       "showLess": "少なく表示",
-      "showMoreLinks": "さらに{{count}}件のリンクを表示"
+      "showMoreLinks": "さらに{{count}}件のリンクを表示",
+      "comments": {
+        "title": "コメント ({{count}})",
+        "reply": "返信",
+        "delete": "削除",
+        "replyingTo": "返信先",
+        "writeComment": "コメントを書く...",
+        "submitHint": "送信: Enter ・ 改行: Shift+Enter",
+        "comment": "コメント",
+        "signInToComment": "コメントするにはサインインしてください",
+        "noComments": "まだコメントがありません。最初のコメントを投稿しましょう！",
+        "justNow": "たった今",
+        "minutesAgo": "{{count}}分前",
+        "hoursAgo": "{{count}}時間前",
+        "daysAgo": "{{count}}日前"
+      }
     }
   },
 

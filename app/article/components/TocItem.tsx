@@ -21,7 +21,7 @@ export default function TocItem({ item, activeId }: TocItemProps) {
           ?.scrollIntoView({ behavior: "smooth", block: "start" });
         window.history.replaceState(null, "", `#${item.id}`);
       }}
-      className={`block rounded-md px-2.5 py-1.5 text-sm leading-5 transition-colors ${
+      className={`block rounded-md px-2 py-1 text-[13px] leading-4 transition-colors ${
         isActive
           ? "text-primary bg-primary/10 font-semibold"
           : "text-muted-foreground hover:text-foreground hover:bg-muted/60"

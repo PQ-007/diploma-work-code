@@ -4,9 +4,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { components as mdxComponents } from "@/mdx/mdx-components";
 import { compileMdx } from "@/mdx/mdx-editor/MdxCompiler";
 import {
@@ -29,6 +45,7 @@ import {
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import BackToTopButton from "../components/BackToTopButton";
 
 import RightPanelCard from "../components/RightPanelCard";
@@ -40,7 +57,7 @@ import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSe
 import { useArticleInteractions } from "@/hooks/useArticleInteractions";
 
 type ArticleLangCode = "mn" | "en" | "jp";
-type TocGroup = { parent: TocEntry; children: TocEntry[] };
+type TocNode = { item: TocEntry; children: TocNode[] };
 
 const ARTICLE_LANGS: Array<{ code: ArticleLangCode; label: string }> = [
   { code: "mn", label: "MN" },
@@ -73,6 +90,7 @@ const extractRelatedLinks = (body: string): RelatedLink[] => {
 
 export default function ModernArticlePage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("");
   const [article, setArticle] = useState<ArticlePayload | null>(null);
   const [MdxContent, setMdxContent] = useState<React.ComponentType<any> | null>(
@@ -92,6 +110,10 @@ export default function ModernArticlePage() {
   const [availableTranslations, setAvailableTranslations] = useState<
     ArticleLangCode[]
   >([]);
+  const [activeMoreAction, setActiveMoreAction] = useState<
+    "request-translation" | "report-article" | "report-author" | null
+  >(null);
+  const [moreActionMessage, setMoreActionMessage] = useState("");
   const articleRef = useRef<HTMLDivElement | null>(null);
   const desktopLanguageMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -136,37 +158,58 @@ export default function ModernArticlePage() {
     [relatedLinks, showAllLinks],
   );
 
-  const tocGroups = useMemo<TocGroup[]>(() => {
-    const groups: TocGroup[] = [];
-    let currentGroup: TocGroup | null = null;
+  const tocTree = useMemo<TocNode[]>(() => {
+    const roots: TocNode[] = [];
+    const stack: TocNode[] = [];
 
     tocItems.forEach((item) => {
-      if (item.level <= 2) {
-        currentGroup = { parent: item, children: [] };
-        groups.push(currentGroup);
-        return;
+      const node: TocNode = { item, children: [] };
+
+      while (
+        stack.length > 0 &&
+        stack[stack.length - 1].item.level >= item.level
+      ) {
+        stack.pop();
       }
 
-      if (!currentGroup) {
-        currentGroup = { parent: item, children: [] };
-        groups.push(currentGroup);
-        return;
+      if (stack.length === 0) {
+        roots.push(node);
+      } else {
+        stack[stack.length - 1].children.push(node);
       }
 
-      currentGroup.children.push(item);
+      stack.push(node);
     });
 
-    return groups;
+    return roots;
   }, [tocItems]);
 
+  const collapsibleNodeIds = useMemo(() => {
+    const ids: string[] = [];
+
+    const visit = (nodes: TocNode[]) => {
+      nodes.forEach((node) => {
+        if (node.children.length > 0 && node.item.level <= 3) {
+          ids.push(node.item.id);
+        }
+        if (node.children.length > 0) {
+          visit(node.children);
+        }
+      });
+    };
+
+    visit(tocTree);
+    return ids;
+  }, [tocTree]);
+
   const hasExpandableTocGroups = useMemo(
-    () => tocGroups.some((group) => group.children.length > 0),
-    [tocGroups],
+    () => collapsibleNodeIds.length > 0,
+    [collapsibleNodeIds],
   );
 
   const hasCollapsedTocGroups = useMemo(
-    () => tocGroups.some((group) => collapsedTocGroups[group.parent.id]),
-    [tocGroups, collapsedTocGroups],
+    () => collapsibleNodeIds.some((id) => collapsedTocGroups[id]),
+    [collapsibleNodeIds, collapsedTocGroups],
   );
 
   useEffect(() => {
@@ -187,13 +230,13 @@ export default function ModernArticlePage() {
     setCollapsedTocGroups((previous) => {
       const next: Record<string, boolean> = {};
 
-      tocGroups.forEach((group) => {
-        next[group.parent.id] = previous[group.parent.id] ?? false;
+      collapsibleNodeIds.forEach((id) => {
+        next[id] = previous[id] ?? false;
       });
 
       return next;
     });
-  }, [tocGroups]);
+  }, [collapsibleNodeIds]);
 
   const PageSkeleton = () => (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -400,19 +443,106 @@ export default function ModernArticlePage() {
   const articleData = useMemo(() => {
     const wordCount = (article?.body || "").split(/\s+/).filter(Boolean).length;
     const readTime = Math.max(1, Math.ceil(wordCount / 200));
-    const authorName = article?.author?.user_name || "Unknown";
 
     return {
       readTime,
       views: article?.views ?? 0,
       author: {
+        id: article?.author?.id || "",
         username: article?.author?.user_name || "",
+        displayName:
+          article?.author?.display_name || article?.author?.user_name || "",
         avatar: article?.author?.avatar_url || "",
         ranking: article?.author?.ranking_point || 0,
         bio: article?.author?.bio ?? "",
       },
     };
   }, [article]);
+
+  const currentUsername =
+    typeof user?.user_metadata?.username === "string"
+      ? user.user_metadata.username
+      : typeof user?.user_metadata?.user_name === "string"
+        ? user.user_metadata.user_name
+        : "";
+
+  const normalizedCurrentUsername = currentUsername
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  const normalizedAuthorUsername = (articleData.author.username || "")
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+
+  const isOwnArticle =
+    (Boolean(user?.id) &&
+      Boolean(articleData.author.id) &&
+      user?.id === articleData.author.id) ||
+    (Boolean(normalizedCurrentUsername) &&
+      Boolean(normalizedAuthorUsername) &&
+      normalizedCurrentUsername === normalizedAuthorUsername);
+  const articleEditHref = article?.id
+    ? `/article/create?id=${encodeURIComponent(String(article.id))}`
+    : "#";
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const sharePayload = {
+      title: displayTitle,
+      text: displaySubtitle || displayTitle,
+      url,
+    };
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share(sharePayload);
+        return;
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+    }
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        toast.success(t("articles.detail.shareLinkCopied"));
+        return;
+      }
+    } catch {
+      // no-op, fallback below
+    }
+
+    toast.error(t("articles.detail.shareFailed"));
+  };
+
+  const getMoreActionText = () => {
+    if (activeMoreAction === "request-translation") {
+      return {
+        title: t("articles.detail.requestTranslation"),
+        description: t("articles.detail.requestTranslationDescription"),
+      };
+    }
+    if (activeMoreAction === "report-article") {
+      return {
+        title: t("articles.detail.reportArticle"),
+        description: t("articles.detail.reportArticleDescription"),
+      };
+    }
+    return {
+      title: t("articles.detail.reportAuthor"),
+      description: t("articles.detail.reportAuthorDescription"),
+    };
+  };
+
+  const submitMoreAction = () => {
+    if (!activeMoreAction) return;
+    toast.success(t("articles.detail.requestSubmitted"));
+    setActiveMoreAction(null);
+    setMoreActionMessage("");
+  };
 
   const headingSelector = "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]";
 
@@ -491,75 +621,71 @@ export default function ModernArticlePage() {
   const setAllTocGroupsCollapsed = (collapsed: boolean) => {
     setCollapsedTocGroups(() => {
       const next: Record<string, boolean> = {};
-      tocGroups.forEach((group) => {
-        next[group.parent.id] = collapsed;
+      collapsibleNodeIds.forEach((id) => {
+        next[id] = collapsed;
       });
       return next;
     });
   };
 
+  const renderTocNode = (node: TocNode) => {
+    const isExpandable = node.children.length > 0;
+    const canCollapse = isExpandable && node.item.level <= 3;
+    const isCollapsed = collapsedTocGroups[node.item.id] ?? false;
+
+    return (
+      <div key={node.item.id} className="space-y-0.5">
+        <div className="flex items-start gap-0.5">
+          <div className="min-w-0 flex-1">
+            <TocItem item={node.item} activeId={activeSection} />
+          </div>
+
+          {canCollapse && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={
+                isCollapsed
+                  ? t("articles.detail.expandSection")
+                  : t("articles.detail.collapseSection")
+              }
+              className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
+              onClick={() => toggleTocGroup(node.item.id)}
+            >
+              {isCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
+
+        {(!canCollapse || !isCollapsed) &&
+          node.children.map((child) => renderTocNode(child))}
+      </div>
+    );
+  };
+
   const renderToc = () => (
-    <nav className="flex flex-col gap-1">
-      {tocGroups.length ? (
+    <nav className="flex flex-col gap-0.5">
+      {tocTree.length ? (
         <>
-          {tocGroups.map((group) => {
-            const isCollapsed = collapsedTocGroups[group.parent.id] ?? false;
-            const isExpandable = group.children.length > 0;
-
-            return (
-              <div key={group.parent.id} className="space-y-1">
-                <div className="flex items-start gap-1">
-                  <div className="min-w-0 flex-1">
-                    <TocItem item={group.parent} activeId={activeSection} />
-                  </div>
-
-                  {isExpandable && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={
-                        isCollapsed
-                          ? t("articles.detail.expandSection")
-                          : t("articles.detail.collapseSection")
-                      }
-                      className="mt-0.5 h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => toggleTocGroup(group.parent.id)}
-                    >
-                      {isCollapsed ? (
-                        <ChevronRight className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
-                </div>
-
-                {!isCollapsed &&
-                  group.children.map((child) => (
-                    <TocItem
-                      key={child.id}
-                      item={child}
-                      activeId={activeSection}
-                    />
-                  ))}
-              </div>
-            );
-          })}
-
           {hasExpandableTocGroups && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="mt-2 h-7 justify-start px-2 text-xs text-muted-foreground"
-              onClick={() => setAllTocGroupsCollapsed(!hasCollapsedTocGroups)}
+              className="mb-1 h-6 justify-start px-2 text-xs text-muted-foreground"
+              onClick={() => setAllTocGroupsCollapsed(false)}
+              disabled={!hasCollapsedTocGroups}
             >
-              {hasCollapsedTocGroups
-                ? t("articles.detail.expandAll")
-                : t("articles.detail.collapseAll")}
+              {t("articles.detail.expandAll")}
             </Button>
           )}
+
+          {tocTree.map((node) => renderTocNode(node))}
         </>
       ) : (
         <div className="text-sm text-muted-foreground">
@@ -687,21 +813,43 @@ export default function ModernArticlePage() {
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
                     aria-label={t("common.share")}
-                    onClick={() => commentRef.current?.focus()}
+                    onClick={handleShare}
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
 
                   {/* More action */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full border border-border hover:bg-muted"
-                    aria-label={t("articles.detail.moreActions")}
-                    onClick={() => commentRef.current?.focus()}
-                  >
-                    <MoreHorizontal className="h-5 w-5" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full border border-border hover:bg-muted"
+                        aria-label={t("articles.detail.moreActions")}
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          setActiveMoreAction("request-translation")
+                        }
+                      >
+                        {t("articles.detail.requestTranslation")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setActiveMoreAction("report-article")}
+                      >
+                        {t("articles.detail.reportArticle")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setActiveMoreAction("report-author")}
+                      >
+                        {t("articles.detail.reportAuthor")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   <div className="h-px w-10 bg-border my-1" />
 
@@ -799,7 +947,11 @@ export default function ModernArticlePage() {
 
           {/* Right panels (wireframe: Author data, TOC, Definitions, Related links) */}
           <aside className="hidden xl:block">
-            <AuthorBox author={articleData.author} />
+            <AuthorBox
+              author={articleData.author}
+              isOwnArticle={isOwnArticle}
+              editHref={articleEditHref}
+            />
             <div className="sticky top-6 mt-6 space-y-6">
               <RightPanelCard title={t("articles.detail.tableOfContents")}>
                 {renderToc()}
@@ -824,16 +976,16 @@ export default function ModernArticlePage() {
               )}
               {relatedLinks && relatedLinks.length > 0 && (
                 <RightPanelCard title={t("articles.detail.relatedLinks")}>
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
                     {visibleRelatedLinks.map((l) => (
                       <a
                         key={l.href}
                         href={l.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group flex items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
+                        className="group flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-muted/50"
                       >
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-1.5 text-sm">
                           <LinkIcon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
                           <span className="text-muted-foreground group-hover:text-foreground max-w-[220px] truncate block">
                             {l.label}
@@ -843,12 +995,12 @@ export default function ModernArticlePage() {
                       </a>
                     ))}
                     {relatedLinks.length > 4 && (
-                      <div className="pt-1">
+                      <div className="pt-0.5">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setShowAllLinks((prev) => !prev)}
-                          className="w-full justify-start text-xs text-muted-foreground"
+                          className="h-6 w-full justify-start px-2 text-xs text-muted-foreground"
                         >
                           {showAllLinks
                             ? t("articles.detail.showLess")
@@ -867,6 +1019,48 @@ export default function ModernArticlePage() {
       </div>
 
       <BackToTopButton />
+
+      <Dialog
+        open={Boolean(activeMoreAction)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveMoreAction(null);
+            setMoreActionMessage("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{getMoreActionText().title}</DialogTitle>
+            <DialogDescription>
+              {getMoreActionText().description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Textarea
+            value={moreActionMessage}
+            onChange={(event) => setMoreActionMessage(event.target.value)}
+            placeholder={t("articles.detail.actionMessagePlaceholder")}
+            className="min-h-[110px]"
+          />
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setActiveMoreAction(null);
+                setMoreActionMessage("");
+              }}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button type="button" onClick={submitMoreAction}>
+              {t("articles.detail.submitRequest")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
