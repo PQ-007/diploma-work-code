@@ -46,22 +46,22 @@ export function Alert({ variant = "info", title, children }: AlertProps) {
   return (
     <div
       className={`
-        my-6 rounded-xl border p-5 shadow-sm
+        my-4 rounded-xl border p-3 pb-1 shadow-sm
         ${style.containerClass}
       `}
       role="alert"
     >
-      <div className="flex gap-4">
+      <div className="flex gap-2 items-start">
         <div className="flex-shrink-0">
           <Icon className={`w-5 h-5 ${style.iconClass}`} />
         </div>
         <div className="flex-1">
           {title && (
-            <div className={`font-semibold mb-2 ${style.titleClass}`}>
+            <div className={`font-semibold  ${style.titleClass}`}>
               {title}
             </div>
           )}
-          <div className="prose prose-sm max-w-none text-foreground">
+          <div className="text-[15px] text-foreground">
             {children}
           </div>
         </div>

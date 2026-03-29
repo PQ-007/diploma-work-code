@@ -240,9 +240,9 @@ export function MdxEditor({
         }
       );
 
-      // Toggle preview (Ctrl/Cmd + Shift + P)
+      // Toggle preview (Ctrl/Cmd + Shift + O)
       editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyP,
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyL,
         () => {
           onTogglePreview?.();
         }

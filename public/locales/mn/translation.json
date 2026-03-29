@@ -1,6 +1,7 @@
 {
   "common": {
     "welcome": "FutureHub-д тавтай морилно уу",
+    "views": "уншилт",
     "loading": "Ачаалж байна...",
     "error": "Алдаа",
     "save": "Хадгалах",
@@ -303,8 +304,9 @@
 
   "nav_user": {
     "profile": "Профайл",
-    "roadmap": "Roadmap",
-    "theme": "Theme",
+    "library": "Миний сан",
+    "roadmap": "Суралцах төлөвлөгөө",
+    "theme": "Өнгөний горим",
     "language": "Хэл",
     "logout": "Гарах"
   },

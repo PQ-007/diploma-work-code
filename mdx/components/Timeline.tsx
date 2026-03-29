@@ -6,14 +6,17 @@ interface TimelineItem {
   description: React.ReactNode;
 }
 
-export function Timeline({ items }: { items: TimelineItem[] }) {
+export function Timeline({ items }: { items?: TimelineItem[] }) {
+  const resolvedItems = Array.isArray(items) ? items : [];
+  if (resolvedItems.length === 0) return null;
+
   return (
     <div className="my-8 relative">
       {/* Vertical line */}
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
 
       <div className="space-y-8">
-        {items.map((item, index) => (
+        {resolvedItems.map((item, index) => (
           <div key={index} className="relative flex gap-6 group">
             {/* Timeline dot */}
             <div className="flex-shrink-0 relative z-10">
@@ -35,7 +38,7 @@ export function Timeline({ items }: { items: TimelineItem[] }) {
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 {item.title}
               </h3>
-              <div className="prose prose-sm max-w-none text-muted-foreground">
+              <div className="text-[15px] leading-7 text-muted-foreground">
                 {item.description}
               </div>
             </div>

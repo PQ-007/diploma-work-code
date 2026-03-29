@@ -7,10 +7,13 @@ interface Feature {
   description: string;
 }
 
-export function FeatureGrid({ features }: { features: Feature[] }) {
+export function FeatureGrid({ features }: { features?: Feature[] }) {
+  const resolvedFeatures = Array.isArray(features) ? features : [];
+  if (resolvedFeatures.length === 0) return null;
+
   return (
     <div className="my-8 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {features.map((feature, index) => {
+      {resolvedFeatures.map((feature, index) => {
         const Icon = getIcon(feature.icon);
 
         return (

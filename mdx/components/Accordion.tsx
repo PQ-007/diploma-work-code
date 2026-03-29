@@ -8,7 +8,17 @@ interface AccordionItem {
   content: React.ReactNode;
 }
 
-export function Accordion({ items }: { items: AccordionItem[] }) {
+type AccordionProps = {
+  items?: AccordionItem[];
+  children?: React.ReactNode;
+};
+
+export function Accordion({ items, children }: AccordionProps) {
+  const resolvedItems = Array.isArray(items) ? items : [];
+  if (resolvedItems.length === 0) {
+    return children ? <div className="my-8">{children}</div> : null;
+  }
+
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleItem = (index: number) => {
@@ -17,7 +27,7 @@ export function Accordion({ items }: { items: AccordionItem[] }) {
 
   return (
     <div className="my-8 space-y-3">
-      {items.map((item, index) => {
+      {resolvedItems.map((item, index) => {
         const isOpen = openIndex === index;
 
         return (

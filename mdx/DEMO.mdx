@@ -1,346 +1,649 @@
 ---
-title: "MDX Components Demo"
-description: "A showcase of all available MDX components"
+title: "Бүх MDX Компонент ба Синтаксын Бүрэн Лавлах"
+description: "Бүх боломжит MDX компонент болон энгийн markdown синтаксыг нэг нийтлэлд харуулах жишээ"
 ---
 
-# MDX Components Demo
+# Бүх MDX Компонент ба Синтаксын Бүрэн Лавлах
 
-This page demonstrates all available MDX components in action.
+Энэ нэг нийтлэл нь бүтээгдэхүүн болон контентын хяналт хийхэд зориулагдсан.
 
-<Alert variant="info" title="Welcome!">
-  This is a comprehensive demo of production-quality MDX components designed for
-  modern web applications.
-</Alert>
+Үүнд:
 
-## Getting Started
+- Одоогоор ашиглаж болох бүх custom MDX компонентууд
+- Энгийн markdown синтакс (гарчиг, жагсаалт, хүснэгт, эшлэл, код, холбоос, зураг гэх мэт)
+- Компонент бүрийг хэрхэн ашиглахыг тайлбарласан богино жишээнүүд
 
-Let's explore each component with real examples.
+Энийг checklist болгон ашиглаад аль компонентыг үлдээх, сайжруулах, эсвэл устгахаа шийдээрэй.
 
-<Steps>
+---
 
-### Installation
+## Хурдан Import Жишээ
 
-First, ensure all components are imported in your MDX file:
+Хэрэв таны MDX runtime компонентуудыг аль хэдийн map хийсэн бол гараар import хийх шаардлагагүй.
+Өөр тохиргоонд explicit import хэрэглэх бол синтакс нь ихэвчлэн ийм байна:
 
-```typescript
+```mdx
 import {
   Alert,
-  Badge,
   Card,
   Steps,
   Tabs,
   Accordion,
   Quote,
   Timeline,
-  Kbd,
-} from "@/components/mdx";
+  Image,
+  ImageGrid,
+  VideoEmbed,
+  Table,
+  ComparisonTable,
+  FeatureGrid,
+  FileTree,
+  Chart,
+  DataTable,
+  ProTip,
+} from "@/mdx/components";
 ```
 
-### Using Components
+---
 
-Simply use them in your MDX content like regular React components:
+## Энгийн Markdown Синтакс
+
+### Гарчгууд
+
+#### H4 гарчгийн жишээ
+
+##### H5 гарчгийн жишээ
+
+###### H6 гарчгийн жишээ
+
+### Текстийн Стайл
+
+Энэ нь **bold текст**, _italic текст_, мөн **_bold + italic_** жишээ юм.
+
+Мөн `const ready = true;` шиг inline code болон ~~зураасаар дарах~~ хэлбэр багтсан.
+
+### Жагсаалтууд
+
+- Эрэмбэгүй жагсаалтын эхний мөр
+- Эрэмбэгүй жагсаалтын хоёр дахь мөр
+- Эрэмбэгүй жагсаалтын гурав дахь мөр
+
+1. Эрэмбэтэй жагсаалтын эхний мөр
+2. Эрэмбэтэй жагсаалтын хоёр дахь мөр
+3. Эрэмбэтэй жагсаалтын гурав дахь мөр
+
+### Blockquote
+
+> Энгийн markdown blockquote жишээ.
+>
+> Үүнийг тэмдэглэл, ишлэл, эсвэл онцлох өгүүлбэрт ашиглаж болно.
+
+### Холбоос ба Зураг
+
+Энгийн markdown холбоос: [MDX гарын авлага нээх](./MDX_COMPONENTS_GUIDE.md)
+
+Энгийн markdown зураг (MDX `Image` компонентоор map хийгдэнэ):
+
+![Reference illustration](https://picsum.photos/seed/mdx-reference/1200/600)
+
+### Энгийн Markdown Хүснэгт
+
+| Синтакс     | Ямар үүрэгтэй              | Жишээ            |
+| ----------- | -------------------------- | ---------------- |
+| `# Heading` | Гарчиг үүсгэнэ             | `## Хэсэг`       |
+| `- item`    | Эрэмбэгүй жагсаалт үүсгэнэ | `- MDX сурах`    |
+| `1. item`   | Эрэмбэтэй жагсаалт үүсгэнэ | `1. Эхний алхам` |
+| ` ```ts `   | Кодын блок үүсгэнэ         | Доорх жишээг хар |
+
+### Энгийн Кодын Блок
+
+```typescript
+type ComponentDecision = "keep" | "polish" | "remove";
+
+interface ReviewResult {
+  component: string;
+  decision: ComponentDecision;
+  reason: string;
+}
+```
+
+---
+
+## Alert Компонент
+
+Ашиглалт:
 
 ```mdx
-<Alert variant="success">Your component is ready to use!</Alert>
+<Alert variant="info" title="Тавтай морил">
+  Контекст тайлбар бүхий туслах мессеж.
+</Alert>
 ```
 
-### Customization
-
-All components support theme-aware styling and can be customized via props.
-
-</Steps>
-
----
-
-## Interactive Components
-
-### Tabs
-
-<Tabs
-  items={[
-    {
-      label: "Overview",
-      content: (
-        <>
-          <p>Tabs allow you to organize content into multiple sections.</p>
-          <Badge variant="primary">Interactive</Badge>
-        </>
-      ),
-    },
-    {
-      label: "Features",
-      content: (
-        <ul>
-          <li>Smooth transitions</li>
-          <li>Keyboard navigation</li>
-          <li>Mobile responsive</li>
-        </ul>
-      ),
-    },
-    {
-      label: "Usage",
-      content: (
-        <>
-          <code>Pass an array of items with label and content properties.</code>
-        </>
-      ),
-    },
-  ]}
-/>
-
-### Accordion
-
-<Accordion
-  items={[
-    {
-      title: "What makes these components special?",
-      content:
-        "They're built with accessibility, performance, and design consistency in mind. Every component adapts to your theme automatically.",
-    },
-    {
-      title: "Are they mobile-friendly?",
-      content:
-        "Absolutely! All components are fully responsive and work beautifully on mobile devices.",
-    },
-    {
-      title: "Can I customize the styling?",
-      content:
-        "Yes! Components use your theme's CSS variables and can be customized through props and standard Tailwind classes.",
-    },
-  ]}
-/>
-
----
-
-## Content Display
-
-### Feature Grid
-
-<FeatureGrid
-  features={[
-    {
-      icon: "zap",
-      title: "Blazing Fast",
-      description:
-        "Optimized for performance with minimal bundle impact and smooth animations.",
-    },
-    {
-      icon: "shield",
-      title: "Accessible",
-      description:
-        "WCAG compliant with proper ARIA labels and keyboard navigation support.",
-    },
-    {
-      icon: "palette",
-      title: "Theme-Aware",
-      description:
-        "Seamlessly adapts to light and dark modes using your design system.",
-    },
-    {
-      icon: "code",
-      title: "Developer-Friendly",
-      description:
-        "Clean API with TypeScript support and comprehensive documentation.",
-    },
-  ]}
-/>
-
-### Timeline
-
-<Timeline
-  items={[
-    {
-      date: "Step 1",
-      title: "Design System Integration",
-      description:
-        "Components automatically adopt your theme colors, spacing, and typography.",
-    },
-    {
-      date: "Step 2",
-      title: "Component Development",
-      description:
-        "Built with modern React patterns and best practices for maintainability.",
-    },
-    {
-      date: "Step 3",
-      title: "Production Ready",
-      description:
-        "Tested for performance, accessibility, and cross-browser compatibility.",
-    },
-  ]}
-/>
-
----
-
-## Alerts & Callouts
-
-<Alert variant="success" title="Success!">
-  Your configuration has been saved successfully.
+<Alert variant="info" title="Тавтай морил!">
+  Энэ нь саармаг шинэчлэлд ашиглах мэдээллийн alert юм.
 </Alert>
 
-<Alert variant="warning" title="Important Notice">
-  Please review the changes before proceeding.
+<Alert variant="success" title="Амжилттай">
+  Дууссан үйлдэл болон баталгаажуулалтад success alert ашиглана.
 </Alert>
 
-<Callout type="tip">
-  💡 **Pro Tip**: Use keyboard shortcuts to navigate faster. Press{" "}
-  <Kbd>Cmd+K</Kbd> to open the command palette.
-</Callout>
+<Alert variant="warning" title="Анхааруулга">
+  Хэрэглэгч үргэлжлүүлэхийн өмнө заавал шалгах шаардлагатай үед warning alert
+  ашиглана.
+</Alert>
 
-<Callout type="danger">
-  🚨 **Warning**: This action will permanently delete all associated data and
-  cannot be undone.
-</Callout>
+<Alert variant="error" title="Алдаа">
+  Хэрэглэгчийн оролцоо шаардсан алдаанд error alert ашиглана.
+</Alert>
 
 ---
 
-## Cards & Badges
+## ProTip Компонент
 
-<div className="grid md:grid-cols-2 gap-6 my-8">
-  <Card icon="rocket" title="Quick Start" variant="primary">
-    Get up and running in minutes with our step-by-step guide. <Badge variant="success">New</Badge>
+Ашиглалт:
+
+```mdx
+<ProTip>Энгийн тэмдэглэлээс ялгарч харагдах мэргэжлийн зөвлөгөө.</ProTip>
+```
+
+<ProTip>
+  Хэрэв таны контент стратегид ахисан түвшний зөвлөгөө хэрэгтэй бол энэ
+  компонентыг үлдээгээрэй. Онцолсон expert guidance хэсэг хэрэгтэй үед
+  тохиромжтой.
+</ProTip>
+
+---
+
+## Card Компонент
+
+Ашиглалт:
+
+```mdx
+<Card icon="rocket" title="Хурдан Эхлэх" variant="primary">
+  Card доторх контент
+</Card>
+```
+
+<div className="grid gap-6 my-8 md:grid-cols-2">
+  <Card icon="rocket" title="Хурдан Эхлэх" variant="primary">
+    Тодорхой setup урсгалаар богино хугацаанд ажиллуулж эхлээрэй.
   </Card>
 
-  <Card icon="database" title="API Reference">
-    Comprehensive API documentation with code examples. <Badge variant="outline">Docs</Badge>
+<Card icon="database" title="API Лавлах" variant="default">
+  Жишээ болон edge case-уудтай төвлөрсөн API баримт.
+</Card>
+
+<Card icon="shield" title="Аюулгүй байдал" variant="warning">
+  Auth, permission, protected route-уудаа анхааралтай тохируулна уу.
+</Card>
+
+  <Card
+    icon="book"
+    title="Баримт Нээх"
+    variant="success"
+    href="./MDX_COMPONENTS_GUIDE.md"
+  >
+    Энэ card нь дарагддаг link-style card жишээг харуулж байна.
   </Card>
 </div>
 
 ---
 
-## Code Examples
+## Steps Компонент
 
-### Regular Code Block
+Ашиглалт:
 
-```typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+```mdx
+<Steps>
 
-async function getUser(id: string): Promise<User> {
-  const response = await fetch(`/api/users/${id}`);
-  return response.json();
-}
+### Алхам Нэг
+
+Тайлбар
+
+### Алхам Хоёр
+
+Тайлбар
+
+</Steps>
 ```
 
-### Code Comparison
+<Steps>
 
-<CodeComparison
-  language="typescript"
-  beforeLabel="❌ Don't do this"
-  afterLabel="✅ Do this instead"
-  before={`// Nested callbacks
-fetchUser((user) => {
-  fetchPosts(user.id, (posts) => {
-    fetchComments(posts[0].id, (comments) => {
-      console.log(comments);
-    });
-  });
-});`}
-  after={`// Async/await
-const user = await fetchUser();
-const posts = await fetchPosts(user.id);
-const comments = await fetchComments(posts[0].id);
-console.log(comments);`}
-/>
+### Суулгалт
+
+Таны MDX runtime бүх custom компонентуудыг map хийсэн эсэхийг шалгаарай.
+
+```typescript
+import { components } from "@/mdx/mdx-components";
+```
+
+### Ашиглалт
+
+Custom tag-ууд танигдахын тулд MDX контентыг map хийсэн компонентуудтай render хийнэ.
+
+### Хяналт
+
+Энэ нийтлэлийн хэсэг бүрийг тестлэсний дараа компонентуудаа keep, polish, remove гэж тэмдэглээрэй.
+
+</Steps>
 
 ---
 
-## File Structure
+## Tabs Компонент
 
-<FileTree
-  tree={[
+Ашиглалт:
+
+```mdx
+<Tabs
+  items={[
+    { label: "Тойм", content: <>...</> },
+    { label: "Дэлгэрэнгүй", content: <>...</> },
+  ]}
+/>
+```
+
+<Tabs
+  items={[
     {
-      name: "app",
-      type: "folder",
-      children: [
-        { name: "layout.tsx", type: "file" },
-        { name: "page.tsx", type: "file" },
-        {
-          name: "api",
-          type: "folder",
-          children: [{ name: "route.ts", type: "file" }],
-        },
-      ],
+      label: "Тойм",
+      content: (
+        <>
+          <p>
+            Tabs нь холбоотой контентыг төвлөрсөн panel-ууд болгон бүлэглэнэ.
+          </p>
+          <strong>Интерактив хэсэг</strong>
+        </>
+      ),
     },
     {
-      name: "components",
-      type: "folder",
-      children: [
-        { name: "Button.tsx", type: "file" },
-        { name: "Card.tsx", type: "file" },
-      ],
+      label: "Онцлогууд",
+      content: (
+        <ul>
+          <li>Keyboard-д ээлтэй</li>
+          <li>Mobile responsive</li>
+          <li>Идэвхтэй төлөв нь харагдахуйц ойлгомжтой</li>
+        </ul>
+      ),
     },
-    { name: "package.json", type: "file" },
+    {
+      label: "Зөвлөмж",
+      content: (
+        <>
+          <p>Tab-ын шошгыг богино, тодорхой байлгаарай.</p>
+          <code>Уншихад хялбар байх үүднээс 2-5 tab тохиромжтой.</code>
+        </>
+      ),
+    },
   ]}
 />
 
 ---
 
-## Quotes
+## Accordion Компонент
+
+Ашиглалт:
+
+```mdx
+<Accordion
+  items={[
+    { title: "Асуулт", content: "Хариулт" },
+    { title: "Асуулт", content: "Хариулт" },
+  ]}
+/>
+```
+
+<Accordion
+  items={[
+    {
+      title: "Accordion-ыг хэзээ хэрэглэх вэ?",
+      content:
+        "Контент урт эсвэл заавал биш үед, хэрэглэгчид аажмаар мэдээлэл харах нь илүү үр дүнтэй бол accordion ашиглана.",
+    },
+    {
+      title: "Хэзээ ашиглахаас зайлсхийх вэ?",
+      content:
+        "Бүх хэрэглэгч шууд харах ёстой чухал мэдээлэлд accordion ашиглахаас зайлсхий.",
+    },
+    {
+      title: "Tabs-ыг орлож чадах уу?",
+      content:
+        "Зарим тохиолдолд тийм. Ялангуяа mobile дээр босоо өргөтгөл нь хэвтээ tab-аас уншихад амар байдаг.",
+    },
+  ]}
+/>
+
+---
+
+## FeatureGrid Компонент
+
+Ашиглалт:
+
+```mdx
+<FeatureGrid
+  features={[
+    { icon: "zap", title: "Хурдан", description: "..." },
+    { icon: "shield", title: "Найдвартай", description: "..." },
+  ]}
+/>
+```
+
+<FeatureGrid
+  features={[
+    {
+      icon: "zap",
+      title: "Хурдан",
+      description: "Оптимиз хийсэн render болон жигд interaction.",
+    },
+    {
+      icon: "shield",
+      title: "Найдвартай",
+      description:
+        "Баримт бичиг болон бүтээгдэхүүний гарын авлагад тохирох бат бөх бүтэц.",
+    },
+    {
+      icon: "code",
+      title: "Хөгжүүлэгчид Ээлтэй",
+      description: "Ойлгомжтой props болон дахин ашиглахад хялбар pattern-ууд.",
+    },
+  ]}
+/>
+
+---
+
+## Timeline Компонент
+
+Ашиглалт:
+
+```mdx
+<Timeline
+  items={[
+    { date: "Үе шат 1", title: "Эхлэх", description: "..." },
+    { date: "Үе шат 2", title: "Давталт", description: "..." },
+  ]}
+/>
+```
+
+<Timeline
+  items={[
+    {
+      date: "Үе шат 1",
+      title: "Аудит",
+      description:
+        "Одоо байгаа бүх компонент болон одоогийн хэрэглээг жагсаана.",
+    },
+    {
+      date: "Үе шат 2",
+      title: "Хяналт",
+      description: "Дизайны чанар болон UX нийцтэй байдлыг шалгана.",
+    },
+    {
+      date: "Үе шат 3",
+      title: "Шийдвэр",
+      description: "Компонент бүрийг keep, polish, remove гэж шийднэ.",
+    },
+  ]}
+/>
+
+---
+
+## Quote Компонент
+
+Ашиглалт:
+
+```mdx
+<Quote author="Нэр" role="Албан тушаал">
+  Ишлэлийн текст
+</Quote>
+```
 
 <Quote author="Dieter Rams" role="Industrial Designer">
-  Good design is as little design as possible. Less, but better – because it
-  concentrates on the essential aspects, and the products are not burdened with
-  non-essentials.
+  Сайн дизайн гэдэг нь аль болох бага дизайн. Цөөн, гэхдээ илүү сайн.
 </Quote>
 
 ---
 
-## Comparison Table
+## ImageGrid Компонент
 
-<ComparisonTable
-  columns={[
-    { name: "Basic" },
-    { name: "Pro", highlight: true },
-    { name: "Enterprise" },
+Ашиглалт:
+
+```mdx
+<ImageGrid
+  columns={3}
+  images={[
+    { src: "...", alt: "...", caption: "..." },
+    { src: "...", alt: "...", caption: "..." },
   ]}
-  rows={[
-    { feature: "MDX Components", values: [true, true, true] },
-    { feature: "Custom Themes", values: [false, true, true] },
-    { feature: "Priority Support", values: [false, false, true] },
-    { feature: "Users", values: ["5", "50", "Unlimited"] },
-    { feature: "Storage", values: ["10 GB", "100 GB", "1 TB"] },
+/>
+```
+
+<ImageGrid
+  columns={3}
+  images={[
+    {
+      src: "https://picsum.photos/seed/mdx-grid-1/800/500",
+      alt: "Grid зураг 1",
+      caption: "Хянах самбар",
+    },
+    {
+      src: "https://picsum.photos/seed/mdx-grid-2/800/500",
+      alt: "Grid зураг 2",
+      caption: "Профайл",
+    },
+    {
+      src: "https://picsum.photos/seed/mdx-grid-3/800/500",
+      alt: "Grid зураг 3",
+      caption: "Шинжилгээ",
+    },
   ]}
 />
 
 ---
 
-## Keyboard Shortcuts
+## VideoEmbed Компонент
 
-Common keyboard shortcuts for navigation:
+Ашиглалт:
 
-- <Kbd>Ctrl+K</Kbd> - Open command palette
-- <Kbd>Cmd+B</Kbd> - Toggle sidebar
-- <Kbd>Ctrl+Shift+P</Kbd> - Open preferences
-- <Kbd>/</Kbd> - Focus search
+```mdx
+<VideoEmbed
+  url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  title="Демо видео"
+  aspectRatio="16/9"
+/>
+```
 
----
-
-## Best Practices
-
-<Card variant="primary">
-
-### Design Principles
-
-1. **Consistency**: Use components consistently across your application
-2. **Accessibility**: Always provide alt text, labels, and proper semantics
-3. **Performance**: Lazy load images and optimize content
-4. **Responsiveness**: Test on multiple screen sizes
-
-</Card>
+<VideoEmbed
+  url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  title="YouTube Embed Жишээ"
+  aspectRatio="16/9"
+/>
 
 ---
 
-## Conclusion
+## Table Компонент (Structured)
 
-<Alert variant="success" title="You're All Set!">
-  You now have access to a complete set of production-quality MDX components.
-  Start building beautiful, accessible content today!
+Ашиглалт:
+
+```mdx
+<Table
+  data={{
+    headers: ["Компонент", "Төлөв"],
+    rows: [["Alert", "Keep"]],
+  }}
+/>
+```
+
+<Table
+  data={{
+    headers: ["Компонент", "Одоогийн төлөв", "Тэмдэглэл"],
+    rows: [
+      ["Alert", "Keep", "Тодорхой бөгөөд хэрэгтэй"],
+      ["Tabs", "Polish", "Mobile spacing-ийг сайжруулах"],
+      ["Timeline", "Review", "Сайн боловч илүү хялбарчилж болно"],
+    ],
+  }}
+/>
+
+---
+
+## ComparisonTable Компонент
+
+Ашиглалт:
+
+```mdx
+<ComparisonTable
+  columns={[{ name: "Basic" }, { name: "Pro", highlight: true }]}
+  rows={[{ feature: "Feature A", values: [true, true] }]}
+/>
+```
+
+<ComparisonTable
+  columns={[
+    { name: "Энгийн" },
+    { name: "Pro", highlight: true },
+    { name: "Байгууллага" },
+  ]}
+  rows={[
+    { feature: "MDX Компонент", values: [true, true, true] },
+    { feature: "Custom Theme", values: [false, true, true] },
+    { feature: "Priority Support", values: [false, false, true] },
+    { feature: "Суудал", values: ["5", "50", "Хязгааргүй"] },
+  ]}
+/>
+
+---
+
+## FileTree Компонент
+
+Ашиглалт:
+
+```mdx
+<FileTree
+  tree={[
+    {
+      name: "апп",
+      type: "folder",
+      children: [{ name: "page.tsx", type: "file" }],
+    },
+  ]}
+/>
+```
+
+<FileTree
+  tree={[
+    {
+      name: "mdx",
+      type: "folder",
+      children: [
+        { name: "DEMO.mdx", type: "file" },
+        { name: "mdx-components.tsx", type: "file" },
+        {
+          name: "components",
+          type: "folder",
+          children: [
+            { name: "Alert.tsx", type: "file" },
+            { name: "Tabs.tsx", type: "file" },
+            { name: "Timeline.tsx", type: "file" },
+          ],
+        },
+      ],
+    },
+  ]}
+/>
+
+---
+
+## Chart Компонент
+
+Ашиглалт:
+
+```mdx
+<Chart
+  type="line"
+  data={[
+    { name: "Jan", value: 12 },
+    { name: "Feb", value: 18 },
+  ]}
+  xKey="name"
+  yKey="value"
+  title="Сарын Идэвх"
+/>
+```
+
+<Chart
+  type="bar"
+  title="Сараар Нийтлэлийн Үзэлт"
+  description="Энгийн bar chart жишээ"
+  xKey="month"
+  yKey="views"
+  data={[
+    { month: "Jan", views: 1200 },
+    { month: "Feb", views: 1600 },
+    { month: "Mar", views: 2300 },
+    { month: "Apr", views: 1900 },
+  ]}
+/>
+
+<Chart
+  type="pie"
+  title="Контент Төрлийн Хуваарилалт"
+  description="Pie chart жишээ"
+  data={[
+    { name: "Гарын авлага", value: 40 },
+    { name: "Туториал", value: 35 },
+    { name: "Лавлах", value: 25 },
+  ]}
+/>
+
+---
+
+## DataTable Компонент
+
+Ашиглалт:
+
+```mdx
+<DataTable
+  title="Хэрэглэгчид"
+  data={[{ name: "A", role: "Админ" }]}
+  columns={[
+    { key: "name", label: "Нэр" },
+    { key: "role", label: "Үүрэг" },
+  ]}
+/>
+```
+
+<DataTable
+  title="Оролцогчид"
+  description="Эрэмбэлж, хайж болдог data table"
+  data={[
+    { name: "Ану", role: "Зохиогч", status: "Идэвхтэй", articles: 12 },
+    { name: "Бат", role: "Редактор", status: "Идэвхтэй", articles: 7 },
+    { name: "Саруул", role: "Зохиогч", status: "Идэвхгүй", articles: 3 },
+    { name: "Тэмүү", role: "Админ", status: "Идэвхтэй", articles: 22 },
+  ]}
+  columns={[
+    { key: "name", label: "Нэр" },
+    { key: "role", label: "Үүрэг" },
+    { key: "status", label: "Төлөв" },
+    { key: "articles", label: "Нийтлэл", sortable: true },
+  ]}
+  searchable={true}
+  sortable={true}
+  pagination={true}
+  pageSize={3}
+/>
+
+---
+
+## Эцсийн Тэмдэглэл
+
+Санал болгож буй хяналтын урсгал:
+
+1. Хэсэг бүрийг шалгаж, эхний сэтгэгдлийн чанарыг тэмдэглэ.
+2. Компонент бүрийг keep, polish, эсвэл remove гэж тэмдэглэ.
+3. Бодит нийтлэлд их ашиглагддаг компонентын polish ажлыг түрүүнд эрэмбэл.
+4. Давхардсан үүрэгтэй эсвэл бага үнэ цэнтэй компонентыг устга.
+
+<Alert variant="success" title="Хяналтанд Бэлэн">
+  Энэ нийтлэлд одоо бүх боломжит custom MDX компонент болон үндсэн markdown
+  синтаксыг нэг дор багтаалаа.
 </Alert>
-
----
-
-**Need help?** Check out the [full documentation](./MDX_COMPONENTS_GUIDE.md) for detailed usage examples and API reference.

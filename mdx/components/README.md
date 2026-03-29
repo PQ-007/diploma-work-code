@@ -22,10 +22,8 @@ Production-quality MDX components for modern web applications, designed to seaml
 
 - **Card** - Flexible content containers
 - **Alert** - Contextual alerts and notifications
-- **Callout** - Highlighted information boxes
 - **Quote** - Enhanced blockquotes with attribution
-- **Badge** - Labels and tags
-- **Screenshot** - Images with captions
+- **Image** - Images with captions and click-to-zoom preview
 
 ### Data Presentation
 
@@ -42,17 +40,15 @@ Production-quality MDX components for modern web applications, designed to seaml
 ### Code
 
 - **Code** - Syntax-highlighted code blocks
-- **CodeComparison** - Side-by-side code diffs
 
 ### UI Elements
 
 - **FeatureGrid** - Feature showcase grid
-- **Kbd** - Keyboard shortcut display
 
 ## 🚀 Quick Start
 
 ```mdx
-import { Alert, Card, Steps, Badge } from "@/mdx/components";
+import { Alert, Card, Steps } from "@/mdx/components";
 
 <Alert variant="info" title="Getting Started">
   Welcome to our component library!

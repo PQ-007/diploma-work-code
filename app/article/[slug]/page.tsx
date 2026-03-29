@@ -7,11 +7,14 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { components as mdxComponents } from "@/mdx/mdx-components";
+import { compileMdx } from "@/mdx/mdx-editor/MdxCompiler";
 import {
   Bookmark,
   Boxes,
   Calendar,
   Check,
+  ChevronDown,
+  ChevronRight,
   ExternalLink,
   Globe,
   Hash,
@@ -22,8 +25,6 @@ import {
   MoreHorizontal,
   Share2,
 } from "lucide-react";
-import { MDXRemote } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -38,6 +39,7 @@ import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSe
 import { useArticleInteractions } from "@/hooks/useArticleInteractions";
 
 type ArticleLangCode = "mn" | "en" | "jp";
+type TocGroup = { parent: TocEntry; children: TocEntry[] };
 
 const ARTICLE_LANGS: Array<{ code: ArticleLangCode; label: string }> = [
   { code: "mn", label: "MN" },
@@ -71,10 +73,15 @@ const extractRelatedLinks = (body: string): RelatedLink[] => {
 export default function ModernArticlePage() {
   const [activeSection, setActiveSection] = useState("");
   const [article, setArticle] = useState<ArticlePayload | null>(null);
-  const [mdxSource, setMdxSource] = useState<any>(null);
+  const [MdxContent, setMdxContent] = useState<React.ComponentType<any> | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tocItems, setTocItems] = useState<TocEntry[]>([]);
+  const [collapsedTocGroups, setCollapsedTocGroups] = useState<
+    Record<string, boolean>
+  >({});
   const [showAllLinks, setShowAllLinks] = useState(false);
   const [selectedLanguage, setSelectedLanguage] =
     useState<ArticleLangCode>("mn");
@@ -127,6 +134,39 @@ export default function ModernArticlePage() {
     [relatedLinks, showAllLinks],
   );
 
+  const tocGroups = useMemo<TocGroup[]>(() => {
+    const groups: TocGroup[] = [];
+    let currentGroup: TocGroup | null = null;
+
+    tocItems.forEach((item) => {
+      if (item.level <= 2) {
+        currentGroup = { parent: item, children: [] };
+        groups.push(currentGroup);
+        return;
+      }
+
+      if (!currentGroup) {
+        currentGroup = { parent: item, children: [] };
+        groups.push(currentGroup);
+        return;
+      }
+
+      currentGroup.children.push(item);
+    });
+
+    return groups;
+  }, [tocItems]);
+
+  const hasExpandableTocGroups = useMemo(
+    () => tocGroups.some((group) => group.children.length > 0),
+    [tocGroups],
+  );
+
+  const hasCollapsedTocGroups = useMemo(
+    () => tocGroups.some((group) => collapsedTocGroups[group.parent.id]),
+    [tocGroups, collapsedTocGroups],
+  );
+
   useEffect(() => {
     if (!isDesktopLanguageMenuOpen) return;
 
@@ -140,6 +180,64 @@ export default function ModernArticlePage() {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isDesktopLanguageMenuOpen]);
+
+  useEffect(() => {
+    setCollapsedTocGroups((previous) => {
+      const next: Record<string, boolean> = {};
+
+      tocGroups.forEach((group) => {
+        next[group.parent.id] = previous[group.parent.id] ?? false;
+      });
+
+      return next;
+    });
+  }, [tocGroups]);
+
+  useEffect(() => {
+    if (!activeSection) return;
+
+    const activeGroup = tocGroups.find(
+      (group) =>
+        group.parent.id === activeSection ||
+        group.children.some((child) => child.id === activeSection),
+    );
+
+    if (!activeGroup) return;
+
+    setCollapsedTocGroups((previous) => {
+      if (!previous[activeGroup.parent.id]) return previous;
+      return {
+        ...previous,
+        [activeGroup.parent.id]: false,
+      };
+    });
+  }, [activeSection, tocGroups]);
+
+  useEffect(() => {
+    if (!activeSection || !tocGroups.length) return;
+
+    const activeGroup = tocGroups.find(
+      (group) =>
+        group.parent.id === activeSection ||
+        group.children.some((child) => child.id === activeSection),
+    );
+
+    if (!activeGroup) return;
+
+    setCollapsedTocGroups((previous) => {
+      let changed = false;
+      const next: Record<string, boolean> = {};
+
+      tocGroups.forEach((group) => {
+        const shouldCollapse = group.parent.id !== activeGroup.parent.id;
+        const current = previous[group.parent.id] ?? false;
+        next[group.parent.id] = shouldCollapse;
+        if (current !== shouldCollapse) changed = true;
+      });
+
+      return changed ? next : previous;
+    });
+  }, [activeSection, tocGroups]);
 
   const PageSkeleton = () => (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -260,8 +358,6 @@ export default function ModernArticlePage() {
         );
         const data = await response.json();
 
-      
-
         if (!response.ok) {
           throw new Error(
             data?.error || `Failed to load article: ${response.statusText}`,
@@ -301,7 +397,7 @@ export default function ModernArticlePage() {
             /^---[\s\S]*?---\s*/,
             "",
           ) || "";
-        const serialized = await serialize(body);
+        const compiled = await compileMdx(body);
 
         setArticle({
           id: data?.id,
@@ -320,10 +416,11 @@ export default function ModernArticlePage() {
           author: data?.author || null,
           views: typeof data?.views === "number" ? data.views : 0,
         });
-        setMdxSource(serialized);
+        setMdxContent(() => compiled.default);
       } catch (e) {
         console.error("Error loading MDX:", e);
         setError("Failed to load article content.");
+        setMdxContent(null);
       } finally {
         setLoading(false);
       }
@@ -365,7 +462,7 @@ export default function ModernArticlePage() {
 
   // Build TOC from rendered headings (scoped)
   useEffect(() => {
-    if (!mdxSource || !articleRef.current) return;
+    if (!MdxContent || !articleRef.current) return;
 
     const headings = Array.from(
       articleRef.current.querySelectorAll<HTMLElement>(headingSelector),
@@ -391,11 +488,11 @@ export default function ModernArticlePage() {
       .filter((x) => x.text.length > 0);
 
     setTocItems(items);
-  }, [mdxSource]);
+  }, [MdxContent]);
 
   // Intersection Observer for active TOC section
   useEffect(() => {
-    if (!mdxSource || !articleRef.current) return;
+    if (!MdxContent || !articleRef.current) return;
 
     const headings = Array.from(
       articleRef.current.querySelectorAll<HTMLElement>(headingSelector),
@@ -422,11 +519,87 @@ export default function ModernArticlePage() {
 
     headings.forEach((h) => observer.observe(h));
     return () => observer.disconnect();
-  }, [mdxSource]);
+  }, [MdxContent]);
 
   if (loading) {
     return <PageSkeleton />;
   }
+
+  const toggleTocGroup = (groupId: string) => {
+    setCollapsedTocGroups((previous) => ({
+      ...previous,
+      [groupId]: !previous[groupId],
+    }));
+  };
+
+  const setAllTocGroupsCollapsed = (collapsed: boolean) => {
+    setCollapsedTocGroups(() => {
+      const next: Record<string, boolean> = {};
+      tocGroups.forEach((group) => {
+        next[group.parent.id] = collapsed;
+      });
+      return next;
+    });
+  };
+
+  const renderToc = () => (
+    <nav className="flex flex-col gap-1">
+      {tocGroups.length ? (
+        <>
+          {hasExpandableTocGroups && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mb-1 h-7 justify-start px-2 text-xs text-muted-foreground"
+              onClick={() => setAllTocGroupsCollapsed(!hasCollapsedTocGroups)}
+            >
+              {hasCollapsedTocGroups ? "Expand all" : "Collapse all"}
+            </Button>
+          )}
+
+          {tocGroups.map((group) => {
+            const isCollapsed = collapsedTocGroups[group.parent.id] ?? false;
+            const isExpandable = group.children.length > 0;
+
+            return (
+              <div key={group.parent.id} className="space-y-1">
+                <div className="flex items-start gap-1">
+                  <div className="min-w-0 flex-1">
+                    <TocItem item={group.parent} activeId={activeSection} />
+                  </div>
+
+                  {isExpandable && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={isCollapsed ? "Expand section" : "Collapse section"}
+                      className="mt-0.5 h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => toggleTocGroup(group.parent.id)}
+                    >
+                      {isCollapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+
+                {!isCollapsed &&
+                  group.children.map((child) => (
+                    <TocItem key={child.id} item={child} activeId={activeSection} />
+                  ))}
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <div className="text-sm text-muted-foreground">No headings found.</div>
+      )}
+    </nav>
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary">
@@ -620,16 +793,9 @@ export default function ModernArticlePage() {
 
               {/* Article body (wireframe: big center area) */}
               <div className="px-6  sm:px-8" ref={articleRef}>
-                {mdxSource ? (
-                  <article
-                    className="prose dark:prose-invert prose-headings:font-semibold prose-h2:mt-10 prose-h3:mt-8
-                    prose-p:text-[15px] prose-p:leading-7 prose-li:text-[15px] prose-li:leading-7 max-w-none
-                    prose-a:break-all overflow-hidden"
-                  >
-                    <MDXRemote
-                      {...mdxSource}
-                      components={{ ...mdxComponents }}
-                    />
+                {MdxContent ? (
+                  <article className="max-w-none overflow-hidden text-foreground [overflow-wrap:anywhere] [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                    <MdxContent components={{ ...mdxComponents }} />
                   </article>
                 ) : (
                   <div className="text-center py-16 text-muted-foreground">
@@ -642,21 +808,7 @@ export default function ModernArticlePage() {
             {/* Mobile TOC (because your right sidebar disappears) */}
             <div className="xl:hidden mt-6">
               <RightPanelCard title="Table of Contents">
-                <nav className="flex flex-col gap-1">
-                  {tocItems.length ? (
-                    tocItems.map((item) => (
-                      <TocItem
-                        key={item.id}
-                        item={item}
-                        activeId={activeSection}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      No headings found.
-                    </div>
-                  )}
-                </nav>
+                {renderToc()}
               </RightPanelCard>
             </div>
 
@@ -676,21 +828,7 @@ export default function ModernArticlePage() {
             <AuthorBox author={articleData.author} />
             <div className="sticky top-6 mt-6 space-y-6">
               <RightPanelCard title="Table of Contents">
-                <nav className="flex flex-col gap-1">
-                  {tocItems.length ? (
-                    tocItems.map((item) => (
-                      <TocItem
-                        key={item.id}
-                        item={item}
-                        activeId={activeSection}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      No headings found.
-                    </div>
-                  )}
-                </nav>
+                {renderToc()}
               </RightPanelCard>
               {definitions && definitions.length > 0 && (
                 <RightPanelCard title="Definitions">

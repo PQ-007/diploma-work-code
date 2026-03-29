@@ -14,38 +14,57 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [language, setLanguageState] = useState<Language>("en");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem("language") as Language;
+    let nextLanguage: Language = "en";
+
+    // Load saved language from localStorage (support legacy i18next key as fallback)
+    const savedLanguage =
+      (localStorage.getItem("language") as Language | null) ||
+      (localStorage.getItem("i18nextLng") as Language | null);
+
     if (savedLanguage && ["en", "mn", "ja"].includes(savedLanguage)) {
-      setLanguageState(savedLanguage);
-      i18n.changeLanguage(savedLanguage);
+      nextLanguage = savedLanguage as Language;
     } else {
       // Detect browser language
       const browserLang = navigator.language.split("-")[0];
-      const detectedLang = ["en", "mn", "ja"].includes(browserLang)
+      nextLanguage = ["en", "mn", "ja"].includes(browserLang)
         ? (browserLang as Language)
         : "ja";
-      setLanguageState(detectedLang);
-      i18n.changeLanguage(detectedLang);
     }
+
+    setLanguageState(nextLanguage);
+    if (i18n.language !== nextLanguage) {
+      i18n.changeLanguage(nextLanguage);
+    }
+    setIsHydrated(true);
   }, [i18n]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
+    setIsHydrated(true);
     i18n.changeLanguage(lang);
     localStorage.setItem("language", lang);
+    localStorage.setItem("i18nextLng", lang);
   };
 
+  const stableLanguage = isHydrated ? language : "en";
+  const stableT = React.useMemo(
+    () => i18n.getFixedT(stableLanguage),
+    [i18n, stableLanguage],
+  );
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language: stableLanguage, setLanguage, t: stableT }}
+    >
       {children}
     </LanguageContext.Provider>
   );
@@ -53,6 +72,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within a LanguageProvider");
+  if (!ctx)
+    throw new Error("useLanguage must be used within a LanguageProvider");
   return ctx;
 }

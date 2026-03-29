@@ -11,13 +11,13 @@ export function Quote({ children, author, role, avatar }: QuoteProps) {
   return (
     <div className="my-8 relative">
       {/* Quote icon */}
-      <div className="absolute -top-2 -left-2 text-primary/20">
+      <div className="absolute -top-2 -right-0 text-primary/20">
         <QuoteIcon className="w-12 h-12 fill-current" />
       </div>
 
       {/* Quote content */}
       <div
-        className="relative rounded-xl border-l-4 border-primary bg-muted/30
+        className="relative rounded-lg border-l-4 border-primary bg-muted/30
                    p-6 pl-8 shadow-sm"
       >
         <div className="prose prose-sm max-w-none text-foreground italic mb-4">

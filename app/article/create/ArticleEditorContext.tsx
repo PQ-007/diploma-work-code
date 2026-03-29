@@ -189,13 +189,8 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
   // Core content state
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [mdx, setMdx] = useState(`# Hello MDX Editor
-
-This is a **Zenn/Qiita-style** editor for technical writing.
-
-## Code Blocks
-
-`);
+  const [mdx, setMdx] =
+    useState(`>**There is no magic—just abstraction layers built on top of one another.**`);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [contentLang, setContentLang] = useState<ContentLang>("mn");
