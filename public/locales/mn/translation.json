@@ -339,8 +339,7 @@
     "topAuthors": "Шилдэг зохиогчид",
     "untitled": "Гарчиггүй нийтлэл",
     "anonymous": "Нэрсгүй",
-    "unpublished": "Нийтлэгдээгүй"
-,
+    "unpublished": "Нийтлэгдээгүй",
     "create": {
       "checkingAccess": "Нийтлэлийн хандалтыг шалгаж байна...",
       "accessDenied": "Хандалт хориглогдсон",
@@ -425,7 +424,8 @@
       "notAdded": "Нэмэгдээгүй",
       "complete": "Дуусгасан",
       "empty": "Хоосон"
-    }  },
+    }
+  },
 
   "discussions": {
     "title": "Хэлэлцүүлэг",
@@ -480,7 +480,7 @@
     "report": "Мэдэгдэх",
     "entryRejected": "Бичлэг татгалзсан",
     "relatedTerms": "Холбоотой нэр томъёо",
-    
+
     "moderationHistory": "Хяналтын түүх",
     "noTranslations": "Орчуулга одоогоор байхгүй байна.",
     "noExamples": "Жишээ одоогоор байхгүй байна.",
