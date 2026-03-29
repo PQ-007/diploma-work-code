@@ -225,7 +225,9 @@
     "signInSubtitle": "Бүртгэлдээ нэвтрэх",
     "signUpTitle": "Бүртгэл үүсгэх",
     "signUpSubtitle": "Бүртгүүлж эхлэх",
+    "studentCodeLabel": "Оюутны код",
     "emailLabel": "И-мэйл хаяг",
+    "studentCodePlaceholder": "s2x....",
     "passwordLabel": "Нууц үг",
     "emailPlaceholder": "И-мэйлээ оруулна уу",
     "passwordPlaceholder": "Нууц үгээ оруулна уу",
@@ -248,7 +250,7 @@
 
   "feed": {
     "title": "Таны мэдээ",
-    
+
     "tabs": {
       "all": "Бүгд",
       "projects": "Төслүүд",
