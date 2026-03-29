@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import {
   ChessBishop,
@@ -20,10 +21,13 @@ type Props = {
   author: {
     avatar: string;
     username: string;
+    displayName?: string;
     ranking: number;
     bio: string;
     followersCount?: number;
   };
+  isOwnArticle?: boolean;
+  editHref?: string;
 };
 
 const getRankIcon = (rank: number) => {
@@ -39,7 +43,12 @@ const getRankIcon = (rank: number) => {
   return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
 };
 
-export default function MinimalAuthorBox({ author }: Props) {
+export default function MinimalAuthorBox({
+  author,
+  isOwnArticle = false,
+  editHref,
+}: Props) {
+  const { t } = useLanguage();
   const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
   const rankingPoints = author.ranking; // normalize missing ranking
   const [isFollowing, setIsFollowing] = useState(false);
@@ -70,7 +79,7 @@ export default function MinimalAuthorBox({ author }: Props) {
                 href={profileHref}
                 className="text-sm font-bold tracking-tight text-foreground/90 hover:text-primary transition-colors truncate"
               >
-                {author.username}
+                {author.displayName || author.username}
               </Link>
               {getRankIcon(rankingPoints)}
             </div>
@@ -86,29 +95,40 @@ export default function MinimalAuthorBox({ author }: Props) {
           </div>
         </div>
 
-        <Button
-          onClick={handleFollowToggle}
-          variant={isFollowing ? "outline" : "secondary"}
-          size="sm"
-          className={cn(
-            "h-8 rounded-full px-3 text-[11px] font-bold transition-all duration-200 active:scale-95",
-            isFollowing
-              ? "bg-transparent border-primary/20 text-primary hover:bg-primary/5"
-              : "hover:bg-primary hover:text-primary-foreground",
-          )}
-        >
-          {isFollowing ? (
-            <span className="flex items-center gap-1">
-              <Check className="h-3 w-3" />
-              <span>Following</span>
-            </span>
-          ) : (
-            <span className="flex items-center gap-1">
-              <Plus className="h-3 w-3" />
-              <span>Follow</span>
-            </span>
-          )}
-        </Button>
+        {isOwnArticle ? (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-full px-3 text-[11px] font-bold"
+          >
+            <Link href={editHref || "#"}>{t("common.edit")}</Link>
+          </Button>
+        ) : (
+          <Button
+            onClick={handleFollowToggle}
+            variant={isFollowing ? "outline" : "secondary"}
+            size="sm"
+            className={cn(
+              "h-8 rounded-full px-3 text-[11px] font-bold transition-all duration-200 active:scale-95",
+              isFollowing
+                ? "bg-transparent border-primary/20 text-primary hover:bg-primary/5"
+                : "hover:bg-primary hover:text-primary-foreground",
+            )}
+          >
+            {isFollowing ? (
+              <span className="flex items-center gap-1">
+                <Check className="h-3 w-3" />
+                <span>Following</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <Plus className="h-3 w-3" />
+                <span>Follow</span>
+              </span>
+            )}
+          </Button>
+        )}
       </div>
 
       {author.bio && (

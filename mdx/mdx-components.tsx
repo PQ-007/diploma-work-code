@@ -1,27 +1,27 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { createHeading } from "./components/Heading";
-import { RImage } from "./components/Image";
+
 import { CLink } from "./components/CustomLink";
 import { Code } from "./components/Code";
 import { Pre } from "./components/Pre";
 import { Table } from "./components/Table";
-import { Callout } from "./components/Callout";
 import { Steps } from "./components/Steps";
 import { Tabs } from "./components/Tabs";
 import { Accordion } from "./components/Accordion";
 import { Card } from "./components/Card";
-import { Badge } from "./components/Badge";
 import { Quote } from "./components/Quote";
-import { CodeComparison } from "./components/CodeComparison";
 import { ImageGrid } from "./components/ImageGrid";
 import { VideoEmbed } from "./components/VideoEmbed";
 import { Timeline } from "./components/Timeline";
-import { Kbd } from "./components/Kbd";
-import { Screenshot } from "./components/Screenshot";
+import { Image } from "./components/Image";
 import { FileTree } from "./components/FileTree";
 import { Alert } from "./components/Alert";
 import { FeatureGrid } from "./components/FeatureGrid";
 import { ComparisonTable } from "./components/ComparisonTable";
+import { Chart } from "./components/Chart";
+import { DataTable } from "./components/DataTable";
+import { ProTip } from "./components/ProTip";
+import { cn } from "@/lib/utils";
 
 export const components = {
   h1: createHeading(1),
@@ -30,8 +30,17 @@ export const components = {
   h4: createHeading(4),
   h5: createHeading(5),
   h6: createHeading(6),
-  Image: RImage,
-  a: CLink,
+  Image: Image,
+  img: (props: any) => <Image inline {...props} />,
+  a: ({ className, ...props }: any) => (
+    <CLink
+      className={cn(
+        "font-medium text-primary underline underline-offset-4 decoration-primary/50 hover:decoration-primary",
+        className,
+      )}
+      {...props}
+    />
+  ),
   code: Code,
   pre: Pre,
   Table,
@@ -55,41 +64,42 @@ export const components = {
   td: (props: any) => (
     <td className="px-4 py-2.5 text-sm text-foreground align-top" {...props} />
   ),
-  Callout,
   Steps,
   Tabs,
   Accordion,
   Card,
-  Badge,
   Quote,
-  CodeComparison,
   ImageGrid,
   VideoEmbed,
   Timeline,
-  Kbd,
-  Screenshot,
   FileTree,
   Alert,
   FeatureGrid,
   ComparisonTable,
+  Chart,
+  DataTable,
+  ProTip,
   // Enhanced paragraph
   p: (props: any) => (
-    <p className="mb-6 leading-relaxed text-sm text-foreground" {...props} />
+    <p className="mb-6 text-[15px] leading-7 text-foreground" {...props} />
   ),
   // Enhanced blockquote
   blockquote: (props: any) => (
     <blockquote
-      className="pl-4 py-3 my-6 border-l-4 border-primary bg-muted/30 rounded-r-lg italic text-muted-foreground"
+      className="px-2 pt-5 pb-1 border-l-4 border-primary bg-primary/10 rounded-lg italic text-muted-foreground"
       {...props}
     />
   ),
   // Enhanced lists
   ul: (props: any) => (
-    <ul className="my-6 ml-6 list-disc space-y-2 text-foreground" {...props} />
+    <ul
+      className="my-6 ml-6 list-disc space-y-2.5 text-[15px] leading-7 text-foreground"
+      {...props}
+    />
   ),
   ol: (props: any) => (
     <ol
-      className="my-6 ml-6 list-decimal space-y-2 text-foreground"
+      className="my-6 ml-6 list-decimal space-y-2.5 text-[15px] leading-7 text-foreground"
       {...props}
     />
   ),

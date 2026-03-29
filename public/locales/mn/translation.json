@@ -1,6 +1,7 @@
 {
   "common": {
     "welcome": "FutureHub-д тавтай морилно уу",
+    "views": "уншилт",
     "loading": "Ачаалж байна...",
     "error": "Алдаа",
     "save": "Хадгалах",
@@ -247,7 +248,7 @@
 
   "feed": {
     "title": "Таны мэдээ",
-    "description": "Нийгэмлэгийн сүүлийн мэдээтэй байгаарай",
+    
     "tabs": {
       "all": "Бүгд",
       "projects": "Төслүүд",
@@ -303,8 +304,9 @@
 
   "nav_user": {
     "profile": "Профайл",
-    "roadmap": "Roadmap",
-    "theme": "Theme",
+    "library": "Миний сан",
+    "roadmap": "Суралцах төлөвлөгөө",
+    "theme": "Өнгөний горим",
     "language": "Хэл",
     "logout": "Гарах"
   },
@@ -325,7 +327,7 @@
 
   "articles": {
     "title": "Нийтлэлүүд",
-    "subtitle": "Нийгэмлэгийн нийтлэлүүдийг нээ",
+    "subtitle": "Сонирхолтой нийтлэлүүдийг уншиж, бичээрэй",
     "searchPlaceholder": "Нийтлэлийн гарчиг, зохиогч эсвэл шошгоор хайх...",
     "refreshArticles": "Нийтлэлүүдийг шинэчлэх",
     "failedToLoad": "Нийтлэлүүдийг ачааллаж чадсангүй",
@@ -337,8 +339,7 @@
     "topAuthors": "Шилдэг зохиогчид",
     "untitled": "Гарчиггүй нийтлэл",
     "anonymous": "Нэрсгүй",
-    "unpublished": "Нийтлэгдээгүй"
-,
+    "unpublished": "Нийтлэгдээгүй",
     "create": {
       "checkingAccess": "Нийтлэлийн хандалтыг шалгаж байна...",
       "accessDenied": "Хандалт хориглогдсон",
@@ -373,14 +374,16 @@
       "published": "Нийтлэгдсэн",
       "draft": "Ноорог",
       "autoSaving": "Автоматаар хадгалж байна...",
-      "autoSaved": "{{time}}-ы өмнө автоматаар хадгалагдсан",
+      "autoSaved": "{{time}} өмнө автоматаар хадгалагдсан",
       "unsavedChanges": "Хадгалагдаагүй өөрчлөлт",
       "autoSaveEnabled": "Авто хадгалалт идэвхжсэн",
       "saved": "Хадгалагдсан",
-      "saveChanges": "Өөрчлөлт хадгалах",
+      "saveChanges": "Хадгалах",
       "saveDraft": "Ноорог хадгалах",
       "publishing": "Нийтэлж байна…",
       "publish": "Нийтлэх",
+      "unpublishing": "Нийтлэснийг буцааж байна…",
+      "unpublish": "Нийтлэснийг буцаах",
       "loadingSuggestions": "Санал ачаалж байна...",
       "noTagsFound": "Шошго олдсонгүй",
       "articleSettings": "Нийтлэлийн тохиргоо",
@@ -423,11 +426,59 @@
       "notAdded": "Нэмэгдээгүй",
       "complete": "Дуусгасан",
       "empty": "Хоосон"
-    }  },
+    },
+    "detail": {
+      "redirecting": "Чиглүүлж байна...",
+      "missingArticleId": "Нийтлэлийн ID олдсонгүй.",
+      "failedToLoadContent": "Нийтлэлийн агуулгыг ачаалж чадсангүй.",
+      "noDate": "Огноо байхгүй",
+      "editedOn": "Засварласан: {{date}}",
+      "readTime": "{{minutes}} минутын уншлага",
+      "views": "{{count}} уншилт",
+      "expandSection": "Хэсгийг дэлгэх",
+      "collapseSection": "Хэсгийг хураах",
+      "expandAll": "Бүгдийг дэлгэх",
+      "collapseAll": "Бүгдийг хураах",
+      "noHeadingsFound": "Гарчиг олдсонгүй.",
+      "languageSelector": "Хэл сонгогч",
+      "moreActions": "Нэмэлт үйлдлүүд",
+      "requestTranslation": "Орчуулах хүсэлт илгээх",
+      "reportArticle": "Энэ нийтлэлийг репортлох",
+      "reportAuthor": "Зохиогчийг репортлох",
+      "requestTranslationDescription": "Ямар хэл рүү орчуулах эсвэл ямар хэсгийг орчуулах хэрэгтэйг бичнэ үү.",
+      "reportArticleDescription": "Энэ нийтлэлтэй холбоотой асуудлын дэлгэрэнгүйг бичнэ үү.",
+      "reportAuthorDescription": "Энэ зохиогчтой холбоотой асуудлын дэлгэрэнгүйг бичнэ үү.",
+      "actionMessagePlaceholder": "Тайлбараа бичнэ үү...",
+      "submitRequest": "Илгээх",
+      "requestSubmitted": "Таны хүсэлт амжилттай илгээгдлээ.",
+      "shareLinkCopied": "Холбоос хуулж авлаа",
+      "shareFailed": "Одоогоор энэ нийтлэлийг хуваалцах боломжгүй байна",
+      "tableOfContents": "Агуулга",
+      "definitions": "Тодорхойлолтууд",
+      "relatedLinks": "Холбоосууд",
+      "showLess": "Бага харуулах",
+      "showMoreLinks": "{{count}} холбоосыг нэмж харуулах",
+      "comments": {
+        "title": "Сэтгэгдэл ({{count}})",
+        "reply": "Хариулах",
+        "delete": "Устгах",
+        "replyingTo": "Хариулж байна:",
+        "writeComment": "Сэтгэгдэл бичих...",
+        "submitHint": "Илгээхдээ Enter · Шинэ мөрнөөс бичихдээ Shift+Enter",
+        "comment": "Сэтгэгдэл",
+        "signInToComment": "Сэтгэгдэл үлдээхийн тулд нэвтэрнэ үү",
+        "noComments": "Одоогоор сэтгэгдэл алга. Хэлэлцүүлгийг эхлүүлээрэй!",
+        "justNow": "яг одоо",
+        "minutesAgo": "{{count}} мин өмнө",
+        "hoursAgo": "{{count}} цагийн өмнө",
+        "daysAgo": "{{count}} хоногийн өмнө"
+      }
+    }
+  },
 
   "discussions": {
     "title": "Хэлэлцүүлэг",
-    "subtitle": "Асуулт асуух, санаа хуваалцах, нийгэмлэгтэй холбогдох.",
+    "subtitle": "Асуулт асуух, санаа хуваалцах",
     "newDiscussion": "Шинэ хэлэлцүүлэг",
     "noDiscussions": "Энэ ангилалд хэлэлцүүлэг олдсонгүй.",
     "stats": "Хэлэлцүүлгийн статистик",
@@ -460,7 +511,7 @@
     "popularTopics": "Алдартай сэдвүүд",
     "trendingArticles": "Тренд нийтлэлүүд",
     "cantFindTerm": "Нэр томъёо олдохгүй байна уу?",
-    "cantFindTermDesc": "Нийгэмлэгт тус болно гэж бодсон шинэ нэр томъёо нэмнэ үү!",
+    "cantFindTermDesc": "Толь бичгийн санд тус болно гэж бодсон шинэ нэр томъёо нэмнэ үү!",
     "addNewTerm": "Шинэ нэр томъёо нэмэх",
     "termNotFound": "Нэр томъёо олдсонгүй",
     "termNotFoundDesc": "Таны хайсан нэр томъёо толь бичигт одоогоор байхгүй байна.",
@@ -478,7 +529,7 @@
     "report": "Мэдэгдэх",
     "entryRejected": "Бичлэг татгалзсан",
     "relatedTerms": "Холбоотой нэр томъёо",
-    
+
     "moderationHistory": "Хяналтын түүх",
     "noTranslations": "Орчуулга одоогоор байхгүй байна.",
     "noExamples": "Жишээ одоогоор байхгүй байна.",

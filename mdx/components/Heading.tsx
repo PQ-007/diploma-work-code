@@ -1,8 +1,24 @@
-import { Tag } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import React from "react";
 
+const extractTextContent = (node: React.ReactNode): string => {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(extractTextContent).join(" ");
+  }
+
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return extractTextContent(node.props.children);
+  }
+
+  return "";
+};
+
 export function slugify(str: React.ReactNode): string {
-  return String(str)
+  return extractTextContent(str)
     .toLowerCase()
     .trim()
     .normalize("NFD")
@@ -16,13 +32,17 @@ export function slugify(str: React.ReactNode): string {
 }
 
 export function createHeading(level: number) {
-  const Heading = ({ children }: { children: React.ReactNode }) => {
+  const Heading = ({
+    children,
+    className,
+    ...props
+  }: React.HTMLAttributes<HTMLHeadingElement>) => {
     const slug = slugify(children);
 
     const headingClasses =
       {
         1: "text-2xl font-bold tracking-tight   text-foreground",
-        2: "text-xl font-bold tracking-tight   text-foreground",
+        2: "text-xl font-bold tracking-tight mt-10 mb-4 text-foreground",
         3: "text-lg font-semibold mt-10 mb-3 text-foreground",
         4: "text-base font-semibold mt-8 mb-2 text-foreground",
         5: "text-sm font-semibold mt-6 mb-2 text-foreground",
@@ -33,7 +53,8 @@ export function createHeading(level: number) {
       `h${level}`,
       {
         id: slug,
-        className: `group flex items-center scroll-mt-24 ${headingClasses}`,
+        className: `group flex items-center scroll-mt-24 ${headingClasses} ${className || ""}`,
+        ...props,
       },
       [
         children,
@@ -46,14 +67,7 @@ export function createHeading(level: number) {
               "anchor ml-3 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary",
             "aria-hidden": "true",
           },
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <Tag/>
-          </svg>,
+          <LinkIcon className="h-4 w-4" />,
         ),
       ],
     );

@@ -4,6 +4,7 @@ export type AuthorPayload = {
   id?: string;
   avatar_url?: string | null;
   user_name?: string | null;
+  display_name?: string | null;
   role?: string | null;
   bio?: string | null;
   ranking_point?: number;

@@ -1,6 +1,7 @@
 {
   "common": {
     "welcome": "FutureHubへようこそ",
+    "views": "閲覧数",
     "loading": "読み込み中...",
     "error": "エラー",
     "save": "保存",
@@ -339,8 +340,7 @@
     "topAuthors": "トップ著者",
     "untitled": "無題の記事",
     "anonymous": "匿名",
-    "unpublished": "未公開"
-,
+    "unpublished": "未公開",
     "create": {
       "checkingAccess": "記事へのアクセスを確認中...",
       "accessDenied": "アクセスが拒否されました",
@@ -383,6 +383,8 @@
       "saveDraft": "下書きを保存",
       "publishing": "公開中…",
       "publish": "公開",
+      "unpublishing": "公開を取り消し中…",
+      "unpublish": "公開を取り消す",
       "loadingSuggestions": "候補を読み込み中...",
       "noTagsFound": "タグが見つかりません",
       "articleSettings": "記事設定",
@@ -425,7 +427,55 @@
       "notAdded": "追加されていません",
       "complete": "完了",
       "empty": "空"
-    }  },
+    },
+    "detail": {
+      "redirecting": "リダイレクト中...",
+      "missingArticleId": "記事IDが見つかりません。",
+      "failedToLoadContent": "記事コンテンツの読み込みに失敗しました。",
+      "noDate": "日付なし",
+      "editedOn": "編集日: {{date}}",
+      "readTime": "{{minutes}}分で読めます",
+      "views": "{{count}} 閲覧",
+      "expandSection": "セクションを展開",
+      "collapseSection": "セクションを折りたたむ",
+      "expandAll": "すべて展開",
+      "collapseAll": "すべて折りたたむ",
+      "noHeadingsFound": "見出しが見つかりません。",
+      "languageSelector": "言語セレクター",
+      "moreActions": "その他の操作",
+      "requestTranslation": "翻訳をリクエスト",
+      "reportArticle": "この記事を報告",
+      "reportAuthor": "著者を報告",
+      "requestTranslationDescription": "必要な言語や翻訳してほしい内容を入力してください。",
+      "reportArticleDescription": "この記事の問題点を入力してください。",
+      "reportAuthorDescription": "この著者に関する懸念事項を入力してください。",
+      "actionMessagePlaceholder": "メッセージを入力してください...",
+      "submitRequest": "送信",
+      "requestSubmitted": "リクエストを送信しました。",
+      "shareLinkCopied": "リンクをクリップボードにコピーしました",
+      "shareFailed": "現在この記事を共有できません",
+      "tableOfContents": "目次",
+      "definitions": "定義",
+      "relatedLinks": "関連リンク",
+      "showLess": "少なく表示",
+      "showMoreLinks": "さらに{{count}}件のリンクを表示",
+      "comments": {
+        "title": "コメント ({{count}})",
+        "reply": "返信",
+        "delete": "削除",
+        "replyingTo": "返信先",
+        "writeComment": "コメントを書く...",
+        "submitHint": "送信: Enter ・ 改行: Shift+Enter",
+        "comment": "コメント",
+        "signInToComment": "コメントするにはサインインしてください",
+        "noComments": "まだコメントがありません。最初のコメントを投稿しましょう！",
+        "justNow": "たった今",
+        "minutesAgo": "{{count}}分前",
+        "hoursAgo": "{{count}}時間前",
+        "daysAgo": "{{count}}日前"
+      }
+    }
+  },
 
   "discussions": {
     "title": "ディスカッション",
@@ -479,7 +529,7 @@
     "report": "報告",
     "entryRejected": "エントリーが却下されました",
     "relatedTerms": "関連用語",
-   
+
     "moderationHistory": "審査履歴",
     "noTranslations": "翻訳はまだありません。",
     "noExamples": "例文はまだありません。",

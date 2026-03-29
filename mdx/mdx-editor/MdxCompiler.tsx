@@ -5,6 +5,30 @@ import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
+function rehypeSourceLinePlugin() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+
+      if (node.type === "element") {
+        const line = node.position?.start?.line;
+        if (typeof line === "number") {
+          node.properties = node.properties || {};
+          if (node.properties["data-source-line"] == null) {
+            node.properties["data-source-line"] = String(line);
+          }
+        }
+      }
+
+      if (Array.isArray(node.children)) {
+        node.children.forEach(walk);
+      }
+    };
+
+    walk(tree);
+  };
+}
+
 /**
  * Preprocess source to normalize display-math like Obsidian:
  * - Treat any $$...$$ (even on one line) as a display block
@@ -59,6 +83,7 @@ export async function compileMdx(source: string) {
       development: false,
       remarkPlugins: [remarkGfm, remarkDirective, remarkMath],
       rehypePlugins: [
+        rehypeSourceLinePlugin,
         [
           rehypeKatex,
           {

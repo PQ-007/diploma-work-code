@@ -35,13 +35,9 @@ export interface LibrarySubItem {
   href: string;
 }
 
-export interface LibraryItem {
-  nameKey: string;
-  icon: React.ComponentType<{ className?: string }>;
-  items: LibrarySubItem[];
-}
+
 
 export interface SidebarData {
   navMain: NavItem[];
-  navLibrary: LibraryItem[];
+
 }

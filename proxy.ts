@@ -18,7 +18,7 @@ const protectedPrefixes = [
   "/setup",
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the request matches a protected route
@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet: Array<{ name: string; value: string; options?: any }>,
         ) {
           // Forward refreshed cookies to the browser
-          cookiesToSet.forEach(({ name, value, options }) => {
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
           response = NextResponse.next({ request });

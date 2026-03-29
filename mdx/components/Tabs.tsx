@@ -7,7 +7,28 @@ interface Tab {
   content: React.ReactNode;
 }
 
-export function Tabs({ items }: { items: Tab[] }) {
+type TabsProps = {
+  items?: Tab[];
+  // Legacy alias in case existing content uses a different prop name.
+  tabs?: Tab[];
+  children?: React.ReactNode;
+};
+
+export function Tabs({ items, tabs, children }: TabsProps) {
+  const resolvedItems = Array.isArray(items)
+    ? items
+    : Array.isArray(tabs)
+      ? tabs
+      : [];
+
+  if (resolvedItems.length === 0) {
+    return children ? (
+      <div className="my-8 rounded-xl border border-border bg-card p-6 shadow-md">
+        <div className="text-[15px] leading-7 text-foreground">{children}</div>
+      </div>
+    ) : null;
+  }
+
   const [activeTab, setActiveTab] = useState(0);
 
   return (
@@ -17,7 +38,7 @@ export function Tabs({ items }: { items: Tab[] }) {
         className="flex border-b border-border bg-muted/30 overflow-x-auto scrollbar-none"
         role="tablist"
       >
-        {items.map((tab, index) => (
+        {resolvedItems.map((tab, index) => (
           <button
             key={index}
             role="tab"
@@ -44,7 +65,7 @@ export function Tabs({ items }: { items: Tab[] }) {
       </div>
 
       {/* Tab content */}
-      {items.map((tab, index) => (
+      {resolvedItems.map((tab, index) => (
         <div
           key={index}
           role="tabpanel"
@@ -52,7 +73,7 @@ export function Tabs({ items }: { items: Tab[] }) {
           hidden={activeTab !== index}
           className={`p-6 ${activeTab === index ? "animate-fade-in" : ""}`}
         >
-          <div className="prose prose-sm max-w-none text-foreground">
+          <div className="text-[15px] leading-7 text-foreground">
             {tab.content}
           </div>
         </div>

@@ -21,6 +21,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CommentAuthor {
   id: string;
@@ -45,17 +46,23 @@ export interface ArticleCommentSectionHandle {
   focus: () => void;
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(
+  dateStr: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) {
   const now = new Date();
   const d = new Date(dateStr);
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return t("articles.detail.comments.justNow");
+  if (diffMin < 60)
+    return t("articles.detail.comments.minutesAgo", { count: diffMin });
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}h ago`;
+  if (diffH < 24)
+    return t("articles.detail.comments.hoursAgo", { count: diffH });
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 30) return `${diffD}d ago`;
+  if (diffD < 30)
+    return t("articles.detail.comments.daysAgo", { count: diffD });
   return d.toLocaleDateString();
 }
 
@@ -72,6 +79,7 @@ function CommentItem({
   onReply: (parentId: number) => void;
   onDelete: (commentId: number) => void;
 }) {
+  const { t } = useLanguage();
   const isOwn = currentUserId === comment.author.id;
 
   return (
@@ -90,7 +98,7 @@ function CommentItem({
               @{comment.author.user_name}
             </span>
             <span className="text-xs text-muted-foreground">
-              {timeAgo(comment.created_at)}
+              {timeAgo(comment.created_at, t)}
             </span>
           </div>
           <p className="text-sm text-foreground/90 mt-1 whitespace-pre-wrap break-words">
@@ -104,7 +112,7 @@ function CommentItem({
               onClick={() => onReply(comment.id)}
             >
               <CornerDownRight className="h-3 w-3 mr-1" />
-              Reply
+              {t("articles.detail.comments.reply")}
             </Button>
             {isOwn && (
               <Button
@@ -114,7 +122,7 @@ function CommentItem({
                 onClick={() => onDelete(comment.id)}
               >
                 <Trash2 className="h-3 w-3 mr-1" />
-                Delete
+                {t("articles.detail.comments.delete")}
               </Button>
             )}
           </div>
@@ -145,6 +153,7 @@ const ArticleCommentSection = forwardRef<
   ArticleCommentSectionProps
 >(function ArticleCommentSection({ articleId }, ref) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [comments, setComments] = useState<ArticleComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
@@ -245,7 +254,7 @@ const ArticleCommentSection = forwardRef<
           <div className="flex items-center gap-2 mb-5">
             <MessageCircle className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Comments ({comments.length})
+              {t("articles.detail.comments.title", { count: comments.length })}
             </span>
           </div>
 
@@ -256,7 +265,7 @@ const ArticleCommentSection = forwardRef<
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
                   <CornerDownRight className="h-3 w-3" />
                   <span>
-                    Replying to{" "}
+                    {t("articles.detail.comments.replyingTo")}{" "}
                     <span className="font-medium text-foreground">
                       {replyComment.author.display_name}
                     </span>
@@ -267,13 +276,13 @@ const ArticleCommentSection = forwardRef<
                     className="h-5 ml-auto text-xs px-1"
                     onClick={() => setReplyTo(null)}
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               )}
               <Textarea
                 ref={textareaRef}
-                placeholder="Write a comment..."
+                placeholder={t("articles.detail.comments.writeComment")}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 className="min-h-[80px] resize-none"
@@ -286,7 +295,7 @@ const ArticleCommentSection = forwardRef<
               />
               <div className="flex justify-between items-center">
                 <span className="text-xs text-muted-foreground">
-                  Enter to submit · Shift+Enter for new line
+                  {t("articles.detail.comments.submitHint")}
                 </span>
                 <Button
                   size="sm"
@@ -298,13 +307,15 @@ const ArticleCommentSection = forwardRef<
                   ) : (
                     <Send className="h-4 w-4 mr-1" />
                   )}
-                  {replyTo ? "Reply" : "Comment"}
+                  {replyTo
+                    ? t("articles.detail.comments.reply")
+                    : t("articles.detail.comments.comment")}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="text-sm text-muted-foreground mb-6 p-4 rounded-md bg-muted/30 text-center">
-              Sign in to leave a comment
+              {t("articles.detail.comments.signInToComment")}
             </div>
           )}
 
@@ -317,7 +328,7 @@ const ArticleCommentSection = forwardRef<
             </div>
           ) : topLevel.length === 0 ? (
             <div className="text-sm text-muted-foreground text-center py-8">
-              No comments yet. Be the first to start the conversation!
+              {t("articles.detail.comments.noComments")}
             </div>
           ) : (
             <div className="space-y-5">

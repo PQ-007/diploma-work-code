@@ -4,12 +4,83 @@ import { useEffect, useState, useRef } from "react";
 import { compileMdx } from "./MdxCompiler";
 import { components } from "@/mdx/mdx-components";
 
-export function MdxPreview({ source }: { source: string }) {
+const normalizeHeadingText = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[`*_~#>[\]()!]/g, "")
+    .replace(/\s+/g, " ");
+
+const slugifyLoose = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "-and-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+
+const findHeadingLineInSource = (
+  source: string,
+  headingText: string,
+  headingId?: string,
+): number | null => {
+  const lines = source.split("\n");
+  const normalizedTarget = normalizeHeadingText(headingText);
+  const normalizedTargetId = headingId ? slugifyLoose(headingId) : "";
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const match = line.match(/^(#{1,6})\s+(.*)$/);
+    if (!match) continue;
+
+    const candidateText = match[2].trim();
+    const normalizedCandidate = normalizeHeadingText(candidateText);
+    const candidateSlug = slugifyLoose(candidateText);
+
+    const textMatch =
+      normalizedCandidate === normalizedTarget ||
+      normalizedCandidate.includes(normalizedTarget) ||
+      normalizedTarget.includes(normalizedCandidate);
+
+    const idMatch =
+      !!normalizedTargetId &&
+      (candidateSlug === normalizedTargetId ||
+        candidateSlug.includes(normalizedTargetId) ||
+        normalizedTargetId.includes(candidateSlug));
+
+    if (textMatch || idMatch) {
+      return index + 1;
+    }
+  }
+
+  return null;
+};
+
+type MdxPreviewProps = {
+  source: string;
+  activeSourceLine?: number;
+  autoFollowContext?: boolean;
+  onSourceLineNavigate?: (line: number) => void;
+};
+
+export function MdxPreview({
+  source,
+  activeSourceLine,
+  autoFollowContext = false,
+  onSourceLineNavigate,
+}: MdxPreviewProps) {
   const [Content, setContent] = useState<React.ComponentType<any> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSourceRef = useRef<string>(source);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const autoFollowPausedUntilRef = useRef<number>(0);
 
   useEffect(() => {
     // Clear any existing debounce timer
@@ -57,6 +128,123 @@ export function MdxPreview({ source }: { source: string }) {
     };
   }, [source]);
 
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const pauseAutoFollow = () => {
+      autoFollowPausedUntilRef.current = Date.now() + 900;
+    };
+
+    root.addEventListener("wheel", pauseAutoFollow, { passive: true });
+    root.addEventListener("touchmove", pauseAutoFollow, { passive: true });
+
+    return () => {
+      root.removeEventListener("wheel", pauseAutoFollow);
+      root.removeEventListener("touchmove", pauseAutoFollow);
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !onSourceLineNavigate) return;
+
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const heading = target.closest(
+        "h1, h2, h3, h4, h5, h6",
+      ) as HTMLElement | null;
+      const headingAnchor = target.closest("a.anchor") as HTMLElement | null;
+
+      // Only intercept heading or heading-anchor clicks to keep normal links working.
+      if (!heading && !headingAnchor) return;
+
+      const sourceNode =
+        headingAnchor?.closest("[data-source-line]") ||
+        heading?.closest("[data-source-line]") ||
+        heading;
+
+      const lineRaw = sourceNode?.getAttribute("data-source-line");
+      let line = lineRaw ? Number(lineRaw) : NaN;
+
+      if (!Number.isFinite(line) && heading) {
+        const fallbackLine = findHeadingLineInSource(
+          source,
+          heading.textContent?.trim() || "",
+          heading.id,
+        );
+        if (fallbackLine) {
+          line = fallbackLine;
+        }
+      }
+
+      if (!Number.isFinite(line)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      onSourceLineNavigate(line);
+
+      // Keep URL hash behavior for heading anchors.
+      if (heading?.id) {
+        window.history.replaceState(null, "", `#${heading.id}`);
+      }
+    };
+
+    root.addEventListener("click", handleClick);
+    return () => root.removeEventListener("click", handleClick);
+  }, [onSourceLineNavigate, source]);
+
+  useEffect(() => {
+    if (!autoFollowContext || !activeSourceLine || !Content) return;
+    if (Date.now() < autoFollowPausedUntilRef.current) return;
+
+    const root = rootRef.current;
+    if (!root) return;
+
+    const elements = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-source-line]"),
+    );
+    if (!elements.length) return;
+
+    let target: HTMLElement | null = null;
+    let bestDistance = Number.POSITIVE_INFINITY;
+
+    for (const element of elements) {
+      const raw = element.getAttribute("data-source-line");
+      const sourceLine = raw ? Number(raw) : NaN;
+      if (!Number.isFinite(sourceLine)) continue;
+
+      const distance = Math.abs(sourceLine - activeSourceLine);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        target = element;
+      }
+    }
+
+    if (!target) return;
+
+    requestAnimationFrame(() => {
+      const scrollContainer = root.parentElement;
+      if (!scrollContainer) {
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const topPadding = 8;
+      const delta = targetRect.top - containerRect.top;
+      const nextTop = scrollContainer.scrollTop + delta - topPadding;
+
+      scrollContainer.scrollTo({
+        top: Math.max(0, nextTop),
+        behavior: "smooth",
+      });
+    });
+  }, [activeSourceLine, autoFollowContext, Content, source]);
+
   if (error) {
     return (
       <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
@@ -77,5 +265,9 @@ export function MdxPreview({ source }: { source: string }) {
 
   if (!Content) return null;
 
-  return <Content components={components} />;
+  return (
+    <div ref={rootRef}>
+      <Content components={components} />
+    </div>
+  );
 }

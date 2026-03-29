@@ -160,6 +160,7 @@ interface ArticleEditorActions {
   // Article operations
   handleSaveDraft: () => Promise<void>;
   handlePublish: () => Promise<void>;
+  handleUnpublish: () => Promise<void>;
   handleDeleteArticle: () => Promise<void>;
   handleExport: () => void;
   handleImageButtonClick: () => void;
@@ -189,13 +190,9 @@ export function ArticleEditorProvider({ children }: { children: ReactNode }) {
   // Core content state
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [mdx, setMdx] = useState(`# Hello MDX Editor
-
-This is a **Zenn/Qiita-style** editor for technical writing.
-
-## Code Blocks
-
-`);
+  const [mdx, setMdx] = useState(
+    `>**There is no magic—just abstraction layers built on top of one another.**`,
+  );
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [contentLang, setContentLang] = useState<ContentLang>("mn");
@@ -250,6 +247,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
   const isSavingRef = useRef(false);
   const isPublishingRef = useRef(false);
   const isDeletingRef = useRef(false);
+  const suppressUnsavedTrackingRef = useRef(true);
 
   const articleIdFromQuery = searchParams.get("id");
   const isEditMode = Boolean(articleIdFromQuery);
@@ -457,7 +455,8 @@ This is a **Zenn/Qiita-style** editor for technical writing.
           new Set(tags.map((tag) => tag.trim()).filter(Boolean)),
         ),
         language_code: contentLang,
-        status: "draft" as ArticleStatus, // Auto-save always saves as draft
+        // Preserve current article status to avoid unpublishing on autosave.
+        status,
       };
 
       // Use the same save strategy as manual save to determine method and URL
@@ -504,6 +503,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     mdx,
     tags,
     contentLang,
+    status,
     articleId, // Add articleId to dependencies
   ]);
 
@@ -543,10 +543,21 @@ This is a **Zenn/Qiita-style** editor for technical writing.
 
   // Track content changes for unsaved changes
   useEffect(() => {
+    if (suppressUnsavedTrackingRef.current) return;
+
     if (title || subtitle || mdx || tags.length > 0) {
       setHasUnsavedChanges(true);
     }
   }, [title, subtitle, mdx, tags]);
+
+  // Enable unsaved-change tracking after the first paint.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      suppressUnsavedTrackingRef.current = false;
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Update translation completeness when translations change
   useEffect(() => {
@@ -575,6 +586,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     if (!articleIdFromQuery) return;
 
     const loadArticleForEdit = async () => {
+      suppressUnsavedTrackingRef.current = true;
       setIsEditHydrating(true);
       setIsEditAccessDenied(false);
       setSaveError(null);
@@ -656,6 +668,8 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         setStatus(
           data?.article?.status === "published" ? "published" : "draft",
         );
+        setHasUnsavedChanges(false);
+        setHasUnsavedTranslations(false);
 
         const lang =
           typeof selectedTranslation?.language_code === "string"
@@ -676,6 +690,9 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         );
       } finally {
         setIsEditHydrating(false);
+        setTimeout(() => {
+          suppressUnsavedTrackingRef.current = false;
+        }, 0);
       }
     };
 
@@ -744,6 +761,9 @@ This is a **Zenn/Qiita-style** editor for technical writing.
       }
 
       setJustSaved(true);
+      setLastAutoSave(new Date());
+      setHasUnsavedChanges(false);
+      setHasUnsavedTranslations(false);
       setTimeout(() => setJustSaved(false), 2000);
     } catch (err) {
       setSaveError(
@@ -779,6 +799,34 @@ This is a **Zenn/Qiita-style** editor for technical writing.
     } catch (err) {
       setSaveError(
         err instanceof Error ? err.message : "Failed to publish article.",
+      );
+    } finally {
+      isPublishingRef.current = false;
+      setIsPublishing(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!articleId || isPublishingRef.current || isPublishing) return;
+
+    isPublishingRef.current = true;
+    setIsPublishing(true);
+    try {
+      const res = await fetch(`/api/articles/${articleId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "draft" }),
+      });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(
+          getFriendlyApiError(errorText, "Failed to unpublish article."),
+        );
+      }
+      setStatus("draft");
+    } catch (err) {
+      setSaveError(
+        err instanceof Error ? err.message : "Failed to unpublish article.",
       );
     } finally {
       isPublishingRef.current = false;
@@ -950,6 +998,7 @@ This is a **Zenn/Qiita-style** editor for technical writing.
         // Article operations
         handleSaveDraft,
         handlePublish,
+        handleUnpublish,
         handleDeleteArticle,
         handleExport,
         handleImageButtonClick,

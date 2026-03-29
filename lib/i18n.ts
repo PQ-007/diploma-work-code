@@ -1,7 +1,6 @@
 // lib/i18n.ts
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 
 // Import translation files
 import enTranslation from "@/public/locales/en/translation.json";
@@ -21,7 +20,6 @@ const resources = {
 };
 
 i18n
-  .use(LanguageDetector) // Detects user language
   .use(initReactI18next) // Passes i18n down to react-i18next
   .init({
     resources,
@@ -30,13 +28,6 @@ i18n
 
     interpolation: {
       escapeValue: false, // React already escapes values
-    },
-
-    detection: {
-      // Order of language detection
-      order: ["localStorage", "navigator", "htmlTag"],
-      caches: ["localStorage"],
-      lookupLocalStorage: "i18nextLng",
     },
 
     react: {

@@ -8,6 +8,7 @@ interface FileTreeNode {
 
 function TreeNode({ node, level = 0 }: { node: FileTreeNode; level?: number }) {
   const isFolder = node.type === "folder";
+  const children = Array.isArray(node.children) ? node.children : [];
 
   return (
     <div>
@@ -30,9 +31,9 @@ function TreeNode({ node, level = 0 }: { node: FileTreeNode; level?: number }) {
         </span>
       </div>
 
-      {isFolder && node.children && (
+      {isFolder && children.length > 0 && (
         <div>
-          {node.children.map((child, index) => (
+          {children.map((child, index) => (
             <TreeNode key={index} node={child} level={level + 1} />
           ))}
         </div>
@@ -41,10 +42,13 @@ function TreeNode({ node, level = 0 }: { node: FileTreeNode; level?: number }) {
   );
 }
 
-export function FileTree({ tree }: { tree: FileTreeNode[] }) {
+export function FileTree({ tree }: { tree?: FileTreeNode[] }) {
+  const resolvedTree = Array.isArray(tree) ? tree : [];
+  if (resolvedTree.length === 0) return null;
+
   return (
     <div className="my-8 rounded-xl border border-border bg-card p-4 shadow-sm overflow-x-auto">
-      {tree.map((node, index) => (
+      {resolvedTree.map((node, index) => (
         <TreeNode key={index} node={node} />
       ))}
     </div>

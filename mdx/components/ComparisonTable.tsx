@@ -14,9 +14,13 @@ export function ComparisonTable({
   columns,
   rows,
 }: {
-  columns: ComparisonColumn[];
-  rows: ComparisonRow[];
+  columns?: ComparisonColumn[];
+  rows?: ComparisonRow[];
 }) {
+  const resolvedColumns = Array.isArray(columns) ? columns : [];
+  const resolvedRows = Array.isArray(rows) ? rows : [];
+  if (resolvedColumns.length === 0 || resolvedRows.length === 0) return null;
+
   return (
     <div className="my-8 overflow-x-auto rounded-xl border border-border shadow-lg">
       <table className="w-full">
@@ -25,7 +29,7 @@ export function ComparisonTable({
             <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
               Feature
             </th>
-            {columns.map((col, index) => (
+            {resolvedColumns.map((col, index) => (
               <th
                 key={index}
                 className={`
@@ -43,7 +47,7 @@ export function ComparisonTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rowIndex) => (
+          {resolvedRows.map((row, rowIndex) => (
             <tr
               key={rowIndex}
               className="border-b border-border/50 hover:bg-muted/20 transition-colors"
@@ -57,7 +61,7 @@ export function ComparisonTable({
                   className={`
                     px-6 py-4 text-center
                     ${
-                      columns[colIndex].highlight
+                      resolvedColumns[colIndex]?.highlight
                         ? "bg-primary/5 border-x-2 border-primary/20"
                         : ""
                     }

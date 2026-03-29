@@ -140,6 +140,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
     let author = null as {
       id: string;
       user_name: string | null;
+      display_name: string | null;
       avatar_url: string | null;
       bio: string | null;
       ranking_point?: number;
@@ -149,7 +150,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
     if (article.author_id) {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id, user_name, avatar_url, bio, ranking_point")
+        .select("id, user_name, display_name, avatar_url, bio, ranking_point")
         .eq("id", article.author_id)
         .single();
 
@@ -159,6 +160,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
         author = {
           id: profile.id,
           user_name: profile.user_name,
+          display_name: profile.display_name,
           avatar_url: profile.avatar_url,
           bio: profile.bio,
           ranking_point: profile.ranking_point,

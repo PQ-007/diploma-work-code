@@ -15,6 +15,8 @@ type MdxEditorProps = {
   onFormatItalic?: () => void;
   onInsertImage?: () => void;
   onTogglePreview?: () => void;
+  onCursorLineChange?: (line: number) => void;
+  onJumpToLineRequest?: { line: number; token: number } | null;
 };
 
 export function MdxEditor({
@@ -26,12 +28,174 @@ export function MdxEditor({
   onFormatItalic,
   onInsertImage,
   onTogglePreview,
+  onCursorLineChange,
+  onJumpToLineRequest,
 }: MdxEditorProps) {
   // resolvedTheme ensures "system" is converted to "light" or "dark"
   const { resolvedTheme } = useTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
+  const cursorListenerRef = useRef<{ dispose: () => void } | null>(null);
+  const enterKeyListenerRef = useRef<{ dispose: () => void } | null>(null);
+  const contentListenerRef = useRef<{ dispose: () => void } | null>(null);
+  const pendingJumpRef = useRef<{ line: number; token: number } | null>(null);
+  const lastHandledJumpTokenRef = useRef<number>(0);
+  const lastUserEditAtRef = useRef<number>(0);
+
+  const handleMarkdownListEnter = useCallback((editor: any, monaco: any) => {
+    const model = editor?.getModel?.();
+    const selection = editor?.getSelection?.();
+    const position = editor?.getPosition?.();
+
+    if (!model || !selection || !position || !selection.isEmpty()) {
+      return false;
+    }
+
+    const lineNumber = position.lineNumber;
+    const lineContent = model.getLineContent(lineNumber);
+
+    // Keep Enter behavior default unless cursor is at end-of-line.
+    if (position.column !== lineContent.length + 1) {
+      return false;
+    }
+
+    const taskMatch = lineContent.match(
+      /^(\s*)([-+*])\s+\[(?: |x|X)\]\s+(.*)$/,
+    );
+    const taskEmptyMatch = lineContent.match(
+      /^(\s*)([-+*])\s+\[(?: |x|X)\]\s*$/,
+    );
+
+    const bulletMatch = lineContent.match(/^(\s*)([-+*])\s+(.*)$/);
+    const bulletEmptyMatch = lineContent.match(/^(\s*)([-+*])\s*$/);
+
+    const orderedMatch = lineContent.match(/^(\s*)(\d+)([.)])\s+(.*)$/);
+    const orderedEmptyMatch = lineContent.match(/^(\s*)(\d+)([.)])\s*$/);
+
+    const stripMarkerRange = new monaco.Range(
+      lineNumber,
+      1,
+      lineNumber,
+      lineContent.length + 1,
+    );
+
+    // If current item is already empty, pressing Enter exits the list item.
+    if (taskEmptyMatch || bulletEmptyMatch || orderedEmptyMatch) {
+      const indent =
+        taskEmptyMatch?.[1] ||
+        bulletEmptyMatch?.[1] ||
+        orderedEmptyMatch?.[1] ||
+        "";
+
+      editor.executeEdits("markdown-list-exit", [
+        {
+          range: stripMarkerRange,
+          text: indent,
+        },
+      ]);
+      editor.setPosition({ lineNumber, column: indent.length + 1 });
+      return true;
+    }
+
+    if (taskMatch) {
+      const indent = taskMatch[1];
+      const bullet = taskMatch[2];
+      const nextText = `\n${indent}${bullet} [ ] `;
+
+      editor.executeEdits("markdown-list-continue", [
+        {
+          range: new monaco.Range(
+            lineNumber,
+            position.column,
+            lineNumber,
+            position.column,
+          ),
+          text: nextText,
+        },
+      ]);
+      editor.setPosition({
+        lineNumber: lineNumber + 1,
+        column: `${indent}${bullet} [ ] `.length + 1,
+      });
+      return true;
+    }
+
+    if (bulletMatch) {
+      const indent = bulletMatch[1];
+      const bullet = bulletMatch[2];
+      const nextText = `\n${indent}${bullet} `;
+
+      editor.executeEdits("markdown-list-continue", [
+        {
+          range: new monaco.Range(
+            lineNumber,
+            position.column,
+            lineNumber,
+            position.column,
+          ),
+          text: nextText,
+        },
+      ]);
+      editor.setPosition({
+        lineNumber: lineNumber + 1,
+        column: `${indent}${bullet} `.length + 1,
+      });
+      return true;
+    }
+
+    if (orderedMatch) {
+      const indent = orderedMatch[1];
+      const currentNumber = Number(orderedMatch[2]);
+      const separator = orderedMatch[3];
+      const nextMarker = `${currentNumber + 1}${separator} `;
+      const nextText = `\n${indent}${nextMarker}`;
+
+      editor.executeEdits("markdown-list-continue", [
+        {
+          range: new monaco.Range(
+            lineNumber,
+            position.column,
+            lineNumber,
+            position.column,
+          ),
+          text: nextText,
+        },
+      ]);
+      editor.setPosition({
+        lineNumber: lineNumber + 1,
+        column: `${indent}${nextMarker}`.length + 1,
+      });
+      return true;
+    }
+
+    return false;
+  }, []);
+
+  const jumpEditorToLine = useCallback((line: number) => {
+    const editor = editorRef.current;
+    const model = editor?.getModel?.();
+    if (!editor || !model) return;
+
+    const maxLine = Math.max(1, model.getLineCount());
+    const safeLine = Math.min(maxLine, Math.max(1, line));
+
+    editor.setPosition({ lineNumber: safeLine, column: 1 });
+    // Keep the target line almost at the top so user can continue writing downward.
+    if (
+      typeof editor.getTopForLineNumber === "function" &&
+      typeof editor.setScrollTop === "function"
+    ) {
+      const lineTop = editor.getTopForLineNumber(safeLine);
+      const topPadding = 8;
+      editor.setScrollTop(Math.max(0, lineTop - topPadding));
+    } else if (typeof editor.revealLineNearTop === "function") {
+      editor.revealLineNearTop(safeLine);
+    } else {
+      editor.revealLine(safeLine);
+    }
+    editor.focus();
+  }, []);
 
   const insertAtCursor = useCallback(
     (markdown: string) => {
@@ -71,79 +235,78 @@ export function MdxEditor({
   );
 
   // Text formatting helpers
-  const wrapSelectionWith = useCallback(
-    (prefix: string, suffix?: string) => {
-      const editor = editorRef.current;
-      const monaco = monacoRef.current;
-      const model = editor?.getModel?.();
+  const wrapSelectionWith = useCallback((prefix: string, suffix?: string) => {
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor?.getModel?.();
 
-      if (!editor || !monaco || !model) return;
+    if (!editor || !monaco || !model) return;
 
-      const selection = editor.getSelection();
-      if (!selection) return;
+    const selection = editor.getSelection();
+    if (!selection) return;
 
-      const selectedText = model.getValueInRange(selection);
-      const wrapper = suffix || prefix;
-      const newText = `${prefix}${selectedText}${wrapper}`;
+    const selectedText = model.getValueInRange(selection);
+    const wrapper = suffix || prefix;
+    const newText = `${prefix}${selectedText}${wrapper}`;
 
-      editor.executeEdits("format", [
-        {
-          range: selection,
-          text: newText,
-        },
-      ]);
+    editor.executeEdits("format", [
+      {
+        range: selection,
+        text: newText,
+      },
+    ]);
 
-      // Update selection to be inside the wrapped text
-      const startPos = selection.getStartPosition();
-      const newSelectionStart = model.getPositionAt(
-        model.getOffsetAt(startPos) + prefix.length
+    // Update selection to be inside the wrapped text
+    const startPos = selection.getStartPosition();
+    const newSelectionStart = model.getPositionAt(
+      model.getOffsetAt(startPos) + prefix.length,
+    );
+    const newSelectionEnd = model.getPositionAt(
+      model.getOffsetAt(startPos) + prefix.length + selectedText.length,
+    );
+
+    editor.setSelection(
+      new monaco.Selection(
+        newSelectionStart.lineNumber,
+        newSelectionStart.column,
+        newSelectionEnd.lineNumber,
+        newSelectionEnd.column,
+      ),
+    );
+  }, []);
+
+  const insertAtLineBeginning = useCallback((prefix: string) => {
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor?.getModel?.();
+
+    if (!editor || !monaco || !model) return;
+
+    const position = editor.getPosition();
+    if (!position) return;
+
+    const lineText = model.getLineContent(position.lineNumber);
+
+    // Check if line already has the prefix and toggle it
+    if (lineText.startsWith(prefix)) {
+      const newText = lineText.substring(prefix.length);
+      const range = new monaco.Range(
+        position.lineNumber,
+        1,
+        position.lineNumber,
+        lineText.length + 1,
       );
-      const newSelectionEnd = model.getPositionAt(
-        model.getOffsetAt(startPos) + prefix.length + selectedText.length
+      editor.executeEdits("format", [{ range, text: newText }]);
+    } else {
+      const range = new monaco.Range(
+        position.lineNumber,
+        1,
+        position.lineNumber,
+        1,
       );
-
-      editor.setSelection(
-        new monaco.Selection(
-          newSelectionStart.lineNumber,
-          newSelectionStart.column,
-          newSelectionEnd.lineNumber,
-          newSelectionEnd.column
-        )
-      );
-    },
-    []
-  );
-
-  const insertAtLineBeginning = useCallback(
-    (prefix: string) => {
-      const editor = editorRef.current;
-      const monaco = monacoRef.current;
-      const model = editor?.getModel?.();
-
-      if (!editor || !monaco || !model) return;
-
-      const position = editor.getPosition();
-      if (!position) return;
-
-      const lineText = model.getLineContent(position.lineNumber);
-
-      // Check if line already has the prefix and toggle it
-      if (lineText.startsWith(prefix)) {
-        const newText = lineText.substring(prefix.length);
-        const range = new monaco.Range(
-          position.lineNumber,
-          1,
-          position.lineNumber,
-          lineText.length + 1
-        );
-        editor.executeEdits("format", [{ range, text: newText }]);
-      } else {
-        const range = new monaco.Range(position.lineNumber, 1, position.lineNumber, 1);
-        editor.executeEdits("format", [{ range, text: prefix }]);
-      }
-    },
-    []
-  );
+      editor.executeEdits("format", [{ range, text: prefix }]);
+    }
+  }, []);
 
   const { onPaste, onDrop, onDragOver, uploading, error } = useImagePasteUpload(
     {
@@ -201,143 +364,200 @@ export function MdxEditor({
     };
   }, [onDragOver, onDrop, onPaste]);
 
+  useEffect(() => {
+    return () => {
+      cursorListenerRef.current?.dispose?.();
+      enterKeyListenerRef.current?.dispose?.();
+      contentListenerRef.current?.dispose?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!onJumpToLineRequest) return;
+
+    if (onJumpToLineRequest.token <= lastHandledJumpTokenRef.current) {
+      return;
+    }
+
+    const editor = editorRef.current;
+    const model = editor?.getModel?.();
+    if (!editor || !model) {
+      pendingJumpRef.current = onJumpToLineRequest;
+      return;
+    }
+
+    const typedRecently = Date.now() - lastUserEditAtRef.current < 1200;
+    if (typedRecently && editor.hasTextFocus?.()) {
+      // Ignore stale external jumps while the user is actively typing.
+      lastHandledJumpTokenRef.current = onJumpToLineRequest.token;
+      return;
+    }
+
+    jumpEditorToLine(onJumpToLineRequest.line);
+    lastHandledJumpTokenRef.current = onJumpToLineRequest.token;
+  }, [jumpEditorToLine, onJumpToLineRequest]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    const model = editor?.getModel?.();
+    if (!editor || !model) return;
+
+    const currentValue = model.getValue();
+    if (currentValue === value) {
+      return;
+    }
+
+    const currentPosition = editor.getPosition?.();
+    const currentScrollTop = editor.getScrollTop?.() ?? 0;
+
+    // Only overwrite the Monaco model when content changed externally
+    // (language switch, hydration, etc.), not for normal local typing.
+    model.setValue(value);
+
+    if (currentPosition) {
+      const maxLine = Math.max(1, model.getLineCount());
+      const safeLine = Math.min(
+        maxLine,
+        Math.max(1, currentPosition.lineNumber),
+      );
+      const maxColumn = model.getLineMaxColumn(safeLine);
+      const safeColumn = Math.min(
+        maxColumn,
+        Math.max(1, currentPosition.column),
+      );
+      editor.setPosition({ lineNumber: safeLine, column: safeColumn });
+    }
+
+    if (typeof editor.setScrollTop === "function") {
+      editor.setScrollTop(currentScrollTop);
+    }
+  }, [value]);
+
   /**
    * Register custom keyboard shortcuts for markdown editing
    */
   const registerKeyboardShortcuts = useCallback(
     (editor: any, monaco: any) => {
       // Save document (Ctrl/Cmd + S)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-        () => {
-          onSave?.();
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+        onSave?.();
+      });
 
       // Bold text (Ctrl/Cmd + B)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB,
-        () => {
-          wrapSelectionWith('**');
-          onFormatBold?.();
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB, () => {
+        wrapSelectionWith("**");
+        onFormatBold?.();
+      });
 
       // Italic text (Ctrl/Cmd + I)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-        () => {
-          wrapSelectionWith('*');
-          onFormatItalic?.();
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
+        wrapSelectionWith("*");
+        onFormatItalic?.();
+      });
 
       // Insert image (Ctrl/Cmd + Shift + I)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyI,
         () => {
           onInsertImage?.();
-        }
+        },
       );
 
-      // Toggle preview (Ctrl/Cmd + Shift + P)
+      // Toggle preview (Ctrl/Cmd + Shift + O)
       editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyP,
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyL,
         () => {
           onTogglePreview?.();
-        }
+        },
       );
 
       // Insert code block (Ctrl/Cmd + Shift + C)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyC,
         () => {
-          insertAtCursor('\n```\n\n```\n');
-        }
+          insertAtCursor("\n```\n\n```\n");
+        },
       );
 
       // Insert inline code (Ctrl/Cmd + `)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backquote,
         () => {
-          wrapSelectionWith('`');
-        }
+          wrapSelectionWith("`");
+        },
       );
 
       // Insert link (Ctrl/Cmd + K)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-        () => {
-          wrapSelectionWith('[', '](url)');
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+        wrapSelectionWith("[", "](url)");
+      });
 
       // Heading shortcuts
       // H1 (Ctrl/Cmd + 1)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit1,
-        () => {
-          insertAtLineBeginning('# ');
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit1, () => {
+        insertAtLineBeginning("# ");
+      });
 
       // H2 (Ctrl/Cmd + 2)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit2,
-        () => {
-          insertAtLineBeginning('## ');
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit2, () => {
+        insertAtLineBeginning("## ");
+      });
 
       // H3 (Ctrl/Cmd + 3)
-      editor.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit3,
-        () => {
-          insertAtLineBeginning('### ');
-        }
-      );
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Digit3, () => {
+        insertAtLineBeginning("### ");
+      });
 
       // Insert horizontal rule (Ctrl/Cmd + Shift + -)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Minus,
         () => {
-          insertAtCursor('\n---\n');
-        }
+          insertAtCursor("\n---\n");
+        },
       );
 
       // Insert unordered list (Ctrl/Cmd + Shift + 8)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Digit8,
         () => {
-          insertAtLineBeginning('- ');
-        }
+          insertAtLineBeginning("- ");
+        },
       );
 
       // Insert ordered list (Ctrl/Cmd + Shift + 7)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Digit7,
         () => {
-          insertAtLineBeginning('1. ');
-        }
+          insertAtLineBeginning("1. ");
+        },
       );
 
       // Insert blockquote (Ctrl/Cmd + Shift + >)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Period,
         () => {
-          insertAtLineBeginning('> ');
-        }
+          insertAtLineBeginning("> ");
+        },
       );
 
       // Strikethrough text (Ctrl/Cmd + Shift + X)
       editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyX,
         () => {
-          wrapSelectionWith('~~');
-        }
+          wrapSelectionWith("~~");
+        },
       );
     },
-    [wrapSelectionWith, insertAtCursor, insertAtLineBeginning, onSave, onFormatBold, onFormatItalic, onInsertImage, onTogglePreview]
+    [
+      wrapSelectionWith,
+      insertAtCursor,
+      insertAtLineBeginning,
+      onSave,
+      onFormatBold,
+      onFormatItalic,
+      onInsertImage,
+      onTogglePreview,
+    ],
   );
 
   /**
@@ -364,7 +584,7 @@ export function MdxEditor({
       <Editor
         height={resolvedHeight}
         language="markdown"
-        value={value}
+        defaultValue={value}
         onChange={(v) => onChange(v ?? "")}
         beforeMount={handleEditorBeforeMount}
         onMount={(editor, monaco) => {
@@ -373,6 +593,48 @@ export function MdxEditor({
 
           // Register custom keyboard shortcuts
           registerKeyboardShortcuts(editor, monaco);
+
+          onCursorLineChange?.(editor.getPosition()?.lineNumber ?? 1);
+
+          if (pendingJumpRef.current) {
+            if (
+              pendingJumpRef.current.token > lastHandledJumpTokenRef.current
+            ) {
+              jumpEditorToLine(pendingJumpRef.current.line);
+              lastHandledJumpTokenRef.current = pendingJumpRef.current.token;
+            }
+            pendingJumpRef.current = null;
+          }
+
+          cursorListenerRef.current?.dispose?.();
+          cursorListenerRef.current = editor.onDidChangeCursorPosition(
+            (event: any) => {
+              onCursorLineChange?.(event.position.lineNumber);
+            },
+          );
+
+          contentListenerRef.current?.dispose?.();
+          contentListenerRef.current = editor.onDidChangeModelContent(() => {
+            lastUserEditAtRef.current = Date.now();
+          });
+
+          enterKeyListenerRef.current?.dispose?.();
+          enterKeyListenerRef.current = editor.onKeyDown((event: any) => {
+            if (event.keyCode !== monaco.KeyCode.Enter) return;
+            if (
+              event.shiftKey ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.altKey
+            ) {
+              return;
+            }
+
+            if (handleMarkdownListEnter(editor, monaco)) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          });
         }}
         theme={resolvedTheme === "dark" ? "my-dark-theme" : "my-light-theme"}
         options={{
@@ -381,8 +643,11 @@ export function MdxEditor({
           lineHeight: 24,
           fontFamily: "JetBrains Mono, ui-monospace, monospace",
           minimap: { enabled: false },
-          glyphMargin: false,
-          folding: false,
+          glyphMargin: true,
+          folding: true,
+          foldingStrategy: "auto",
+          showFoldingControls: "always",
+          unfoldOnClickAfterEndOfLine: false,
           lineNumbers: "on",
           lineNumbersMinChars: 3,
           scrollBeyondLastLine: false,
