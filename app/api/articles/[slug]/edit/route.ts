@@ -6,9 +6,9 @@ type RouteParams = { slug?: string } | Promise<{ slug?: string }>;
 export async function GET(_: Request, context: { params: RouteParams }) {
   const resolvedParams =
     "then" in context.params ? await context.params : context.params;
-  const articleId = resolvedParams?.slug ? String(resolvedParams.slug) : "";
+  const resourceId = resolvedParams?.slug ? String(resolvedParams.slug) : "";
 
-  if (!articleId) {
+  if (!resourceId) {
     return NextResponse.json({ error: "Missing article id" }, { status: 400 });
   }
 
@@ -22,11 +22,37 @@ export async function GET(_: Request, context: { params: RouteParams }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: article, error: articleError } = await supabase
+    let articleId = resourceId;
+
+    // Some callers may accidentally pass article_translations.id in the URL.
+    // Resolve that to the canonical articles.id when needed.
+    let { data: article, error: articleError } = await supabase
       .from("articles")
       .select("id, author_id, status, created_at, base_lang_code, series")
       .eq("id", articleId)
-      .single();
+      .maybeSingle();
+
+    if (!article && /^\d+$/.test(resourceId)) {
+      const { data: translationRow, error: translationLookupError } =
+        await supabase
+          .from("article_translations")
+          .select("article_id")
+          .eq("id", resourceId)
+          .maybeSingle();
+
+      if (!translationLookupError && translationRow?.article_id) {
+        articleId = String(translationRow.article_id);
+        const { data: resolvedArticle, error: resolvedArticleError } =
+          await supabase
+            .from("articles")
+            .select("id, author_id, status, created_at, base_lang_code, series")
+            .eq("id", articleId)
+            .maybeSingle();
+
+        article = resolvedArticle;
+        articleError = resolvedArticleError;
+      }
+    }
 
     if (articleError || !article) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
