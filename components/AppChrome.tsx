@@ -9,7 +9,12 @@ interface AppChromeProps {
   children: ReactNode;
 }
 
-const AUTH_FULLSCREEN_PREFIXES = ["/signin", "/signup"];
+const AUTH_FULLSCREEN_PREFIXES = [
+  "/signin",
+  "/signup",
+  "/forgot-password",
+  "/auth/reset-password",
+];
 
 export function AppChrome({ children }: AppChromeProps) {
   const pathname = usePathname();
