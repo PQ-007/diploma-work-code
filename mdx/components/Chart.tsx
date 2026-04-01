@@ -100,13 +100,19 @@ export function Chart({
             />
             {showTooltip && (
               <Tooltip
+                cursor={false}
                 contentStyle={tooltipStyle}
                 itemStyle={{ color: "hsl(var(--foreground))" }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
               />
             )}
             {showLegend && <Legend wrapperStyle={legendStyle} />}
-            <Bar dataKey={yKey} fill={colors[0]} radius={[4, 4, 0, 0]} />
+            <Bar
+              dataKey={yKey}
+              fill={colors[0]}
+              radius={[4, 4, 0, 0]}
+              activeBar={false}
+            />
           </BarChart>
         );
 
