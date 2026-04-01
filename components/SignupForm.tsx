@@ -1,87 +1,108 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { useState } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SignupForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const { t } = useLanguage();
+  const [password, setPassword] = useState("");
+  const [studentCode, setStudentCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   const handleSignup = async (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setMessage(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
 
     try {
+      const normalizedCode = studentCode.trim().toLowerCase();
+      if (!normalizedCode) {
+        setError("Student code is required.");
+        setLoading(false);
+        return;
+      }
+
+      const derivedEmail = `${normalizedCode}@nmct.edu.mn`;
+
       const { error } = await supabase.auth.signUp({
-        email,
+        email: derivedEmail,
         password,
         options: {
-          emailRedirectTo: `${location.origin}/auth/callback`
-        }
-      })
+          emailRedirectTo: `${location.origin}/auth/callback`,
+          data: { studentCode: normalizedCode },
+        },
+      });
 
       if (error) {
-        setError(error.message)
+        setError(error.message);
       } else {
-        setMessage('Check your email for a confirmation link!')
+        setMessage(t("auth.checkEmail"));
+        // After email confirmation, user will land on /setup via middleware
       }
     } catch (error) {
-      setError('An unexpected error occurred')
+      setError(t("auth.unexpectedError"));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black py-12 px-4 sm:px-6 lg:px-8 rounded-3xl">
-      <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl transform transition-all duration-300 hover:shadow-3xl">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div>
-          <h2 className="text-3xl font-extrabold text-white text-center">
-            Create Your Account
+          <h2 className="text-3xl font-bold text-foreground text-center">
+            {t("auth.signUpTitle")}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-300">
-            Sign up to get started
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            {t("auth.signUpSubtitle")}
           </p>
         </div>
 
         {error && (
-          <div className="p-4 rounded-lg bg-red-900 border border-red-700 text-red-200 animate-fade-in">
+          <div className="animate-fade-in rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive">
             {error}
           </div>
         )}
 
         {message && (
-          <div className="p-4 rounded-lg bg-green-900 border border-green-700 text-green-200 animate-fade-in">
+          <div className="animate-fade-in rounded-lg border border-border bg-muted p-4 text-foreground">
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="space-y-6">
+        <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-200">
-              Email address
+            <label
+              htmlFor="student-code"
+              className="block text-sm font-medium text-foreground"
+            >
+              Student code
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="student-code"
+              type="text"
+              value={studentCode}
+              onChange={(e) => setStudentCode(e.target.value)}
               required
-              className="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 placeholder-gray-400"
-              placeholder="Enter your email"
-              aria-describedby="email-error"
+              className="mt-1 block w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground shadow-sm outline-none transition duration-200 placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring"
+              placeholder="s2x...."
             />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Required to link your student profile.
+            </p>
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-200">
-              Password
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-foreground"
+            >
+              {t("auth.passwordLabel")}
             </label>
             <input
               id="password"
@@ -90,8 +111,8 @@ export default function SignupForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 placeholder-gray-400"
-              placeholder="Enter your password"
+              className="mt-1 block w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground shadow-sm outline-none transition duration-200 placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring"
+              placeholder={t("auth.passwordPlaceholder")}
               aria-describedby="password-error"
             />
           </div>
@@ -99,29 +120,48 @@ export default function SignupForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-md font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 transform hover:-translate-y-0.5"
+            className="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
-                Signing up...
+                {t("auth.signingUp")}
               </span>
             ) : (
-              'Sign Up'
+              t("auth.signUp")
             )}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-300">
-          Already have an account?{' '}
-          <a href="/signin" className="font-medium text-blue-400 hover:text-blue-300 transition duration-200">
-            Sign in
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          {t("auth.hasAccount")}{" "}
+          <a
+            href="/signin"
+            className="font-medium text-primary transition duration-200 hover:opacity-80"
+          >
+            {t("auth.signIn")}
           </a>
         </p>
       </div>
     </div>
-  )
+  );
 }

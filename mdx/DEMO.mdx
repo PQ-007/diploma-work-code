@@ -1,0 +1,649 @@
+---
+title: "Бүх MDX Компонент ба Синтаксын Бүрэн Лавлах"
+description: "Бүх боломжит MDX компонент болон энгийн markdown синтаксыг нэг нийтлэлд харуулах жишээ"
+---
+
+# Бүх MDX Компонент ба Синтаксын Бүрэн Лавлах
+
+Энэ нэг нийтлэл нь бүтээгдэхүүн болон контентын хяналт хийхэд зориулагдсан.
+
+Үүнд:
+
+- Одоогоор ашиглаж болох бүх custom MDX компонентууд
+- Энгийн markdown синтакс (гарчиг, жагсаалт, хүснэгт, эшлэл, код, холбоос, зураг гэх мэт)
+- Компонент бүрийг хэрхэн ашиглахыг тайлбарласан богино жишээнүүд
+
+Энийг checklist болгон ашиглаад аль компонентыг үлдээх, сайжруулах, эсвэл устгахаа шийдээрэй.
+
+---
+
+## Хурдан Import Жишээ
+
+Хэрэв таны MDX runtime компонентуудыг аль хэдийн map хийсэн бол гараар import хийх шаардлагагүй.
+Өөр тохиргоонд explicit import хэрэглэх бол синтакс нь ихэвчлэн ийм байна:
+
+```mdx
+import {
+  Alert,
+  Card,
+  Steps,
+  Tabs,
+  Accordion,
+  Quote,
+  Timeline,
+  Image,
+  ImageGrid,
+  VideoEmbed,
+  Table,
+  ComparisonTable,
+  FeatureGrid,
+  FileTree,
+  Chart,
+  DataTable,
+  ProTip,
+} from "@/mdx/components";
+```
+
+---
+
+## Энгийн Markdown Синтакс
+
+### Гарчгууд
+
+#### H4 гарчгийн жишээ
+
+##### H5 гарчгийн жишээ
+
+###### H6 гарчгийн жишээ
+
+### Текстийн Стайл
+
+Энэ нь **bold текст**, _italic текст_, мөн **_bold + italic_** жишээ юм.
+
+Мөн `const ready = true;` шиг inline code болон ~~зураасаар дарах~~ хэлбэр багтсан.
+
+### Жагсаалтууд
+
+- Эрэмбэгүй жагсаалтын эхний мөр
+- Эрэмбэгүй жагсаалтын хоёр дахь мөр
+- Эрэмбэгүй жагсаалтын гурав дахь мөр
+
+1. Эрэмбэтэй жагсаалтын эхний мөр
+2. Эрэмбэтэй жагсаалтын хоёр дахь мөр
+3. Эрэмбэтэй жагсаалтын гурав дахь мөр
+
+### Blockquote
+
+> Энгийн markdown blockquote жишээ.
+>
+> Үүнийг тэмдэглэл, ишлэл, эсвэл онцлох өгүүлбэрт ашиглаж болно.
+
+### Холбоос ба Зураг
+
+Энгийн markdown холбоос: [MDX гарын авлага нээх](./MDX_COMPONENTS_GUIDE.md)
+
+Энгийн markdown зураг (MDX `Image` компонентоор map хийгдэнэ):
+
+![Reference illustration](https://picsum.photos/seed/mdx-reference/1200/600)
+
+### Энгийн Markdown Хүснэгт
+
+| Синтакс     | Ямар үүрэгтэй              | Жишээ            |
+| ----------- | -------------------------- | ---------------- |
+| `# Heading` | Гарчиг үүсгэнэ             | `## Хэсэг`       |
+| `- item`    | Эрэмбэгүй жагсаалт үүсгэнэ | `- MDX сурах`    |
+| `1. item`   | Эрэмбэтэй жагсаалт үүсгэнэ | `1. Эхний алхам` |
+| ` ```ts `   | Кодын блок үүсгэнэ         | Доорх жишээг хар |
+
+### Энгийн Кодын Блок
+
+```typescript
+type ComponentDecision = "keep" | "polish" | "remove";
+
+interface ReviewResult {
+  component: string;
+  decision: ComponentDecision;
+  reason: string;
+}
+```
+
+---
+
+## Alert Компонент
+
+Ашиглалт:
+
+```mdx
+<Alert variant="info" title="Тавтай морил">
+  Контекст тайлбар бүхий туслах мессеж.
+</Alert>
+```
+
+<Alert variant="info" title="Тавтай морил!">
+  Энэ нь саармаг шинэчлэлд ашиглах мэдээллийн alert юм.
+</Alert>
+
+<Alert variant="success" title="Амжилттай">
+  Дууссан үйлдэл болон баталгаажуулалтад success alert ашиглана.
+</Alert>
+
+<Alert variant="warning" title="Анхааруулга">
+  Хэрэглэгч үргэлжлүүлэхийн өмнө заавал шалгах шаардлагатай үед warning alert
+  ашиглана.
+</Alert>
+
+<Alert variant="error" title="Алдаа">
+  Хэрэглэгчийн оролцоо шаардсан алдаанд error alert ашиглана.
+</Alert>
+
+---
+
+## ProTip Компонент
+
+Ашиглалт:
+
+```mdx
+<ProTip>Энгийн тэмдэглэлээс ялгарч харагдах мэргэжлийн зөвлөгөө.</ProTip>
+```
+
+<ProTip>
+  Хэрэв таны контент стратегид ахисан түвшний зөвлөгөө хэрэгтэй бол энэ
+  компонентыг үлдээгээрэй. Онцолсон expert guidance хэсэг хэрэгтэй үед
+  тохиромжтой.
+</ProTip>
+
+---
+
+## Card Компонент
+
+Ашиглалт:
+
+```mdx
+<Card icon="rocket" title="Хурдан Эхлэх" variant="primary">
+  Card доторх контент
+</Card>
+```
+
+<div className="grid gap-6 my-8 md:grid-cols-2">
+  <Card icon="rocket" title="Хурдан Эхлэх" variant="primary">
+    Тодорхой setup урсгалаар богино хугацаанд ажиллуулж эхлээрэй.
+  </Card>
+
+<Card icon="database" title="API Лавлах" variant="default">
+  Жишээ болон edge case-уудтай төвлөрсөн API баримт.
+</Card>
+
+<Card icon="shield" title="Аюулгүй байдал" variant="warning">
+  Auth, permission, protected route-уудаа анхааралтай тохируулна уу.
+</Card>
+
+  <Card
+    icon="book"
+    title="Баримт Нээх"
+    variant="success"
+    href="./MDX_COMPONENTS_GUIDE.md"
+  >
+    Энэ card нь дарагддаг link-style card жишээг харуулж байна.
+  </Card>
+</div>
+
+---
+
+## Steps Компонент
+
+Ашиглалт:
+
+```mdx
+<Steps>
+
+### Алхам Нэг
+
+Тайлбар
+
+### Алхам Хоёр
+
+Тайлбар
+
+</Steps>
+```
+
+<Steps>
+
+### Суулгалт
+
+Таны MDX runtime бүх custom компонентуудыг map хийсэн эсэхийг шалгаарай.
+
+```typescript
+import { components } from "@/mdx/mdx-components";
+```
+
+### Ашиглалт
+
+Custom tag-ууд танигдахын тулд MDX контентыг map хийсэн компонентуудтай render хийнэ.
+
+### Хяналт
+
+Энэ нийтлэлийн хэсэг бүрийг тестлэсний дараа компонентуудаа keep, polish, remove гэж тэмдэглээрэй.
+
+</Steps>
+
+---
+
+## Tabs Компонент
+
+Ашиглалт:
+
+```mdx
+<Tabs
+  items={[
+    { label: "Тойм", content: <>...</> },
+    { label: "Дэлгэрэнгүй", content: <>...</> },
+  ]}
+/>
+```
+
+<Tabs
+  items={[
+    {
+      label: "Тойм",
+      content: (
+        <>
+          <p>
+            Tabs нь холбоотой контентыг төвлөрсөн panel-ууд болгон бүлэглэнэ.
+          </p>
+          <strong>Интерактив хэсэг</strong>
+        </>
+      ),
+    },
+    {
+      label: "Онцлогууд",
+      content: (
+        <ul>
+          <li>Keyboard-д ээлтэй</li>
+          <li>Mobile responsive</li>
+          <li>Идэвхтэй төлөв нь харагдахуйц ойлгомжтой</li>
+        </ul>
+      ),
+    },
+    {
+      label: "Зөвлөмж",
+      content: (
+        <>
+          <p>Tab-ын шошгыг богино, тодорхой байлгаарай.</p>
+          <code>Уншихад хялбар байх үүднээс 2-5 tab тохиромжтой.</code>
+        </>
+      ),
+    },
+  ]}
+/>
+
+---
+
+## Accordion Компонент
+
+Ашиглалт:
+
+```mdx
+<Accordion
+  items={[
+    { title: "Асуулт", content: "Хариулт" },
+    { title: "Асуулт", content: "Хариулт" },
+  ]}
+/>
+```
+
+<Accordion
+  items={[
+    {
+      title: "Accordion-ыг хэзээ хэрэглэх вэ?",
+      content:
+        "Контент урт эсвэл заавал биш үед, хэрэглэгчид аажмаар мэдээлэл харах нь илүү үр дүнтэй бол accordion ашиглана.",
+    },
+    {
+      title: "Хэзээ ашиглахаас зайлсхийх вэ?",
+      content:
+        "Бүх хэрэглэгч шууд харах ёстой чухал мэдээлэлд accordion ашиглахаас зайлсхий.",
+    },
+    {
+      title: "Tabs-ыг орлож чадах уу?",
+      content:
+        "Зарим тохиолдолд тийм. Ялангуяа mobile дээр босоо өргөтгөл нь хэвтээ tab-аас уншихад амар байдаг.",
+    },
+  ]}
+/>
+
+---
+
+## FeatureGrid Компонент
+
+Ашиглалт:
+
+```mdx
+<FeatureGrid
+  features={[
+    { icon: "zap", title: "Хурдан", description: "..." },
+    { icon: "shield", title: "Найдвартай", description: "..." },
+  ]}
+/>
+```
+
+<FeatureGrid
+  features={[
+    {
+      icon: "zap",
+      title: "Хурдан",
+      description: "Оптимиз хийсэн render болон жигд interaction.",
+    },
+    {
+      icon: "shield",
+      title: "Найдвартай",
+      description:
+        "Баримт бичиг болон бүтээгдэхүүний гарын авлагад тохирох бат бөх бүтэц.",
+    },
+    {
+      icon: "code",
+      title: "Хөгжүүлэгчид Ээлтэй",
+      description: "Ойлгомжтой props болон дахин ашиглахад хялбар pattern-ууд.",
+    },
+  ]}
+/>
+
+---
+
+## Timeline Компонент
+
+Ашиглалт:
+
+```mdx
+<Timeline
+  items={[
+    { date: "Үе шат 1", title: "Эхлэх", description: "..." },
+    { date: "Үе шат 2", title: "Давталт", description: "..." },
+  ]}
+/>
+```
+
+<Timeline
+  items={[
+    {
+      date: "Үе шат 1",
+      title: "Аудит",
+      description:
+        "Одоо байгаа бүх компонент болон одоогийн хэрэглээг жагсаана.",
+    },
+    {
+      date: "Үе шат 2",
+      title: "Хяналт",
+      description: "Дизайны чанар болон UX нийцтэй байдлыг шалгана.",
+    },
+    {
+      date: "Үе шат 3",
+      title: "Шийдвэр",
+      description: "Компонент бүрийг keep, polish, remove гэж шийднэ.",
+    },
+  ]}
+/>
+
+---
+
+## Quote Компонент
+
+Ашиглалт:
+
+```mdx
+<Quote author="Нэр" role="Албан тушаал">
+  Ишлэлийн текст
+</Quote>
+```
+
+<Quote author="Dieter Rams" role="Industrial Designer">
+  Сайн дизайн гэдэг нь аль болох бага дизайн. Цөөн, гэхдээ илүү сайн.
+</Quote>
+
+---
+
+## ImageGrid Компонент
+
+Ашиглалт:
+
+```mdx
+<ImageGrid
+  columns={3}
+  images={[
+    { src: "...", alt: "...", caption: "..." },
+    { src: "...", alt: "...", caption: "..." },
+  ]}
+/>
+```
+
+<ImageGrid
+  columns={3}
+  images={[
+    {
+      src: "https://picsum.photos/seed/mdx-grid-1/800/500",
+      alt: "Grid зураг 1",
+      caption: "Хянах самбар",
+    },
+    {
+      src: "https://picsum.photos/seed/mdx-grid-2/800/500",
+      alt: "Grid зураг 2",
+      caption: "Профайл",
+    },
+    {
+      src: "https://picsum.photos/seed/mdx-grid-3/800/500",
+      alt: "Grid зураг 3",
+      caption: "Шинжилгээ",
+    },
+  ]}
+/>
+
+---
+
+## VideoEmbed Компонент
+
+Ашиглалт:
+
+```mdx
+<VideoEmbed
+  url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  title="Демо видео"
+  aspectRatio="16/9"
+/>
+```
+
+<VideoEmbed
+  url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  title="YouTube Embed Жишээ"
+  aspectRatio="16/9"
+/>
+
+---
+
+## Table Компонент (Structured)
+
+Ашиглалт:
+
+```mdx
+<Table
+  data={{
+    headers: ["Компонент", "Төлөв"],
+    rows: [["Alert", "Keep"]],
+  }}
+/>
+```
+
+<Table
+  data={{
+    headers: ["Компонент", "Одоогийн төлөв", "Тэмдэглэл"],
+    rows: [
+      ["Alert", "Keep", "Тодорхой бөгөөд хэрэгтэй"],
+      ["Tabs", "Polish", "Mobile spacing-ийг сайжруулах"],
+      ["Timeline", "Review", "Сайн боловч илүү хялбарчилж болно"],
+    ],
+  }}
+/>
+
+---
+
+## ComparisonTable Компонент
+
+Ашиглалт:
+
+```mdx
+<ComparisonTable
+  columns={[{ name: "Basic" }, { name: "Pro", highlight: true }]}
+  rows={[{ feature: "Feature A", values: [true, true] }]}
+/>
+```
+
+<ComparisonTable
+  columns={[
+    { name: "Энгийн" },
+    { name: "Pro", highlight: true },
+    { name: "Байгууллага" },
+  ]}
+  rows={[
+    { feature: "MDX Компонент", values: [true, true, true] },
+    { feature: "Custom Theme", values: [false, true, true] },
+    { feature: "Priority Support", values: [false, false, true] },
+    { feature: "Суудал", values: ["5", "50", "Хязгааргүй"] },
+  ]}
+/>
+
+---
+
+## FileTree Компонент
+
+Ашиглалт:
+
+```mdx
+<FileTree
+  tree={[
+    {
+      name: "апп",
+      type: "folder",
+      children: [{ name: "page.tsx", type: "file" }],
+    },
+  ]}
+/>
+```
+
+<FileTree
+  tree={[
+    {
+      name: "mdx",
+      type: "folder",
+      children: [
+        { name: "DEMO.mdx", type: "file" },
+        { name: "mdx-components.tsx", type: "file" },
+        {
+          name: "components",
+          type: "folder",
+          children: [
+            { name: "Alert.tsx", type: "file" },
+            { name: "Tabs.tsx", type: "file" },
+            { name: "Timeline.tsx", type: "file" },
+          ],
+        },
+      ],
+    },
+  ]}
+/>
+
+---
+
+## Chart Компонент
+
+Ашиглалт:
+
+```mdx
+<Chart
+  type="line"
+  data={[
+    { name: "Jan", value: 12 },
+    { name: "Feb", value: 18 },
+  ]}
+  xKey="name"
+  yKey="value"
+  title="Сарын Идэвх"
+/>
+```
+
+<Chart
+  type="bar"
+  title="Сараар Нийтлэлийн Үзэлт"
+  description="Энгийн bar chart жишээ"
+  xKey="month"
+  yKey="views"
+  data={[
+    { month: "Jan", views: 1200 },
+    { month: "Feb", views: 1600 },
+    { month: "Mar", views: 2300 },
+    { month: "Apr", views: 1900 },
+  ]}
+/>
+
+<Chart
+  type="pie"
+  title="Контент Төрлийн Хуваарилалт"
+  description="Pie chart жишээ"
+  data={[
+    { name: "Гарын авлага", value: 40 },
+    { name: "Туториал", value: 35 },
+    { name: "Лавлах", value: 25 },
+  ]}
+/>
+
+---
+
+## DataTable Компонент
+
+Ашиглалт:
+
+```mdx
+<DataTable
+  title="Хэрэглэгчид"
+  data={[{ name: "A", role: "Админ" }]}
+  columns={[
+    { key: "name", label: "Нэр" },
+    { key: "role", label: "Үүрэг" },
+  ]}
+/>
+```
+
+<DataTable
+  title="Оролцогчид"
+  description="Эрэмбэлж, хайж болдог data table"
+  data={[
+    { name: "Ану", role: "Зохиогч", status: "Идэвхтэй", articles: 12 },
+    { name: "Бат", role: "Редактор", status: "Идэвхтэй", articles: 7 },
+    { name: "Саруул", role: "Зохиогч", status: "Идэвхгүй", articles: 3 },
+    { name: "Тэмүү", role: "Админ", status: "Идэвхтэй", articles: 22 },
+  ]}
+  columns={[
+    { key: "name", label: "Нэр" },
+    { key: "role", label: "Үүрэг" },
+    { key: "status", label: "Төлөв" },
+    { key: "articles", label: "Нийтлэл", sortable: true },
+  ]}
+  searchable={true}
+  sortable={true}
+  pagination={true}
+  pageSize={3}
+/>
+
+---
+
+## Эцсийн Тэмдэглэл
+
+Санал болгож буй хяналтын урсгал:
+
+1. Хэсэг бүрийг шалгаж, эхний сэтгэгдлийн чанарыг тэмдэглэ.
+2. Компонент бүрийг keep, polish, эсвэл remove гэж тэмдэглэ.
+3. Бодит нийтлэлд их ашиглагддаг компонентын polish ажлыг түрүүнд эрэмбэл.
+4. Давхардсан үүрэгтэй эсвэл бага үнэ цэнтэй компонентыг устга.
+
+<Alert variant="success" title="Хяналтанд Бэлэн">
+  Энэ нийтлэлд одоо бүх боломжит custom MDX компонент болон үндсэн markdown
+  синтаксыг нэг дор багтаалаа.
+</Alert>

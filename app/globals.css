@@ -1,65 +1,109 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+/* Dashtseden – traditional Mongolian calligraphic font.
+   Place Dashtseden.ttf (or .woff2) in public/fonts/. */
+@font-face {
+  font-family: "Dashtseden";
+  src: url("/fonts/cmdashitseden.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.mn-script {
+  font-family: "Dashtseden", "Mongolian Baiti", "Noto Sans Mongolian", serif;
+}
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #0a0a0f;
-  --foreground: #f8fafc;
-  --card: #111115;
+  --background: #000000;
+  --foreground: #e5e7eb;
+  --card: #0b0c0f;
   --card-foreground: #f8fafc;
-  --popover: #111115;
+  --popover: #0b0c0f;
   --popover-foreground: #f8fafc;
   --primary: #1e40af;
   --primary-foreground: #fafafa;
-  --secondary: #1e1e23;
+  --secondary: #101114;
   --secondary-foreground: #f8fafc;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #1d4ed8;
+  --muted: #15171c;
+  --muted-foreground: #8f959f;
+  --accent: #1f2127;
   --accent-foreground: #f8fafc;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
-  --border: #27272a;
-  --input: #18181b;
+  --border: #23262c;
+  --input: #0e1014;
   --ring: #1e40af;
   --chart-1: #1e40af;
-  --chart-2: #06b6d4;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
+  --chart-2: #2563eb;
+  --chart-3: #4f46e5;
+  --chart-4: #3b82f6;
   --chart-5: #ef4444;
-  --sidebar: #0f0f14;
+  --sidebar: #000000;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #1e40af;
   --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #1e1e23;
+  --sidebar-accent: #0d0f13;
   --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #27272a;
+  --sidebar-border: #23262c;
   --sidebar-ring: #1e40af;
   --sidebar-width: 256px; /* Set standard sidebar width */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --radius: 12px;
   --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1),
-    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-md:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-  --glow: 0 0 20px rgb(30 64 175 / 0.3);
-  --glow-strong: 0 0 40px rgb(30 64 175 / 0.5);
+  --glow: 0 0 20px rgb(148 163 184 / 0.16);
+  --glow-strong: 0 0 40px rgb(148 163 184 / 0.24);
+
+  --auth-right-bg:
+    radial-gradient(circle at 20% 20%, #122247, transparent 40%),
+    radial-gradient(circle at 80% 10%, #17295c, transparent 35%),
+    linear-gradient(135deg, #04070f, #0e1730);
+  --auth-right-overlay: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 35%,
+    transparent 60%
+  );
+  --auth-right-orb-1: rgba(37, 99, 235, 0.2);
+  --auth-right-orb-2: rgba(79, 70, 229, 0.16);
+  --auth-right-grid: rgba(96, 165, 250, 0.14);
+  --auth-panel-border: rgba(255, 255, 255, 0.1);
+  --auth-panel-bg: rgba(0, 0, 0, 0.45);
+  --auth-panel-accent: rgba(59, 130, 246, 0.24);
+  --auth-panel-text: rgba(191, 219, 254, 0.9);
+  --auth-panel-text-soft: rgba(191, 219, 254, 0.36);
 }
 
 * {
   caret-color: transparent; /* Hides cursor globally */
   user-select: none; /* Prevents text selection */
+}
+
+/* Keep cursor visible and allow text selection in editable fields. */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  caret-color: var(--foreground);
+  user-select: text;
 }
 
 .light {
@@ -121,6 +165,25 @@
   /* Softer glow effects */
   --glow: 0 0 20px rgb(37 99 235 / 0.15);
   --glow-strong: 0 0 40px rgb(37 99 235 / 0.25);
+
+  --auth-right-bg:
+    radial-gradient(circle at 18% 24%, #e8efff, transparent 42%),
+    radial-gradient(circle at 82% 12%, #dbe7ff, transparent 36%),
+    linear-gradient(135deg, #f2f6ff, #e7f0ff);
+  --auth-right-overlay: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(15, 23, 42, 0.05) 35%,
+    transparent 60%
+  );
+  --auth-right-orb-1: rgba(59, 130, 246, 0.2);
+  --auth-right-orb-2: rgba(99, 102, 241, 0.16);
+  --auth-right-grid: rgba(59, 130, 246, 0.14);
+  --auth-panel-border: rgba(15, 23, 42, 0.16);
+  --auth-panel-bg: rgba(255, 255, 255, 0.62);
+  --auth-panel-accent: rgba(59, 130, 246, 0.2);
+  --auth-panel-text: rgba(30, 58, 138, 0.84);
+  --auth-panel-text-soft: rgba(30, 58, 138, 0.42);
 }
 
 @theme inline {
@@ -216,38 +279,40 @@ body {
 }
 
 .gradient-mesh {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 80%,
-      rgba(139, 92, 246, 0.08) 0%,
+      rgba(37, 99, 235, 0.1) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 80% 20%,
-      rgba(6, 182, 212, 0.08) 0%,
+      rgba(29, 78, 216, 0.11) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 40% 40%,
-      rgba(16, 185, 129, 0.08) 0%,
+      rgba(79, 70, 229, 0.1) 0%,
       transparent 50%
     );
 }
 
 /* Light mode specific gradient mesh */
 .light .gradient-mesh {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 80%,
-      rgba(139, 92, 246, 0.04) 0%,
+      rgba(59, 130, 246, 0.04) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 80% 20%,
-      rgba(6, 182, 212, 0.04) 0%,
+      rgba(37, 99, 235, 0.04) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 40% 40%,
-      rgba(16, 185, 129, 0.04) 0%,
+      rgba(129, 140, 248, 0.04) 0%,
       transparent 50%
     );
 }
@@ -306,6 +371,15 @@ body {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Utility animations */
 .animate-float {
   animation: float 6s ease-in-out infinite;
@@ -327,6 +401,10 @@ body {
   animation: scaleIn 0.3s ease-out;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
 /* Hover effects */
 .hover-glow:hover {
   box-shadow: var(--glow);
@@ -343,24 +421,49 @@ body {
   transition: transform 0.2s ease;
 }
 
-/* Modern scrollbar */
+/* Hide all scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--muted);
-  border-radius: 4px;
+  background: transparent !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 4px;
-  border: 2px solid var(--muted);
+  background: transparent !important;
+  border: none !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
+/* Monaco editor scrollbar aligned to site theme */
+.monaco-editor .scrollbar,
+.monaco-diff-editor .scrollbar {
+  background: var(--muted);
+}
+
+.monaco-editor .scrollbar.vertical,
+.monaco-diff-editor .scrollbar.vertical {
+  width: 8px !important;
+}
+
+.monaco-editor .scrollbar.horizontal,
+.monaco-diff-editor .scrollbar.horizontal {
+  height: 8px !important;
+}
+
+.monaco-editor .scrollbar > .slider,
+.monaco-diff-editor .scrollbar > .slider {
+  background: var(--primary);
+  border: 2px solid var(--muted);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.monaco-editor .scrollbar > .slider:hover,
+.monaco-editor .scrollbar > .slider.active,
+.monaco-diff-editor .scrollbar > .slider:hover,
+.monaco-diff-editor .scrollbar > .slider.active {
   background: var(--accent);
 }
 
@@ -395,13 +498,13 @@ body {
 }
 
 .dark {
-  --sidebar: #0a0a0f;
+  --sidebar: #000000;
   --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary: hsl(221.2 72% 48%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent: hsl(225 8% 10%);
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-border: hsl(220 8% 22%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
   --sidebar-width: 256px; /* Standard sidebar width for dark theme */
 }
@@ -534,6 +637,55 @@ body {
   margin-right: auto;
   padding-left: 16px;
   padding-right: 16px;
+}
+
+/* Responsive app containers for sub-pages */
+.page-shell {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;
+  padding-left: clamp(10px, 1.8vw, 24px);
+  padding-right: clamp(10px, 1.8vw, 24px);
+}
+
+.page-shell-wide {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 56rem;
+  padding-left: clamp(10px, 1.8vw, 24px);
+  padding-right: clamp(10px, 1.8vw, 24px);
+}
+
+@media (min-width: 768px) {
+  .page-shell {
+    max-width: 56rem;
+  }
+
+  .page-shell-wide {
+    max-width: 64rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    max-width: 64rem;
+  }
+
+  .page-shell-wide {
+    max-width: 72rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page-shell {
+    max-width: 72rem;
+  }
+
+  .page-shell-wide {
+    max-width: 84rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -745,5 +897,63 @@ body {
   display: none !important;
 }
 
+/* KaTeX Math Styling */
+.katex-display {
+  margin: 1.5rem 0 !important;
+  padding: 1rem 1.5rem;
+  background: var(--muted);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+  position: relative;
+}
 
+.katex-display > .katex {
+  text-align: center;
+}
 
+.katex {
+  font-size: 1.1em !important;
+  color: var(--foreground);
+}
+
+/* Equation tags like \tag{1} */
+.katex-display .tag {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Inline math */
+.katex:not(.katex-display .katex) {
+  padding: 0.1em 0.2em;
+}
+
+/* Math in light mode */
+.light .katex-display {
+  background: var(--muted);
+}
+
+/* Scrollbar for overflow math */
+.katex-display::-webkit-scrollbar {
+  height: 6px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
+}
+
+.katex-display::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Utility: hide scrollbar while keeping scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

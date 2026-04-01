@@ -1,9 +1,10 @@
-import LoginForm from '@/components/LoginForm'
+import { Suspense } from "react";
+import AuthSplitPage from "@/components/AuthSplitPage";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-center">
-      <LoginForm />
-    </div>
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthSplitPage initialMode="signin" />
+    </Suspense>
+  );
 }

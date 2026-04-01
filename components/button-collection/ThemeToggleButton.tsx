@@ -1,76 +1,50 @@
 "use client";
 
-import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { 
-  Moon, 
-  Sun, 
-  Monitor, 
-  Palette, 
-  Check,
-  Settings,
-  Eye,
-  Zap
-} from "lucide-react";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ThemeToggleButton() {
-  const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [accentColor, setAccentColor] = useState("blue");
 
-  // Use system theme as fallback during SSR to avoid hydration issues
-  const currentTheme = resolvedTheme || systemTheme || "light";
-  const isDark = currentTheme === "dark";
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const themes = [
-    {
-      name: "Light",
-      value: "light",
-      icon: Sun,
-      description: "Clean and bright interface"
-    },
-    {
-      name: "Dark",
-      value: "dark", 
-      icon: Moon,
-      description: "Easy on the eyes"
-    },
-    {
-      name: "System",
-      value: "system",
-      icon: Monitor,
-      description: "Follow system preference"
-    }
-  ];
+  const themes = useMemo(
+    () => [
+      { name: "Light", value: "light", icon: Sun, description: "Clean and bright interface" },
+      { name: "Dark", value: "dark", icon: Moon, description: "Easy on the eyes" },
+      { name: "System", value: "system", icon: Monitor, description: "Follow system preference" },
+    ],
+    []
+  );
 
-  
-
-  const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme);
-  };
+  const handleThemeChange = (newTheme: string) => setTheme(newTheme);
 
   const handleAccentColorChange = (color: string) => {
     setAccentColor(color);
-    // TODO: Implement accent color system
     console.log("Accent color changed to:", color);
   };
 
-  const getCurrentIcon = () => {
+  // Only decide the real icon after mount
+  const CurrentIcon = useMemo(() => {
+    if (!mounted) return Monitor; // stable for SSR + first client render
     if (theme === "system") return Monitor;
-    return isDark ? Moon : Sun;
-  };
+    return resolvedTheme === "dark" ? Moon : Sun;
+  }, [mounted, theme, resolvedTheme]);
 
-  const CurrentIcon = getCurrentIcon();
+  // Stable aria-label until mounted
+  const ariaLabel = mounted ? `Current theme: ${theme ?? "system"}` : "Theme";
 
   return (
     <DropdownMenu>
@@ -79,27 +53,19 @@ export default function ThemeToggleButton() {
           variant="ghost"
           size="icon"
           className={cn("size-7 hover:bg-accent hover:text-accent-foreground transition-colors")}
-          aria-label={`Current theme: ${theme || 'system'}`}
+          aria-label={ariaLabel}
         >
           <CurrentIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        className="w-56" 
-        side="bottom" 
-        align="end"
-        sideOffset={8}
-      >
-       
-        
-        
-        
+
+      <DropdownMenuContent className="w-56" side="bottom" align="end" sideOffset={8}>
         <DropdownMenuGroup>
-         
           {themes.map((themeOption) => {
             const Icon = themeOption.icon;
-            const isSelected = theme === themeOption.value;
-            
+            // Don’t “select” anything until mounted, or you can still mismatch checkmarks
+            const isSelected = mounted && theme === themeOption.value;
+
             return (
               <DropdownMenuItem
                 key={themeOption.value}
@@ -110,9 +76,7 @@ export default function ThemeToggleButton() {
                   <Icon className="h-4 w-4" />
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{themeOption.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {themeOption.description}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{themeOption.description}</span>
                   </div>
                 </div>
                 {isSelected && <Check className="h-4 w-4" />}
@@ -120,17 +84,6 @@ export default function ThemeToggleButton() {
             );
           })}
         </DropdownMenuGroup>
-        
-    
-        
-        
-      
-        
-        
-        
-      
-        
-       
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,609 +1,387 @@
-"use client";
+﻿"use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  BookOpen, 
-  Play, 
-  Clock, 
-  Users, 
-  Star,
-  CheckCircle,
-  Circle,
-  Search,
-  Filter,
-  TrendingUp,
-  Award,
-  Target,
+import { Badge } from "@/components/ui/badge";
+import {
+  BookMarked,
+  BookOpen,
   ChevronRight,
-  Video,
-  FileText,
   Code,
-  Headphones
+  Flame,
+  GraduationCap,
+  Layers,
+  Star,
+  Target,
+  Trophy,
+  Zap,
 } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface Course {
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
+interface ExploreCard {
   id: string;
   title: string;
   description: string;
-  instructor: {
-    name: string;
-    avatar: string;
-    bio: string;
-  };
-  category: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
-  duration: number; // in hours
-  lessons: number;
-  enrolled: number;
-  rating: number;
-  price: number;
-  status: "not-started" | "in-progress" | "completed";
-  progress: number;
-  thumbnail: string;
-  tags: string[];
-  lastAccessed?: string;
-  completedLessons?: number;
-}
-
-interface LearningPath {
-  id: string;
-  name: string;
-  description: string;
-  courses: string[];
-  totalHours: number;
+  href: string;
+  icon: React.ReactNode;
+  gradient: string;
+  items: number;
   completed: number;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  difficulty?: "beginner" | "intermediate" | "advanced" | "mixed";
+  featured?: boolean;
+  category: string;
 }
 
-const courses: Course[] = [
+/* ------------------------------------------------------------------ */
+/*  Static data                                                        */
+/* ------------------------------------------------------------------ */
+
+const exploreCards: ExploreCard[] = [
   {
-    id: "1",
-    title: "Complete React Developer Course",
-    description: "Master React from basics to advanced concepts including hooks, context, and performance optimization.",
-    instructor: {
-      name: "Sarah Johnson",
-      avatar: "/api/placeholder/40/40",
-      bio: "Senior Frontend Developer at Google"
-    },
-    category: "Frontend",
-    level: "Intermediate",
-    duration: 24,
-    lessons: 156,
-    enrolled: 12547,
-    rating: 4.8,
-    price: 89,
-    status: "in-progress",
-    progress: 65,
-    thumbnail: "/api/placeholder/400/225",
-    tags: ["React", "JavaScript", "Frontend", "Hooks"],
-    lastAccessed: "2024-12-15",
-    completedLessons: 101
+    id: "algorithm",
+    title: "Algorithms",
+    description:
+      "Master sorting, searching, dynamic programming, greedy, graph algorithms and more.",
+    href: "/learn/algorithm",
+    icon: <Target className="h-7 w-7" />,
+    gradient: "from-violet-600 to-purple-500",
+    items: 30,
+    completed: 15,
+    difficulty: "mixed",
+    featured: true,
+    category: "Problem Sets",
   },
   {
-    id: "2",
-    title: "Node.js & Express Masterclass",
-    description: "Build scalable backend applications with Node.js, Express, and MongoDB.",
-    instructor: {
-      name: "Michael Chen",
-      avatar: "/api/placeholder/40/40",
-      bio: "Backend Engineer at Netflix"
-    },
-    category: "Backend",
-    level: "Intermediate",
-    duration: 18,
-    lessons: 98,
-    enrolled: 8934,
-    rating: 4.7,
-    price: 79,
-    status: "completed",
-    progress: 100,
-    thumbnail: "/api/placeholder/400/225",
-    tags: ["Node.js", "Express", "MongoDB", "Backend"],
-    lastAccessed: "2024-12-10",
-    completedLessons: 98
+    id: "data-structure",
+    title: "Data Structures",
+    description:
+      "Arrays, linked lists, trees, graphs, hash tables — learn them all through practice.",
+    href: "/learn/data-structure",
+    icon: <Layers className="h-7 w-7" />,
+    gradient: "from-emerald-600 to-green-500",
+    items: 33,
+    completed: 16,
+    difficulty: "mixed",
+    featured: true,
+    category: "Problem Sets",
   },
   {
-    id: "3",
-    title: "Python Data Science Bootcamp",
-    description: "Learn data analysis, visualization, and machine learning with Python, pandas, and scikit-learn.",
-    instructor: {
-      name: "Dr. Lisa Wang",
-      avatar: "/api/placeholder/40/40",
-      bio: "Data Scientist at Tesla"
-    },
-    category: "Data Science",
-    level: "Beginner",
-    duration: 32,
-    lessons: 201,
-    enrolled: 15678,
-    rating: 4.9,
-    price: 129,
-    status: "not-started",
-    progress: 0,
-    thumbnail: "/api/placeholder/400/225",
-    tags: ["Python", "Data Science", "Machine Learning", "Analytics"],
-    completedLessons: 0
+    id: "programming-lang",
+    title: "Programming Languages",
+    description:
+      "Python, JavaScript, TypeScript, Java, C++, Go, Rust, SQL exercises from beginner to advanced.",
+    href: "/learn/programming-lang",
+    icon: <Code className="h-7 w-7" />,
+    gradient: "from-blue-600 to-cyan-500",
+    items: 37,
+    completed: 18,
+    difficulty: "beginner",
+    featured: true,
+    category: "Exercises",
   },
   {
-    id: "4",
-    title: "Advanced JavaScript Concepts",
-    description: "Deep dive into closures, prototypes, async programming, and modern ES6+ features.",
-    instructor: {
-      name: "Alex Rodriguez",
-      avatar: "/api/placeholder/40/40",
-      bio: "JavaScript Expert & Author"
-    },
-    category: "Frontend",
-    level: "Advanced",
-    duration: 16,
-    lessons: 89,
-    enrolled: 6754,
-    rating: 4.6,
-    price: 99,
-    status: "in-progress",
-    progress: 25,
-    thumbnail: "/api/placeholder/400/225",
-    tags: ["JavaScript", "ES6", "Async Programming", "Advanced"],
-    lastAccessed: "2024-12-12",
-    completedLessons: 22
-  }
+    id: "resources",
+    title: "Resources & Guides",
+    description:
+      "Articles, cheat sheets, tutorials, video courses, and curated documentation.",
+    href: "/learn/resources",
+    icon: <BookMarked className="h-7 w-7" />,
+    gradient: "from-amber-500 to-orange-500",
+    items: 27,
+    completed: 17,
+    difficulty: "beginner",
+    category: "Resources",
+  },
 ];
 
-const learningPaths: LearningPath[] = [
-  {
-    id: "1",
-    name: "Full Stack Web Developer",
-    description: "Complete path from frontend to backend development",
-    courses: ["1", "2"],
-    totalHours: 42,
-    completed: 82,
-    difficulty: "Intermediate"
+const difficultyLabel: Record<string, { text: string; color: string }> = {
+  beginner: {
+    text: "Beginner",
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   },
-  {
-    id: "2",
-    name: "Frontend Specialist",
-    description: "Master modern frontend development",
-    courses: ["1", "4"],
-    totalHours: 40,
-    completed: 45,
-    difficulty: "Advanced"
-  }
-];
+  intermediate: {
+    text: "Intermediate",
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  },
+  advanced: {
+    text: "Advanced",
+    color: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  },
+  mixed: {
+    text: "All Levels",
+    color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  },
+};
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
 
 export default function LearnPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+  const { t } = useLanguage();
 
-  const categories = Array.from(new Set(courses.map(course => course.category)));
-  const levels = ["Beginner", "Intermediate", "Advanced"];
-
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "" || course.category === selectedCategory;
-    const matchesLevel = selectedLevel === "" || course.level === selectedLevel;
-    
-    if (activeTab === "all") return matchesSearch && matchesCategory && matchesLevel;
-    if (activeTab === "enrolled") return matchesSearch && matchesCategory && matchesLevel && course.status !== "not-started";
-    if (activeTab === "completed") return matchesSearch && matchesCategory && matchesLevel && course.status === "completed";
-    if (activeTab === "in-progress") return matchesSearch && matchesCategory && matchesLevel && course.status === "in-progress";
-    
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
-
-  const getLevelColor = (level: Course["level"]) => {
-    switch (level) {
-      case "Beginner": return "bg-green-500";
-      case "Intermediate": return "bg-yellow-500";
-      case "Advanced": return "bg-red-500";
-      default: return "bg-gray-500";
-    }
-  };
-
-  const getContentTypeIcon = (type: string) => {
-    switch (type) {
-      case "video": return <Video className="h-4 w-4" />;
-      case "reading": return <FileText className="h-4 w-4" />;
-      case "coding": return <Code className="h-4 w-4" />;
-      case "audio": return <Headphones className="h-4 w-4" />;
-      default: return <Play className="h-4 w-4" />;
-    }
-  };
-
-  const formatDuration = (hours: number) => {
-    return hours > 1 ? `${hours} hours` : `${hours * 60} minutes`;
-  };
-
-  const totalEnrolled = courses.filter(c => c.status !== "not-started").length;
-  const totalCompleted = courses.filter(c => c.status === "completed").length;
-  const totalHours = courses.reduce((acc, course) => {
-    if (course.status !== "not-started") {
-      return acc + (course.duration * (course.progress / 100));
-    }
-    return acc;
-  }, 0);
+  const totalItems = exploreCards.reduce((s, c) => s + c.items, 0);
+  const totalCompleted = exploreCards.reduce((s, c) => s + c.completed, 0);
+  const overallPct =
+    totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Learning Hub</h1>
-          <p className="text-muted-foreground mt-1">
-            Expand your knowledge with expert-led courses
-          </p>
-        </div>
-        <Button className="flex items-center gap-2">
-          <Search className="h-4 w-4" />
-          Browse All Courses
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{totalEnrolled}</div>
-                <p className="text-xs text-muted-foreground">Courses Enrolled</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{totalCompleted}</div>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
-                <Clock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{Math.round(totalHours)}</div>
-                <p className="text-xs text-muted-foreground">Hours Learned</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-orange-100 dark:bg-orange-900 p-3 rounded-lg">
-                <Award className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">7</div>
-                <p className="text-xs text-muted-foreground">Certificates</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Continue Learning Section */}
-      {courses.some(c => c.status === "in-progress") && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Continue Learning</CardTitle>
-            <CardDescription>Pick up where you left off</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {courses.filter(c => c.status === "in-progress").map((course) => (
-                <div key={course.id} className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
-                  <img 
-                    src={course.thumbnail} 
-                    alt={course.title}
-                    className="w-16 h-9 object-cover rounded"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{course.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {course.completedLessons}/{course.lessons} lessons completed
-                    </p>
-                    <div className="mt-2">
-                      <Progress value={course.progress} className="h-2" />
-                    </div>
-                  </div>
-                  <Button size="sm">
-                    <Play className="h-4 w-4 mr-1" />
-                    Continue
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Learning Paths */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Learning Paths</CardTitle>
-          <CardDescription>Structured learning journeys to master specific skills</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {learningPaths.map((path) => (
-              <div key={path.id} className="p-4 border rounded-lg">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-medium">{path.name}</h4>
-                    <p className="text-sm text-muted-foreground">{path.description}</p>
-                  </div>
-                  <Badge className={`${getLevelColor(path.difficulty)} text-white`}>
-                    {path.difficulty}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>{path.courses.length} courses • {path.totalHours} hours</span>
-                    <span>{path.completed}% complete</span>
-                  </div>
-                  <Progress value={path.completed} className="h-2" />
-                </div>
-                <Button variant="outline" size="sm" className="mt-3 w-full">
-                  <Target className="h-4 w-4 mr-2" />
-                  View Path
-                </Button>
-              </div>
-            ))}
+    <div className="space-y-10 pb-16 max-w-6xl items-center mx-auto">
+      {/* ── Hero Header ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-border p-6 md:p-8">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t("learn.title") || "Explore"}
+            </h1>
+            <p className="text-muted-foreground max-w-lg">
+              {t("learn.subtitle") ||
+                "Curated study plans and problem sets to level up your skills step by step."}
+            </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search courses..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          {/* Mini progress ring */}
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="relative h-20 w-20">
+              <svg className="h-20 w-20 -rotate-90" viewBox="0 0 120 120">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  strokeWidth="8"
+                  className="stroke-muted/20"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  strokeWidth="8"
+                  className="stroke-primary"
+                  strokeDasharray={`${(totalCompleted / totalItems) * 327} 327`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-bold">{overallPct}%</span>
+              </div>
+            </div>
+            <div className="text-sm">
+              <p className="font-semibold">
+                {totalCompleted}/{totalItems}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {t("learn.completed") || "completed"}
+              </p>
+            </div>
+          </div>
         </div>
-        
-        <div className="flex gap-2">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-          >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
-          
-          <select
-            value={selectedLevel}
-            onChange={(e) => setSelectedLevel(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-          >
-            <option value="">All Levels</option>
-            {levels.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
-        </div>
+
+        {/* Background decoration */}
+        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -left-8 -bottom-8 h-32 w-32 rounded-full bg-primary/5 blur-2xl" />
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All Courses</TabsTrigger>
-          <TabsTrigger value="enrolled">Enrolled</TabsTrigger>
-          <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
-        </TabsList>
+      {/* ── Featured Study Plans ── */}
+      <section className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold">
+              {t("learn.featured") || "Featured"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {t("learn.featuredDesc") ||
+                "Most popular study plans to get started"}
+            </p>
+          </div>
+        </div>
 
-        <TabsContent value={activeTab} className="space-y-4">
-          {/* Courses Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <Card key={course.id} className="hover:shadow-md transition-shadow overflow-hidden">
-                <div className="relative">
-                  <img 
-                    src={course.thumbnail} 
-                    alt={course.title}
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="absolute top-2 right-2">
-                    <Badge className={`${getLevelColor(course.level)} text-white`}>
-                      {course.level}
-                    </Badge>
-                  </div>
-                  {course.status !== "not-started" && (
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <Progress value={course.progress} className="h-1" />
-                    </div>
-                  )}
-                </div>
-                
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg leading-tight">{course.title}</CardTitle>
-                  <CardDescription className="text-sm line-clamp-2">
-                    {course.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {/* Instructor */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
-                      <AvatarFallback>{course.instructor.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{course.instructor.name}</p>
-                      <p className="text-xs text-muted-foreground">{course.instructor.bio}</p>
-                    </div>
-                  </div>
-
-                  {/* Course Stats */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatDuration(course.duration)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Play className="h-4 w-4 text-muted-foreground" />
-                      <span>{course.lessons} lessons</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{course.enrolled.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4 fill-current text-yellow-500" />
-                      <span>{course.rating}</span>
-                    </div>
-                  </div>
-
-                  {/* Progress (if enrolled) */}
-                  {course.status !== "not-started" && (
-                    <div className="bg-muted/50 p-3 rounded-lg">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-medium">Progress</span>
-                        <span className="text-sm">{course.progress}%</span>
-                      </div>
-                      <Progress value={course.progress} className="h-2" />
-                      {course.completedLessons && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {course.completedLessons}/{course.lessons} lessons completed
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {exploreCards
+            .filter((c) => c.featured)
+            .map((card) => {
+              const pct =
+                card.items > 0
+                  ? Math.round((card.completed / card.items) * 100)
+                  : 0;
+              const diff = card.difficulty
+                ? difficultyLabel[card.difficulty]
+                : null;
+              return (
+                <Link key={card.id} href={card.href} className="group">
+                  <Card className="overflow-hidden border-border transition-all hover:shadow-xl hover:border-primary/30 hover:-translate-y-0.5 h-full">
+                    <CardContent className="p-0">
+                      {/* Gradient banner */}
+                      <div
+                        className={`bg-gradient-to-br ${card.gradient} p-5 text-white relative overflow-hidden`}
+                      >
+                        <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+                        <div className="relative flex items-start justify-between">
+                          <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                            {card.icon}
+                          </div>
+                          <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0.5 mt-1" />
+                        </div>
+                        <h3 className="text-lg font-bold mt-4">{card.title}</h3>
+                        <p className="text-sm text-white/75 mt-1 line-clamp-2">
+                          {card.description}
                         </p>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">
+                              {card.completed}/{card.items}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {t("learn.items") || "items"}
+                            </span>
+                          </div>
+                          {diff && (
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] font-semibold ${diff.color}`}
+                            >
+                              {diff.text}
+                            </Badge>
+                          )}
+                        </div>
+                        <Progress value={pct} className="h-1.5" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+        </div>
+      </section>
+
+      {/* ── All Study Plans ── */}
+      <section className="space-y-5">
+        <h2 className="text-xl font-bold">
+          {t("learn.allPlans") || "All Study Plans"}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {exploreCards.map((card) => {
+            const pct =
+              card.items > 0
+                ? Math.round((card.completed / card.items) * 100)
+                : 0;
+            const diff = card.difficulty
+              ? difficultyLabel[card.difficulty]
+              : null;
+            return (
+              <Link key={card.id} href={card.href} className="group">
+                <Card className="border-border transition-all hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5 h-full">
+                  <CardContent className="p-4 space-y-4">
+                    {/* Icon + badge row */}
+                    <div className="flex items-start justify-between">
+                      <div
+                        className={`rounded-xl bg-gradient-to-br ${card.gradient} p-3 text-white`}
+                      >
+                        {card.icon}
+                      </div>
+                      {diff && (
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] font-semibold ${diff.color}`}
+                        >
+                          {diff.text}
+                        </Badge>
                       )}
                     </div>
-                  )}
 
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-1">
-                    {course.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {course.tags.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{course.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="text-lg font-bold">
-                      {course.price === 0 ? "Free" : `${course.price}`}
+                    {/* Title + desc */}
+                    <div>
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                        {card.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {card.description}
+                      </p>
                     </div>
-                    <div className="flex gap-2">
-                      {course.status === "not-started" ? (
-                        <Button size="sm">
-                          Enroll Now
-                        </Button>
-                      ) : course.status === "completed" ? (
-                        <Button variant="outline" size="sm">
-                          Review
-                        </Button>
-                      ) : (
-                        <Button size="sm">
-                          <Play className="h-4 w-4 mr-1" />
-                          Continue
-                        </Button>
-                      )}
+
+                    {/* Progress */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {card.completed}/{card.items}{" "}
+                          {t("learn.items") || "items"}
+                        </span>
+                        <span className="font-medium">{pct}%</span>
+                      </div>
+                      <Progress value={pct} className="h-1.5" />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
-          {filteredCourses.length === 0 && (
-            <div className="text-center py-12">
-              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No courses found matching your criteria.</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Recommended for You */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Recommended for You
-          </CardTitle>
-          <CardDescription>
-            Based on your learning history and interests
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
-              <div className="bg-primary/10 p-3 rounded-lg flex-shrink-0">
-                <Code className="h-6 w-6 text-primary" />
+      {/* ── Quick Links ── */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link href="/learn/algorithm" className="group">
+          <Card className="border-border hover:border-primary/20 transition-all hover:-translate-y-0.5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg bg-violet-500/10 p-2">
+                <Flame className="h-4 w-4 text-violet-500" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium">TypeScript for React Developers</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Learn TypeScript in the context of React development
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {t("learn.topAlgorithms") || "Top Algorithm Problems"}
                 </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">12 hours • Intermediate</span>
-                  <Button size="sm" variant="outline">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <p className="text-xs text-muted-foreground">30 problems</p>
               </div>
-            </div>
-            
-            <div className="flex gap-4 p-4 bg-muted/50 rounded-lg">
-              <div className="bg-primary/10 p-3 rounded-lg flex-shrink-0">
-                <Target className="h-6 w-6 text-primary" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/learn/data-structure" className="group">
+          <Card className="border-border hover:border-primary/20 transition-all hover:-translate-y-0.5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg bg-emerald-500/10 p-2">
+                <Star className="h-4 w-4 text-emerald-500" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium">GraphQL with Node.js</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Build modern APIs with GraphQL and Apollo Server
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {t("learn.topDataStructures") ||
+                    "Top Data Structure Problems"}
                 </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">16 hours • Advanced</span>
-                  <Button size="sm" variant="outline">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <p className="text-xs text-muted-foreground">33 problems</p>
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/learn/programming-lang" className="group">
+          <Card className="border-border hover:border-primary/20 transition-all hover:-translate-y-0.5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg bg-blue-500/10 p-2">
+                <GraduationCap className="h-4 w-4 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                  {t("learn.learnLanguage") || "Learn a Language"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  8 languages, 37 exercises
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+            </CardContent>
+          </Card>
+        </Link>
+      </section>
     </div>
   );
 }
