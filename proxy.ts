@@ -91,6 +91,8 @@ export const config = {
     "/profile/:path*",
     "/article/create",
     "/project/create",
+    "/dictionary/create",
+    "/dictionary/moderation/:path*",
     "/setup",
   ],
 };

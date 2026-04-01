@@ -228,6 +228,7 @@
     "signUpSubtitle": "サインアップして始めましょう",
     "studentCodeLabel": "学生コード",
     "emailLabel": "メールアドレス",
+    "studentCodePlaceholder": "s2x....",
     "passwordLabel": "パスワード",
     "emailPlaceholder": "メールを入力してください",
     "passwordPlaceholder": "パスワードを入力してください",
