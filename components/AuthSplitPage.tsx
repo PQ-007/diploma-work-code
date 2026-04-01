@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Github } from "lucide-react";
 
 type AuthMode = "signin" | "signup";
 
@@ -17,6 +16,15 @@ const DONUT_TICK_MS = 90;
 const DONUT_WIDTH = 48;
 const DONUT_HEIGHT = 22;
 const DONUT_SHADES = ".,-~:;=!*#$@";
+
+function isStrongPassword(value: string): boolean {
+  if (value.length < 8) return false;
+  const hasLower = /[a-z]/.test(value);
+  const hasUpper = /[A-Z]/.test(value);
+  const hasDigit = /\d/.test(value);
+  const hasSymbol = /[^A-Za-z0-9]/.test(value);
+  return hasLower && hasUpper && hasDigit && hasSymbol;
+}
 
 function generateDonutFrame(angleA: number, angleB: number): string {
   const output = new Array<string>(DONUT_WIDTH * DONUT_HEIGHT).fill(" ");
@@ -88,6 +96,8 @@ function generateDonutFrame(angleA: number, angleB: number): string {
 export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
   const { t } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
 
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -97,6 +107,9 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(
+    null,
+  );
   const [donutFrame, setDonutFrame] = useState<string>(() =>
     generateDonutFrame(0, 0),
   );
@@ -104,6 +117,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
   const formSwapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const donutARef = useRef(0);
   const donutBRef = useRef(0);
+  const isForgotScreen = pathname?.startsWith("/forgot-password") ?? false;
 
   useEffect(() => {
     return () => {
@@ -122,6 +136,14 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isForgotScreen) return;
+    const code = searchParams.get("code")?.trim() ?? "";
+    if (code && !studentCode) {
+      setStudentCode(code);
+    }
+  }, [isForgotScreen, searchParams, studentCode]);
 
   const setAuthMode = (nextMode: AuthMode) => {
     if (nextMode === mode) return;
@@ -202,6 +224,12 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
       return;
     }
 
+    if (!isStrongPassword(password)) {
+      setError(t("auth.strongPasswordError"));
+      setLoading(false);
+      return;
+    }
+
     const derivedEmail = `${normalizedCode}@nmct.edu.mn`;
 
     try {
@@ -209,7 +237,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
         email: derivedEmail,
         password,
         options: {
-          emailRedirectTo: `${location.origin}/auth/callback`,
+          emailRedirectTo: `${location.origin}/auth/callback?next=/setup`,
           data: { studentCode: normalizedCode },
         },
       });
@@ -219,7 +247,84 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
         return;
       }
 
+      setVerificationEmail(derivedEmail);
       setMessage(t("auth.checkEmail"));
+    } catch {
+      setError(t("auth.unexpectedError"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!verificationEmail) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: "signup",
+        email: verificationEmail,
+        options: {
+          emailRedirectTo: `${location.origin}/auth/callback?next=/setup`,
+        },
+      });
+
+      if (resendError) {
+        setError(resendError.message);
+        return;
+      }
+
+      setMessage("Verification email resent. Please check your inbox.");
+    } catch {
+      setError(t("auth.unexpectedError"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goToForgotPassword = () => {
+    const code = studentCode.trim();
+    const query = code ? `?code=${encodeURIComponent(code)}` : "";
+    router.push(`/forgot-password${query}`);
+  };
+
+  const handleForgotPasswordRequest = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    const normalizedCode = studentCode.trim().toLowerCase();
+    if (!normalizedCode) {
+      setError(t("auth.studentCodeRequired"));
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/recover", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ studentCode: normalizedCode }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        message?: string;
+      };
+
+      if (!response.ok) {
+        setError(data.error || t("auth.resetEmailFailed"));
+        return;
+      }
+
+      setMessage(data.message || t("auth.resetEmailSent"));
     } catch {
       setError(t("auth.unexpectedError"));
     } finally {
@@ -254,6 +359,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                     ? "bg-white text-black"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
+                disabled={isForgotScreen}
               >
                 {t("auth.signIn")}
               </button>
@@ -265,6 +371,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                     ? "bg-white text-black"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
+                disabled={isForgotScreen}
               >
                 {t("auth.signUp")}
               </button>
@@ -272,12 +379,18 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
 
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                {isFormSignIn ? t("auth.welcomeBack") : t("auth.signUpTitle")}
+                {isForgotScreen
+                  ? t("auth.forgotPassword")
+                  : isFormSignIn
+                    ? t("auth.welcomeBack")
+                    : t("auth.signUpTitle")}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {isFormSignIn
-                  ? t("auth.signInSubtitle")
-                  : t("auth.signUpSubtitle")}
+                {isForgotScreen
+                  ? t("auth.forgotPasswordSubtitle")
+                  : isFormSignIn
+                    ? t("auth.signInSubtitle")
+                    : t("auth.signUpSubtitle")}
               </p>
             </div>
 
@@ -289,11 +402,27 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
             {message && (
               <div className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 p-3 text-sm text-emerald-200">
                 {message}
+                {verificationEmail && !isFormSignIn && (
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    className="ml-2 underline underline-offset-2 transition hover:opacity-80"
+                    disabled={loading}
+                  >
+                    Resend
+                  </button>
+                )}
               </div>
             )}
 
             <form
-              onSubmit={isFormSignIn ? handleSignIn : handleSignUp}
+              onSubmit={
+                isForgotScreen
+                  ? handleForgotPasswordRequest
+                  : isFormSignIn
+                    ? handleSignIn
+                    : handleSignUp
+              }
               className="space-y-4"
             >
               <div>
@@ -315,80 +444,89 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 />
               </div>
 
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <label
-                    htmlFor="password"
-                    className="font-medium text-foreground"
-                  >
-                    {t("auth.passwordLabel")}
-                  </label>
-                  {isFormSignIn && (
-                    <button
-                      type="button"
-                      className="text-muted-foreground transition hover:text-foreground"
+              {!isForgotScreen && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between text-sm">
+                    <label
+                      htmlFor="password"
+                      className="font-medium text-foreground"
                     >
-                      {t("auth.forgotPassword")}
-                    </button>
+                      {t("auth.passwordLabel")}
+                    </label>
+                    {isFormSignIn && (
+                      <button
+                        type="button"
+                        onClick={goToForgotPassword}
+                        className="text-muted-foreground transition hover:text-foreground"
+                      >
+                        {t("auth.forgotPassword")}
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t("auth.passwordPlaceholder")}
+                    autoComplete={
+                      isFormSignIn ? "current-password" : "new-password"
+                    }
+                    minLength={isFormSignIn ? 6 : 8}
+                    required
+                    className="block w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/25"
+                  />
+                  {!isFormSignIn && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t("auth.strongPasswordHint")}
+                    </p>
                   )}
                 </div>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t("auth.passwordPlaceholder")}
-                  autoComplete={
-                    isFormSignIn ? "current-password" : "new-password"
-                  }
-                  minLength={6}
-                  required
-                  className="block w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/25"
-                />
-              </div>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading
-                  ? isFormSignIn
-                    ? t("auth.signingIn")
-                    : t("auth.signingUp")
-                  : isFormSignIn
-                    ? t("auth.signIn")
-                    : t("auth.signUp")}
+                {isForgotScreen
+                  ? loading
+                    ? t("auth.sendingResetLink")
+                    : t("auth.sendResetLink")
+                  : loading
+                    ? isFormSignIn
+                      ? t("auth.signingIn")
+                      : t("auth.signingUp")
+                    : isFormSignIn
+                      ? t("auth.signIn")
+                      : t("auth.signUp")}
               </button>
+
+              {isForgotScreen && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/signin")}
+                  className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-accent"
+                >
+                  {t("auth.backToSignIn")}
+                </button>
+              )}
             </form>
 
-            <div className="relative py-1">
-              <div className="absolute inset-0 flex items-center">
-                <span className="h-px w-full bg-border" />
-              </div>
-              <p className="relative mx-auto w-max bg-card px-3 text-sm text-muted-foreground">
-                {t("auth.orContinueWith")}
+            {!isForgotScreen && (
+              <p className="text-center text-sm text-muted-foreground">
+                {isFormSignIn ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setAuthMode(isFormSignIn ? "signup" : "signin")
+                  }
+                  className="font-semibold text-foreground hover:text-muted-foreground"
+                >
+                  {isFormSignIn ? t("auth.signUp") : t("auth.signIn")}
+                </button>
               </p>
-            </div>
-
-            <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-accent"
-            >
-              <Github className="h-4 w-4" />
-              Login with GitHub
-            </button>
-
-            <p className="text-center text-sm text-muted-foreground">
-              {isFormSignIn ? t("auth.noAccount") : t("auth.hasAccount")}{" "}
-              <button
-                type="button"
-                onClick={() => setAuthMode(isFormSignIn ? "signup" : "signin")}
-                className="font-semibold text-foreground hover:text-muted-foreground"
-              >
-                {isFormSignIn ? t("auth.signUp") : t("auth.signIn")}
-              </button>
-            </p>
+            )}
           </div>
         </section>
 
