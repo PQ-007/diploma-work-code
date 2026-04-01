@@ -28,9 +28,9 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the request matches a protected route
-  const isProtected = protectedPrefixes.some((prefix) =>
-    pathname.startsWith(prefix),
-  ) || isProtectedProfilePath(pathname);
+  const isProtected =
+    protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+    isProtectedProfilePath(pathname);
 
   if (!isProtected) {
     return NextResponse.next();
