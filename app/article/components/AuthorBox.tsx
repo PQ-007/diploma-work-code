@@ -26,7 +26,6 @@ type Props = {
     bio: string;
     followersCount?: number;
   };
-  
 };
 
 const getRankIcon = (rank: number) => {
@@ -42,9 +41,7 @@ const getRankIcon = (rank: number) => {
   return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
 };
 
-export default function MinimalAuthorBox({
-  author,
-}: Props) {
+export default function MinimalAuthorBox({ author }: Props) {
   const { user } = useAuth();
   const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
   const rankingPoints = author.ranking; // normalize missing ranking

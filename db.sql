@@ -342,6 +342,21 @@ CREATE TABLE public.project_milestones (
   CONSTRAINT project_milestones_pkey PRIMARY KEY (id),
   CONSTRAINT project_milestones_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
 );
+CREATE TABLE public.project_updates (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  project_id bigint NOT NULL,
+  created_by uuid NOT NULL,
+  title text NOT NULL,
+  body text NOT NULL,
+  update_type text NOT NULL DEFAULT 'regular'::text CHECK (update_type = ANY (ARRAY['regular'::text, 'milestone'::text, 'release'::text, 'announcement'::text])),
+  image_url text,
+  published_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT project_updates_pkey PRIMARY KEY (id),
+  CONSTRAINT project_updates_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id),
+  CONSTRAINT project_updates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
+);
 CREATE TABLE public.project_sections (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   project_id bigint NOT NULL,

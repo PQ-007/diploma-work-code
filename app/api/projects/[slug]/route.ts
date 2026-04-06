@@ -60,6 +60,7 @@ export async function GET(
       { data: milestones },
       { data: comments },
       { data: files },
+      { data: updates },
       { data: tagLinks },
     ] = await Promise.all([
       supabase
@@ -87,6 +88,12 @@ export async function GET(
         .eq("project_id", project.id)
         .order("created_at", { ascending: false }),
       supabase
+        .from("project_updates")
+        .select("*")
+        .eq("project_id", project.id)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false }),
+      supabase
         .from("project_tags")
         .select("project_id, tag_id")
         .eq("project_id", project.id),
@@ -109,6 +116,7 @@ export async function GET(
         project.created_by,
         ...(members || []).map((m) => m.user_id),
         ...(comments || []).map((c) => c.user_id),
+        ...(updates || []).map((u) => u.created_by),
       ]),
     ].filter(Boolean);
 
@@ -181,6 +189,10 @@ export async function GET(
       milestones: milestones || [],
       comments: topLevelComments,
       files: files || [],
+      updates: (updates || []).map((update) => ({
+        ...update,
+        author: profilesById.get(update.created_by) || null,
+      })),
       userLiked,
       isOwner: !!isOwner,
       isMember,

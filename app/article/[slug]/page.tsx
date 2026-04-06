@@ -713,8 +713,8 @@ export default function ModernArticlePage() {
                     size="icon"
                     className={`rounded-full border ${
                       isLiked
-                         ? "text-destructive border-destructive/40 bg-destructive/10"
-                      : "border-border hover:bg-muted"
+                        ? "text-destructive border-destructive/40 bg-destructive/10"
+                        : "border-border hover:bg-muted"
                     }`}
                     onClick={toggleLike}
                     aria-label={t("feed.actions.like")}

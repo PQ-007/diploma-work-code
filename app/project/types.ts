@@ -71,6 +71,26 @@ export interface ProjectFile {
   created_at: string;
 }
 
+export type ProjectUpdateType =
+  | "regular"
+  | "milestone"
+  | "release"
+  | "announcement";
+
+export interface ProjectUpdate {
+  id: number;
+  project_id: number;
+  created_by: string;
+  title: string;
+  body: string;
+  update_type: ProjectUpdateType;
+  image_url: string | null;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+  author?: ProjectAuthor | null;
+}
+
 export interface ProjectPayload {
   id: number;
   title: string;
@@ -99,7 +119,10 @@ export interface ProjectPayload {
   milestones?: ProjectMilestone[];
   comments?: ProjectComment[];
   files?: ProjectFile[];
+  updates?: ProjectUpdate[];
   userLiked?: boolean;
+  isOwner?: boolean;
+  isMember?: boolean;
 }
 
 export interface CreateProjectBody {
