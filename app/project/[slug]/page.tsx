@@ -8,8 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
+  Bookmark,
   Heart,
   Eye,
   Calendar,
@@ -153,6 +154,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<ProjectPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
   const [isMember, setIsMember] = useState(false);
@@ -213,6 +215,10 @@ export default function ProjectDetailPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }, []);
+
+  const handleBookmark = useCallback(() => {
+    setBookmarked((prev) => !prev);
   }, []);
 
   useEffect(() => {
@@ -309,124 +315,172 @@ export default function ProjectDetailPage() {
   const doneCount = (project.milestones || []).filter(
     (m) => m.completed,
   ).length;
+  const tabItems: {
+    value: string;
+    icon: React.ElementType;
+    label: string;
+    count: number;
+  }[] = [
+    {
+      value: "overview",
+      icon: BookOpen,
+      label: t("project.overview") || "Overview",
+      count: 0,
+    },
+    {
+      value: "milestones",
+      icon: Target,
+      label: t("project.kanban") || "Requirements",
+      count: milestonesCount,
+    },
+    {
+      value: "team",
+      icon: Users,
+      label: t("project.team") || "Technical",
+      count: membersCount,
+    },
+    {
+      value: "project-log",
+      icon: ScrollText,
+      label: t("project.projectLog") || "Changelog",
+      count: 0,
+    },
+    ...(filesCount > 0
+      ? [
+          {
+            value: "files",
+            icon: FileText,
+            label: t("project.files") || "Media",
+            count: filesCount,
+          },
+        ]
+      : []),
+  ];
+  const recentActivity = [...(project.milestones || [])]
+    .filter((m) => m.completed_at)
+    .sort(
+      (a, b) =>
+        new Date(b.completed_at || 0).getTime() -
+        new Date(a.completed_at || 0).getTime(),
+    )
+    .slice(0, 3);
 
   return (
-    <div className="min-h-screen pb-16 -mx-4 lg:-mx-8">
-      {/* Title bar */}
-      <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30 px-4 lg:px-8 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 flex-shrink-0"
-              onClick={() => router.push("/project")}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="min-w-0">
-              <h1 className="text-lg font-bold truncate">{project.title}</h1>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <StatusBadge status={project.status} />
-                {project.is_public && (
-                  <Badge variant="secondary" className="text-[10px]">
-                    Public
-                  </Badge>
+    <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%),linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--background))_100%)]" />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
+          <aside className="hidden lg:block">
+            <div className="sticky top-6">
+              <div className="flex">
+                <div className="flex flex-col items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-full border ${
+                    liked
+                      ? "text-destructive border-destructive/40 bg-destructive/10"
+                      : "border-border hover:bg-muted"
+                  }`}
+                  onClick={handleLike}
+                  disabled={!user}
+                  aria-label={t("project.likes") || "Like"}
+                >
+                  <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-full border ${
+                    bookmarked
+                      ? "text-primary border-primary/40 bg-primary/10"
+                      : "border-border hover:bg-muted"
+                  }`}
+                  onClick={handleBookmark}
+                  aria-label={t("common.bookmark") || "Bookmark"}
+                >
+                  <Bookmark
+                    className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`}
+                  />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full border border-border hover:bg-muted"
+                  onClick={scrollToComments}
+                  aria-label={t("project.comments") || "Comments"}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full border border-border hover:bg-muted"
+                  onClick={handleShare}
+                  aria-label={t("common.share") || "Share"}
+                >
+                  <Share2 className="h-5 w-5" />
+                </Button>
+
+                {isOwner && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full border border-border hover:bg-muted"
+                      onClick={() =>
+                        router.push(`/project/create?edit=${slug}`)
+                      }
+                      aria-label={t("common.edit") || "Edit"}
+                    >
+                      <Pencil className="h-5 w-5" />
+                    </Button>
+
+                  </>
                 )}
+
+                <div className="h-px w-10 bg-border my-1" />
+                <div className="text-[11px] text-muted-foreground text-center">
+                  <div className="font-semibold text-foreground/80">
+                    {likesCount}
+                  </div>
+                  <div>{t("project.likes") || "Likes"}</div>
+                </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {isOwner && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/project/create?edit=${slug}`)}
-                >
-                  <Pencil className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">
-                    {t("common.edit") || "Edit"}
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-destructive border-destructive/30 hover:bg-destructive/10"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            <Button variant="outline" size="sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">
-                {copied
-                  ? t("common.copied") || "Copied!"
-                  : t("common.share") || "Share"}
-              </span>
-            </Button>
-          </div>
-        </div>
-      </div>
+          </aside>
 
-      {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6">
-        <div className="flex gap-4">
-          {/* Mongolian vertical script accent */}
-          {mnScript && (
-            <div className="hidden xl:flex items-start pt-3 w-7 flex-shrink-0 select-none">
-              <span
-                className="mn-script text-[13px] font-bold text-violet-400/50 tracking-widest"
-                style={{
-                  writingMode: "vertical-lr",
-                  letterSpacing: "0.18em",
-                }}
-                title={project.title}
-              >
-                {mnScript}
-              </span>
+          <main className="space-y-8 min-w-0">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl lg:text-[46px] leading-[1.05] font-black uppercase tracking-tight text-foreground">
+                {project.title}
+              </h2>
             </div>
-          )}
-          <div className="flex-1 space-y-8">
-            {/* Steam-style header: cover + info panel */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-              {/* Cover image */}
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border bg-muted group">
+
+            <div className="space-y-3">
+              <div className="relative w-full aspect-[16/9] rounded-md overflow-hidden border border-border bg-card group shadow-[0_22px_40px_rgba(0,0,0,0.2)]">
                 {project.thumbnail_url ? (
                   <img
                     src={project.thumbnail_url}
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/5 via-primary/10 to-muted">
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/10 via-muted to-card">
                     <Layers className="h-20 w-20 text-primary/20" />
                     <span className="text-sm text-muted-foreground font-medium">
                       {project.title}
                     </span>
                   </div>
                 )}
-                {/* Overlay badges */}
-                <div className="absolute top-3 left-3 flex gap-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-background/80 backdrop-blur-sm text-xs capitalize"
-                  >
-                    {project.project_type}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={`bg-background/80 backdrop-blur-sm text-xs ${difficultyColors[project.difficulty]}`}
-                  >
-                    {difficultyLabel[project.difficulty]}
-                  </Badge>
-                </div>
-                {/* Progress overlay */}
                 {milestonesCount > 0 && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                    <div className="flex items-center justify-between text-white text-xs mb-1.5">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/50 to-transparent p-4">
+                    <div className="flex items-center justify-between text-foreground text-xs mb-1.5">
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                         {doneCount}/{milestonesCount}{" "}
@@ -434,9 +488,9 @@ export default function ProjectDetailPage() {
                       </span>
                       <span className="font-semibold">{project.progress}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-foreground/20 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-white transition-all duration-500"
+                        className="h-full rounded-full bg-primary transition-all duration-500"
                         style={{ width: `${project.progress}%` }}
                       />
                     </div>
@@ -444,356 +498,347 @@ export default function ProjectDetailPage() {
                 )}
               </div>
 
-              {/* Info sidebar */}
-              <Card className="flex flex-col gap-4 text-sm p-5 border-border/60">
-                <div>
-                  <p className="font-semibold text-base mb-1">
-                    {project.title}
-                  </p>
-                  {project.description && (
-                    <p className="text-muted-foreground leading-relaxed text-[13px] line-clamp-4">
-                      {project.description}
-                    </p>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Stats */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.likes") || "Likes"}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`h-auto py-0.5 px-2 gap-1 font-normal ${liked ? "text-red-500" : "text-muted-foreground hover:text-red-400"}`}
-                      onClick={handleLike}
-                      disabled={!user}
-                    >
-                      <Heart
-                        className={`h-3.5 w-3.5 ${liked ? "fill-current" : ""}`}
+              <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-video rounded-md border border-border bg-card/90 overflow-hidden"
+                  >
+                    {project.thumbnail_url ? (
+                      <img
+                        src={project.thumbnail_url}
+                        alt={`${project.title} preview ${i + 1}`}
+                        className="w-full h-full object-cover opacity-60"
                       />
-                      {likesCount}
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.views") || "Views"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                      {project.views}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.progress") || "Progress"}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${project.progress}%` }}
-                        />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground uppercase tracking-wide">
+                        Preview {i + 1}
                       </div>
-                      <span className="tabular-nums">{project.progress}%</span>
-                    </div>
+                    )}
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                <Separator />
-
-                {/* Metadata */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.releaseDate") || "Created"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                      {new Date(project.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.developer") || "Author"}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage
-                          src={project.author?.avatar_url || undefined}
-                        />
-                        <AvatarFallback className="text-[9px]">
-                          {(project.author?.display_name || "U")
-                            .charAt(0)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-blue-400 hover:underline cursor-pointer">
-                        {project.author?.display_name ||
-                          project.author?.user_name ||
-                          "Unknown"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.difficulty") || "Difficulty"}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${difficultyColors[project.difficulty]}`}
+            <Card className="border-border/80 bg-card/90 text-card-foreground p-5 sm:p-6 space-y-4">
+              <h3 className="text-xl font-black uppercase tracking-tight">
+                {t("project.about") || "About The Project"}
+              </h3>
+              <p className="text-sm sm:text-[15px] leading-7 text-muted-foreground">
+                {project.description ||
+                  "This project details a modular build intended for high-performance development workflows and collaborative iteration."}
+              </p>
+              {(project.technologies.length > 0 || project.tags.length > 0) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {[
+                    ...project.technologies.slice(0, 4),
+                    ...project.tags.slice(0, 4),
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-md border border-border/70 bg-muted/40 p-3"
                     >
-                      {difficultyLabel[project.difficulty]}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t("project.type") || "Type"}
-                    </span>
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {project.project_type}
-                    </Badge>
-                  </div>
-                  {project.category && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        {t("project.category") || "Category"}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {project.category}
-                      </Badge>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                        module
+                      </p>
+                      <p className="text-sm font-semibold mt-1">{item}</p>
                     </div>
-                  )}
+                  ))}
                 </div>
+              )}
+            </Card>
 
-                {/* Links */}
-                {(project.repository_url || project.demo_url) && (
-                  <>
-                    <Separator />
-                    <div className="flex flex-col gap-2">
-                      {project.repository_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="w-full justify-start"
-                        >
-                          <a
-                            href={project.repository_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Github className="h-4 w-4 mr-2" />
-                            {t("project.repository") || "Repository"}
-                          </a>
-                        </Button>
-                      )}
-                      {project.demo_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="w-full justify-start"
-                        >
-                          <a
-                            href={project.demo_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Globe className="h-4 w-4 mr-2" />
-                            {t("project.liveDemo") || "Live Demo"}
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  </>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+              {tabItems.map(({ value, icon: Icon, label, count }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setActiveTab(value)}
+                  className={`rounded-md border px-3 py-2 text-sm flex items-center justify-between ${
+                    activeTab === value
+                      ? "border-primary/50 bg-primary/15 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 truncate">
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </span>
+                  {count > 0 && <span className="text-xs">{count}</span>}
+                </button>
+              ))}
+            </div>
+
+            <Card className="border-border/80 bg-card/85 p-4 sm:p-5">
+              <TabsContent value="overview" className="mt-0 text-foreground">
+                <SectionEditor
+                  slug={slug}
+                  sections={project.sections || []}
+                  canEdit={canEdit}
+                  onSectionsChange={handleSectionsChange}
+                />
+              </TabsContent>
+              <TabsContent value="milestones" className="mt-0 text-foreground">
+                <KanbanBoard
+                  slug={slug}
+                  milestones={project.milestones || []}
+                  progress={project.progress}
+                  canEdit={canEdit}
+                  onMilestonesChange={handleMilestonesChange}
+                />
+              </TabsContent>
+              <TabsContent value="team" className="mt-0 text-foreground">
+                <TeamManager
+                  slug={slug}
+                  members={project.members || []}
+                  isOwner={isOwner}
+                  onMembersChange={handleMembersChange}
+                />
+              </TabsContent>
+              <TabsContent value="project-log" className="mt-0 text-foreground">
+                <ProjectLogTab
+                  milestones={project.milestones || []}
+                  members={project.members || []}
+                  createdAt={project.created_at}
+                />
+              </TabsContent>
+              {filesCount > 0 && (
+                <TabsContent value="files" className="mt-0">
+                  <div className="space-y-2">
+                    {(project.files || []).map((file) => (
+                      <a
+                        key={file.id}
+                        href={file.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 rounded-md border border-border p-3 text-sm text-foreground hover:bg-accent transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate flex-1">
+                          {file.file_name}
+                        </span>
+                        {file.file_size && (
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {(file.file_size / 1024).toFixed(0)} KB
+                          </span>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
+            </Card>
+
+            <Card
+              ref={commentsRef}
+              className="border-border/80 bg-card/90 p-5 sm:p-6"
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-base font-semibold text-foreground">
+                  {t("project.comments") || "Comments"}
+                  {commentsCount > 0 && (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground">
+                      ({commentsCount})
+                    </span>
+                  )}
+                </h2>
+              </div>
+              <ProjectComments
+                slug={slug}
+                comments={(project.comments as ProjectComment[]) || []}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
+              />
+            </Card>
+          </main>
+
+          <aside className="hidden xl:flex xl:flex-col gap-4 sticky top-[84px] self-start">
+            <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
+              <div className="rounded-md overflow-hidden border border-border">
+                {project.thumbnail_url ? (
+                  <img
+                    src={project.thumbnail_url}
+                    alt={project.title}
+                    className="w-full aspect-video object-cover"
+                  />
+                ) : (
+                  <div className="aspect-video flex items-center justify-center bg-muted/60 text-muted-foreground text-xs uppercase tracking-wide">
+                    Preview
+                  </div>
                 )}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-3">
+                {project.description ||
+                  "A high-performance implementation designed for collaborative open-source contributors."}
+              </p>
+              <div className="space-y-2 mt-4 text-xs">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t("project.releaseDate") || "Release date"}</span>
+                  <span className="text-foreground flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {new Date(project.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t("project.developer") || "Developer"}</span>
+                  <span className="text-foreground truncate max-w-[160px] text-right">
+                    {project.author?.display_name ||
+                      project.author?.user_name ||
+                      "Unknown"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{t("project.progress") || "Progress"}</span>
+                  <span className="text-foreground">{project.progress}%</span>
+                </div>
+              </div>
 
-                {/* Technologies + tags */}
-                {(project.technologies.length > 0 ||
-                  project.tags.length > 0) && (
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1.5">
-                      {t("project.popularTags") ||
-                        "Popular user-defined tags for this project:"}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {project.technologies.map((tech) => (
+              {(project.tags.length > 0 || project.technologies.length > 0) && (
+                <div className="mt-4">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
+                    {t("project.popularTags") || "Tags"}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="outline"
+                        className="text-[11px] px-2 py-0.5"
+                      >
+                        #{tag}
+                      </Badge>
+                    ))}
+                    {project.tags.length === 0 &&
+                      project.technologies.slice(0, 6).map((tech) => (
                         <Badge
                           key={tech}
                           variant="secondary"
-                          className="rounded text-xs px-2 py-0.5"
+                          className="text-[11px] px-2 py-0.5"
                         >
                           {tech}
                         </Badge>
                       ))}
-                      {project.tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="outline"
-                          className="rounded text-xs px-2 py-0.5 text-muted-foreground"
-                        >
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
                   </div>
-                )}
-              </Card>
-            </div>
-
-            {/* Tab navigation */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-border rounded-none gap-0 overflow-x-auto">
-                {(
-                  [
-                    {
-                      value: "overview",
-                      icon: BookOpen,
-                      label: t("project.overview") || "Overview",
-                      count: 0,
-                    },
-                    {
-                      value: "milestones",
-                      icon: Target,
-                      label: t("project.kanban") || "To-Do Board",
-                      count: milestonesCount,
-                    },
-                    {
-                      value: "team",
-                      icon: Users,
-                      label: t("project.team") || "Team",
-                      count: membersCount,
-                    },
-                    {
-                      value: "project-log",
-                      icon: ScrollText,
-                      label: t("project.projectLog") || "Project Log",
-                      count: 0,
-                    },
-                    ...(filesCount > 0
-                      ? [
-                          {
-                            value: "files",
-                            icon: FileText,
-                            label: t("project.files") || "Files",
-                            count: filesCount,
-                          },
-                        ]
-                      : []),
-                  ] as {
-                    value: string;
-                    icon: React.ElementType;
-                    label: string;
-                    count: number;
-                  }[]
-                ).map(({ value, icon: Icon, label, count }) => (
-                  <TabsTrigger
-                    key={value}
-                    value={value}
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 gap-1.5 text-sm font-medium whitespace-nowrap"
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                    {count > 0 && (
-                      <span className="ml-0.5 text-xs bg-muted px-1.5 py-0.5 rounded-full">
-                        {count}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              <div className="pt-6">
-                <TabsContent value="overview" className="mt-0">
-                  <SectionEditor
-                    slug={slug}
-                    sections={project.sections || []}
-                    canEdit={canEdit}
-                    onSectionsChange={handleSectionsChange}
-                  />
-                </TabsContent>
-                <TabsContent value="milestones" className="mt-0">
-                  <KanbanBoard
-                    slug={slug}
-                    milestones={project.milestones || []}
-                    progress={project.progress}
-                    canEdit={canEdit}
-                    onMilestonesChange={handleMilestonesChange}
-                  />
-                </TabsContent>
-                <TabsContent value="team" className="mt-0">
-                  <TeamManager
-                    slug={slug}
-                    members={project.members || []}
-                    isOwner={isOwner}
-                    onMembersChange={handleMembersChange}
-                  />
-                </TabsContent>
-                <TabsContent value="project-log" className="mt-0">
-                  <ProjectLogTab
-                    milestones={project.milestones || []}
-                    members={project.members || []}
-                    createdAt={project.created_at}
-                  />
-                </TabsContent>
-                {filesCount > 0 && (
-                  <TabsContent value="files" className="mt-0">
-                    <div className="space-y-2">
-                      {(project.files || []).map((file) => (
-                        <a
-                          key={file.id}
-                          href={file.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-muted/50 transition-colors"
-                        >
-                          <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate flex-1">
-                            {file.file_name}
-                          </span>
-                          {file.file_size && (
-                            <span className="text-xs text-muted-foreground flex-shrink-0">
-                              {(file.file_size / 1024).toFixed(0)} KB
-                            </span>
-                          )}
-                        </a>
-                      ))}
-                    </div>
-                  </TabsContent>
-                )}
-              </div>
-            </Tabs>
-
-            {/* Comments section */}
-            <div ref={commentsRef}>
-              <Separator />
-              <div className="pt-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                  <h2 className="text-base font-semibold">
-                    {t("project.comments") || "Comments"}
-                    {commentsCount > 0 && (
-                      <span className="ml-2 text-sm font-normal text-muted-foreground">
-                        ({commentsCount})
-                      </span>
-                    )}
-                  </h2>
                 </div>
-                <ProjectComments
-                  slug={slug}
-                  comments={(project.comments as ProjectComment[]) || []}
-                  onCommentAdded={handleCommentAdded}
-                  onCommentDeleted={handleCommentDeleted}
-                />
+              )}
+            </Card>
+
+            <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
+              <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                Core Tech Stack
+              </p>
+              <div className="space-y-2.5">
+                {(project.technologies.length > 0
+                  ? project.technologies.slice(0, 5)
+                  : ["TypeScript", "Supabase", "Next.js"]
+                ).map((tech) => (
+                  <div
+                    key={tech}
+                    className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2"
+                  >
+                    <span className="text-sm">{tech}</span>
+                    <span className="text-[10px] uppercase text-muted-foreground">
+                      core
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
+            </Card>
+
+            <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
+              <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                Contributor Spotlight
+              </p>
+              <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10 border border-border">
+                  <AvatarImage src={project.author?.avatar_url || undefined} />
+                  <AvatarFallback>
+                    {(project.author?.display_name || "U")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">
+                    {project.author?.display_name ||
+                      project.author?.user_name ||
+                      "Unknown"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Lead contributor
+                  </p>
+                </div>
+              </div>
+              {(project.repository_url || project.demo_url) && (
+                <div className="grid grid-cols-1 gap-2 mt-4">
+                  {project.repository_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="w-full justify-start border-border bg-muted/30 hover:bg-accent text-foreground"
+                    >
+                      <a
+                        href={project.repository_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Github className="h-4 w-4 mr-2" />
+                        {t("project.repository") || "Repository"}
+                      </a>
+                    </Button>
+                  )}
+                  {project.demo_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="w-full justify-start border-border bg-muted/30 hover:bg-accent text-foreground"
+                    >
+                      <a
+                        href={project.demo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Globe className="h-4 w-4 mr-2" />
+                        {t("project.liveDemo") || "Live Demo"}
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
+              <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
+                Recent Activity
+              </p>
+              <div className="space-y-2">
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((item) => (
+                    <div
+                      key={item.id}
+                      className="text-xs border-l border-border pl-2"
+                    >
+                      <p className="text-foreground truncate">{item.title}</p>
+                      <p className="text-muted-foreground mt-0.5">
+                        {new Date(
+                          item.completed_at || item.created_at,
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    No activity updates yet.
+                  </p>
+                )}
+              </div>
+            </Card>
+          </aside>
         </div>
-      </div>
+      </Tabs>
 
       {/* Mobile floating action bar */}
       <FloatingActionBar

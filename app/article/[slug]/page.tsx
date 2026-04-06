@@ -38,7 +38,8 @@ import {
   Heart,
   Languages,
   Link as LinkIcon,
-  MessageCircle,
+  Pencil,
+  MessageSquare,
   MoreHorizontal,
   Share2,
 } from "lucide-react";
@@ -712,8 +713,8 @@ export default function ModernArticlePage() {
                     size="icon"
                     className={`rounded-full border ${
                       isLiked
-                        ? "text-red-500 border-red-200 bg-red-50"
-                        : "border-border hover:bg-muted"
+                         ? "text-destructive border-destructive/40 bg-destructive/10"
+                      : "border-border hover:bg-muted"
                     }`}
                     onClick={toggleLike}
                     aria-label={t("feed.actions.like")}
@@ -729,7 +730,7 @@ export default function ModernArticlePage() {
                     size="icon"
                     className={`rounded-full border ${
                       isBookmarked
-                        ? "text-blue-500 border-blue-200 bg-blue-50"
+                        ? "text-primary border-primary/40 bg-primary/10 "
                         : "border-border hover:bg-muted"
                     }`}
                     onClick={toggleBookmark}
@@ -748,7 +749,7 @@ export default function ModernArticlePage() {
                     aria-label={t("feed.actions.comment")}
                     onClick={() => commentRef.current?.focus()}
                   >
-                    <MessageCircle className="h-5 w-5" />
+                    <MessageSquare className="h-5 w-5" />
                   </Button>
 
                   {/* Language selector */}
@@ -817,6 +818,20 @@ export default function ModernArticlePage() {
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
+
+                  {isOwnArticle && (
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full border border-border hover:bg-muted"
+                      aria-label={t("common.edit")}
+                    >
+                      <Link href={articleEditHref}>
+                        <Pencil className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  )}
 
                   {/* More action */}
                   <DropdownMenu>
@@ -947,11 +962,7 @@ export default function ModernArticlePage() {
 
           {/* Right panels (wireframe: Author data, TOC, Definitions, Related links) */}
           <aside className="hidden xl:block">
-            <AuthorBox
-              author={articleData.author}
-              isOwnArticle={isOwnArticle}
-              editHref={articleEditHref}
-            />
+            <AuthorBox author={articleData.author} />
             <div className="sticky top-6 mt-6 space-y-6">
               <RightPanelCard title={t("articles.detail.tableOfContents")}>
                 {renderToc()}

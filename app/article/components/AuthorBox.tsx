@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import {
   ChessBishop,
@@ -26,8 +26,7 @@ type Props = {
     bio: string;
     followersCount?: number;
   };
-  isOwnArticle?: boolean;
-  editHref?: string;
+  
 };
 
 const getRankIcon = (rank: number) => {
@@ -45,13 +44,29 @@ const getRankIcon = (rank: number) => {
 
 export default function MinimalAuthorBox({
   author,
-  isOwnArticle = false,
-  editHref,
 }: Props) {
-  const { t } = useLanguage();
+  const { user } = useAuth();
   const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
   const rankingPoints = author.ranking; // normalize missing ranking
   const [isFollowing, setIsFollowing] = useState(false);
+  const currentUsername =
+    typeof user?.user_metadata?.username === "string"
+      ? user.user_metadata.username
+      : typeof user?.user_metadata?.user_name === "string"
+        ? user.user_metadata.user_name
+        : "";
+  const normalizedCurrentUsername = currentUsername
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  const normalizedAuthorUsername = (author.username || "")
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  const isSelf =
+    normalizedCurrentUsername.length > 0 &&
+    normalizedCurrentUsername === normalizedAuthorUsername;
+
   const handleFollowToggle = () => {
     setIsFollowing((prev) => !prev);
   };
@@ -95,16 +110,7 @@ export default function MinimalAuthorBox({
           </div>
         </div>
 
-        {isOwnArticle ? (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-full px-3 text-[11px] font-bold"
-          >
-            <Link href={editHref || "#"}>{t("common.edit")}</Link>
-          </Button>
-        ) : (
+        {!isSelf && (
           <Button
             onClick={handleFollowToggle}
             variant={isFollowing ? "outline" : "secondary"}
