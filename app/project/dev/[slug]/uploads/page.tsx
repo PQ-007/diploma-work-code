@@ -89,9 +89,14 @@ export default function ProjectUploadsPage() {
       setFileName((prev) => prev || image.name);
       setFileType((prev) => prev || image.type || "image");
       setFileSize((prev) => prev || String(image.size));
-      setSuccess(t("project.imageUploadedNowRegister") || "Image uploaded. Click Add file to register metadata.");
+      setSuccess(
+        t("project.imageUploadedNowRegister") ||
+          "Image uploaded. Click Add file to register metadata.",
+      );
     } catch {
-      setError(t("project.updateImageUploadFailed") || "Failed to upload image.");
+      setError(
+        t("project.updateImageUploadFailed") || "Failed to upload image.",
+      );
     } finally {
       setUploadingImage(false);
       event.target.value = "";
@@ -100,7 +105,9 @@ export default function ProjectUploadsPage() {
 
   const handleAddFile = useCallback(async () => {
     if (!fileName.trim() || !fileUrl.trim()) {
-      setError(t("project.fileNameUrlRequired") || "File name and URL are required.");
+      setError(
+        t("project.fileNameUrlRequired") || "File name and URL are required.",
+      );
       return;
     }
 
@@ -140,7 +147,9 @@ export default function ProjectUploadsPage() {
 
   const handleDelete = useCallback(
     async (id: number) => {
-      const ok = window.confirm(t("project.confirmDeleteFile") || "Delete this file?");
+      const ok = window.confirm(
+        t("project.confirmDeleteFile") || "Delete this file?",
+      );
       if (!ok) return;
 
       const snapshot = files;
@@ -183,11 +192,19 @@ export default function ProjectUploadsPage() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => router.push(`/project/dev/${slug}`)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/project/dev/${slug}`)}
+              >
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 {t("common.back") || "Back"}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => router.push(`/project/dev/${slug}/config`)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/project/dev/${slug}/config`)}
+              >
                 {t("project.configPage") || "Config"}
               </Button>
             </div>
@@ -195,13 +212,17 @@ export default function ProjectUploadsPage() {
         </Card>
 
         {(error || success) && (
-          <Card className={`p-3 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-primary/30 bg-primary/10 text-primary"}`}>
+          <Card
+            className={`p-3 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-primary/30 bg-primary/10 text-primary"}`}
+          >
             {error || success}
           </Card>
         )}
 
         <Card className="border-border/80 bg-card/90 p-5 space-y-4">
-          <h2 className="text-lg font-semibold">{t("project.addFile") || "Add File Metadata"}</h2>
+          <h2 className="text-lg font-semibold">
+            {t("project.addFile") || "Add File Metadata"}
+          </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
@@ -224,34 +245,59 @@ export default function ProjectUploadsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
             <Input
-              placeholder={t("project.fileSizeBytes") || "File size in bytes (optional)"}
+              placeholder={
+                t("project.fileSizeBytes") || "File size in bytes (optional)"
+              }
               value={fileSize}
-              onChange={(e) => setFileSize(e.target.value.replace(/[^0-9]/g, ""))}
+              onChange={(e) =>
+                setFileSize(e.target.value.replace(/[^0-9]/g, ""))
+              }
             />
             <label className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors">
-              {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+              {uploadingImage ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ImagePlus className="h-4 w-4" />
+              )}
               <span className="text-sm">
-                {uploadingImage ? (t("common.uploading") || "Uploading...") : (t("project.uploadImage") || "Upload Image")}
+                {uploadingImage
+                  ? t("common.uploading") || "Uploading..."
+                  : t("project.uploadImage") || "Upload Image"}
               </span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleCloudinaryUpload} disabled={uploadingImage} />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCloudinaryUpload}
+                disabled={uploadingImage}
+              />
             </label>
           </div>
 
           <Button onClick={handleAddFile} disabled={saving || uploadingImage}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {saving ? (t("common.saving") || "Saving...") : (t("common.add") || "Add")}
+            {saving
+              ? t("common.saving") || "Saving..."
+              : t("common.add") || "Add"}
           </Button>
         </Card>
 
         <Card className="border-border/80 bg-card/90 p-5 space-y-3">
-          <h2 className="text-lg font-semibold">{t("project.files") || "Files"}</h2>
+          <h2 className="text-lg font-semibold">
+            {t("project.files") || "Files"}
+          </h2>
 
           {files.length === 0 && (
-            <p className="text-sm text-muted-foreground">{t("project.noFilesYet") || "No files added yet."}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("project.noFilesYet") || "No files added yet."}
+            </p>
           )}
 
           {files.map((file) => (
-            <div key={file.id} className="flex items-center gap-3 rounded-md border border-border p-3">
+            <div
+              key={file.id}
+              className="flex items-center gap-3 rounded-md border border-border p-3"
+            >
               <a
                 href={file.file_url}
                 target="_blank"
@@ -263,10 +309,17 @@ export default function ProjectUploadsPage() {
               </a>
 
               {file.file_size && (
-                <span className="text-xs text-muted-foreground">{(file.file_size / 1024).toFixed(0)} KB</span>
+                <span className="text-xs text-muted-foreground">
+                  {(file.file_size / 1024).toFixed(0)} KB
+                </span>
               )}
 
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(file.id)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={() => handleDelete(file.id)}
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>

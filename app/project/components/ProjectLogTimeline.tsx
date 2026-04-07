@@ -57,20 +57,24 @@ export default function ProjectLogTimeline({
   const entries = useMemo<TimelineEntry[]>(() => {
     const resolvedUpdates = (updates || [])
       .map((update) => {
-        const iconByType: Record<ProjectUpdate["update_type"], React.ElementType> = {
+        const iconByType: Record<
+          ProjectUpdate["update_type"],
+          React.ElementType
+        > = {
           regular: ScrollText,
           milestone: CheckCircle2,
           release: Layers,
           announcement: Megaphone,
         };
 
-        const fallbackTypeLabel: Record<ProjectUpdate["update_type"], string> = {
-          regular: t("project.regularUpdate") || "Regular Update",
-          milestone: t("project.updateType.milestone") || "Milestone Update",
-          release: t("project.updateType.release") || "Release Update",
-          announcement:
-            t("project.updateType.announcement") || "Announcement",
-        };
+        const fallbackTypeLabel: Record<ProjectUpdate["update_type"], string> =
+          {
+            regular: t("project.regularUpdate") || "Regular Update",
+            milestone: t("project.updateType.milestone") || "Milestone Update",
+            release: t("project.updateType.release") || "Release Update",
+            announcement:
+              t("project.updateType.announcement") || "Announcement",
+          };
 
         return {
           id: update.id,

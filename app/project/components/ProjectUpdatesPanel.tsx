@@ -99,7 +99,11 @@ export default function ProjectUpdatesPanel({
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error || t("project.updateCreateFailed") || "Failed to publish update.");
+        setError(
+          data?.error ||
+            t("project.updateCreateFailed") ||
+            "Failed to publish update.",
+        );
         return;
       }
 
@@ -112,13 +116,22 @@ export default function ProjectUpdatesPanel({
     } finally {
       setSaving(false);
     }
-  }, [body, imageUrl, onUpdatesChange, resetForm, slug, t, title, updateType, updates]);
+  }, [
+    body,
+    imageUrl,
+    onUpdatesChange,
+    resetForm,
+    slug,
+    t,
+    title,
+    updateType,
+    updates,
+  ]);
 
   const handleDeleteUpdate = useCallback(
     async (id: number) => {
       const confirmed = window.confirm(
-        t("project.confirmDeleteUpdate") ||
-          "Delete this update permanently?",
+        t("project.confirmDeleteUpdate") || "Delete this update permanently?",
       );
       if (!confirmed) return;
 
@@ -134,7 +147,11 @@ export default function ProjectUpdatesPanel({
 
         if (!res.ok) {
           const data = await res.json().catch(() => null);
-          setError(data?.error || t("project.updateDeleteFailed") || "Failed to delete update.");
+          setError(
+            data?.error ||
+              t("project.updateDeleteFailed") ||
+              "Failed to delete update.",
+          );
           return;
         }
 
@@ -166,12 +183,16 @@ export default function ProjectUpdatesPanel({
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={t("project.updateTitlePlaceholder") || "Update title"}
+                placeholder={
+                  t("project.updateTitlePlaceholder") || "Update title"
+                }
               />
 
               <Select
                 value={updateType}
-                onValueChange={(value) => setUpdateType(value as ProjectUpdateType)}
+                onValueChange={(value) =>
+                  setUpdateType(value as ProjectUpdateType)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -188,7 +209,9 @@ export default function ProjectUpdatesPanel({
               <Input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
-                placeholder={t("project.updateImageUrlPlaceholder") || "Optional image URL"}
+                placeholder={
+                  t("project.updateImageUrlPlaceholder") || "Optional image URL"
+                }
               />
 
               <Textarea
@@ -229,7 +252,9 @@ export default function ProjectUpdatesPanel({
             </div>
           )}
 
-          {!creating && error && <p className="text-xs text-destructive">{error}</p>}
+          {!creating && error && (
+            <p className="text-xs text-destructive">{error}</p>
+          )}
         </div>
       )}
 
@@ -246,7 +271,9 @@ export default function ProjectUpdatesPanel({
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{update.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(update.published_at || update.created_at).toLocaleDateString()}
+                  {new Date(
+                    update.published_at || update.created_at,
+                  ).toLocaleDateString()}
                 </p>
               </div>
               <Button

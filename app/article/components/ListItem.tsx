@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Share } from "lucide-react";
+import { Bookmark, Eye, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getRankIcon } from "@/lib/utils/rankIcons";
 
@@ -50,14 +50,14 @@ export default function ListItem({
   item,
   isLiked,
   isBookmarked,
-  toggleLike,
+  toggleLike: _toggleLike,
   toggleBookmark,
 }: ListItemProps) {
   const { t } = useLanguage();
   return (
     <article key={item.id} className="group relative">
       <Card
-        className={`border-border/40 p-4 transition-all duration-300 hover:shadow-md ${item.featured ? "border-foreground/20 shadow-sm bg-muted/20" : ""}`}
+        className={`relative border-border/40 p-4 transition-all duration-300 hover:shadow-md ${item.featured ? "border-foreground/20 shadow-sm bg-muted/20" : ""}`}
       >
         <div className="flex gap-4">
           <div className="flex-1 min-w-0 space-y-3">
@@ -109,48 +109,34 @@ export default function ListItem({
             </div>
 
             {/* Tags + Actions row to mirror skeleton layout */}
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="min-w-0 flex items-center gap-1.5 overflow-hidden">
                 {item.content.tags.slice(0, 4).map((tag) => (
                   <Badge
                     key={tag}
                     variant="secondary"
-                    className="px-2 py-0.5 text-xs font-normal border border-border/40"
+                    className="px-2 py-0.5 text-xs font-normal border border-border/40 shrink-0"
                   >
                     {tag}
                   </Badge>
                 ))}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-xs text-muted-foreground hidden sm:inline">
-                  {item.stats.views} {t("common.views")}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`h-7 w-7 ${
-                    isLiked
-                      ? "text-red-500"
-                      : "text-muted-foreground hover:text-red-500"
-                  }`}
-                  onClick={() => toggleLike(item.id)}
-                  title={
-                    isLiked ? t("feed.actions.unlike") : t("feed.actions.like")
-                  }
-                >
-                  <Heart
-                    className="h-4 w-4"
-                    fill={isLiked ? "currentColor" : "none"}
-                  />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                  title={t("feed.actions.comment")}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="inline-flex items-center gap-1">
+                    <Eye className="h-3.5 w-3.5" />
+                    {item.stats.views}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1 ${isLiked ? "text-red-500" : ""}`}
+                  >
+                    <Heart
+                      className="h-3.5 w-3.5"
+                      fill={isLiked ? "currentColor" : "none"}
+                    />
+                    {item.stats.likes}
+                  </span>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -170,14 +156,6 @@ export default function ListItem({
                     className="h-4 w-4"
                     fill={isBookmarked ? "currentColor" : "none"}
                   />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                  title={t("feed.actions.share")}
-                >
-                  <Share className="h-4 w-4" />
                 </Button>
               </div>
             </div>

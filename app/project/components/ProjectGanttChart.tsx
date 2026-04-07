@@ -48,7 +48,8 @@ function buildTasks(milestones: ProjectMilestone[]): GanttTask[] {
       end = start;
     }
 
-    const status = milestone.kanban_status || (milestone.completed ? "done" : "todo");
+    const status =
+      milestone.kanban_status || (milestone.completed ? "done" : "todo");
 
     return {
       id: milestone.id,
@@ -66,7 +67,9 @@ function statusClass(status: GanttTask["status"]) {
   return "bg-muted-foreground/40";
 }
 
-export default function ProjectGanttChart({ milestones }: ProjectGanttChartProps) {
+export default function ProjectGanttChart({
+  milestones,
+}: ProjectGanttChartProps) {
   const { t } = useLanguage();
   const tasks = buildTasks(milestones);
 
@@ -106,7 +109,8 @@ export default function ProjectGanttChart({ milestones }: ProjectGanttChartProps
           {t("project.timelineWindow") || "Timeline window"}
         </p>
         <p className="text-sm font-medium text-foreground">
-          {projectStart.toLocaleDateString()} - {projectEnd.toLocaleDateString()}
+          {projectStart.toLocaleDateString()} -{" "}
+          {projectEnd.toLocaleDateString()}
         </p>
       </div>
 
@@ -141,7 +145,8 @@ export default function ProjectGanttChart({ milestones }: ProjectGanttChartProps
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{task.title}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {task.start.toLocaleDateString()} - {task.end.toLocaleDateString()}
+                    {task.start.toLocaleDateString()} -{" "}
+                    {task.end.toLocaleDateString()}
                   </p>
                 </div>
 

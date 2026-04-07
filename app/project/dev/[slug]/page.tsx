@@ -126,11 +126,15 @@ export default function ProjectDevWorkspacePage() {
               <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
                 {t("project.workspace") || "Workspace"}
               </p>
-              <h1 className="text-2xl md:text-3xl font-bold mt-1">{project.title}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mt-1">
+                {project.title}
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
-                {isOwner ? (t("project.owner") || "Owner") : (t("project.member") || "Member")}
+                {isOwner
+                  ? t("project.owner") || "Owner"
+                  : t("project.member") || "Member"}
               </Badge>
               <Button
                 variant="outline"

@@ -167,10 +167,13 @@ export async function POST(
     const title = typeof payload.title === "string" ? payload.title.trim() : "";
     const body = typeof payload.body === "string" ? payload.body.trim() : "";
     const imageUrl =
-      typeof payload.image_url === "string" && payload.image_url.trim().length > 0
+      typeof payload.image_url === "string" &&
+      payload.image_url.trim().length > 0
         ? payload.image_url.trim()
         : null;
-    const updateType: UpdateType = VALID_UPDATE_TYPES.includes(payload.update_type)
+    const updateType: UpdateType = VALID_UPDATE_TYPES.includes(
+      payload.update_type,
+    )
       ? payload.update_type
       : "regular";
 
@@ -261,7 +264,10 @@ export async function PUT(
     const update: Record<string, unknown> = {};
 
     if (payload.title !== undefined) {
-      if (typeof payload.title !== "string" || payload.title.trim().length === 0) {
+      if (
+        typeof payload.title !== "string" ||
+        payload.title.trim().length === 0
+      ) {
         return NextResponse.json(
           { error: "title cannot be empty" },
           { status: 400 },
@@ -271,7 +277,10 @@ export async function PUT(
     }
 
     if (payload.body !== undefined) {
-      if (typeof payload.body !== "string" || payload.body.trim().length === 0) {
+      if (
+        typeof payload.body !== "string" ||
+        payload.body.trim().length === 0
+      ) {
         return NextResponse.json(
           { error: "body cannot be empty" },
           { status: 400 },
@@ -292,7 +301,8 @@ export async function PUT(
 
     if (payload.image_url !== undefined) {
       update.image_url =
-        typeof payload.image_url === "string" && payload.image_url.trim().length > 0
+        typeof payload.image_url === "string" &&
+        payload.image_url.trim().length > 0
           ? payload.image_url.trim()
           : null;
     }

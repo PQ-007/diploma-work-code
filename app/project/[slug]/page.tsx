@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +29,7 @@ import {
   Pencil,
   Share2,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const difficultyColors: Record<ProjectDifficulty, string> = {
@@ -44,6 +43,209 @@ const difficultyLabel: Record<ProjectDifficulty, string> = {
   intermediate: "Intermediate",
   advanced: "Advanced",
 };
+
+function getSeedImage(seed: string, index: number) {
+  return `https://picsum.photos/seed/future-hub-${encodeURIComponent(seed)}-${index}/1600/900`;
+}
+
+function isImageUrl(url: string, fileType?: string | null) {
+  if (fileType && fileType.startsWith("image/")) return true;
+  return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
+}
+
+function buildPlaceholderProject(slug: string): ProjectPayload {
+  const now = new Date();
+  const twoDaysAgo = new Date(now);
+  twoDaysAgo.setDate(now.getDate() - 2);
+  const fiveDaysAgo = new Date(now);
+  fiveDaysAgo.setDate(now.getDate() - 5);
+  const inFourDays = new Date(now);
+  inFourDays.setDate(now.getDate() + 4);
+  const inSevenDays = new Date(now);
+  inSevenDays.setDate(now.getDate() + 7);
+
+  return {
+    id: 999001,
+    title: "FutureHub Testing Project",
+    slug,
+    description:
+      "Placeholder introduction content for QA/testing. This sample simulates real project data, updates, milestones, files, and discussion state.",
+    category: "Web Platform",
+    project_type: "coding",
+    difficulty: "intermediate",
+    status: "in_progress",
+    is_public: true,
+    repository_url: "https://github.com/example/future-hub-testing-project",
+    demo_url: "https://example.com/future-hub-testing-project",
+    thumbnail_url: getSeedImage(slug, 0),
+    progress: 62,
+    technologies: ["Next.js", "TypeScript", "Supabase", "Tailwind"],
+    created_by: "test-user-owner",
+    created_at: fiveDaysAgo.toISOString(),
+    updated_at: now.toISOString(),
+    published_at: fiveDaysAgo.toISOString(),
+    views: 284,
+    likes_count: 17,
+    tags: ["test", "placeholder", "intro-page", "ui-qa"],
+    author: {
+      id: "test-user-owner",
+      user_name: "futurehub_owner",
+      display_name: "FutureHub Owner",
+      avatar_url: getSeedImage(slug, 9),
+    },
+    members: [
+      {
+        user_id: "test-user-owner",
+        role: "owner",
+        joined_at: fiveDaysAgo.toISOString(),
+        profile: {
+          id: "test-user-owner",
+          user_name: "futurehub_owner",
+          display_name: "FutureHub Owner",
+          avatar_url: getSeedImage(slug, 9),
+        },
+      },
+      {
+        user_id: "test-user-contributor",
+        role: "contributor",
+        joined_at: twoDaysAgo.toISOString(),
+        profile: {
+          id: "test-user-contributor",
+          user_name: "tester_contributor",
+          display_name: "QA Contributor",
+          avatar_url: getSeedImage(slug, 10),
+        },
+      },
+    ],
+    milestones: [
+      {
+        id: 1,
+        project_id: 999001,
+        title: "Implement intro/dev route split",
+        description: "Project introduction and workspace routes separated.",
+        due_date: inFourDays.toISOString().slice(0, 10),
+        completed: true,
+        completed_at: twoDaysAgo.toISOString(),
+        kanban_status: "done",
+        sort_order: 0,
+        created_at: fiveDaysAgo.toISOString(),
+      },
+      {
+        id: 2,
+        project_id: 999001,
+        title: "Add uploads and config pages",
+        description: "Editor config + uploads test flows are being validated.",
+        due_date: inSevenDays.toISOString().slice(0, 10),
+        completed: false,
+        completed_at: null,
+        kanban_status: "in_progress",
+        sort_order: 1,
+        created_at: twoDaysAgo.toISOString(),
+      },
+    ],
+    comments: [
+      {
+        id: 1001,
+        project_id: 999001,
+        user_id: "test-user-contributor",
+        parent_id: null,
+        body: "This is placeholder discussion data for UI testing.",
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+        author: {
+          id: "test-user-contributor",
+          user_name: "tester_contributor",
+          display_name: "QA Contributor",
+          avatar_url: getSeedImage(slug, 10),
+        },
+        replies: [],
+      },
+    ],
+    files: [
+      {
+        id: 2001,
+        project_id: 999001,
+        uploaded_by: "test-user-owner",
+        file_name: "Project Deck.pdf",
+        file_url: "https://example.com/files/project-deck.pdf",
+        file_type: "application/pdf",
+        file_size: 823411,
+        created_at: now.toISOString(),
+      },
+      {
+        id: 2002,
+        project_id: 999001,
+        uploaded_by: "test-user-owner",
+        file_name: "Architecture Mockup.png",
+        file_url: getSeedImage(slug, 11),
+        file_type: "image/png",
+        file_size: 452311,
+        created_at: now.toISOString(),
+      },
+    ],
+    updates: [
+      {
+        id: 3001,
+        project_id: 999001,
+        created_by: "test-user-owner",
+        title: "Testing update feed with modal content",
+        body: "This is a placeholder update body used to verify project update rendering and modal behavior on the intro page.",
+        update_type: "regular",
+        image_url: getSeedImage(slug, 1),
+        published_at: twoDaysAgo.toISOString(),
+        created_at: twoDaysAgo.toISOString(),
+        updated_at: twoDaysAgo.toISOString(),
+        author: {
+          id: "test-user-owner",
+          user_name: "futurehub_owner",
+          display_name: "FutureHub Owner",
+          avatar_url: getSeedImage(slug, 9),
+        },
+      },
+      {
+        id: 3002,
+        project_id: 999001,
+        created_by: "test-user-contributor",
+        title: "Added config and uploads test pages",
+        body: "Second placeholder update for test data coverage and multiple timeline entries.",
+        update_type: "milestone",
+        image_url: getSeedImage(slug, 2),
+        published_at: now.toISOString(),
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+        author: {
+          id: "test-user-contributor",
+          user_name: "tester_contributor",
+          display_name: "QA Contributor",
+          avatar_url: getSeedImage(slug, 10),
+        },
+      },
+    ],
+    sections: [],
+    userLiked: false,
+    isOwner: true,
+    isMember: true,
+  };
+}
+
+function buildGalleryImages(project: ProjectPayload) {
+  const seedBase = project.slug || "placeholder";
+  const collected = [
+    project.thumbnail_url,
+    ...(project.updates || []).map((update) => update.image_url),
+    ...(project.files || [])
+      .filter((file) => isImageUrl(file.file_url, file.file_type))
+      .map((file) => file.file_url),
+  ].filter((url): url is string => Boolean(url));
+
+  const deduped = Array.from(new Set(collected));
+
+  while (deduped.length < 4) {
+    deduped.push(getSeedImage(seedBase, deduped.length + 3));
+  }
+
+  return deduped.slice(0, 4);
+}
 
 function PageSkeleton() {
   return (
@@ -67,6 +269,8 @@ function PageSkeleton() {
 export default function ProjectDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const searchParams = useSearchParams();
+  const demoMode = searchParams.get("demo") === "1";
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -83,11 +287,21 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
+      if (demoMode) {
+        const demoProject = buildPlaceholderProject(slug);
+        setProject(demoProject);
+        setLiked(false);
+        setLikesCount(demoProject.likes_count || 0);
+        setIsOwner(true);
+        setIsMember(true);
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(`/api/projects/${slug}`);
         if (!res.ok) {
-          router.push("/project");
-          return;
+          throw new Error("Project request failed");
         }
         const data = await res.json();
         setProject(data);
@@ -96,12 +310,17 @@ export default function ProjectDetailPage() {
         setIsOwner(data.isOwner || false);
         setIsMember(data.isMember || false);
       } catch {
-        router.push("/project");
+        const fallbackProject = buildPlaceholderProject(slug);
+        setProject(fallbackProject);
+        setLiked(false);
+        setLikesCount(fallbackProject.likes_count || 0);
+        setIsOwner(true);
+        setIsMember(true);
       } finally {
         setLoading(false);
       }
     })();
-  }, [slug, router]);
+  }, [slug, demoMode]);
 
   const handleLike = useCallback(async () => {
     if (!user || !project) return;
@@ -169,9 +388,13 @@ export default function ProjectDetailPage() {
 
   const commentsCount = (project.comments || []).length;
   const milestonesCount = (project.milestones || []).length;
-  const doneCount = (project.milestones || []).filter((m) => m.completed).length;
+  const doneCount = (project.milestones || []).filter(
+    (m) => m.completed,
+  ).length;
   const filesCount = (project.files || []).length;
   const canOpenWorkspace = isOwner || isMember;
+  const heroImage = project.thumbnail_url || getSeedImage(project.slug, 0);
+  const galleryImages = buildGalleryImages(project);
 
   return (
     <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background text-foreground">
@@ -208,7 +431,9 @@ export default function ProjectDetailPage() {
                   onClick={handleBookmark}
                   aria-label={t("common.bookmark") || "Bookmark"}
                 >
-                  <Bookmark className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`} />
+                  <Bookmark
+                    className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`}
+                  />
                 </Button>
 
                 <Button
@@ -245,7 +470,9 @@ export default function ProjectDetailPage() {
 
                 <div className="h-px w-10 bg-border my-1" />
                 <div className="text-[11px] text-muted-foreground text-center">
-                  <div className="font-semibold text-foreground/80">{likesCount}</div>
+                  <div className="font-semibold text-foreground/80">
+                    {likesCount}
+                  </div>
                   <div>{t("project.likes") || "Likes"}</div>
                 </div>
               </div>
@@ -262,24 +489,18 @@ export default function ProjectDetailPage() {
 
           <div className="space-y-3">
             <div className="relative w-full aspect-[16/9] rounded-md overflow-hidden border border-border bg-card group shadow-[0_22px_40px_rgba(0,0,0,0.2)]">
-              {project.thumbnail_url ? (
-                <img
-                  src={project.thumbnail_url}
-                  alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/10 via-muted to-card">
-                  <Layers className="h-20 w-20 text-primary/20" />
-                  <span className="text-sm text-muted-foreground font-medium">{project.title}</span>
-                </div>
-              )}
+              <img
+                src={heroImage}
+                alt={project.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
               {milestonesCount > 0 && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/50 to-transparent p-4">
                   <div className="flex items-center justify-between text-foreground text-xs mb-1.5">
                     <span className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      {doneCount}/{milestonesCount} {t("project.tasksCompleted") || "tasks done"}
+                      {doneCount}/{milestonesCount}{" "}
+                      {t("project.tasksCompleted") || "tasks done"}
                     </span>
                     <span className="font-semibold">{project.progress}%</span>
                   </div>
@@ -294,22 +515,16 @@ export default function ProjectDetailPage() {
             </div>
 
             <div className="grid grid-cols-4 gap-2 sm:gap-3">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {galleryImages.map((imageUrl, i) => (
                 <div
                   key={i}
                   className="aspect-video rounded-md border border-border bg-card/90 overflow-hidden"
                 >
-                  {project.thumbnail_url ? (
-                    <img
-                      src={project.thumbnail_url}
-                      alt={`${project.title} preview ${i + 1}`}
-                      className="w-full h-full object-cover opacity-60"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground uppercase tracking-wide">
-                      Preview {i + 1}
-                    </div>
-                  )}
+                  <img
+                    src={imageUrl}
+                    alt={`${project.title} preview ${i + 1}`}
+                    className="w-full h-full object-cover opacity-80"
+                  />
                 </div>
               ))}
             </div>
@@ -325,12 +540,17 @@ export default function ProjectDetailPage() {
             </p>
             {(project.technologies.length > 0 || project.tags.length > 0) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                {[...project.technologies.slice(0, 4), ...project.tags.slice(0, 4)].map((item) => (
+                {[
+                  ...project.technologies.slice(0, 4),
+                  ...project.tags.slice(0, 4),
+                ].map((item) => (
                   <div
                     key={item}
                     className="rounded-md border border-border/70 bg-muted/40 p-3"
                   >
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">module</p>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      module
+                    </p>
                     <p className="text-sm font-semibold mt-1">{item}</p>
                   </div>
                 ))}
@@ -359,14 +579,16 @@ export default function ProjectDetailPage() {
               members={project.members || []}
               createdAt={project.created_at}
               projectTitle={project.title}
-              heroImageUrl={project.thumbnail_url}
+              heroImageUrl={heroImage}
               updates={project.updates || []}
             />
           </Card>
 
           {filesCount > 0 && (
             <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
-              <h3 className="text-base font-semibold mb-4">{t("project.files") || "Files"}</h3>
+              <h3 className="text-base font-semibold mb-4">
+                {t("project.files") || "Files"}
+              </h3>
               <div className="space-y-2">
                 {(project.files || []).map((file) => (
                   <a
@@ -389,13 +611,18 @@ export default function ProjectDetailPage() {
             </Card>
           )}
 
-          <Card ref={commentsRef} className="border-border/80 bg-card/90 p-5 sm:p-6">
+          <Card
+            ref={commentsRef}
+            className="border-border/80 bg-card/90 p-5 sm:p-6"
+          >
             <div className="flex items-center gap-2 mb-5">
               <MessageSquare className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">
                 {t("project.comments") || "Comments"}
                 {commentsCount > 0 && (
-                  <span className="ml-2 text-sm font-normal text-muted-foreground">({commentsCount})</span>
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    ({commentsCount})
+                  </span>
                 )}
               </h2>
             </div>
@@ -411,17 +638,11 @@ export default function ProjectDetailPage() {
         <aside className="hidden xl:flex xl:flex-col gap-4 sticky top-[84px] self-start">
           <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
             <div className="rounded-md overflow-hidden border border-border">
-              {project.thumbnail_url ? (
-                <img
-                  src={project.thumbnail_url}
-                  alt={project.title}
-                  className="w-full aspect-video object-cover"
-                />
-              ) : (
-                <div className="aspect-video flex items-center justify-center bg-muted/60 text-muted-foreground text-xs uppercase tracking-wide">
-                  Preview
-                </div>
-              )}
+              <img
+                src={heroImage}
+                alt={project.title}
+                className="w-full aspect-video object-cover"
+              />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mt-3">
               {project.description ||
@@ -438,7 +659,9 @@ export default function ProjectDetailPage() {
               <div className="flex justify-between text-muted-foreground">
                 <span>{t("project.developer") || "Developer"}</span>
                 <span className="text-foreground truncate max-w-[160px] text-right">
-                  {project.author?.display_name || project.author?.user_name || "Unknown"}
+                  {project.author?.display_name ||
+                    project.author?.user_name ||
+                    "Unknown"}
                 </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
@@ -448,14 +671,24 @@ export default function ProjectDetailPage() {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-1.5">
-              <Badge variant="outline" className={`text-xs ${difficultyColors[project.difficulty]}`}>
+              <Badge
+                variant="outline"
+                className={`text-xs ${difficultyColors[project.difficulty]}`}
+              >
                 {difficultyLabel[project.difficulty]}
               </Badge>
-              <Badge variant="outline" className="text-xs border-primary/35 text-primary bg-primary/5 uppercase">
+              <Badge
+                variant="outline"
+                className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
+              >
                 {project.project_type}
               </Badge>
               {project.tags.slice(0, 4).map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-[11px] px-2 py-0.5">
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="text-[11px] px-2 py-0.5"
+                >
                   #{tag}
                 </Badge>
               ))}
@@ -463,19 +696,27 @@ export default function ProjectDetailPage() {
           </Card>
 
           <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">Contributor Spotlight</p>
+            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
+              Contributor Spotlight
+            </p>
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10 border border-border">
                 <AvatarImage src={project.author?.avatar_url || undefined} />
                 <AvatarFallback>
-                  {(project.author?.display_name || "U").charAt(0).toUpperCase()}
+                  {(project.author?.display_name || "U")
+                    .charAt(0)
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">
-                  {project.author?.display_name || project.author?.user_name || "Unknown"}
+                  {project.author?.display_name ||
+                    project.author?.user_name ||
+                    "Unknown"}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">Lead contributor</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Lead contributor
+                </p>
               </div>
             </div>
             {(project.repository_url || project.demo_url) && (

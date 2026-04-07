@@ -172,6 +172,147 @@ export function MdxEditor({
     return false;
   }, []);
 
+  const handleMathDollarAutoPair = useCallback((editor: any, monaco: any) => {
+    const model = editor?.getModel?.();
+    const selection = editor?.getSelection?.();
+
+    if (!model || !selection) {
+      return false;
+    }
+
+    if (!selection.isEmpty()) {
+      const selectedText = model.getValueInRange(selection);
+      const startPos = selection.getStartPosition();
+      const startOffset = model.getOffsetAt(startPos);
+
+      editor.executeEdits("math-dollar-wrap", [
+        {
+          range: selection,
+          text: `$${selectedText}$`,
+        },
+      ]);
+
+      const newStart = model.getPositionAt(startOffset + 1);
+      const newEnd = model.getPositionAt(startOffset + 1 + selectedText.length);
+      editor.setSelection(
+        new monaco.Selection(
+          newStart.lineNumber,
+          newStart.column,
+          newEnd.lineNumber,
+          newEnd.column,
+        ),
+      );
+      return true;
+    }
+
+    const position = selection.getStartPosition();
+    const lineContent = model.getLineContent(position.lineNumber);
+    const cursorIndex = position.column - 1;
+    const prev1 = lineContent.charAt(cursorIndex - 1);
+    const prev2 = lineContent.charAt(cursorIndex - 2);
+    const next1 = lineContent.charAt(cursorIndex);
+    const next2 = lineContent.charAt(cursorIndex + 1);
+
+    // If we're right before an existing closer, jump over it instead of creating extras.
+    if (next1 === "$" && next2 === "$") {
+      editor.setPosition({
+        lineNumber: position.lineNumber,
+        column: position.column + 2,
+      });
+      return true;
+    }
+
+    if (next1 === "$") {
+      editor.setPosition({
+        lineNumber: position.lineNumber,
+        column: position.column + 1,
+      });
+      return true;
+    }
+
+    // Convert $|$ into $$|$$ when user types $ the second time.
+    if (prev1 === "$" && next1 === "$" && prev2 !== "$" && next2 !== "$") {
+      editor.executeEdits("math-dollar-double", [
+        {
+          range: new monaco.Range(
+            position.lineNumber,
+            position.column - 1,
+            position.lineNumber,
+            position.column + 1,
+          ),
+          text: "$$$$",
+        },
+      ]);
+      editor.setPosition({
+        lineNumber: position.lineNumber,
+        column: position.column + 1,
+      });
+      return true;
+    }
+
+    editor.executeEdits("math-dollar-pair", [
+      {
+        range: new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column,
+        ),
+        text: "$$",
+      },
+    ]);
+    editor.setPosition({
+      lineNumber: position.lineNumber,
+      column: position.column + 1,
+    });
+    return true;
+  }, []);
+
+  const handleHtmlTagAutoClose = useCallback((editor: any, monaco: any) => {
+    const model = editor?.getModel?.();
+    const selection = editor?.getSelection?.();
+
+    if (!model || !selection || !selection.isEmpty()) {
+      return false;
+    }
+
+    const position = selection.getStartPosition();
+    const lineContent = model.getLineContent(position.lineNumber);
+    const textBeforeCursor = lineContent.slice(0, position.column - 1);
+    const openTagMatch = textBeforeCursor.match(
+      /<([A-Za-z][\w-]*)(?:\s[^<>]*)?$/,
+    );
+
+    if (!openTagMatch) {
+      return false;
+    }
+
+    if (openTagMatch[0].startsWith("</") || openTagMatch[0].endsWith("/")) {
+      return false;
+    }
+
+    const tagName = openTagMatch[1];
+
+    editor.executeEdits("html-tag-close", [
+      {
+        range: new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column,
+        ),
+        text: `></${tagName}>`,
+      },
+    ]);
+
+    // Keep cursor between opening and closing tags.
+    editor.setPosition({
+      lineNumber: position.lineNumber,
+      column: position.column + 1,
+    });
+    return true;
+  }, []);
+
   const jumpEditorToLine = useCallback((line: number) => {
     const editor = editorRef.current;
     const model = editor?.getModel?.();
@@ -620,6 +761,34 @@ export function MdxEditor({
 
           enterKeyListenerRef.current?.dispose?.();
           enterKeyListenerRef.current = editor.onKeyDown((event: any) => {
+            const key = event.browserEvent?.key;
+
+            if (
+              key === "$" &&
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey
+            ) {
+              if (handleMathDollarAutoPair(editor, monaco)) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              return;
+            }
+
+            if (
+              key === ">" &&
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey
+            ) {
+              if (handleHtmlTagAutoClose(editor, monaco)) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              return;
+            }
+
             if (event.keyCode !== monaco.KeyCode.Enter) return;
             if (
               event.shiftKey ||
