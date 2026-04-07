@@ -523,8 +523,13 @@
     "cantFindTerm": "用語が見つかりませんか？",
     "cantFindTermDesc": "コミュニティに役立つと思う新しい用語を自由に追加してください！",
     "addNewTerm": "新しい用語を追加",
+    "createFirstEntry": "最初のエントリーを作成",
+    "myDrafts": "マイ下書き",
     "termNotFound": "用語が見つかりません",
     "termNotFoundDesc": "お探しの用語は辞書にまだ存在しません。",
+    "noEntriesForSearch": "\"{{search}}\" の検索結果はありません",
+    "noDraftsYet": "下書きはまだありません",
+    "noEntriesForLetter": "この文字のエントリーはありません",
     "backToDictionary": "辞書に戻る",
     "definition": "定義",
     "translations": "翻訳",
@@ -613,6 +618,18 @@
       "draft": "下書き",
       "rejected": "却下"
     },
+    "sort": {
+      "relevance": "関連順",
+      "newest": "新着順",
+      "mostSaved": "保存数順"
+    },
+    "pagination": {
+      "previous": "前へ",
+      "next": "次へ",
+      "pageOf": "{{totalPages}}ページ中 {{page}}ページ"
+    },
+    "statsTotalEntries": "総エントリー",
+    "statsLanguages": "言語数",
     "languages": {
       "mn": "モンゴル語",
       "ja": "日本語",

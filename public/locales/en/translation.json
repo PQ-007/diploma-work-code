@@ -524,8 +524,13 @@
     "cantFindTerm": "Can't find the term?",
     "cantFindTermDesc": "Feel free to add new terms to the dictionary that you think can help the community!",
     "addNewTerm": "Add New Term",
+    "createFirstEntry": "Create first entry",
+    "myDrafts": "My Drafts",
     "termNotFound": "Term Not Found",
     "termNotFoundDesc": "The term you're looking for doesn't exist in the dictionary yet.",
+    "noEntriesForSearch": "No entries found for \"{{search}}\"",
+    "noDraftsYet": "You have no drafts yet",
+    "noEntriesForLetter": "No entries found for this letter",
     "backToDictionary": "Back to Dictionary",
     "definition": "Definition",
     "translations": "Translations",
@@ -614,6 +619,18 @@
       "draft": "DRAFT",
       "rejected": "REJECTED"
     },
+    "sort": {
+      "relevance": "Relevance",
+      "newest": "Newest",
+      "mostSaved": "Most Saved"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{totalPages}}"
+    },
+    "statsTotalEntries": "Total Entries",
+    "statsLanguages": "Languages",
     "languages": {
       "mn": "Монгол",
       "ja": "日本語",

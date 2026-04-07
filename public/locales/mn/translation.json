@@ -524,8 +524,13 @@
     "cantFindTerm": "Нэр томъёо олдохгүй байна уу?",
     "cantFindTermDesc": "Толь бичгийн санд тус болно гэж бодсон шинэ нэр томъёо нэмнэ үү!",
     "addNewTerm": "Шинэ нэр томъёо нэмэх",
+    "createFirstEntry": "Эхний нэр томъёогоо үүсгэх",
+    "myDrafts": "Миний нооргууд",
     "termNotFound": "Нэр томъёо олдсонгүй",
     "termNotFoundDesc": "Таны хайсан нэр томъёо толь бичигт одоогоор байхгүй байна.",
+    "noEntriesForSearch": "\"{{search}}\" хайлтаар бичлэг олдсонгүй",
+    "noDraftsYet": "Танд одоогоор ноорог байхгүй байна",
+    "noEntriesForLetter": "Энэ үсгээр эхэлсэн бичлэг олдсонгүй",
     "backToDictionary": "Толь бичиг рүү буцах",
     "definition": "Тодорхойлолт",
     "translations": "Орчуулга",
@@ -613,6 +618,18 @@
       "draft": "НООРОГ",
       "rejected": "ТАТГАЛЗСАН"
     },
+    "sort": {
+      "relevance": "Хамаарал",
+      "newest": "Шинэ",
+      "mostSaved": "Хамгийн их хадгалсан"
+    },
+    "pagination": {
+      "previous": "Өмнөх",
+      "next": "Дараах",
+      "pageOf": "{{page}} / {{totalPages}} хуудас"
+    },
+    "statsTotalEntries": "Нийт бичлэг",
+    "statsLanguages": "Хэлүүд",
     "languages": {
       "mn": "Монгол",
       "ja": "日本語",

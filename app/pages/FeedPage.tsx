@@ -51,6 +51,32 @@ type FeedEntry =
   | { kind: "discussion"; data: DiscussionItemData; sortKey: string }
   | { kind: "poll"; data: PollData; sortKey: string };
 
+type ArticleApiItem = {
+  article_id: string;
+  title: string;
+  sub_title?: string | null;
+  published_at?: string | null;
+  tags?: string[];
+  author?: {
+    display_name?: string | null;
+    user_name?: string | null;
+    avatar_url?: string | null;
+    ranking_point?: number | null;
+  } | null;
+};
+
+type ArticlesResponse = {
+  items?: ArticleApiItem[];
+};
+
+type DiscussionsResponse = {
+  items?: DiscussionItemData[];
+};
+
+type PollsResponse = {
+  polls?: PollData[];
+};
+
 // --- Helpers ---
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
@@ -182,7 +208,11 @@ export default function FeedPage() {
           fetch("/api/polls"),
         ]);
 
-        const [articlesData, discussionsData, pollsData] = await Promise.all([
+        const [articlesData, discussionsData, pollsData]: [
+          ArticlesResponse,
+          DiscussionsResponse,
+          PollsResponse,
+        ] = await Promise.all([
           articlesRes.json(),
           discussionsRes.json(),
           pollsRes.json(),
@@ -191,7 +221,7 @@ export default function FeedPage() {
         const entries: FeedEntry[] = [];
 
         // Convert articles → ListItemData
-        (articlesData.items ?? []).forEach((a: any) => {
+        (articlesData.items ?? []).forEach((a) => {
           const item: ListItemData = {
             id: a.article_id,
             type: "blog",
@@ -219,19 +249,19 @@ export default function FeedPage() {
         });
 
         // Add discussions directly (already match DiscussionItemData shape)
-        (discussionsData.items ?? []).forEach((d: any) => {
+        (discussionsData.items ?? []).forEach((d) => {
           entries.push({
             kind: "discussion",
-            data: d as DiscussionItemData,
+            data: d,
             sortKey: d.created_at ?? "",
           });
         });
 
         // Add polls
-        (pollsData.polls ?? []).forEach((p: any) => {
+        (pollsData.polls ?? []).forEach((p) => {
           entries.push({
             kind: "poll",
-            data: p as PollData,
+            data: p,
             sortKey: p.created_at ?? "",
           });
         });
@@ -252,7 +282,11 @@ export default function FeedPage() {
   const toggleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) {
+        s.delete(id);
+      } else {
+        s.add(id);
+      }
       return s;
     });
   }, []);
@@ -260,7 +294,11 @@ export default function FeedPage() {
   const toggleBookmark = useCallback((id: string) => {
     setBookmarkedItems((prev) => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) {
+        s.delete(id);
+      } else {
+        s.add(id);
+      }
       return s;
     });
   }, []);

@@ -16,20 +16,17 @@ import {
   MessageSquare,
   MousePointerClick,
   SwatchBook,
-  Trophy
+  Trophy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
-import {useTranslation} from "react-i18next";
-import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const CreateButton = () => {
   const router = useRouter();
-  const { user } = useAuth();
   const { t } = useTranslation();
 
-  const handleAction = (label: string, path?: string) => {
-    console.log(`Action: Create ${label}`);
+  const handleAction = (path?: string) => {
     if (path) {
       router.push(path);
     }
@@ -43,13 +40,13 @@ const CreateButton = () => {
           icon: FileText,
           label: t("create_button.article"),
           description: t("create_button.article_disc"),
-          action: () => handleAction("Blog", "/article/create"),
+          action: () => handleAction("/article/create"),
         },
         {
           icon: SwatchBook,
           label: t("create_button.flashcards"),
           description: t("create_button.flashcards_disc"),
-          action: () => handleAction("Flashcard Deck", "/flashcards/create"),
+          action: () => handleAction("/flashcards/create"),
         },
       ],
     },
@@ -60,13 +57,13 @@ const CreateButton = () => {
           icon: Trophy,
           label: t("create_button.contest"),
           description: t("create_button.contest_disc"),
-          action: () => handleAction("Competition", "/competition/create"),
+          action: () => handleAction("/competition/create"),
         },
         {
           icon: MessageSquare,
           label: t("create_button.discussions"),
           description: t("create_button.discussions_disc"),
-          action: () => handleAction("Discussion", "/discussion/create"),
+          action: () => handleAction("/discussion/create"),
         },
       ],
     },
@@ -77,7 +74,7 @@ const CreateButton = () => {
           icon: Code,
           label: t("create_button.project"),
           description: t("create_button.project_disc"),
-          action: () => handleAction("Project", "/project/create"),
+          action: () => handleAction("/project/create"),
         },
       ],
     },
@@ -87,19 +84,18 @@ const CreateButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="default" 
-          size="default" 
+          variant="default"
+          size="default"
           className={cn(
             "h-9 px-3 rounded-md transition-colors",
-            "flex items-center gap-1.5" 
+            "flex items-center gap-1.5",
           )}
           aria-label="Create new content or activity"
         >
           {/* Main Icon */}
-          
+
           <span className="font-medium">{t("create_button.create")}</span>
-          <MousePointerClick/>
-          
+          <MousePointerClick />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
