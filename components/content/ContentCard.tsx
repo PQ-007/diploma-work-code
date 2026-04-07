@@ -98,7 +98,10 @@ export function ContentCard({
       <Card
         className={`relative border-border/40 p-4 transition-all duration-300 hover:shadow-md ${
           isPinned ? "border-foreground/20 bg-muted/20" : ""
-        }`}
+        } ${isDiscussion && onClick ? "cursor-pointer" : ""}`}
+        onClick={() => {
+          if (isDiscussion && onClick) onClick();
+        }}
       >
         <div className="space-y-3">
           {/* Badges for special states */}
@@ -134,6 +137,7 @@ export function ContentCard({
             onClick={(e) => {
               if (onClick) {
                 e.preventDefault();
+                e.stopPropagation();
                 onClick();
               }
             }}

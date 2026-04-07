@@ -65,7 +65,7 @@ CREATE TABLE public.articles (
   status USER-DEFINED NOT NULL,
   created_at timestamp without time zone DEFAULT now(),
   series text,
-  base_lang_code text,
+  base_lang_code text DEFAULT 'mn'::text,
   CONSTRAINT articles_pkey PRIMARY KEY (id),
   CONSTRAINT article_author FOREIGN KEY (author_id) REFERENCES public.profiles(id)
 );
@@ -342,21 +342,6 @@ CREATE TABLE public.project_milestones (
   CONSTRAINT project_milestones_pkey PRIMARY KEY (id),
   CONSTRAINT project_milestones_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
 );
-CREATE TABLE public.project_updates (
-  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  project_id bigint NOT NULL,
-  created_by uuid NOT NULL,
-  title text NOT NULL,
-  body text NOT NULL,
-  update_type text NOT NULL DEFAULT 'regular'::text CHECK (update_type = ANY (ARRAY['regular'::text, 'milestone'::text, 'release'::text, 'announcement'::text])),
-  image_url text,
-  published_at timestamp with time zone NOT NULL DEFAULT now(),
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT project_updates_pkey PRIMARY KEY (id),
-  CONSTRAINT project_updates_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id),
-  CONSTRAINT project_updates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
-);
 CREATE TABLE public.project_sections (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   project_id bigint NOT NULL,
@@ -375,6 +360,21 @@ CREATE TABLE public.project_tags (
   CONSTRAINT project_tags_pkey PRIMARY KEY (project_id, tag_id),
   CONSTRAINT project_tags_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id),
   CONSTRAINT project_tags_tag_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id)
+);
+CREATE TABLE public.project_updates (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  project_id bigint NOT NULL,
+  created_by uuid NOT NULL,
+  title text NOT NULL,
+  body text NOT NULL,
+  update_type text NOT NULL DEFAULT 'regular'::text CHECK (update_type = ANY (ARRAY['regular'::text, 'milestone'::text, 'release'::text, 'announcement'::text])),
+  image_url text,
+  published_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT project_updates_pkey PRIMARY KEY (id),
+  CONSTRAINT project_updates_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id),
+  CONSTRAINT project_updates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
 );
 CREATE TABLE public.projects (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,

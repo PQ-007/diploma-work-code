@@ -140,7 +140,7 @@ export default function ListItem({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-7 w-7 ${
+                  className={`h-7 w-7 hover:bg-transparent ${
                     isBookmarked
                       ? "text-blue-500"
                       : "text-muted-foreground hover:text-blue-500"

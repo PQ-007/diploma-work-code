@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Author } from "@/lib/types/author";
 import { getRankIcon } from "@/lib/utils/rankIcons";
+import Link from "next/link";
 
 interface AuthorRowProps {
   author: Author;
@@ -54,30 +55,38 @@ export function AuthorRow({
 
   return (
     <div className="flex items-center gap-2">
-      <Avatar
-        className={`${classes.avatar} border border-border/40 flex-shrink-0`}
+      <Link
+        href={`/profile/${author.username || author.id}`}
+        className="flex items-center gap-2 flex-1 min-w-0"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
-        <AvatarImage src={author.avatarUrl || ""} alt={author.displayName} />
-        <AvatarFallback className="text-xs font-medium">
-          {author.displayName.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1">
-          <span className={`${classes.name} font-medium truncate`}>
-            {author.displayName}
-          </span>
-          {getRankIcon(author.rankingPoint || 0)}
-        </div>
-        <div
-          className={`${classes.timestamp} flex items-center gap-1.5 text-muted-foreground`}
+        <Avatar
+          className={`${classes.avatar} border border-border/40 flex-shrink-0`}
         >
-          <span>{timestamp}</span>
-          <span>·</span>
-          <span>{author.rankingPoint || 0} points</span>
-          {additionalInfo}
+          <AvatarImage src={author.avatarUrl || ""} alt={author.displayName} />
+          <AvatarFallback className="text-xs font-medium">
+            {author.displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1">
+            <span className={`${classes.name} font-medium truncate`}>
+              {author.displayName}
+            </span>
+            {getRankIcon(author.rankingPoint || 0)}
+          </div>
+          <div
+            className={`${classes.timestamp} flex items-center gap-1.5 text-muted-foreground`}
+          >
+            <span>{timestamp}</span>
+            <span>·</span>
+            <span>{author.rankingPoint || 0} points</span>
+            {additionalInfo}
+          </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }

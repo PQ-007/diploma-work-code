@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 import {
   MessageSquare,
   ArrowBigUp,
@@ -61,49 +62,61 @@ export default function DiscussionItem({
 }: DiscussionItemProps) {
   return (
     <Card
-      className={`overflow-hidden border-border/40 transition-all duration-200 hover:shadow-sm ${
+      className={`overflow-hidden border-border/40 transition-all duration-200 hover:shadow-lg ${
         item.pinned ? "border-foreground/20 bg-muted/20" : ""
-      }`}
+      } cursor-pointer`}
+      onClick={() => onClick(item.id)}
     >
       {/* Author header */}
-      <div className="px-4 pt-4 pb-2 flex items-center gap-3">
-        <Avatar className="h-9 w-9 border border-border/40">
-          <AvatarImage src={item.author.avatar_url} />
-          <AvatarFallback className="text-xs font-medium">
-            {item.author.display_name?.[0]?.toUpperCase() || "?"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold truncate">
-              {item.author.display_name}
-            </span>
-            {getRankIcon(item.author.ranking_point || 0)}
-            {item.pinned && (
-              <Pin className="h-3 w-3 text-muted-foreground shrink-0" />
-            )}
-            {item.answered && (
-              <Badge
-                variant="secondary"
-                className="shrink-0 text-[10px] font-normal border border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10 px-1.5 py-0"
-              >
-                <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
-                Answered
-              </Badge>
-            )}
+      <div className="px-4 flex items-center gap-3">
+        <Link
+          href={`/profile/${item.author.user_name || item.author.id}`}
+          className="flex items-center gap-3 flex-1 min-w-0"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Avatar className="h-9 w-9 border border-border/40">
+            <AvatarImage src={item.author.avatar_url} />
+            <AvatarFallback className="text-xs font-medium">
+              {item.author.display_name?.[0]?.toUpperCase() || "?"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold truncate">
+                {item.author.display_name}
+              </span>
+              {getRankIcon(item.author.ranking_point || 0)}
+              {item.pinned && (
+                <Pin className="h-3 w-3 text-muted-foreground shrink-0" />
+              )}
+              {item.answered && (
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 text-[10px] font-normal border border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10 px-1.5 py-0"
+                >
+                  <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                  Answered
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span>{timeAgo(item.created_at)}</span>
+              <span>·</span>
+              <span>{item.author.ranking_point || 0} points</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>{timeAgo(item.created_at)}</span>
-            <span>·</span>
-            <span>{item.author.ranking_point || 0} points</span>
-          </div>
-        </div>
+        </Link>
       </div>
 
       {/* Post body — clickable to open modal */}
       <button
         className="w-full text-left px-4 pb-2 cursor-pointer focus:outline-none"
-        onClick={() => onClick(item.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(item.id);
+        }}
       >
         <h2 className="text-[15px] font-semibold leading-snug mb-1">
           {item.title}
@@ -137,16 +150,16 @@ export default function DiscussionItem({
           <Button
             variant="ghost"
             size="sm"
-            className={`h-8 gap-1 px-2 ${
-              item.userVote === "up"
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+            className={`h-8 gap-1 px-2 hover:bg-transparent hover:text-primary ${
+              item.userVote === "up" ? "text-primary" : "text-muted-foreground "
             }`}
-            onClick={() => onVote(item.id, "up")}
-            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onVote(item.id, "up");
+            }}
           >
             <ArrowBigUp
-              className="h-[18px] w-[18px]"
+              className="h-5 w-5"
               fill={item.userVote === "up" ? "currentColor" : "none"}
             />
           </Button>
@@ -156,49 +169,51 @@ export default function DiscussionItem({
           <Button
             variant="ghost"
             size="sm"
-            className={`h-8 gap-1 px-2 ${
+            className={`h-8 gap-1 px-2 hover:bg-transparent hover:text-destructive ${
               item.userVote === "down"
                 ? "text-destructive"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground"
             }`}
-            onClick={() => onVote(item.id, "down")}
-            disabled={disabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onVote(item.id, "down");
+            }}
           >
             <ArrowBigDown
-              className="h-[18px] w-[18px]"
+              className="h-5 w-5"
               fill={item.userVote === "down" ? "currentColor" : "none"}
             />
           </Button>
         </div>
 
-        {/* Comment */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-1.5 px-3 text-muted-foreground hover:text-foreground"
-          onClick={() => onClick(item.id)}
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span className="text-xs">{item.commentCount}</span>
-        </Button>
+        <div className="flex items-center">
+          {/* Comment indicator */}
+          <div className="h-8 px-3 inline-flex items-center gap-1.5 text-muted-foreground">
+            <MessageSquare className="h-3.5 w-3.5" />
+            <span className="text-xs">{item.commentCount}</span>
+          </div>
 
-        {/* Bookmark */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`h-8 px-2 ${
-            item.bookmarked
-              ? "text-blue-500"
-              : "text-muted-foreground hover:text-blue-500"
-          }`}
-          onClick={() => onBookmark(item.id)}
-          disabled={disabled}
-        >
-          <Bookmark
-            className="h-4 w-4"
-            fill={item.bookmarked ? "currentColor" : "none"}
-          />
-        </Button>
+          {/* Bookmark */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-8 px-2 hover:bg-transparent ${
+              item.bookmarked
+                ? "text-primary"
+                : "text-muted-foreground hover:text-primary"
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBookmark(item.id);
+            }}
+            disabled={disabled}
+          >
+            <Bookmark
+              className="h-4 w-4"
+              fill={item.bookmarked ? "currentColor" : "none"}
+            />
+          </Button>
+        </div>
       </div>
     </Card>
   );

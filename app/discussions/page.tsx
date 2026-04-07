@@ -85,12 +85,8 @@ export default function DiscussionsPage() {
     );
   });
 
-  // Sort: pinned first, then by votes
-  const sortedDiscussions = [...filteredDiscussions].sort((a, b) => {
-    if (a.content.pinned && !b.content.pinned) return -1;
-    if (!a.content.pinned && b.content.pinned) return 1;
-    return b.stats.likes - a.stats.likes;
-  });
+  // Keep server order stable so vote toggles do not reorder list items.
+  const sortedDiscussions = filteredDiscussions;
 
   // Stats computed from real data
   const totalThreads = discussions?.length || 0;

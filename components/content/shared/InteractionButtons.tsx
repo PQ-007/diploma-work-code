@@ -63,10 +63,10 @@ export function InteractionButtons({
             size="sm"
             onClick={() => onVote?.("up")}
             disabled={disabled}
-            className={`h-8 gap-1 px-2 ${
+            className={`h-8 gap-1 px-2 hover:bg-transparent ${
               interactions.userVote === "up"
                 ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground "
             }`}
           >
             <ArrowBigUp
@@ -95,35 +95,37 @@ export function InteractionButtons({
           </Button>
         </div>
 
-        {/* Comment count */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onComment}
-          disabled={disabled}
-          className="h-8 gap-1.5 px-3 text-muted-foreground hover:text-foreground"
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-xs">{stats.comments}</span>
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* Comment count */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onComment}
+            disabled={disabled}
+            className="h-8 gap-1.5 px-3 text-muted-foreground hover:text-foreground"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs">{stats.comments}</span>
+          </Button>
 
-        {/* Bookmark */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBookmark}
-          disabled={disabled}
-          className={`h-8 px-2 ${
-            interactions.isBookmarked
-              ? "text-blue-500"
-              : "text-muted-foreground hover:text-blue-500"
-          }`}
-        >
-          <Bookmark
-            className="h-4 w-4"
-            fill={interactions.isBookmarked ? "currentColor" : "none"}
-          />
-        </Button>
+          {/* Bookmark */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBookmark}
+            disabled={disabled}
+            className={`h-8 px-2 ${
+              interactions.isBookmarked
+                ? "text-blue-500"
+                : "text-muted-foreground hover:text-blue-500"
+            }`}
+          >
+            <Bookmark
+              className="h-4 w-4"
+              fill={interactions.isBookmarked ? "currentColor" : "none"}
+            />
+          </Button>
+        </div>
       </div>
     );
   }

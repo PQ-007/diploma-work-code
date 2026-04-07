@@ -1,6 +1,28 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ContentType } from "@/lib/types/content";
 
+const applyDiscussionVote = (
+  likes: number,
+  currentVote: "up" | "down" | null | undefined,
+  nextVote: "up" | "down",
+) => {
+  const normalizedCurrent = currentVote || null;
+  const previousDelta =
+    normalizedCurrent === "up" ? 1 : normalizedCurrent === "down" ? -1 : 0;
+  const willToggleOff = normalizedCurrent === nextVote;
+  const nextUserVote = willToggleOff ? null : nextVote;
+  const nextDelta =
+    nextUserVote === "up" ? 1 : nextUserVote === "down" ? -1 : 0;
+
+  return {
+    likes: likes - previousDelta + nextDelta,
+    userVote: nextUserVote,
+  };
+};
+
+const applyBookmarkToggle = (isBookmarked: boolean | undefined) =>
+  !Boolean(isBookmarked);
+
 /**
  * Hook for liking/unliking content (articles, discussions, projects).
  * Automatically invalidates relevant queries to trigger refetch.
@@ -93,6 +115,76 @@ export function useContentBookmark(
       if (!res.ok) throw new Error("Failed to toggle bookmark");
       return res.json();
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: [contentType + "s"] });
+      await queryClient.cancelQueries({ queryKey: [contentType, contentId] });
+
+      const previousLists = queryClient.getQueriesData<any>({
+        queryKey: [contentType + "s"],
+      });
+      const previousDetail = queryClient.getQueryData<any>([
+        contentType,
+        contentId,
+      ]);
+
+      previousLists.forEach(([key, data]) => {
+        if (!Array.isArray(data)) return;
+
+        queryClient.setQueryData(
+          key,
+          data.map((entry: any) => {
+            if (entry?.content?.id !== contentId) return entry;
+            return {
+              ...entry,
+              interactions: {
+                ...entry.interactions,
+                isBookmarked: applyBookmarkToggle(
+                  entry?.interactions?.isBookmarked,
+                ),
+              },
+            };
+          }),
+        );
+      });
+
+      if (previousDetail) {
+        if (previousDetail?.interactions) {
+          queryClient.setQueryData([contentType, contentId], {
+            ...previousDetail,
+            interactions: {
+              ...previousDetail.interactions,
+              isBookmarked: applyBookmarkToggle(
+                previousDetail.interactions?.isBookmarked,
+              ),
+            },
+          });
+        } else if (previousDetail?.discussion) {
+          queryClient.setQueryData([contentType, contentId], {
+            ...previousDetail,
+            discussion: {
+              ...previousDetail.discussion,
+              bookmarked: applyBookmarkToggle(
+                previousDetail.discussion?.bookmarked,
+              ),
+            },
+          });
+        }
+      }
+
+      return { previousLists, previousDetail };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previousLists?.forEach(([key, data]: [unknown, unknown]) => {
+        queryClient.setQueryData(key as any, data);
+      });
+
+      if (context?.previousDetail) {
+        queryClient.setQueryData(
+          [contentType, contentId],
+          context.previousDetail,
+        );
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [contentType + "s"] });
       queryClient.invalidateQueries({ queryKey: [contentType, contentId] });
@@ -116,15 +208,91 @@ export function useDiscussionVote(discussionId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (direction: "up" | "down") => {
+    mutationFn: async (vote: "up" | "down") => {
       const res = await fetch("/api/discussions/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ discussionId, direction }),
+        body: JSON.stringify({ discussionId, vote }),
       });
 
       if (!res.ok) throw new Error("Failed to vote");
       return res.json();
+    },
+    onMutate: async (vote) => {
+      await queryClient.cancelQueries({ queryKey: ["discussions"] });
+      await queryClient.cancelQueries({
+        queryKey: ["discussion", discussionId],
+      });
+
+      const previousDiscussionLists = queryClient.getQueriesData<any>({
+        queryKey: ["discussions"],
+      });
+      const previousDiscussionDetail = queryClient.getQueryData<any>([
+        "discussion",
+        discussionId,
+      ]);
+
+      previousDiscussionLists.forEach(([key, data]) => {
+        if (!Array.isArray(data)) return;
+
+        queryClient.setQueryData(
+          key,
+          data.map((entry: any) => {
+            if (entry?.content?.id !== discussionId) return entry;
+            const next = applyDiscussionVote(
+              Number(entry?.stats?.likes || 0),
+              entry?.interactions?.userVote,
+              vote,
+            );
+
+            return {
+              ...entry,
+              stats: {
+                ...entry.stats,
+                likes: next.likes,
+              },
+              interactions: {
+                ...entry.interactions,
+                userVote: next.userVote,
+                isLiked: next.userVote !== null,
+              },
+            };
+          }),
+        );
+      });
+
+      if (previousDiscussionDetail?.discussion) {
+        const next = applyDiscussionVote(
+          Number(previousDiscussionDetail.discussion?.votes || 0),
+          previousDiscussionDetail.discussion?.userVote,
+          vote,
+        );
+
+        queryClient.setQueryData(["discussion", discussionId], {
+          ...previousDiscussionDetail,
+          discussion: {
+            ...previousDiscussionDetail.discussion,
+            votes: next.likes,
+            userVote: next.userVote,
+          },
+        });
+      }
+
+      return { previousDiscussionLists, previousDiscussionDetail };
+    },
+    onError: (_error, _vote, context) => {
+      context?.previousDiscussionLists?.forEach(
+        ([key, data]: [unknown, unknown]) => {
+          queryClient.setQueryData(key as any, data);
+        },
+      );
+
+      if (context?.previousDiscussionDetail) {
+        queryClient.setQueryData(
+          ["discussion", discussionId],
+          context.previousDiscussionDetail,
+        );
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["discussions"] });
