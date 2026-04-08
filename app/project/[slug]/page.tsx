@@ -3,7 +3,6 @@
 import BackToTopButton from "@/app/project/components/BackToTopButton";
 import FloatingActionBar from "@/app/project/components/FloatingActionBar";
 import ProjectComments from "@/app/project/components/ProjectComments";
-import ProjectLogTimeline from "@/app/project/components/ProjectLogTimeline";
 import type {
   ProjectComment,
   ProjectDifficulty,
@@ -19,12 +18,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Bookmark,
   Calendar,
-  CheckCircle2,
   ExternalLink,
   Github,
   Globe,
   Heart,
-  Layers,
   MessageSquare,
   Pencil,
   Share2,
@@ -69,7 +66,7 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
     title: "FutureHub Testing Project",
     slug,
     description:
-      "Placeholder introduction content for QA/testing. This sample simulates real project data, updates, milestones, files, and discussion state.",
+      "Placeholder showcase content for QA/testing. This sample simulates project summary, team, files, links, and discussion state.",
     category: "Web Platform",
     project_type: "coding",
     difficulty: "intermediate",
@@ -387,12 +384,9 @@ export default function ProjectDetailPage() {
   if (!project) return null;
 
   const commentsCount = (project.comments || []).length;
-  const milestonesCount = (project.milestones || []).length;
-  const doneCount = (project.milestones || []).filter(
-    (m) => m.completed,
-  ).length;
+  const teamMembers = project.members || [];
   const filesCount = (project.files || []).length;
-  const canOpenWorkspace = isOwner || isMember;
+  const canEditProject = isOwner || isMember;
   const heroImage = project.thumbnail_url || getSeedImage(project.slug, 0);
   const galleryImages = buildGalleryImages(project);
 
@@ -456,13 +450,13 @@ export default function ProjectDetailPage() {
                   <Share2 className="h-5 w-5" />
                 </Button>
 
-                {canOpenWorkspace && (
+                {canEditProject && (
                   <Button
                     variant="ghost"
                     size="icon"
                     className="rounded-full border border-border hover:bg-muted"
-                    onClick={() => router.push(`/project/dev/${slug}`)}
-                    aria-label={t("project.workspace") || "Open Workspace"}
+                    onClick={() => router.push(`/project/create?edit=${slug}`)}
+                    aria-label={t("project.editProject") || "Edit Project"}
                   >
                     <Pencil className="h-5 w-5" />
                   </Button>
@@ -494,24 +488,6 @@ export default function ProjectDetailPage() {
                 alt={project.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               />
-              {milestonesCount > 0 && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/50 to-transparent p-4">
-                  <div className="flex items-center justify-between text-foreground text-xs mb-1.5">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      {doneCount}/{milestonesCount}{" "}
-                      {t("project.tasksCompleted") || "tasks done"}
-                    </span>
-                    <span className="font-semibold">{project.progress}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-foreground/20 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{ width: `${project.progress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -556,32 +532,70 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
             )}
-            {canOpenWorkspace && (
+            {canEditProject && (
               <div className="pt-1">
                 <Button
                   variant="outline"
                   className="border-border bg-muted/30 hover:bg-accent"
-                  onClick={() => router.push(`/project/dev/${slug}`)}
+                  onClick={() => router.push(`/project/create?edit=${slug}`)}
                 >
                   <Pencil className="h-4 w-4 mr-2" />
-                  {t("project.workspace") || "Open Workspace"}
+                  {t("project.editProject") || "Edit Project"}
                 </Button>
               </div>
             )}
           </Card>
 
-          <Card className="border-border/80 bg-card/85 p-4 sm:p-5">
+          <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
             <h3 className="text-base font-semibold mb-4">
-              {t("project.projectLog") || "Project Updates"}
+              {t("project.team") || "Team"}
             </h3>
-            <ProjectLogTimeline
-              milestones={project.milestones || []}
-              members={project.members || []}
-              createdAt={project.created_at}
-              projectTitle={project.title}
-              heroImageUrl={heroImage}
-              updates={project.updates || []}
-            />
+            {teamMembers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {t("project.noTeamMembers") || "No team members listed."}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {teamMembers.map((member) => (
+                  <div
+                    key={member.user_id}
+                    className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="h-8 w-8 border border-border">
+                        <AvatarImage
+                          src={member.profile?.avatar_url || undefined}
+                        />
+                        <AvatarFallback>
+                          {(
+                            member.profile?.display_name ||
+                            member.profile?.user_name ||
+                            "U"
+                          )
+                            .charAt(0)
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {member.profile?.display_name ||
+                            member.profile?.user_name ||
+                            "Unknown"}
+                        </p>
+                        {member.profile?.user_name && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            @{member.profile.user_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-[11px] uppercase">
+                      {member.role}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
 
           {filesCount > 0 && (
@@ -665,8 +679,8 @@ export default function ProjectDetailPage() {
                 </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
-                <span>{t("project.progress") || "Progress"}</span>
-                <span className="text-foreground">{project.progress}%</span>
+                <span>{t("project.team") || "Team"}</span>
+                <span className="text-foreground">{teamMembers.length}</span>
               </div>
             </div>
 

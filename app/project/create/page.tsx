@@ -19,21 +19,20 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft,
+  ExternalLink,
   Plus,
+  Trash2,
+  Upload,
   X,
   Save,
-  Eye,
-  Send,
   ImagePlus,
   Loader2,
-  Code2,
-  LinkIcon,
-  Tag,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
 import type {
+  ProjectFile,
   ProjectType,
   ProjectDifficulty,
   ProjectStatus,
@@ -66,6 +65,15 @@ export default function CreateProjectPage() {
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [error, setError] = useState("");
 
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [fileName, setFileName] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+  const [fileType, setFileType] = useState("");
+  const [fileSize, setFileSize] = useState("");
+  const [savingFile, setSavingFile] = useState(false);
+  const [uploadingFileImage, setUploadingFileImage] = useState(false);
+  const [fileMessage, setFileMessage] = useState("");
+
   // Load project data when editing
   useEffect(() => {
     if (!editSlug) return;
@@ -85,6 +93,7 @@ export default function CreateProjectPage() {
         setTags(data.tags || []);
         setStatus(data.status || "draft");
         setIsPublic(data.is_public || false);
+        setFiles(data.files || []);
       }
     })();
   }, [editSlug]);
@@ -129,7 +138,7 @@ export default function CreateProjectPage() {
     try {
       const result = await uploadImageToCloudinary(file);
       setThumbnailUrl(result.secureUrl);
-    } catch (err) {
+    } catch {
       setError("Failed to upload thumbnail");
     } finally {
       setUploadingThumbnail(false);
@@ -179,8 +188,11 @@ export default function CreateProjectPage() {
 
       if (res.ok) {
         const data = await res.json();
-        const targetSlug = editSlug || data.slug;
-        router.push(`/project/${targetSlug}`);
+        if (editSlug) {
+          router.push(`/project/${editSlug}`);
+        } else {
+          router.push(`/project/create?edit=${data.slug}`);
+        }
       } else {
         const data = await res.json();
         setError(data.error || "Something went wrong");
@@ -205,6 +217,117 @@ export default function CreateProjectPage() {
     router,
     t,
   ]);
+
+  const handleFileImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const image = e.target.files?.[0];
+    if (!image) return;
+
+    setUploadingFileImage(true);
+    setFileMessage("");
+    setError("");
+
+    try {
+      const uploaded = await uploadImageToCloudinary(image);
+      setFileUrl(uploaded.secureUrl);
+      setFileName((prev) => prev || image.name);
+      setFileType((prev) => prev || image.type || "image");
+      setFileSize((prev) => prev || String(image.size));
+      setFileMessage(
+        t("project.imageUploadedNowRegister") ||
+          "Image uploaded. Click Add file to register metadata.",
+      );
+    } catch {
+      setError(
+        t("project.updateImageUploadFailed") || "Failed to upload image.",
+      );
+    } finally {
+      setUploadingFileImage(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleAddFile = useCallback(async () => {
+    if (!editSlug) {
+      setError(
+        t("project.saveBeforeUploads") ||
+          "Save the project first, then add attachments.",
+      );
+      return;
+    }
+
+    if (!fileName.trim() || !fileUrl.trim()) {
+      setError(
+        t("project.fileNameUrlRequired") || "File name and URL are required.",
+      );
+      return;
+    }
+
+    setSavingFile(true);
+    setError("");
+    setFileMessage("");
+
+    try {
+      const res = await fetch(`/api/projects/${editSlug}/files`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_name: fileName.trim(),
+          file_url: fileUrl.trim(),
+          file_type: fileType.trim() || null,
+          file_size: fileSize ? Number(fileSize) : null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error || "Failed to add file");
+        return;
+      }
+
+      const data = await res.json();
+      setFiles((prev) => [data.file, ...prev]);
+      setFileName("");
+      setFileUrl("");
+      setFileType("");
+      setFileSize("");
+      setFileMessage(t("project.fileSaved") || "File saved.");
+    } finally {
+      setSavingFile(false);
+    }
+  }, [editSlug, fileName, fileSize, fileType, fileUrl, t]);
+
+  const handleDeleteFile = useCallback(
+    async (id: number) => {
+      if (!editSlug) return;
+      const ok = window.confirm(
+        t("project.confirmDeleteFile") || "Delete this file?",
+      );
+      if (!ok) return;
+
+      const snapshot = files;
+      setFiles((prev) => prev.filter((file) => file.id !== id));
+
+      try {
+        const res = await fetch(`/api/projects/${editSlug}/files`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+
+        if (!res.ok) {
+          setFiles(snapshot);
+          const data = await res.json().catch(() => null);
+          setError(data?.error || "Failed to delete file");
+        }
+      } catch {
+        setFiles(snapshot);
+        setError("Failed to delete file");
+      }
+    },
+    [editSlug, files, t],
+  );
 
   if (authLoading) {
     return (
@@ -585,6 +708,139 @@ export default function CreateProjectPage() {
               onChange={(e) => setDemoUrl(e.target.value)}
             />
           </div>
+        </div>
+
+        <Separator />
+
+        {/* Attachments */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Upload className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-base font-semibold">
+              {t("project.files") || "Files / Attachments"}
+            </h2>
+          </div>
+
+          {!editSlug ? (
+            <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+              {t("project.saveBeforeUploads") ||
+                "Save this project first. You will be redirected to edit mode where attachments can be uploaded."}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  placeholder={t("project.fileName") || "File name"}
+                  value={fileName}
+                  onChange={(e) => setFileName(e.target.value)}
+                />
+                <Input
+                  placeholder={
+                    t("project.fileType") || "File type (optional)"
+                  }
+                  value={fileType}
+                  onChange={(e) => setFileType(e.target.value)}
+                />
+              </div>
+
+              <Input
+                placeholder={t("project.fileUrl") || "File URL"}
+                value={fileUrl}
+                onChange={(e) => setFileUrl(e.target.value)}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+                <Input
+                  placeholder={
+                    t("project.fileSizeBytes") ||
+                    "File size in bytes (optional)"
+                  }
+                  value={fileSize}
+                  onChange={(e) =>
+                    setFileSize(e.target.value.replace(/[^0-9]/g, ""))
+                  }
+                />
+                <label className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors">
+                  {uploadingFileImage ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-4 w-4" />
+                  )}
+                  <span className="text-sm">
+                    {uploadingFileImage
+                      ? t("common.uploading") || "Uploading..."
+                      : t("project.uploadImage") || "Upload Image"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileImageUpload}
+                    disabled={uploadingFileImage}
+                  />
+                </label>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddFile}
+                disabled={savingFile || uploadingFileImage}
+              >
+                {savingFile ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                {savingFile
+                  ? t("common.saving") || "Saving..."
+                  : t("common.add") || "Add"}
+              </Button>
+
+              {fileMessage && (
+                <p className="text-xs text-primary">{fileMessage}</p>
+              )}
+
+              <div className="space-y-2">
+                {files.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {t("project.noFilesYet") || "No files added yet."}
+                  </p>
+                )}
+
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center gap-3 rounded-md border border-border p-3"
+                  >
+                    <a
+                      href={file.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 min-w-0 flex-1 text-sm hover:text-primary"
+                    >
+                      <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{file.file_name}</span>
+                    </a>
+
+                    {file.file_size && (
+                      <span className="text-xs text-muted-foreground">
+                        {(file.file_size / 1024).toFixed(0)} KB
+                      </span>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDeleteFile(file.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
