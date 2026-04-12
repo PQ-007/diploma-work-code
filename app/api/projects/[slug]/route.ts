@@ -60,6 +60,7 @@ export async function GET(
       { data: milestones },
       { data: comments },
       { data: files },
+      { data: updates },
       { data: tagLinks },
     ] = await Promise.all([
       supabase
@@ -87,6 +88,12 @@ export async function GET(
         .eq("project_id", project.id)
         .order("created_at", { ascending: false }),
       supabase
+        .from("project_updates")
+        .select("*")
+        .eq("project_id", project.id)
+        .order("published_at", { ascending: false })
+        .order("created_at", { ascending: false }),
+      supabase
         .from("project_tags")
         .select("project_id, tag_id")
         .eq("project_id", project.id),
@@ -109,6 +116,7 @@ export async function GET(
         project.created_by,
         ...(members || []).map((m) => m.user_id),
         ...(comments || []).map((c) => c.user_id),
+        ...(updates || []).map((u) => u.created_by),
       ]),
     ].filter(Boolean);
 
@@ -181,6 +189,10 @@ export async function GET(
       milestones: milestones || [],
       comments: topLevelComments,
       files: files || [],
+      updates: (updates || []).map((update) => ({
+        ...update,
+        author: profilesById.get(update.created_by) || null,
+      })),
       userLiked,
       isOwner: !!isOwner,
       isMember,
@@ -241,11 +253,12 @@ export async function PUT(
       title,
       description,
       category,
-      project_type,
+      type: project_type,
       difficulty,
       technologies,
       repository_url,
       demo_url,
+      video_url,
       thumbnail_url,
       status: newStatus,
       is_public,
@@ -259,12 +272,13 @@ export async function PUT(
     if (description !== undefined)
       update.description = description?.trim() || null;
     if (category !== undefined) update.category = category?.trim() || null;
-    if (project_type !== undefined) update.project_type = project_type;
+    if (project_type !== undefined) update.type = project_type;
     if (difficulty !== undefined) update.difficulty = difficulty;
     if (technologies !== undefined) update.technologies = technologies;
     if (repository_url !== undefined)
       update.repository_url = repository_url?.trim() || null;
     if (demo_url !== undefined) update.demo_url = demo_url?.trim() || null;
+    if (video_url !== undefined) update.video_url = video_url?.trim() || null;
     if (thumbnail_url !== undefined)
       update.thumbnail_url = thumbnail_url?.trim() || null;
     if (newStatus !== undefined) update.status = newStatus;
@@ -277,10 +291,21 @@ export async function PUT(
     }
 
     if (Object.keys(update).length > 0) {
-      const { error: updateError } = await supabase
+      let { error: updateError } = await supabase
         .from("projects")
         .update(update)
         .eq("id", project.id);
+
+      // video_url column may not exist yet — retry without it
+      if (updateError?.message?.includes("video_url")) {
+        const { video_url: _v, ...updateWithoutVideo } = update;
+        void _v;
+        const { error: retryError } = await supabase
+          .from("projects")
+          .update(updateWithoutVideo)
+          .eq("id", project.id);
+        updateError = retryError ?? null;
+      }
 
       if (updateError) {
         return NextResponse.json(

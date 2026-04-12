@@ -17,12 +17,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { discussionId, vote } = (await req.json()) as {
+    const { discussionId, vote, direction } = (await req.json()) as {
       discussionId: string;
       vote: "up" | "down";
+      direction?: "up" | "down";
     };
 
-    if (!discussionId || !["up", "down"].includes(vote)) {
+    const resolvedVote = vote || direction;
+
+    if (
+      !discussionId ||
+      !resolvedVote ||
+      !["up", "down"].includes(resolvedVote)
+    ) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
@@ -35,7 +42,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (existing) {
-      if (existing.vote === vote) {
+      if (existing.vote === resolvedVote) {
         // Same vote → remove (toggle off)
         await supabase
           .from("discussion_votes")
@@ -47,17 +54,21 @@ export async function POST(req: NextRequest) {
         // Different vote → update
         await supabase
           .from("discussion_votes")
-          .update({ vote })
+          .update({ vote: resolvedVote })
           .eq("discussion_id", discussionId)
           .eq("user_id", user.id);
-        return NextResponse.json({ userVote: vote });
+        return NextResponse.json({ userVote: resolvedVote });
       }
     } else {
       // No existing → insert
       await supabase
         .from("discussion_votes")
-        .insert({ discussion_id: discussionId, user_id: user.id, vote });
-      return NextResponse.json({ userVote: vote });
+        .insert({
+          discussion_id: discussionId,
+          user_id: user.id,
+          vote: resolvedVote,
+        });
+      return NextResponse.json({ userVote: resolvedVote });
     }
   } catch (error) {
     console.error("Error voting", error);

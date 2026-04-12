@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from("projects")
       .select(
-        "id, title, slug, description, category, project_type, difficulty, status, is_public, thumbnail_url, progress, technologies, created_by, created_at, updated_at, views, likes_count",
+        "id, title, slug, description, category, type, difficulty, status, is_public, thumbnail_url, progress, technologies, created_by, created_at, updated_at, views, likes_count",
       );
 
     // Scope filtering
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     if (category) query = query.eq("category", category);
     if (difficulty) query = query.eq("difficulty", difficulty);
     if (status) query = query.eq("status", status);
-    if (projectType) query = query.eq("project_type", projectType);
+    if (projectType) query = query.eq("type", projectType);
     if (search)
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
 
@@ -188,12 +188,15 @@ export async function POST(req: NextRequest) {
       title,
       description,
       category,
-      project_type = "coding",
+      type: projectType = "private",
       difficulty = "beginner",
       technologies = [],
       repository_url,
       demo_url,
+      video_url,
       thumbnail_url,
+      is_public = false,
+      status: initialStatus = "draft",
       tags = [],
     } = body;
 
@@ -211,14 +214,16 @@ export async function POST(req: NextRequest) {
         slug,
         description: description?.trim() || null,
         category: category?.trim() || null,
-        project_type,
+        type: projectType,
         difficulty,
         technologies,
         repository_url: repository_url?.trim() || null,
         demo_url: demo_url?.trim() || null,
         thumbnail_url: thumbnail_url?.trim() || null,
         created_by: user.id,
-        status: "draft",
+        is_public,
+        status: initialStatus,
+        ...(is_public ? { published_at: new Date().toISOString() } : {}),
       })
       .select("id, slug")
       .single();

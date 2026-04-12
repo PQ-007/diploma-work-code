@@ -60,29 +60,35 @@ interface SearchSuggestion {
 }
 
 // --- Status badge helper ---
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({
+  status,
+  labels,
+}: {
+  status: string;
+  labels: Record<string, string>;
+}) {
   const config: Record<
     string,
     { label: string; className: string; icon: React.ReactNode }
   > = {
     approved: {
-      label: "",
+      label: labels.approved,
       className:
         "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1",
       icon: <CheckCircle className="h-3 w-3" />,
     },
     pending_review: {
-      label: "Pending",
+      label: labels.pending_review,
       className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
       icon: <Clock className="h-3 w-3 mr-1" />,
     },
     draft: {
-      label: "Draft",
+      label: labels.draft,
       className: "bg-blue-500/20 text-blue-400 border-blue-500/30",
       icon: <FileEdit className="h-3 w-3 mr-1" />,
     },
     rejected: {
-      label: "Rejected",
+      label: labels.rejected,
       className: "bg-red-500/20 text-red-400 border-red-500/30",
       icon: <AlertCircle className="h-3 w-3 mr-1" />,
     },
@@ -141,14 +147,20 @@ const languageFilters = [
 ];
 
 const sortOptions = [
-  { value: "relevance", label: "Relevance" },
-  { value: "newest", label: "Newest" },
-  { value: "most_saved", label: "Most Saved" },
+  { value: "relevance", labelKey: "dictionary.sort.relevance" },
+  { value: "newest", labelKey: "dictionary.sort.newest" },
+  { value: "most_saved", labelKey: "dictionary.sort.mostSaved" },
 ];
 
 export default function DictionaryPage() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const statusLabels = {
+    approved: t("dictionary.status.approved"),
+    pending_review: t("dictionary.status.pending_review"),
+    draft: t("dictionary.status.draft"),
+    rejected: t("dictionary.status.rejected"),
+  };
   const [activeLetter, setActiveLetter] = useState("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
@@ -355,7 +367,7 @@ export default function DictionaryPage() {
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.labelKey)}
                   </option>
                 ))}
               </select>
@@ -378,7 +390,7 @@ export default function DictionaryPage() {
                     }}
                   >
                     <FileEdit className="h-3 w-3 mr-1" />
-                    My Drafts
+                    {t("dictionary.myDrafts")}
                   </Button>
                 </>
               )}
@@ -436,10 +448,12 @@ export default function DictionaryPage() {
                 <BookOpen className="h-10 w-10 mx-auto text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
                   {debouncedSearch
-                    ? `No entries found for "${debouncedSearch}"`
+                    ? t("dictionary.noEntriesForSearch", {
+                        search: debouncedSearch,
+                      })
                     : statusFilter === "my_drafts"
-                      ? "You have no drafts yet"
-                      : "No entries found for this letter"}
+                      ? t("dictionary.noDraftsYet")
+                      : t("dictionary.noEntriesForLetter")}
                 </p>
                 {user && (
                   <Link href="/dictionary/create">
@@ -449,7 +463,7 @@ export default function DictionaryPage() {
                       className="text-xs mt-2"
                     >
                       <Plus className="h-3.5 w-3.5 mr-1" />
-                      Create first entry
+                      {t("dictionary.createFirstEntry")}
                     </Button>
                   </Link>
                 )}
@@ -459,70 +473,73 @@ export default function DictionaryPage() {
                 {entries.map((entry) => (
                   <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
                     <div className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full bg-card rounded-md p-4 flex flex-col">
-                     
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                              {entry.display_term || entry.term}
-                            </h3>
-                            {entry.reading && (
-                              <span className="text-xs text-muted-foreground">
-                                ({entry.reading})
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-                            <LanguageBadge code={entry.language_code} />
-                            {(entry.translation_languages || []).map((lang) => (
-                              <LanguageBadge key={lang} code={lang} />
-                            ))}
-                            <StatusBadge status={entry.status} />
-                          </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
+                            {entry.display_term || entry.term}
+                          </h3>
+                          {entry.reading && (
+                            <span className="text-xs text-muted-foreground">
+                              ({entry.reading})
+                            </span>
+                          )}
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                          {entry.display_definition || entry.definition}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-1">
-                            {entry.tags.slice(0, 2).map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="secondary"
-                                className="text-[10px] font-normal px-1.5 py-0"
-                              >
-                                #{tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                            <span>{entry.views} views</span>
-                            {user && (
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleToggleSave(entry.id, entry.saved);
-                                }}
-                                className="hover:text-foreground transition-colors"
-                              >
-                                <Bookmark
-                                  className={`h-3 w-3 ${entry.saved ? "fill-current" : ""}`}
-                                />
-                              </button>
-                            )}
-                          </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+                          <LanguageBadge code={entry.language_code} />
+                          {(entry.translation_languages || []).map((lang) => (
+                            <LanguageBadge key={lang} code={lang} />
+                          ))}
+                          <StatusBadge
+                            status={entry.status}
+                            labels={statusLabels}
+                          />
                         </div>
-                        <div className="flex items-center gap-2 pt-1">
-                          <Avatar className="h-4 w-4">
-                            <AvatarImage src={entry.author.avatar_url} />
-                            <AvatarFallback className="text-[8px]">
-                              {entry.author.display_name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-[10px] text-muted-foreground">
-                            {entry.author.display_name}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                        {entry.display_definition || entry.definition}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap gap-1">
+                          {entry.tags.slice(0, 2).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="secondary"
+                              className="text-[10px] font-normal px-1.5 py-0"
+                            >
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                          <span>
+                            {t("dictionary.views", { count: entry.views })}
                           </span>
+                          {user && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleToggleSave(entry.id, entry.saved);
+                              }}
+                              className="hover:text-foreground transition-colors"
+                            >
+                              <Bookmark
+                                className={`h-3 w-3 ${entry.saved ? "fill-current" : ""}`}
+                              />
+                            </button>
+                          )}
                         </div>
-                    
+                      </div>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Avatar className="h-4 w-4">
+                          <AvatarImage src={entry.author.avatar_url} />
+                          <AvatarFallback className="text-[8px]">
+                            {entry.author.display_name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-[10px] text-muted-foreground">
+                          {entry.author.display_name}
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -547,7 +564,10 @@ export default function DictionaryPage() {
                             {(entry.translation_languages || []).map((lang) => (
                               <LanguageBadge key={lang} code={lang} />
                             ))}
-                            <StatusBadge status={entry.status} />
+                            <StatusBadge
+                              status={entry.status}
+                              labels={statusLabels}
+                            />
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
                             {entry.display_definition || entry.definition}
@@ -555,7 +575,7 @@ export default function DictionaryPage() {
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
                           <span className="text-[10px] text-muted-foreground">
-                            {entry.views} views
+                            {t("dictionary.views", { count: entry.views })}
                           </span>
                           {user && (
                             <button
@@ -588,10 +608,13 @@ export default function DictionaryPage() {
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
                 >
-                  Previous
+                  {t("dictionary.pagination.previous")}
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {t("dictionary.pagination.pageOf", {
+                    page,
+                    totalPages,
+                  })}
                 </span>
                 <Button
                   variant="outline"
@@ -600,7 +623,7 @@ export default function DictionaryPage() {
                   disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
                 >
-                  Next
+                  {t("dictionary.pagination.next")}
                 </Button>
               </div>
             )}
@@ -652,13 +675,15 @@ export default function DictionaryPage() {
                   <div className="text-center">
                     <p className="text-lg font-bold">{totalEntries}</p>
                     <p className="text-[10px] text-muted-foreground">
-                      Total Entries
+                      {t("dictionary.statsTotalEntries")}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold">3</p>
+                    <p className="text-lg font-bold">
+                      {languageFilters.length}
+                    </p>
                     <p className="text-[10px] text-muted-foreground">
-                      Languages
+                      {t("dictionary.statsLanguages")}
                     </p>
                   </div>
                 </div>

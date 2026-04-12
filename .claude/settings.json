@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls c:/PROJECTS/Diploma/future-hub-code/app/api/projects/[slug]/)",
+      "Bash(ls c:/PROJECTS/Diploma/future-hub-code/app/api/projects/[slug]/members/)"
+    ]
+  }
+}

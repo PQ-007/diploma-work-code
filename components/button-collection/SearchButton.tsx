@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import React, { useState } from "react";
+import { Button } from "../ui/button";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -13,33 +12,28 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { 
-  Search, 
-  Clock, 
-  Bookmark, 
-  Filter, 
+import {
+  Search,
+  Clock,
   Settings,
-  TrendingUp,
   FileText,
   Users,
   Hash,
   Home,
   User,
   Calendar,
-  Mail,
-  Calculator,
-  CreditCard
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  CreditCard,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const SearchButton = () => {
   const [open, setOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState([
     "React components",
-    "Next.js routing", 
+    "Next.js routing",
     "TypeScript interfaces",
     "Component library",
-    "API documentation"
+    "API documentation",
   ]);
 
   // Use useEffect for keyboard shortcut
@@ -61,29 +55,31 @@ const SearchButton = () => {
   }, []);
 
   const addToRecentSearches = (search: string) => {
-    setRecentSearches(prev => {
-      const filtered = prev.filter(item => item !== search);
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((item) => item !== search);
       return [search, ...filtered].slice(0, 5);
     });
   };
 
   return (
     <>
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         size="icon"
         onClick={() => setOpen(true)}
-        className={cn("size-7 hover:bg-accent hover:text-accent-foreground transition-colors")}
+        className={cn(
+          "size-7 hover:bg-accent hover:text-accent-foreground transition-colors",
+        )}
         aria-label="Search (⌘K)"
       >
         <Search className="h-4 w-4" />
       </Button>
-      
+
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          
+
           {/* Recent Searches */}
           {recentSearches.length > 0 && (
             <CommandGroup heading="Recent Searches">
@@ -92,7 +88,6 @@ const SearchButton = () => {
                   key={`recent-${index}`}
                   onSelect={() => {
                     runCommand(() => {
-                      console.log("Searching for:", search);
                       addToRecentSearches(search);
                     });
                   }}
@@ -103,58 +98,55 @@ const SearchButton = () => {
               ))}
             </CommandGroup>
           )}
-          
+
           <CommandSeparator />
-          
+
           {/* Navigation */}
           <CommandGroup heading="Navigation">
-            <CommandItem onSelect={() => runCommand(() => console.log("Go to Dashboard"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <Home className="mr-2 h-4 w-4" />
               <span>Dashboard</span>
               <CommandShortcut>⌘D</CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("Go to Profile"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("Go to Calendar"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Calendar</span>
               <CommandShortcut>⌘C</CommandShortcut>
             </CommandItem>
           </CommandGroup>
-          
+
           <CommandSeparator />
-          
-          
-       
-          
+
           {/* Search Categories */}
           <CommandGroup heading="Search In">
-            <CommandItem onSelect={() => runCommand(() => console.log("Search Documents"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <FileText className="mr-2 h-4 w-4" />
               <span>Search Documents</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("Search People"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <Users className="mr-2 h-4 w-4" />
               <span>Search People</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("Search Tags"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <Hash className="mr-2 h-4 w-4" />
               <span>Search Tags</span>
             </CommandItem>
           </CommandGroup>
-          
+
           <CommandSeparator />
-          
+
           {/* Settings */}
           <CommandGroup heading="Settings">
-            <CommandItem onSelect={() => runCommand(() => console.log("Search Settings"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Search Settings</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("Billing"))}>
+            <CommandItem onSelect={() => runCommand(() => null)}>
               <CreditCard className="mr-2 h-4 w-4" />
               <span>Billing</span>
             </CommandItem>

@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   BookMarked,
-  BookOpen,
   ChevronRight,
   Code,
   Flame,
@@ -13,8 +12,6 @@ import {
   Layers,
   Star,
   Target,
-  Trophy,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -127,8 +124,8 @@ export default function LearnPage() {
 
   const totalItems = exploreCards.reduce((s, c) => s + c.items, 0);
   const totalCompleted = exploreCards.reduce((s, c) => s + c.completed, 0);
-  const overallPct =
-    totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
+  const overallRatio = totalItems > 0 ? totalCompleted / totalItems : 0;
+  const overallPct = Math.round(overallRatio * 100);
 
   return (
     <div className="space-y-10 pb-16 max-w-6xl items-center mx-auto">
@@ -164,7 +161,7 @@ export default function LearnPage() {
                   fill="none"
                   strokeWidth="8"
                   className="stroke-primary"
-                  strokeDasharray={`${(totalCompleted / totalItems) * 327} 327`}
+                  strokeDasharray={`${overallRatio * 327} 327`}
                   strokeLinecap="round"
                 />
               </svg>
