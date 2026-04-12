@@ -10,6 +10,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const mode = req.nextUrl.searchParams.get("mode");
+    const isEditMode = mode === "edit";
     const supabase = await createClient();
     const {
       data: { user },
@@ -47,11 +49,20 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Increment views
-    await supabase
-      .from("projects")
-      .update({ views: (project.views || 0) + 1 })
-      .eq("id", project.id);
+    let nextViews = project.views || 0;
+    if (!isEditMode) {
+      const incrementedViews = (project.views || 0) + 1;
+      const { error: incrementError } = await supabase
+        .from("projects")
+        .update({ views: incrementedViews })
+        .eq("id", project.id);
+
+      if (incrementError) {
+        console.warn("Project view increment failed", incrementError.message);
+      } else {
+        nextViews = incrementedViews;
+      }
+    }
 
     // Fetch related data in parallel
     const [
@@ -179,6 +190,7 @@ export async function GET(
     // Assemble result
     const result = {
       ...project,
+      views: nextViews,
       tags: tagNames,
       author: profilesById.get(project.created_by) || null,
       sections: sections || [],

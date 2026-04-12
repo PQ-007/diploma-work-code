@@ -193,7 +193,7 @@ export default function CreateProjectPage() {
     setLoading(true);
     (async () => {
       try {
-        const res = await fetch(`/api/projects/${editSlug}`);
+        const res = await fetch(`/api/projects/${editSlug}?mode=edit`);
         if (!res.ok) return;
         const data = await res.json();
         setTitle(data.title ?? "");
