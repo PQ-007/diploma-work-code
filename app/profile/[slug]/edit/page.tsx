@@ -714,7 +714,6 @@ export default function ProfileEditPage() {
                               e.target.value,
                             )
                           }
-                          placeholder="Language name"
                           placeholder={tr(
                             "profile.edit.languageName",
                             "Language name",

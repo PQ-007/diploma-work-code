@@ -88,7 +88,7 @@ export default function ArticleBrowsePage() {
     return (
       <div className="min-h-screen bg-background">
         <div className="page-shell-wide py-6 lg:py-3">
-          <div className="mb-6">
+          <div className="mb-6 max-w-3xl mx-auto">
             <div className="h-6 w-32 bg-muted-foreground/15 animate-pulse rounded-md mb-1" />
             <div className="h-4 w-56 bg-muted-foreground/15 animate-pulse rounded-md" />
           </div>
@@ -100,9 +100,9 @@ export default function ArticleBrowsePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="page-shell py-6 lg:py-3">
+      <div className="page-shell-wide py-6 lg:py-3">
         {/* Page Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mb-6 max-w-6xl w-full px-3 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-foreground">
               {t("articles.title")}
@@ -134,7 +134,7 @@ export default function ArticleBrowsePage() {
 
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Feed */}
-          <div className="flex-1 max-w-7xl space-y-4">
+          <div className="flex-1 max-w-3xl space-y-4">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -525,7 +525,9 @@ export default function ProjectDetailPage() {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
-                  <span className="text-sm">No preview available</span>
+                  <span className="text-sm">
+                    {t("project.noPreview") || "No preview available"}
+                  </span>
                 </div>
               )}
             </div>
@@ -748,10 +750,11 @@ export default function ProjectDetailPage() {
                 <p className="text-sm font-semibold truncate">
                   {project.author?.display_name ||
                     project.author?.user_name ||
+                    t("project.unknownUser") ||
                     "Unknown"}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Lead contributor
+                  {t("project.leadContributor") || "Lead contributor"}
                 </p>
               </div>
             </div>
@@ -815,7 +818,7 @@ export default function ProjectDetailPage() {
             {project.description && (
               <div className="space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Brief
+                  {t("project.brief") || "Brief"}
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
                   {project.description}
@@ -828,19 +831,21 @@ export default function ProjectDetailPage() {
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Project Type
+                    {t("project.type") || "Project Type"}
                   </p>
                   <Badge
                     variant="outline"
                     className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
                   >
-                    {TYPE_LABELS[project.type] || project.type}
+                    {t(`project.typeValue.${project.type}`) ||
+                      TYPE_LABELS[project.type] ||
+                      project.type}
                   </Badge>
                 </div>
                 {project.category && (
                   <div className="space-y-1">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Category
+                      {t("project.category") || "Category"}
                     </p>
                     <Badge variant="secondary" className="text-xs capitalize">
                       {project.category.replace(/_/g, " ")}
@@ -854,7 +859,7 @@ export default function ProjectDetailPage() {
             {project.tags.length > 0 && (
               <div className="space-y-1.5 border-t border-border/40 pt-2.5">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Tags
+                  {t("project.tags") || "Tags"}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {project.tags.map((tag) => (
@@ -871,7 +876,9 @@ export default function ProjectDetailPage() {
 
             {/* Created date */}
             <div className="flex justify-between items-center text-xs border-t border-border/40 pt-2.5">
-              <span className="text-muted-foreground">Created</span>
+              <span className="text-muted-foreground">
+                {t("project.created") || "Created"}
+              </span>
               <span className="text-foreground flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
                 {new Date(project.created_at).toLocaleDateString()}
@@ -882,7 +889,7 @@ export default function ProjectDetailPage() {
             <div className="space-y-1.5 border-t border-border/40 pt-2.5">
               <div className="flex justify-between items-center">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Progress
+                  {t("project.progress") || "Progress"}
                 </p>
                 <span className="text-xs font-semibold">
                   {project.progress}%
@@ -899,13 +906,14 @@ export default function ProjectDetailPage() {
             {/* Difficulty */}
             <div className="space-y-1.5 border-t border-border/40 pt-2.5">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Difficulty
+                {t("project.difficulty") || "Difficulty"}
               </p>
               <Badge
                 variant="outline"
                 className={`text-xs ${difficultyColors[project.difficulty]}`}
               >
-                {difficultyLabel[project.difficulty]}
+                {t(`project.difficulty.${project.difficulty}`) ||
+                  difficultyLabel[project.difficulty]}
               </Badge>
             </div>
           </Card>

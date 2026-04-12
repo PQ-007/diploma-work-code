@@ -3,44 +3,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function ArticleItemSkeleton() {
   return (
-    <Card className="border-border/40 p-4">
-      <div className="flex gap-4">
-        <div className="flex-1 min-w-0 space-y-3">
-          {/* Author row */}
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-7 w-7 rounded-full" />
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-3.5 w-16" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            </div>
-          </div>
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Skeleton className="h-5 w-[85%]" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-[60%]" />
-          </div>
-          {/* Tags + actions row */}
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex gap-1.5">
-              <Skeleton className="h-5 w-14 rounded-md" />
-              <Skeleton className="h-5 w-16 rounded-md" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-7 w-7 rounded-md" />
-              <Skeleton className="h-7 w-7 rounded-md" />
-              <Skeleton className="h-7 w-7 rounded-md" />
-            </div>
-          </div>
+    <Card className="border-border/40 p-3.5 h-[190px] flex flex-col justify-between space-y-3">
+      {/* Author row */}
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-7 rounded-full" />
+        <div className="space-y-1.5">
+          <Skeleton className="h-3.5 w-28 rounded" />
+          <Skeleton className="h-3 w-36 rounded" />
         </div>
-        
+      </div>
+
+      {/* Title + description */}
+      <div className="space-y-1.5">
+        <Skeleton className="h-5 w-4/5 rounded" />
+        <Skeleton className="h-3.5 w-full rounded" />
+        <Skeleton className="h-3.5 w-4/5 rounded" />
+      </div>
+
+      {/* Tags + stats/actions */}
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex gap-1.5">
+          <Skeleton className="h-5 w-12 rounded-full" />
+          <Skeleton className="h-5 w-10 rounded-full" />
+          <Skeleton className="h-5 w-14 rounded-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-4 w-10 rounded" />
+          <Skeleton className="h-4 w-10 rounded" />
+          <Skeleton className="h-6 w-6 rounded" />
+        </div>
       </div>
     </Card>
   );
@@ -92,7 +83,7 @@ function SidebarSkeleton() {
 
 export function ArticleFeedSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
         <ArticleItemSkeleton key={i} />
       ))}
@@ -103,7 +94,7 @@ export function ArticleFeedSkeleton({ count = 5 }: { count?: number }) {
 export function ArticlePageSkeleton() {
   return (
     <div className="flex gap-8 xl:gap-12 justify-center">
-      <div className="flex-1 max-w-7xl space-y-6">
+      <div className="flex-1 max-w-3xl space-y-6">
         {/* Tabs skeleton */}
         <div className="flex gap-1">
           {Array.from({ length: 5 }).map((_, i) => (

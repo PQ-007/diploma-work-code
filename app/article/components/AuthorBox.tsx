@@ -5,17 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import {
-  ChessBishop,
-  ChessKing,
-  ChessKnight,
-  ChessQueen,
-  ChessPawn,
-  ChessRook,
-  Plus,
-  Check,
-} from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import Link from "next/link";
+import { getRankIcon } from "@/lib/utils/rankIcons";
 
 type Props = {
   author: {
@@ -26,19 +18,6 @@ type Props = {
     bio: string;
     followersCount?: number;
   };
-};
-
-const getRankIcon = (rank: number) => {
-  if (rank >= 2500) return <ChessKing className="h-3.5 w-3.5 text-red-500" />;
-  if (rank >= 2000)
-    return <ChessQueen className="h-3.5 w-3.5 text-orange-500" />;
-  if (rank >= 1600)
-    return <ChessRook className="h-3.5 w-3.5 text-purple-500" />;
-  if (rank >= 1200)
-    return <ChessBishop className="h-3.5 w-3.5 text-blue-500" />;
-  if (rank >= 800)
-    return <ChessKnight className="h-3.5 w-3.5 text-green-500" />;
-  return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
 };
 
 export default function MinimalAuthorBox({ author }: Props) {
