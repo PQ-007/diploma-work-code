@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
 import {
   Camera,
@@ -114,10 +115,19 @@ interface LanguageSkill {
 
 export default function ProfileEditPage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const tr = useCallback(
+    (key: string, fallback: string) => {
+      const value = t(key);
+      return value === key ? fallback : value;
+    },
+    [t],
+  );
 
   // loading states
   const [pageLoading, setPageLoading] = useState(true);
@@ -171,12 +181,10 @@ export default function ProfileEditPage() {
       setBio(p.bio || "");
       setAvatarUrl(p.avatar_url || "");
       setBannerGradient(
-        p.banner_gradient ||
-          "from-violet-600 via-purple-500 to-fuchsia-500",
+        p.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500",
       );
       setAvatarRingColor(
-        p.avatar_ring_color ||
-          "from-amber-400 via-yellow-300 to-amber-500",
+        p.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500",
       );
       setSkills(p.skills || "");
       setPinnedArticleIds(p.pinned_article_ids || []);
@@ -186,10 +194,7 @@ export default function ProfileEditPage() {
       if (json.languageSkills?.length > 0) {
         setLanguageSkills(
           json.languageSkills.map(
-            (ls: {
-              language_name: string;
-              proficiency_level: string;
-            }) => ({
+            (ls: { language_name: string; proficiency_level: string }) => ({
               language_name: ls.language_name,
               proficiency_level: ls.proficiency_level || "Beginner",
             }),
@@ -229,9 +234,7 @@ export default function ProfileEditPage() {
   }, [authLoading, user, fetchProfile, router]);
 
   /* ─── avatar upload ─── */
-  const handleAvatarUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setAvatarUploading(true);
@@ -318,12 +321,17 @@ export default function ProfileEditPage() {
           avatar_ring_color: avatarRingColor,
           pinned_article_ids: pinnedArticleIds,
           pinned_project_ids: pinnedProjectIds,
-          language_skills: languageSkills.filter((ls) => ls.language_name.trim()),
+          language_skills: languageSkills.filter((ls) =>
+            ls.language_name.trim(),
+          ),
         }),
       });
       const result = await res.json();
       if (!res.ok) {
-        setError(result.error || "Something went wrong");
+        setError(
+          result.error ||
+            tr("profile.edit.genericError", "Something went wrong"),
+        );
         return;
       }
       setSuccess(true);
@@ -334,7 +342,9 @@ export default function ProfileEditPage() {
       }
       setTimeout(() => setSuccess(false), 3000);
     } catch {
-      setError("Network error — please try again");
+      setError(
+        tr("profile.edit.networkError", "Network error - please try again"),
+      );
     } finally {
       setSaving(false);
     }
@@ -356,10 +366,9 @@ export default function ProfileEditPage() {
         <Button variant="ghost" size="sm" asChild className="gap-1.5">
           <Link href={`/profile/${slug}`}>
             <ChevronLeft className="h-4 w-4" />
-            Back to Profile
+            {tr("profile.edit.backToProfile", "Back to Profile")}
           </Link>
         </Button>
-        
       </div>
 
       {/* ═══════ Error ═══════ */}
@@ -427,19 +436,22 @@ export default function ProfileEditPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    Display Name
+                    {tr("profile.edit.displayName", "Display Name")}
                   </label>
                   <Input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your display name"
+                    placeholder={tr(
+                      "profile.edit.displayNamePlaceholder",
+                      "Your display name",
+                    )}
                     maxLength={40}
                     className="h-9"
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-muted-foreground">
-                    Username
+                    {tr("profile.edit.username", "Username")}
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
@@ -449,10 +461,15 @@ export default function ProfileEditPage() {
                       value={userName}
                       onChange={(e) =>
                         setUserName(
-                          e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""),
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9_-]/g, ""),
                         )
                       }
-                      placeholder="username"
+                      placeholder={tr(
+                        "profile.edit.usernamePlaceholder",
+                        "username",
+                      )}
                       maxLength={20}
                       className="h-9 pl-8"
                     />
@@ -461,12 +478,15 @@ export default function ProfileEditPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Bio
+                  {tr("profile.bio", "Bio")}
                 </label>
                 <Textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell people about yourself..."
+                  placeholder={tr(
+                    "profile.edit.bioPlaceholder",
+                    "Tell people about yourself...",
+                  )}
                   rows={2}
                   maxLength={200}
                   className="resize-none text-sm"
@@ -485,7 +505,7 @@ export default function ProfileEditPage() {
         <CardHeader>
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Palette className="h-4 w-4" />
-            Banner Gradient
+            {tr("profile.edit.bannerGradient", "Banner Gradient")}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -513,7 +533,7 @@ export default function ProfileEditPage() {
       <Card className="border-border/60">
         <CardHeader>
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            Avatar Ring Color
+            {tr("profile.edit.avatarRingColor", "Avatar Ring Color")}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -551,7 +571,9 @@ export default function ProfileEditPage() {
           {/* Skills */}
           <Card className="border-border/60">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold">Skills</CardTitle>
+              <CardTitle className="text-sm font-semibold">
+                {tr("profile.skills", "Skills")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
               <div className="flex flex-wrap gap-1.5">
@@ -577,7 +599,10 @@ export default function ProfileEditPage() {
                       addSkill(skillInput);
                     }
                   }}
-                  placeholder="Add a skill..."
+                  placeholder={tr(
+                    "profile.edit.addSkillPlaceholder",
+                    "Add a skill...",
+                  )}
                   className="h-8 text-xs flex-1"
                 />
                 <Button
@@ -591,9 +616,7 @@ export default function ProfileEditPage() {
               </div>
               {/* suggestions */}
               <div className="flex flex-wrap gap-1">
-                {SKILL_SUGGESTIONS.filter(
-                  (s) => !skillsList.includes(s),
-                )
+                {SKILL_SUGGESTIONS.filter((s) => !skillsList.includes(s))
                   .slice(0, 8)
                   .map((s) => (
                     <button
@@ -614,7 +637,7 @@ export default function ProfileEditPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                   <Languages className="h-4 w-4" />
-                  Language Skills
+                  {tr("profile.languageSkills", "Language Skills")}
                 </CardTitle>
                 <Button
                   size="sm"
@@ -623,7 +646,7 @@ export default function ProfileEditPage() {
                   onClick={addLanguageSkill}
                 >
                   <Plus className="h-3 w-3" />
-                  Add
+                  {tr("common.add", "Add")}
                 </Button>
               </div>
             </CardHeader>
@@ -633,13 +656,12 @@ export default function ProfileEditPage() {
                 (lp) =>
                   !languageSkills.some(
                     (ls) =>
-                      ls.language_name.toLowerCase() ===
-                      lp.name.toLowerCase(),
+                      ls.language_name.toLowerCase() === lp.name.toLowerCase(),
                   ),
               ).length > 0 && (
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                    Quick add
+                    {tr("profile.edit.quickAdd", "Quick add")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {LANGUAGE_PRESETS.filter(
@@ -693,6 +715,10 @@ export default function ProfileEditPage() {
                             )
                           }
                           placeholder="Language name"
+                          placeholder={tr(
+                            "profile.edit.languageName",
+                            "Language name",
+                          )}
                           className="h-8 text-sm flex-1 bg-background"
                         />
                         <button
@@ -714,7 +740,7 @@ export default function ProfileEditPage() {
                           <div className="space-y-1 pl-6">
                             {isJapanese && (
                               <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
-                                JLPT Level
+                                {tr("profile.edit.jlptLevel", "JLPT Level")}
                               </p>
                             )}
                             <div className="flex flex-wrap gap-1">
@@ -724,7 +750,11 @@ export default function ProfileEditPage() {
                                 return (
                                   <button
                                     key={lvl.label}
-                                    title={isJapanese ? (lvl as typeof JLPT_LEVELS[0]).desc : undefined}
+                                    title={
+                                      isJapanese
+                                        ? (lvl as (typeof JLPT_LEVELS)[0]).desc
+                                        : undefined
+                                    }
                                     onClick={() =>
                                       updateLanguageSkill(
                                         idx,
@@ -753,10 +783,16 @@ export default function ProfileEditPage() {
                 <div className="rounded-lg border border-dashed border-border py-6 text-center">
                   <Languages className="h-6 w-6 mx-auto mb-1.5 text-muted-foreground/40" />
                   <p className="text-xs text-muted-foreground">
-                    Add languages you speak
+                    {tr(
+                      "profile.edit.addLanguagesYouSpeak",
+                      "Add languages you speak",
+                    )}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                    Click a preset above or the Add button
+                    {tr(
+                      "profile.edit.addLanguagesHint",
+                      "Click a preset above or the Add button",
+                    )}
                   </p>
                 </div>
               )}
@@ -767,8 +803,10 @@ export default function ProfileEditPage() {
           <Card className="border-border/60 opacity-60">
             <CardHeader>
               <CardTitle className="text-sm font-semibold text-muted-foreground">
-                Engagement
-                <span className="text-[10px] font-normal ml-2">(read-only)</span>
+                {tr("profile.engagement", "Engagement")}
+                <span className="text-[10px] font-normal ml-2">
+                  ({tr("profile.edit.readOnly", "read-only")})
+                </span>
               </CardTitle>
             </CardHeader>
           </Card>
@@ -782,9 +820,10 @@ export default function ProfileEditPage() {
               <CardHeader>
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Pin className="h-3.5 w-3.5 -rotate-45" />
-                  Pin Articles
+                  {tr("profile.edit.pinArticles", "Pin Articles")}
                   <span className="text-[10px] font-normal text-muted-foreground">
-                    ({pinnedArticleIds.length} pinned)
+                    ({pinnedArticleIds.length}{" "}
+                    {tr("profile.edit.pinned", "pinned")})
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -809,9 +848,7 @@ export default function ProfileEditPage() {
                               : "border-border"
                           }`}
                         >
-                          {isPinned && (
-                            <Check className="h-3 w-3 text-white" />
-                          )}
+                          {isPinned && <Check className="h-3 w-3 text-white" />}
                         </div>
                         <span className="text-xs text-foreground line-clamp-1 flex-1">
                           {article.title}
@@ -830,9 +867,10 @@ export default function ProfileEditPage() {
               <CardHeader>
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Pin className="h-3.5 w-3.5 -rotate-45" />
-                  Pin Projects
+                  {tr("profile.edit.pinProjects", "Pin Projects")}
                   <span className="text-[10px] font-normal text-muted-foreground">
-                    ({pinnedProjectIds.length} pinned)
+                    ({pinnedProjectIds.length}{" "}
+                    {tr("profile.edit.pinned", "pinned")})
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -857,9 +895,7 @@ export default function ProfileEditPage() {
                               : "border-border"
                           }`}
                         >
-                          {isPinned && (
-                            <Check className="h-3 w-3 text-white" />
-                          )}
+                          {isPinned && <Check className="h-3 w-3 text-white" />}
                         </div>
                         <span className="text-xs text-foreground line-clamp-1 flex-1">
                           {project.title}
@@ -887,7 +923,9 @@ export default function ProfileEditPage() {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          {saving ? "Saving..." : "Save Changes"}
+          {saving
+            ? tr("common.saving", "Saving...")
+            : tr("common.saveChanges", "Save Changes")}
         </Button>
       </div>
     </div>
