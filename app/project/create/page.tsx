@@ -735,9 +735,7 @@ export default function CreateProjectPage() {
                   onChange={(e) => setFileName(e.target.value)}
                 />
                 <Input
-                  placeholder={
-                    t("project.fileType") || "File type (optional)"
-                  }
+                  placeholder={t("project.fileType") || "File type (optional)"}
                   value={fileType}
                   onChange={(e) => setFileType(e.target.value)}
                 />
