@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
+  Eye,
   Heart,
   MessageCircle,
   Bookmark,
   ArrowBigUp,
   ArrowBigDown,
-  Share,
 } from "lucide-react";
 import {
   ContentType,
@@ -28,9 +28,9 @@ interface InteractionButtonsProps {
 /**
  * Unified interaction buttons component.
  * Renders appropriate buttons based on content type:
- * - Articles: Like, Comment, Bookmark, Share
+ * - Articles: View and like counts, Bookmark
  * - Discussions: Upvote, Downvote, Comment, Bookmark
- * - Projects: Like, Comment, Bookmark
+ * - Projects: View and like counts, Bookmark
  *
  * @example
  * <InteractionButtons
@@ -63,10 +63,10 @@ export function InteractionButtons({
             size="sm"
             onClick={() => onVote?.("up")}
             disabled={disabled}
-            className={`h-8 gap-1 px-2 ${
+            className={`h-8 gap-1 px-2 hover:bg-transparent ${
               interactions.userVote === "up"
                 ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground "
             }`}
           >
             <ArrowBigUp
@@ -95,79 +95,57 @@ export function InteractionButtons({
           </Button>
         </div>
 
-        {/* Comment count */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onComment}
-          disabled={disabled}
-          className="h-8 gap-1.5 px-3 text-muted-foreground hover:text-foreground"
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-xs">{stats.comments}</span>
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* Comment count */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onComment}
+            disabled={disabled}
+            className="h-8 gap-1.5 px-3 text-muted-foreground hover:text-foreground"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs">{stats.comments}</span>
+          </Button>
 
-        {/* Bookmark */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBookmark}
-          disabled={disabled}
-          className={`h-8 px-2 ${
-            interactions.isBookmarked
-              ? "text-blue-500"
-              : "text-muted-foreground hover:text-blue-500"
-          }`}
-        >
-          <Bookmark
-            className="h-4 w-4"
-            fill={interactions.isBookmarked ? "currentColor" : "none"}
-          />
-        </Button>
+          {/* Bookmark */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBookmark}
+            disabled={disabled}
+            className={`h-8 px-2 ${
+              interactions.isBookmarked
+                ? "text-blue-500"
+                : "text-muted-foreground hover:text-blue-500"
+            }`}
+          >
+            <Bookmark
+              className="h-4 w-4"
+              fill={interactions.isBookmarked ? "currentColor" : "none"}
+            />
+          </Button>
+        </div>
       </div>
     );
   }
 
-  // Articles and projects use like/comment/bookmark pattern
+  // Articles and projects use view/bookmark pattern
   return (
     <div className="flex items-center gap-2 justify-end pt-1">
-      {/* Views (optional) */}
-      {showStats && stats.views > 0 && (
-        <span className="text-xs text-muted-foreground hidden sm:inline">
-          {stats.views} views
-        </span>
+      {/* Stats (optional) */}
+      {showStats && (
+        <div className="flex items-center gap-3 text-xs text-muted-foreground whitespace-nowrap">
+          <span className="inline-flex items-center gap-1">
+            <Eye className="h-3.5 w-3.5" />
+            {stats.views}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Heart className="h-3.5 w-3.5" />
+            {stats.likes}
+          </span>
+        </div>
       )}
-
-      {/* Like button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onLike}
-        disabled={disabled}
-        className={`h-7 w-7 ${
-          interactions.isLiked
-            ? "text-red-500"
-            : "text-muted-foreground hover:text-red-500"
-        }`}
-        title={interactions.isLiked ? "Unlike" : "Like"}
-      >
-        <Heart
-          className="h-4 w-4"
-          fill={interactions.isLiked ? "currentColor" : "none"}
-        />
-      </Button>
-
-      {/* Comment button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onComment}
-        disabled={disabled}
-        className="h-7 w-7 text-muted-foreground hover:text-foreground"
-        title="Comment"
-      >
-        <MessageCircle className="h-4 w-4" />
-      </Button>
 
       {/* Bookmark button */}
       <Button
@@ -187,19 +165,6 @@ export function InteractionButtons({
           fill={interactions.isBookmarked ? "currentColor" : "none"}
         />
       </Button>
-
-      {/* Share button (articles only) */}
-      {contentType === "article" && (
-        <Button
-          variant="ghost"
-          size="icon"
-          disabled={disabled}
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
-          title="Share"
-        >
-          <Share className="h-4 w-4" />
-        </Button>
-      )}
     </div>
   );
 }

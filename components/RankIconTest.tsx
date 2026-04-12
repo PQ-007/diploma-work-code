@@ -5,7 +5,7 @@ import { getRankIcon } from "@/lib/utils/rankIcons";
  * Shows icons for different ranking point values.
  */
 export function RankIconTest() {
-  const testRanks = [0, 500, 900, 1300, 1700, 2100, 2600];
+  const testRanks = [0, 1200, 1600, 3600, 6200, 8200, 10500];
 
   return (
     <div className="p-4 space-y-2 border rounded-lg">
@@ -15,16 +15,16 @@ export function RankIconTest() {
           <span className="w-16 text-sm">{points} pts:</span>
           {getRankIcon(points)}
           <span className="text-xs text-muted-foreground">
-            {points >= 2500
+            {points >= 10000
               ? "King"
-              : points >= 2000
+              : points >= 8000
                 ? "Queen"
-                : points >= 1600
+                : points >= 6000
                   ? "Rook"
-                  : points >= 1200
-                    ? "Bishop"
-                    : points >= 800
-                      ? "Knight"
+                  : points >= 3500
+                    ? "Knight"
+                    : points >= 1500
+                      ? "Bishop"
                       : "Pawn"}
           </span>
         </div>

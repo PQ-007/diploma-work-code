@@ -92,13 +92,11 @@ export default function ArticleCreatePage() {
   };
 
   const handleFormatBold = () => {
-    // Visual feedback for formatting actions could be added here
-    console.log("Bold formatting applied");
+    return;
   };
 
   const handleFormatItalic = () => {
-    // Visual feedback for formatting actions could be added here
-    console.log("Italic formatting applied");
+    return;
   };
 
   const viewIcon = {

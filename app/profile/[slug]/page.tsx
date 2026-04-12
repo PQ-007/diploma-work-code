@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Bookmark,
   Calendar,
@@ -163,8 +164,17 @@ function relativeTime(dateStr: string | null): string {
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const params = useParams();
   const slug = params?.slug as string;
+
+  const tr = useCallback(
+    (key: string, fallback: string) => {
+      const value = t(key);
+      return value === key ? fallback : value;
+    },
+    [t],
+  );
 
   const [data, setData] = useState<ProfileApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -260,9 +270,11 @@ export default function ProfilePage() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-muted-foreground">Profile not found</p>
+        <p className="text-muted-foreground">
+          {tr("profile.notFound", "Profile not found")}
+        </p>
         <Button asChild variant="outline">
-          <Link href="/">Go Home</Link>
+          <Link href="/">{tr("profile.goHome", "Go Home")}</Link>
         </Button>
       </div>
     );
@@ -315,7 +327,7 @@ export default function ProfilePage() {
                   {isOwner ? (
                     <Button size="sm" asChild className="gap-1.5">
                       <Link href={`/profile/${slug}/edit`}>
-                        Edit Profile
+                        {tr("profile.editProfile", "Edit Profile")}
                         <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
@@ -334,7 +346,9 @@ export default function ProfilePage() {
                       ) : (
                         <UserPlus className="h-3.5 w-3.5" />
                       )}
-                      {following ? "Unfollow" : "Follow"}
+                      {following
+                        ? tr("profile.unfollow", "Unfollow")
+                        : tr("feed.actions.follow", "Follow")}
                     </Button>
                   ) : null}
                 </div>
@@ -347,21 +361,20 @@ export default function ProfilePage() {
                       profile.email?.substring(1, 3) ?? "0",
                     );
                     const n = new Date().getFullYear() - enrollYear - 2000;
-                    const s =
-                      n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
-                    return `${n}${s} year student`;
+                    return `${n} ${tr("profile.yearStudent", "year student")}`;
                   })()}
                 </Badge>
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {profile.created_at
-                    ? `Joined ${new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
-                    : "Joined recently"}
+                    ? `${tr("profile.joinedDate", "Joined")} ${new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
+                    : tr("profile.joinedRecently", "Joined recently")}
                 </span>
 
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <UserPlus className="h-3 w-3" />
-                  {followerCount} followers · {stats.following} following
+                  {followerCount} {tr("profile.followers", "followers")} ·{" "}
+                  {stats.following} {tr("profile.following", "following")}
                 </span>
               </div>
             </div>
@@ -377,7 +390,9 @@ export default function ProfilePage() {
           {skills.length > 0 && (
             <Card className="border-border/60">
               <CardHeader>
-                <CardTitle className="text-sm font-semibold">Skills</CardTitle>
+                <CardTitle className="text-sm font-semibold">
+                  {tr("profile.skills", "Skills")}
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-1.5">
@@ -399,7 +414,7 @@ export default function ProfilePage() {
           <Card className="border-border/60">
             <CardHeader>
               <CardTitle className="text-sm font-semibold">
-                Language Skills
+                {tr("profile.languageSkills", "Language Skills")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -426,7 +441,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  No language skills listed.
+                  {tr("profile.noLanguageSkills", "No language skills listed.")}
                 </p>
               )}
             </CardContent>
@@ -436,29 +451,29 @@ export default function ProfilePage() {
           <Card className="border-border/60">
             <CardHeader>
               <CardTitle className="text-sm font-semibold">
-                Engagement
+                {tr("profile.engagement", "Engagement")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-2.5">
               {[
                 {
                   icon: <MessageSquare className="h-3.5 w-3.5 text-blue-500" />,
-                  label: "Comments received",
+                  label: tr("profile.commentsReceived", "Comments received"),
                   value: stats.totalComments,
                 },
                 {
                   icon: <Heart className="h-3.5 w-3.5 text-rose-500" />,
-                  label: "Reactions received",
+                  label: tr("profile.reactionsReceived", "Reactions received"),
                   value: stats.totalReactions,
                 },
                 {
                   icon: <Bookmark className="h-3.5 w-3.5 text-amber-500" />,
-                  label: "Bookmarks received",
+                  label: tr("profile.bookmarksReceived", "Bookmarks received"),
                   value: stats.totalBookmarks,
                 },
                 {
                   icon: <Eye className="h-3.5 w-3.5 text-emerald-500" />,
-                  label: "Total views",
+                  label: tr("profile.totalViews", "Total views"),
                   value: stats.totalViews,
                 },
               ].map((item) => (
@@ -531,17 +546,19 @@ export default function ProfilePage() {
             <TabsList className="bg-transparent  border-border w-full rounded-none p-0 h-auto justify-start gap-0 mb-0">
               <TabsTrigger value="articles">
                 <FileText className="h-3.5 w-3.5" />
-                Articles
+                {tr("sidebar.articles", "Articles")}
               </TabsTrigger>
               <TabsTrigger value="projects">
                 <FolderGit2 className="h-3.5 w-3.5" />
-                Projects
+                {tr("sidebar.projects", "Projects")}
               </TabsTrigger>
               <TabsTrigger value="flashcards">
                 <Layers className="h-3.5 w-3.5" />
-                Flashcards
+                {tr("navigation.flashcards", "Flashcards")}
               </TabsTrigger>
-              <TabsTrigger value="certificates">Certificates</TabsTrigger>
+              <TabsTrigger value="certificates">
+                {tr("profile.certificates", "Certificates")}
+              </TabsTrigger>
             </TabsList>
 
             {/* Articles Tab */}
@@ -571,7 +588,9 @@ export default function ProfilePage() {
               ) : (
                 <div className="rounded-lg border border-border/60 bg-card p-8 text-center text-muted-foreground">
                   <FileText className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No articles published yet.</p>
+                  <p className="text-sm">
+                    {tr("profile.noArticlesYet", "No articles published yet.")}
+                  </p>
                 </div>
               )}
             </TabsContent>
@@ -581,7 +600,12 @@ export default function ProfilePage() {
               <Card className="border-border/60">
                 <CardContent className="p-8 text-center text-muted-foreground">
                   <Layers className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">No flashcard sets created yet.</p>
+                  <p className="text-sm">
+                    {tr(
+                      "profile.noFlashcardsYet",
+                      "No flashcard sets created yet.",
+                    )}
+                  </p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -614,7 +638,12 @@ export default function ProfilePage() {
                 <Card className="border-border/60">
                   <CardContent className="p-8 text-center text-muted-foreground">
                     <FolderGit2 className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm">No projects published yet.</p>
+                    <p className="text-sm">
+                      {tr(
+                        "profile.noProjectsYet",
+                        "No projects published yet.",
+                      )}
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -623,7 +652,12 @@ export default function ProfilePage() {
             {/* Certificates Tab */}
             <TabsContent value="certificates" className="mt-2">
               <div className="rounded-lg border border-border/60 bg-card p-8 text-center text-muted-foreground">
-                <p className="text-sm">No certificates earned yet.</p>
+                <p className="text-sm">
+                  {tr(
+                    "profile.noCertificatesYet",
+                    "No certificates earned yet.",
+                  )}
+                </p>
               </div>
             </TabsContent>
           </Tabs>

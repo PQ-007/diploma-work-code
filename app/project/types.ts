@@ -3,7 +3,17 @@
 /* ------------------------------------------------------------------ */
 
 export type ProjectStatus = "draft" | "in_progress" | "completed" | "archived";
-export type ProjectType = "research" | "coding" | "design" | "other";
+/** Maps to the project_type enum in the DB (column name: `type`) */
+export type ProjectType = "diploma" | "contest" | "intership" | "private";
+/** Maps to the project_category enum stored as text in the `category` column */
+export type ProjectCategory =
+  | "creative_design"
+  | "mobile_dev"
+  | "game_dev"
+  | "web_dev"
+  | "hardware_iot"
+  | "ai"
+  | "other";
 export type ProjectDifficulty = "beginner" | "intermediate" | "advanced";
 export type ProjectMemberRole = "owner" | "contributor" | "viewer";
 
@@ -71,18 +81,39 @@ export interface ProjectFile {
   created_at: string;
 }
 
+export type ProjectUpdateType =
+  | "regular"
+  | "milestone"
+  | "release"
+  | "announcement";
+
+export interface ProjectUpdate {
+  id: number;
+  project_id: number;
+  created_by: string;
+  title: string;
+  body: string;
+  update_type: ProjectUpdateType;
+  image_url: string | null;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+  author?: ProjectAuthor | null;
+}
+
 export interface ProjectPayload {
   id: number;
   title: string;
   slug: string;
   description: string | null;
   category: string | null;
-  project_type: ProjectType;
+  type: ProjectType;
   difficulty: ProjectDifficulty;
   status: ProjectStatus;
   is_public: boolean;
   repository_url: string | null;
   demo_url: string | null;
+  video_url?: string | null;
   thumbnail_url: string | null;
   progress: number;
   technologies: string[];
@@ -99,18 +130,22 @@ export interface ProjectPayload {
   milestones?: ProjectMilestone[];
   comments?: ProjectComment[];
   files?: ProjectFile[];
+  updates?: ProjectUpdate[];
   userLiked?: boolean;
+  isOwner?: boolean;
+  isMember?: boolean;
 }
 
 export interface CreateProjectBody {
   title: string;
   description?: string;
-  category?: string;
-  project_type?: ProjectType;
+  category?: ProjectCategory;
+  type?: ProjectType;
   difficulty?: ProjectDifficulty;
   technologies?: string[];
   repository_url?: string;
   demo_url?: string;
+  video_url?: string;
   thumbnail_url?: string;
   tags?: string[];
 }
