@@ -86,7 +86,7 @@ export const components = {
   // Enhanced blockquote
   blockquote: (props: any) => (
     <blockquote
-      className="px-2 pt-5 pb-1 border-l-4 border-primary bg-primary/10 rounded-lg italic text-muted-foreground"
+      className="px-2 pt-5 pb-0.5 mb-5 border-l-4 border-primary bg-primary/10 rounded-lg italic text-muted-foreground"
       {...props}
     />
   ),

@@ -836,6 +836,11 @@ export function MdxEditor({
             alwaysConsumeMouseWheel: false,
           },
           quickSuggestions: false,
+          unicodeHighlight: {
+            ambiguousCharacters: false,
+            invisibleCharacters: false,
+            nonBasicASCII: false,
+          },
         }}
       />
 
