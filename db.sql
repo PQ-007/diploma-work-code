@@ -329,31 +329,6 @@ CREATE TABLE public.project_members (
   CONSTRAINT project_members_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id),
   CONSTRAINT project_members_user_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
 );
-CREATE TABLE public.project_milestones (
-  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  project_id bigint NOT NULL,
-  title text NOT NULL,
-  description text,
-  due_date date,
-  completed boolean NOT NULL DEFAULT false,
-  completed_at timestamp with time zone,
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT project_milestones_pkey PRIMARY KEY (id),
-  CONSTRAINT project_milestones_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
-);
-CREATE TABLE public.project_sections (
-  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  project_id bigint NOT NULL,
-  title text NOT NULL,
-  section_type text NOT NULL DEFAULT 'custom'::text CHECK (section_type = ANY (ARRAY['overview'::text, 'goals'::text, 'architecture'::text, 'implementation'::text, 'results'::text, 'lessons_learned'::text, 'custom'::text])),
-  content text,
-  sort_order integer NOT NULL DEFAULT 0,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT project_sections_pkey PRIMARY KEY (id),
-  CONSTRAINT project_sections_project_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
-);
 CREATE TABLE public.project_tags (
   project_id bigint NOT NULL,
   tag_id bigint NOT NULL,
@@ -382,7 +357,6 @@ CREATE TABLE public.projects (
   slug text NOT NULL UNIQUE,
   description text,
   category text,
-  project_type USER-DEFINED NOT NULL DEFAULT 'coding'::project_type,
   difficulty USER-DEFINED NOT NULL DEFAULT 'beginner'::project_difficulty,
   status USER-DEFINED NOT NULL DEFAULT 'draft'::project_status,
   is_public boolean NOT NULL DEFAULT false,
@@ -398,6 +372,7 @@ CREATE TABLE public.projects (
   views bigint NOT NULL DEFAULT 0,
   likes_count bigint NOT NULL DEFAULT 0,
   search_vector tsvector,
+  type USER-DEFINED DEFAULT 'private'::project_type,
   CONSTRAINT projects_pkey PRIMARY KEY (id),
   CONSTRAINT projects_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.profiles(id)
 );

@@ -3,7 +3,17 @@
 /* ------------------------------------------------------------------ */
 
 export type ProjectStatus = "draft" | "in_progress" | "completed" | "archived";
-export type ProjectType = "research" | "coding" | "design" | "other";
+/** Maps to the project_type enum in the DB (column name: `type`) */
+export type ProjectType = "diploma" | "contest" | "intership" | "private";
+/** Maps to the project_category enum stored as text in the `category` column */
+export type ProjectCategory =
+  | "creative_design"
+  | "mobile_dev"
+  | "game_dev"
+  | "web_dev"
+  | "hardware_iot"
+  | "ai"
+  | "other";
 export type ProjectDifficulty = "beginner" | "intermediate" | "advanced";
 export type ProjectMemberRole = "owner" | "contributor" | "viewer";
 
@@ -97,7 +107,7 @@ export interface ProjectPayload {
   slug: string;
   description: string | null;
   category: string | null;
-  project_type: ProjectType;
+  type: ProjectType;
   difficulty: ProjectDifficulty;
   status: ProjectStatus;
   is_public: boolean;
@@ -128,12 +138,13 @@ export interface ProjectPayload {
 export interface CreateProjectBody {
   title: string;
   description?: string;
-  category?: string;
-  project_type?: ProjectType;
+  category?: ProjectCategory;
+  type?: ProjectType;
   difficulty?: ProjectDifficulty;
   technologies?: string[];
   repository_url?: string;
   demo_url?: string;
+  video_url?: string;
   thumbnail_url?: string;
   tags?: string[];
 }

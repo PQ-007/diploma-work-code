@@ -68,7 +68,7 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
     description:
       "Placeholder showcase content for QA/testing. This sample simulates project summary, team, files, links, and discussion state.",
     category: "Web Platform",
-    project_type: "coding",
+    type: "private",
     difficulty: "intermediate",
     status: "in_progress",
     is_public: true,
@@ -695,7 +695,7 @@ export default function ProjectDetailPage() {
                 variant="outline"
                 className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
               >
-                {project.project_type}
+                {project.type}
               </Badge>
               {project.tags.slice(0, 4).map((tag) => (
                 <Badge
