@@ -6,13 +6,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -20,43 +13,33 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  useSidebar,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Anvil,
-  Atom,
   Bird,
   Blocks,
-  Brain,
   ChevronRight,
   Clock,
-  Code,
-  Edit,
-  FileText,
   Flame,
-  Folder,
   GraduationCap,
   Hammer,
-  Library,
   MessagesSquare,
-  MoreHorizontal,
   Rocket,
   Scroll,
-  Share2,
+  Settings,
   Store,
   SwatchBook,
   Swords,
   Telescope,
-  Trash2,
-  Trophy,
+  Trophy
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
@@ -116,6 +99,16 @@ const navData: SidebarData = {
       titleKey: "sidebar.articles",
       icon: Telescope,
       href: "/article",
+      items: [{
+        titleKey: "sidebar.internship",
+        href: "/article/internship",
+        icon: Flame,
+      },
+      {
+        titleKey: "sidebar.post-grad",
+        href: "/article/post-grad",
+        icon: Flame,
+      },],
     },
 
     {
@@ -130,8 +123,8 @@ const navData: SidebarData = {
         },
         
         {
-          titleKey: "sidebar.tutorial",
-          href: "/project/tutorial",
+          titleKey: "sidebar.contest",
+          href: "/project/contest",
           icon: Hammer,
         },
       ],
@@ -142,13 +135,20 @@ const navData: SidebarData = {
       href: "/discussions",
       items: [],
     },
-    // {
-    //   titleKey: "sidebar.knowledgeTree",
-    //   icon: Scroll,
-    //   href: "/knowledge-tree",
-    //   items: [],
-    //   authRequired: true,
-    // },
+    {
+      titleKey: "sidebar.knowledgeTree",
+      icon: Scroll,
+      href: "/knowledge-tree",
+      items: [],
+      authRequired: true,
+    },
+    {
+      titleKey: "sidebar.flashcards",
+      icon: SwatchBook,
+      href: "/flashcard",
+      items: [],
+      authRequired: true,
+    },
     {
       titleKey: "sidebar.dictionary",
       icon: Blocks,
@@ -159,6 +159,13 @@ const navData: SidebarData = {
       titleKey: "sidebar.store",
       icon: Store,
       href: "/store",
+      items: [],
+      authRequired: true,
+    },
+    {
+      titleKey: "sidebar.settings",
+      icon: Settings,
+      href: "/settings",
       items: [],
       authRequired: true,
     },

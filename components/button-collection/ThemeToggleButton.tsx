@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils";
 import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ThemeToggleButton() {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { t } = useTranslation();
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -25,25 +27,25 @@ export default function ThemeToggleButton() {
   const themes = useMemo(
     () => [
       {
-        name: "Light",
+        name: t("themeToggle.light"),
         value: "light",
         icon: Sun,
-        description: "Clean and bright interface",
+        description: t("themeToggle.lightDescription"),
       },
       {
-        name: "Dark",
+        name: t("themeToggle.dark"),
         value: "dark",
         icon: Moon,
-        description: "Easy on the eyes",
+        description: t("themeToggle.darkDescription"),
       },
       {
-        name: "System",
+        name: t("themeToggle.system"),
         value: "system",
         icon: Monitor,
-        description: "Follow system preference",
+        description: t("themeToggle.systemDescription"),
       },
     ],
-    [],
+    [t],
   );
 
   const handleThemeChange = (newTheme: string) => setTheme(newTheme);
@@ -56,7 +58,9 @@ export default function ThemeToggleButton() {
   }, [mounted, theme, resolvedTheme]);
 
   // Stable aria-label until mounted
-  const ariaLabel = mounted ? `Current theme: ${theme ?? "system"}` : "Theme";
+  const ariaLabel = mounted
+    ? t("themeToggle.currentTheme", { theme: theme ?? "system" })
+    : t("themeToggle.theme");
 
   return (
     <DropdownMenu>

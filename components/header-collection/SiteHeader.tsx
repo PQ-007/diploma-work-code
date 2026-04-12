@@ -165,14 +165,13 @@ export function SiteHeader() {
               </div>
             ) : user ? (
               <>
-                <CreateButton />
+                <ThemeToggleButton />
+                <LanguageToggleButton />
                 <NotificationButton />
                 <NavUser />
               </>
             ) : (
               <>
-                <ThemeToggleButton />
-                <LanguageToggleButton />
                 <Button
                   variant="outline"
                   size="sm"

@@ -97,7 +97,7 @@ function StatusBadge({
   return (
     <Badge className={`${c.className} text-[10px]`}>
       {c.icon}
-      {c.label}
+      
     </Badge>
   );
 }

@@ -43,9 +43,21 @@
     "saveChanges": "変更を保存"
   },
 
+  "themeToggle": {
+    "theme": "テーマ",
+    "currentTheme": "現在のテーマ: {{theme}}",
+    "light": "ライト",
+    "lightDescription": "明るく見やすい表示",
+    "dark": "ダーク",
+    "darkDescription": "目に優しい表示",
+    "system": "システム",
+    "systemDescription": "システム設定に従う"
+  },
+
   "sidebar": {
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
+    "flashcards": "フラッシュカード",
     "contest": "コンテスト",
     "competitions": "コンペティション",
     "learn": "学習",

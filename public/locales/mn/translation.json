@@ -12,7 +12,6 @@
     "share": "Түгээх",
     "search": "Хайх",
     "filter": "Шүүлтүүр",
-    "create": "Үүсгэх",
     "back": "Буцах",
     "next": "Дараах",
     "previous": "Өмнөх",
@@ -43,9 +42,21 @@
     "saveChanges": "Өөрчлөлтийг хадгалах"
   },
 
+  "themeToggle": {
+    "theme": "Сэдэв",
+    "currentTheme": "Одоогийн сэдэв: {{theme}}",
+    "light": "Гэрэлтэй",
+    "lightDescription": "Цэвэр, тод интерфэйс",
+    "dark": "Бараан",
+    "darkDescription": "Нүдэнд амар",
+    "system": "Систем",
+    "systemDescription": "Системийн тохиргоог дагах"
+  },
+
   "sidebar": {
     "competitions": "Тэмцээн",
     "learn": "Сурах",
+    "flashcards": "Флаш картууд",
     "articles": "Нийтлэл",
     "discussions": "Асуулт хариулт",
     "projects": "Бүтээлүүд",
@@ -362,9 +373,9 @@
   },
 
   "create_button": {
-    "create": "Үүсгэх",
+    "create": "Контент нэмэх",
     "project": "Төсөл",
-    "project_disc": "Шинэ бүтээлийн тэмдэглэл үүсгэх",
+    "project_disc": "Шинэ бүтээл нэмэх",
     "article": "Нийтлэл",
     "article_disc": "Шинэ нийтлэл бичих",
     "flashcards": "Флаш картууд",
@@ -372,7 +383,7 @@
     "contest": "Тэмцээн",
     "contest_disc": "Тэмцээнд зохиох",
     "discussions": "Асуулт",
-    "discussions_disc": "Шинэ асуулт үүсгэх"
+    "discussions_disc": "Шинэ асуулт бичих"
   },
 
   "articles": {
@@ -563,7 +574,7 @@
     "cantFindTerm": "Нэр томъёо олдохгүй байна уу?",
     "cantFindTermDesc": "Толь бичгийн санд тус болно гэж бодсон шинэ нэр томъёо нэмнэ үү!",
     "addNewTerm": "Шинэ нэр томъёо нэмэх",
-    "createFirstEntry": "Эхний нэр томъёогоо үүсгэх",
+    "createFirstEntry": "Эхний нэр томъёогоо нэмнэ үү",
     "myDrafts": "Миний нооргууд",
     "termNotFound": "Нэр томъёо олдсонгүй",
     "termNotFoundDesc": "Таны хайсан нэр томъёо толь бичигт одоогоор байхгүй байна.",
@@ -608,7 +619,7 @@
     "failedFlashcard": "Флашкарт үүсгэхэд алдаа гарлаа",
     "flashcardCreated": "Флашкарт үүслээ!",
     "create": {
-      "title": "Толь бичгийн бичлэг үүсгэх",
+      "title": "Толь бичигт үг нэмэх",
       "editTitle": "Ноорог засах",
       "basicInfo": "Үндсэн мэдээлэл",
       "term": "Нэр томъёо",
@@ -768,7 +779,6 @@
     "beginner": "ЭХЛЭГЧ",
     "intermediate": "ДУНД",
     "advanced": "АХИСАН",
-    
 
     "showcase": "Бүтээлийн үзэсгэлэн",
     "showcaseDescription": "Оюутнуудын бүтээлүүдийг үзэх, хөгжүүлж буй ажлаа хуваалцах, санал хүсэлт авах",
@@ -786,9 +796,9 @@
     "allTypes": "Бүгд",
     "noProjectsFound": "Бүтээл, судагааны ажил олдсонгүй.",
     "noMyProjects": "Та одоогоор бүтээл үүсгээгүй байна.",
-    "createFirst": "Эхний бүтээлөө үүсгэх",
+    "createFirst": "Эхний бүтээлээ нэмэх",
 
-    "createProject": "Бүтээл үүсгэх",
+    "createProject": "Бүтээл нэмэх",
     "editProject": "Төсөл засах",
     "createDraft": "Ноорог үүсгэх",
     "titleRequired": "Гарчиг шаардлагатай",

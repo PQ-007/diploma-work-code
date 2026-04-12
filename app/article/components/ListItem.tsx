@@ -74,7 +74,7 @@ export default function ListItem({
                   <span className="text-sm font-medium truncate">
                     {item.author.name}
                   </span>
-                  {getRankIcon(item.author.ranking_point || 0)}
+                  {getRankIcon(item.author.ranking_point || 0, 3.5)}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{item.timestamp}</span>

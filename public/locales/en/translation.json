@@ -43,6 +43,17 @@
     "saveChanges": "Save Changes"
   },
 
+  "themeToggle": {
+    "theme": "Theme",
+    "currentTheme": "Current theme: {{theme}}",
+    "light": "Light",
+    "lightDescription": "Clean and bright interface",
+    "dark": "Dark",
+    "darkDescription": "Easy on the eyes",
+    "system": "System",
+    "systemDescription": "Follow system preference"
+  },
+
   "sidebar": {
     "internship": "Internship",
     "post-grad": "Post-Grad-Life",
@@ -50,6 +61,7 @@
     "competitions": "Competitions",
     "learn": "Learn",
     "articles": "Articles",
+    "flashcards": "Flashcards",
     "discussions": "Discussions",
     "projects": "Projects",
     "knowledgeTree": "Knowledge Tree",
