@@ -24,10 +24,16 @@ import {
   Heart,
   MessageSquare,
   Pencil,
+  Play,
   Share2,
+  Users,
 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+/* ------------------------------------------------------------------ */
+/*  Constants                                                           */
+/* ------------------------------------------------------------------ */
 
 const difficultyColors: Record<ProjectDifficulty, string> = {
   beginner: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -41,6 +47,17 @@ const difficultyLabel: Record<ProjectDifficulty, string> = {
   advanced: "Advanced",
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  private: "Private",
+  diploma: "Diploma",
+  contest: "Contest",
+  intership: "Internship",
+};
+
+/* ------------------------------------------------------------------ */
+/*  Helpers                                                             */
+/* ------------------------------------------------------------------ */
+
 function getSeedImage(seed: string, index: number) {
   return `https://picsum.photos/seed/future-hub-${encodeURIComponent(seed)}-${index}/1600/900`;
 }
@@ -49,6 +66,18 @@ function isImageUrl(url: string, fileType?: string | null) {
   if (fileType && fileType.startsWith("image/")) return true;
   return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
 }
+
+function getYouTubeId(url?: string | null): string | null {
+  if (!url) return null;
+  const m = url.match(
+    /(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+  );
+  return m ? m[1] : null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Placeholder project (demo / fallback)                              */
+/* ------------------------------------------------------------------ */
 
 function buildPlaceholderProject(slug: string): ProjectPayload {
   const now = new Date();
@@ -67,13 +96,14 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
     slug,
     description:
       "Placeholder showcase content for QA/testing. This sample simulates project summary, team, files, links, and discussion state.",
-    category: "Web Platform",
+    category: "web_dev",
     type: "private",
     difficulty: "intermediate",
     status: "in_progress",
     is_public: true,
     repository_url: "https://github.com/example/future-hub-testing-project",
     demo_url: "https://example.com/future-hub-testing-project",
+    video_url: null,
     thumbnail_url: getSeedImage(slug, 0),
     progress: 62,
     technologies: ["Next.js", "TypeScript", "Supabase", "Tailwind"],
@@ -179,6 +209,16 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
         file_size: 452311,
         created_at: now.toISOString(),
       },
+      {
+        id: 2003,
+        project_id: 999001,
+        uploaded_by: "test-user-owner",
+        file_name: "UI Wireframe.png",
+        file_url: getSeedImage(slug, 12),
+        file_type: "image/png",
+        file_size: 301200,
+        created_at: now.toISOString(),
+      },
     ],
     updates: [
       {
@@ -199,24 +239,6 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
           avatar_url: getSeedImage(slug, 9),
         },
       },
-      {
-        id: 3002,
-        project_id: 999001,
-        created_by: "test-user-contributor",
-        title: "Added config and uploads test pages",
-        body: "Second placeholder update for test data coverage and multiple timeline entries.",
-        update_type: "milestone",
-        image_url: getSeedImage(slug, 2),
-        published_at: now.toISOString(),
-        created_at: now.toISOString(),
-        updated_at: now.toISOString(),
-        author: {
-          id: "test-user-contributor",
-          user_name: "tester_contributor",
-          display_name: "QA Contributor",
-          avatar_url: getSeedImage(slug, 10),
-        },
-      },
     ],
     sections: [],
     userLiked: false,
@@ -225,43 +247,41 @@ function buildPlaceholderProject(slug: string): ProjectPayload {
   };
 }
 
-function buildGalleryImages(project: ProjectPayload) {
-  const seedBase = project.slug || "placeholder";
-  const collected = [
-    project.thumbnail_url,
-    ...(project.updates || []).map((update) => update.image_url),
-    ...(project.files || [])
-      .filter((file) => isImageUrl(file.file_url, file.file_type))
-      .map((file) => file.file_url),
-  ].filter((url): url is string => Boolean(url));
-
-  const deduped = Array.from(new Set(collected));
-
-  while (deduped.length < 4) {
-    deduped.push(getSeedImage(seedBase, deduped.length + 3));
-  }
-
-  return deduped.slice(0, 4);
-}
+/* ------------------------------------------------------------------ */
+/*  Skeleton                                                            */
+/* ------------------------------------------------------------------ */
 
 function PageSkeleton() {
   return (
     <div className="min-h-screen pb-16 -mx-4 lg:-mx-8">
-      <div className="max-w-6xl mx-auto px-4 lg:px-8 pt-6 space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-          <Skeleton className="aspect-video rounded-lg" />
-          <div className="space-y-4">
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
+        <div className="hidden lg:block" />
+        <div className="space-y-5">
+          <Skeleton className="h-12 w-3/4 rounded" />
+          <Skeleton className="aspect-video rounded-md" />
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton
+                key={i}
+                className="w-32 aspect-video rounded-sm flex-shrink-0"
+              />
+            ))}
           </div>
+          <Skeleton className="h-48 w-full rounded-lg" />
+          <Skeleton className="h-32 w-full rounded-lg" />
         </div>
-        <Skeleton className="h-48 w-full rounded-lg" />
-        <Skeleton className="h-96 w-full rounded-lg" />
+        <div className="hidden xl:block space-y-4">
+          <Skeleton className="h-36 rounded-lg" />
+          <Skeleton className="h-72 rounded-lg" />
+        </div>
       </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                                */
+/* ------------------------------------------------------------------ */
 
 export default function ProjectDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -281,25 +301,25 @@ export default function ProjectDetailPage() {
   const [isOwner, setIsOwner] = useState(false);
   const [isMember, setIsMember] = useState(false);
 
+  /* ─── media viewer ─── */
+  const [selectedMediaId, setSelectedMediaId] = useState<string>("thumbnail");
+
   useEffect(() => {
     if (!slug) return;
     (async () => {
       if (demoMode) {
-        const demoProject = buildPlaceholderProject(slug);
-        setProject(demoProject);
+        const demo = buildPlaceholderProject(slug);
+        setProject(demo);
         setLiked(false);
-        setLikesCount(demoProject.likes_count || 0);
+        setLikesCount(demo.likes_count || 0);
         setIsOwner(true);
         setIsMember(true);
         setLoading(false);
         return;
       }
-
       try {
         const res = await fetch(`/api/projects/${slug}`);
-        if (!res.ok) {
-          throw new Error("Project request failed");
-        }
+        if (!res.ok) throw new Error("not found");
         const data = await res.json();
         setProject(data);
         setLiked(data.userLiked || false);
@@ -307,10 +327,10 @@ export default function ProjectDetailPage() {
         setIsOwner(data.isOwner || false);
         setIsMember(data.isMember || false);
       } catch {
-        const fallbackProject = buildPlaceholderProject(slug);
-        setProject(fallbackProject);
+        const fallback = buildPlaceholderProject(slug);
+        setProject(fallback);
         setLiked(false);
-        setLikesCount(fallbackProject.likes_count || 0);
+        setLikesCount(fallback.likes_count || 0);
         setIsOwner(true);
         setIsMember(true);
       } finally {
@@ -318,6 +338,14 @@ export default function ProjectDetailPage() {
       }
     })();
   }, [slug, demoMode]);
+
+  /* ─── default selected media after load ─── */
+  useEffect(() => {
+    if (!project) return;
+    const ytId = getYouTubeId(project.video_url);
+    if (ytId) setSelectedMediaId("youtube");
+    else if (project.thumbnail_url) setSelectedMediaId("thumbnail");
+  }, [project?.slug]);
 
   const handleLike = useCallback(async () => {
     if (!user || !project) return;
@@ -332,13 +360,10 @@ export default function ProjectDetailPage() {
   }, [user, project, slug, liked]);
 
   const handleShare = useCallback(() => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).catch(() => undefined);
+    navigator.clipboard.writeText(window.location.href).catch(() => undefined);
   }, []);
 
-  const handleBookmark = useCallback(() => {
-    setBookmarked((prev) => !prev);
-  }, []);
+  const handleBookmark = useCallback(() => setBookmarked((p) => !p), []);
 
   const scrollToComments = useCallback(() => {
     commentsRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -368,14 +393,11 @@ export default function ProjectDetailPage() {
   const handleCommentDeleted = useCallback(
     (id: number) => {
       if (!project) return;
-      const removeComment = (comments: ProjectComment[]): ProjectComment[] =>
+      const remove = (comments: ProjectComment[]): ProjectComment[] =>
         comments
           .filter((c) => c.id !== id)
-          .map((c) => ({ ...c, replies: removeComment(c.replies || []) }));
-      setProject({
-        ...project,
-        comments: removeComment(project.comments || []),
-      });
+          .map((c) => ({ ...c, replies: remove(c.replies || []) }));
+      setProject({ ...project, comments: remove(project.comments || []) });
     },
     [project],
   );
@@ -383,178 +405,244 @@ export default function ProjectDetailPage() {
   if (loading) return <PageSkeleton />;
   if (!project) return null;
 
-  const commentsCount = (project.comments || []).length;
+  /* ─── derived ─── */
+  const youTubeId = getYouTubeId(project.video_url);
+  const imageFiles = (project.files || []).filter((f) =>
+    isImageUrl(f.file_url, f.file_type),
+  );
+  const nonImageFiles = (project.files || []).filter(
+    (f) => !isImageUrl(f.file_url, f.file_type),
+  );
+  const galleryStripItems = imageFiles.map((f) => ({
+    url: f.file_url,
+    id: `file-${f.id}`,
+  }));
+  const activeGalleryUrl =
+    galleryStripItems.find((g) => g.id === selectedMediaId)?.url ?? null;
   const teamMembers = project.members || [];
-  const filesCount = (project.files || []).length;
-  const canEditProject = isOwner || isMember;
-  const heroImage = project.thumbnail_url || getSeedImage(project.slug, 0);
-  const galleryImages = buildGalleryImages(project);
+  const canEdit = isOwner || isMember;
+  const hasStrip =
+    youTubeId || galleryStripItems.length > 0 || project.thumbnail_url;
 
   return (
     <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%),linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--background))_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
+        {/* ═══ Left sidebar ═══ */}
         <aside className="hidden lg:block">
-          <div className="sticky top-6">
-            <div className="flex">
-              <div className="flex flex-col items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`rounded-full border ${
-                    liked
-                      ? "text-destructive border-destructive/40 bg-destructive/10"
-                      : "border-border hover:bg-muted"
-                  }`}
-                  onClick={handleLike}
-                  disabled={!user}
-                  aria-label={t("project.likes") || "Like"}
-                >
-                  <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
-                </Button>
+          <div className="sticky top-6 flex flex-col items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`rounded-full border ${liked ? "text-destructive border-destructive/40 bg-destructive/10" : "border-border hover:bg-muted"}`}
+              onClick={handleLike}
+              disabled={!user}
+            >
+              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+            </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`rounded-full border ${
-                    bookmarked
-                      ? "text-primary border-primary/40 bg-primary/10"
-                      : "border-border hover:bg-muted"
-                  }`}
-                  onClick={handleBookmark}
-                  aria-label={t("common.bookmark") || "Bookmark"}
-                >
-                  <Bookmark
-                    className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`}
-                  />
-                </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`rounded-full border ${bookmarked ? "text-primary border-primary/40 bg-primary/10" : "border-border hover:bg-muted"}`}
+              onClick={handleBookmark}
+            >
+              <Bookmark
+                className={`h-5 w-5 ${bookmarked ? "fill-current" : ""}`}
+              />
+            </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full border border-border hover:bg-muted"
-                  onClick={scrollToComments}
-                  aria-label={t("project.comments") || "Comments"}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border border-border hover:bg-muted"
+              onClick={scrollToComments}
+            >
+              <MessageSquare className="h-5 w-5" />
+            </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full border border-border hover:bg-muted"
-                  onClick={handleShare}
-                  aria-label={t("common.share") || "Share"}
-                >
-                  <Share2 className="h-5 w-5" />
-                </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border border-border hover:bg-muted"
+              onClick={handleShare}
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
 
-                {canEditProject && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full border border-border hover:bg-muted"
-                    onClick={() => router.push(`/project/create?edit=${slug}`)}
-                    aria-label={t("project.editProject") || "Edit Project"}
-                  >
-                    <Pencil className="h-5 w-5" />
-                  </Button>
-                )}
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full border border-border hover:bg-muted"
+                onClick={() => router.push(`/project/create?edit=${slug}`)}
+              >
+                <Pencil className="h-5 w-5" />
+              </Button>
+            )}
 
-                <div className="h-px w-10 bg-border my-1" />
-                <div className="text-[11px] text-muted-foreground text-center">
-                  <div className="font-semibold text-foreground/80">
-                    {likesCount}
-                  </div>
-                  <div>{t("project.likes") || "Likes"}</div>
-                </div>
+            <div className="h-px w-10 bg-border my-1" />
+            <div className="text-[11px] text-muted-foreground text-center">
+              <div className="font-semibold text-foreground/80">
+                {likesCount}
               </div>
+              <div>{t("project.likes") || "Likes"}</div>
             </div>
           </div>
         </aside>
 
+        {/* ═══ Main content ═══ */}
         <main className="space-y-8 min-w-0">
-          <div className="space-y-4">
-            <h1 className="text-3xl md:text-4xl lg:text-[46px] leading-[1.05] font-black uppercase tracking-tight text-foreground">
-              {project.title}
-            </h1>
-          </div>
+          {/* ── Title ── */}
+          <h1 className="text-3xl md:text-4xl lg:text-[46px] leading-[1.05] font-black uppercase tracking-tight text-foreground">
+            {project.title}
+          </h1>
 
-          <div className="space-y-3">
-            <div className="relative w-full aspect-[16/9] rounded-md overflow-hidden border border-border bg-card group shadow-[0_22px_40px_rgba(0,0,0,0.2)]">
-              <img
-                src={heroImage}
-                alt={project.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              />
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 sm:gap-3">
-              {galleryImages.map((imageUrl, i) => (
-                <div
-                  key={i}
-                  className="aspect-video rounded-md border border-border bg-card/90 overflow-hidden"
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`${project.title} preview ${i + 1}`}
-                    className="w-full h-full object-cover opacity-80"
-                  />
+          {/* ── Steam-style media viewer ── */}
+          <div className="space-y-2">
+            {/* Main viewer */}
+            <div className="relative w-full aspect-[16/9] rounded-md overflow-hidden border border-border bg-muted/30 shadow-[0_22px_40px_rgba(0,0,0,0.2)]">
+              {selectedMediaId === "youtube" && youTubeId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${youTubeId}?autoplay=1`}
+                  title="Project video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              ) : activeGalleryUrl ? (
+                <img
+                  src={activeGalleryUrl}
+                  alt="Screenshot"
+                  className="w-full h-full object-cover"
+                />
+              ) : project.thumbnail_url ? (
+                <img
+                  src={project.thumbnail_url}
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
+                  <span className="text-sm">No preview available</span>
                 </div>
-              ))}
+              )}
             </div>
-          </div>
 
-          <Card className="border-border/80 bg-card/90 text-card-foreground p-5 sm:p-6 space-y-4">
-            <h2 className="text-xl font-black uppercase tracking-tight">
-              {t("project.about") || "About The Project"}
-            </h2>
-            <p className="text-sm sm:text-[15px] leading-7 text-muted-foreground">
-              {project.description ||
-                "This project details a modular build intended for high-performance development workflows and collaborative iteration."}
-            </p>
-            {(project.technologies.length > 0 || project.tags.length > 0) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                {[
-                  ...project.technologies.slice(0, 4),
-                  ...project.tags.slice(0, 4),
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-md border border-border/70 bg-muted/40 p-3"
+            {/* Horizontal strip */}
+            {hasStrip && (
+              <div
+                className="flex gap-2 overflow-x-auto pb-1"
+                style={{ scrollSnapType: "x mandatory" }}
+              >
+                {/* YouTube card */}
+                {youTubeId && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaId("youtube")}
+                    style={{ scrollSnapAlign: "start" }}
+                    className={`relative flex-shrink-0 w-32 aspect-video rounded-sm overflow-hidden border-2 transition-all ${
+                      selectedMediaId === "youtube"
+                        ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]"
+                        : "border-border/50 hover:border-border"
+                    }`}
                   >
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                      module
-                    </p>
-                    <p className="text-sm font-semibold mt-1">{item}</p>
-                  </div>
+                    <img
+                      src={`https://img.youtube.com/vi/${youTubeId}/mqdefault.jpg`}
+                      alt="Video"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+                      <div className="h-8 w-8 rounded-full bg-black/70 flex items-center justify-center">
+                        <Play className="h-4 w-4 text-white fill-white ml-0.5" />
+                      </div>
+                    </div>
+                  </button>
+                )}
+
+                {/* Thumbnail card */}
+                {project.thumbnail_url && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMediaId("thumbnail")}
+                    style={{ scrollSnapAlign: "start" }}
+                    className={`relative flex-shrink-0 w-32 aspect-video rounded-sm overflow-hidden border-2 transition-all ${
+                      selectedMediaId === "thumbnail"
+                        ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]"
+                        : "border-border/50 hover:border-border"
+                    }`}
+                  >
+                    <img
+                      src={project.thumbnail_url}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                )}
+
+                {/* Gallery image cards */}
+                {galleryStripItems.map(({ url, id }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setSelectedMediaId(id)}
+                    style={{ scrollSnapAlign: "start" }}
+                    className={`relative flex-shrink-0 w-32 aspect-video rounded-sm overflow-hidden border-2 transition-all ${
+                      selectedMediaId === id
+                        ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.4)]"
+                        : "border-border/50 hover:border-border"
+                    }`}
+                  >
+                    <img
+                      src={url}
+                      alt="Screenshot"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
                 ))}
               </div>
             )}
-            {canEditProject && (
-              <div className="pt-1">
-                <Button
-                  variant="outline"
-                  className="border-border bg-muted/30 hover:bg-accent"
-                  onClick={() => router.push(`/project/create?edit=${slug}`)}
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  {t("project.editProject") || "Edit Project"}
-                </Button>
+          </div>
+
+          {/* ── About ── */}
+          <Card className="border-border/80 bg-card/90 text-card-foreground p-5 sm:p-6 space-y-5">
+            <h2 className="text-xl font-black uppercase tracking-tight">
+              {t("project.about") || "About The Project"}
+            </h2>
+
+            <p className="text-sm sm:text-[15px] leading-7 text-muted-foreground">
+              {project.description || "No description provided."}
+            </p>
+
+            {/* Technologies (legacy data) */}
+            {project.technologies && project.technologies.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {project.technologies.map((tech) => (
+                  <Badge
+                    key={tech}
+                    variant="outline"
+                    className="text-xs px-2.5 py-0.5 rounded-full border-border/60"
+                  >
+                    {tech}
+                  </Badge>
+                ))}
               </div>
             )}
           </Card>
 
-          <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
-            <h3 className="text-base font-semibold mb-4">
-              {t("project.team") || "Team"}
-            </h3>
-            {teamMembers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("project.noTeamMembers") || "No team members listed."}
-              </p>
-            ) : (
+          {/* ── Team ── */}
+          {teamMembers.length > 1 && (
+            <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-base font-semibold">
+                  {t("project.team") || "Team"}
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    ({teamMembers.length})
+                  </span>
+                </h3>
+              </div>
               <div className="space-y-2">
                 {teamMembers.map((member) => (
                   <div
@@ -562,11 +650,11 @@ export default function ProjectDetailPage() {
                     className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className="h-8 w-8 border border-border">
+                      <Avatar className="h-8 w-8 border border-border flex-shrink-0">
                         <AvatarImage
                           src={member.profile?.avatar_url || undefined}
                         />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs">
                           {(
                             member.profile?.display_name ||
                             member.profile?.user_name ||
@@ -589,28 +677,32 @@ export default function ProjectDetailPage() {
                         )}
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-[11px] uppercase">
+                    <Badge
+                      variant="outline"
+                      className="text-[11px] uppercase shrink-0"
+                    >
                       {member.role}
                     </Badge>
                   </div>
                 ))}
               </div>
-            )}
-          </Card>
+            </Card>
+          )}
 
-          {filesCount > 0 && (
+          {/* ── Attachments (non-image files) ── */}
+          {nonImageFiles.length > 0 && (
             <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
               <h3 className="text-base font-semibold mb-4">
                 {t("project.files") || "Files"}
               </h3>
               <div className="space-y-2">
-                {(project.files || []).map((file) => (
+                {nonImageFiles.map((file) => (
                   <a
                     key={file.id}
                     href={file.file_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-md border border-border p-3 text-sm text-foreground hover:bg-accent transition-colors"
+                    className="flex items-center gap-3 rounded-md border border-border p-3 text-sm hover:bg-accent transition-colors"
                   >
                     <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <span className="truncate flex-1">{file.file_name}</span>
@@ -625,21 +717,11 @@ export default function ProjectDetailPage() {
             </Card>
           )}
 
+          {/* ── Comments ── */}
           <Card
             ref={commentsRef}
             className="border-border/80 bg-card/90 p-5 sm:p-6"
           >
-            <div className="flex items-center gap-2 mb-5">
-              <MessageSquare className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-base font-semibold text-foreground">
-                {t("project.comments") || "Comments"}
-                {commentsCount > 0 && (
-                  <span className="ml-2 text-sm font-normal text-muted-foreground">
-                    ({commentsCount})
-                  </span>
-                )}
-              </h2>
-            </div>
             <ProjectComments
               slug={slug}
               comments={(project.comments as ProjectComment[]) || []}
@@ -649,70 +731,10 @@ export default function ProjectDetailPage() {
           </Card>
         </main>
 
-        <aside className="hidden xl:flex xl:flex-col gap-4 sticky top-[84px] self-start">
-          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
-            <div className="rounded-md overflow-hidden border border-border">
-              <img
-                src={heroImage}
-                alt={project.title}
-                className="w-full aspect-video object-cover"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-3">
-              {project.description ||
-                "A high-performance implementation designed for collaborative open-source contributors."}
-            </p>
-            <div className="space-y-2 mt-4 text-xs">
-              <div className="flex justify-between text-muted-foreground">
-                <span>{t("project.releaseDate") || "Release date"}</span>
-                <span className="text-foreground flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {new Date(project.created_at).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>{t("project.developer") || "Developer"}</span>
-                <span className="text-foreground truncate max-w-[160px] text-right">
-                  {project.author?.display_name ||
-                    project.author?.user_name ||
-                    "Unknown"}
-                </span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>{t("project.team") || "Team"}</span>
-                <span className="text-foreground">{teamMembers.length}</span>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              <Badge
-                variant="outline"
-                className={`text-xs ${difficultyColors[project.difficulty]}`}
-              >
-                {difficultyLabel[project.difficulty]}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
-              >
-                {project.type}
-              </Badge>
-              {project.tags.slice(0, 4).map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="text-[11px] px-2 py-0.5"
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground">
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mb-3">
-              Contributor Spotlight
-            </p>
+        {/* ═══ Right sidebar ═══ */}
+        <aside className="hidden xl:flex xl:flex-col gap-3 sticky top-[84px] self-start">
+          {/* ── Contributor Spotlight ── */}
+          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground space-y-2.5">
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10 border border-border">
                 <AvatarImage src={project.author?.avatar_url || undefined} />
@@ -734,20 +756,20 @@ export default function ProjectDetailPage() {
               </div>
             </div>
             {(project.repository_url || project.demo_url) && (
-              <div className="grid grid-cols-1 gap-2 mt-4">
+              <div className="grid grid-cols-1 gap-2 pt-1">
                 {project.repository_url && (
                   <Button
                     variant="outline"
                     size="sm"
                     asChild
-                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent text-foreground"
+                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent"
                   >
                     <a
                       href={project.repository_url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Github className="h-4 w-4 mr-2" />
+                      <Github className="h-3.5 w-3.5 mr-2" />
                       {t("project.repository") || "Repository"}
                     </a>
                   </Button>
@@ -757,20 +779,135 @@ export default function ProjectDetailPage() {
                     variant="outline"
                     size="sm"
                     asChild
-                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent text-foreground"
+                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent"
                   >
                     <a
                       href={project.demo_url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="h-3.5 w-3.5 mr-2" />
                       {t("project.liveDemo") || "Live Demo"}
                     </a>
                   </Button>
                 )}
               </div>
             )}
+          </Card>
+
+          {/* ── Project info card ── */}
+          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground space-y-3">
+            {/* Thumbnail */}
+            {project.thumbnail_url && (
+              <div
+                className="rounded-md overflow-hidden border border-border cursor-pointer group"
+                onClick={() => setSelectedMediaId("thumbnail")}
+              >
+                <img
+                  src={project.thumbnail_url}
+                  alt={project.title}
+                  className="w-full aspect-video object-cover transition-opacity group-hover:opacity-80"
+                />
+              </div>
+            )}
+
+            {/* Brief */}
+            {project.description && (
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Brief
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                  {project.description}
+                </p>
+              </div>
+            )}
+
+            {/* Project Type + Category */}
+            <div className="border-t border-border/40 pt-2.5 grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Project Type
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
+                  >
+                    {TYPE_LABELS[project.type] || project.type}
+                  </Badge>
+                </div>
+                {project.category && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Category
+                    </p>
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {project.category.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Tags */}
+            {project.tags.length > 0 && (
+              <div className="space-y-1.5 border-t border-border/40 pt-2.5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Tags
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {project.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary text-primary-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Created date */}
+            <div className="flex justify-between items-center text-xs border-t border-border/40 pt-2.5">
+              <span className="text-muted-foreground">Created</span>
+              <span className="text-foreground flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5" />
+                {new Date(project.created_at).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* Progress */}
+            <div className="space-y-1.5 border-t border-border/40 pt-2.5">
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Progress
+                </p>
+                <span className="text-xs font-semibold">
+                  {project.progress}%
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${project.progress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Difficulty */}
+            <div className="space-y-1.5 border-t border-border/40 pt-2.5">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Difficulty
+              </p>
+              <Badge
+                variant="outline"
+                className={`text-xs ${difficultyColors[project.difficulty]}`}
+              >
+                {difficultyLabel[project.difficulty]}
+              </Badge>
+            </div>
           </Card>
         </aside>
       </div>

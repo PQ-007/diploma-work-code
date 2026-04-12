@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from("projects")
       .select(
-        "id, title, slug, description, category, project_type, difficulty, status, is_public, thumbnail_url, progress, technologies, created_by, created_at, updated_at, views, likes_count",
+        "id, title, slug, description, category, type, difficulty, status, is_public, thumbnail_url, progress, technologies, created_by, created_at, updated_at, views, likes_count",
       );
 
     // Scope filtering

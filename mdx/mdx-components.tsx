@@ -58,9 +58,7 @@ const BLOCK_LEVEL_TAGS = new Set([
 function hasBlockLevelChild(children: any) {
   return Children.toArray(children).some((child) => {
     if (!isValidElement(child)) return false;
-    return (
-      typeof child.type === "string" && BLOCK_LEVEL_TAGS.has(child.type)
-    );
+    return typeof child.type === "string" && BLOCK_LEVEL_TAGS.has(child.type);
   });
 }
 
@@ -167,9 +165,7 @@ export const components = {
     <strong className="font-semibold text-blue-500" {...props} />
   ),
   // Enhanced emphasis
-  em: (props: any) => (
-    <em className="italic text-blue-300 " {...props} />
-  ),
+  em: (props: any) => <em className="italic text-blue-300 " {...props} />,
 };
 
 export function CustomMDX(props: any) {

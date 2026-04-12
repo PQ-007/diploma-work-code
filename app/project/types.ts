@@ -113,6 +113,7 @@ export interface ProjectPayload {
   is_public: boolean;
   repository_url: string | null;
   demo_url: string | null;
+  video_url?: string | null;
   thumbnail_url: string | null;
   progress: number;
   technologies: string[];
