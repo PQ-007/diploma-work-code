@@ -113,7 +113,7 @@ function PollCard({
         </Avatar>
         <span className="text-sm font-medium truncate flex items-center gap-1">
           {poll.author.display_name}
-          {getRankIcon(poll.author.ranking_point || 0)}
+          {getRankIcon(poll.author.ranking_point || 0, 3.5)}
         </span>
         <span className="text-xs text-muted-foreground ml-auto">
           {formatDate(poll.created_at)}

@@ -95,6 +95,22 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
         ? translations.find((item) => item.language_code === requestedLang)
         : null) || translations[0];
 
+    let nextViews = selectedTranslation?.views ?? 0;
+    if (!isEditMode) {
+      const incrementedViews = (selectedTranslation?.views || 0) + 1;
+      const { error: incrementError } = await supabase
+        .from("article_translations")
+        .update({ views: incrementedViews })
+        .eq("article_id", articleId)
+        .eq("language_code", selectedTranslation.language_code);
+
+      if (incrementError) {
+        console.warn("Article view increment failed", incrementError.message);
+      } else {
+        nextViews = incrementedViews;
+      }
+    }
+
     const availableTranslations = Array.from(
       new Set(
         translations
@@ -174,6 +190,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
         status: article.status,
         author,
         ...selectedTranslation,
+        views: nextViews,
         article_id: String(selectedTranslation.article_id),
         base_lang_code: article.base_lang_code || null,
         available_translations: availableTranslations,

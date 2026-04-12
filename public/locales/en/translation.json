@@ -43,6 +43,17 @@
     "saveChanges": "Save Changes"
   },
 
+  "themeToggle": {
+    "theme": "Theme",
+    "currentTheme": "Current theme: {{theme}}",
+    "light": "Light",
+    "lightDescription": "Clean and bright interface",
+    "dark": "Dark",
+    "darkDescription": "Easy on the eyes",
+    "system": "System",
+    "systemDescription": "Follow system preference"
+  },
+
   "sidebar": {
     "internship": "Internship",
     "post-grad": "Post-Grad-Life",
@@ -50,6 +61,7 @@
     "competitions": "Competitions",
     "learn": "Learn",
     "articles": "Articles",
+    "flashcards": "Flashcards",
     "discussions": "Discussions",
     "projects": "Projects",
     "knowledgeTree": "Knowledge Tree",
@@ -803,7 +815,18 @@
     "typeValue.diploma": "Diploma",
     "typeValue.contest": "Contest",
     "typeValue.intership": "Internship",
+    "categoryValue.creative_design": "Creative Design",
+    "categoryValue.mobile_dev": "Mobile Dev",
+    "categoryValue.game_dev": "Game Dev",
+    "categoryValue.web_dev": "Web Dev",
+    "categoryValue.hardware_iot": "Hardware / IoT",
+    "categoryValue.ai": "AI",
+    "categoryValue.other": "Other",
     "difficulty": "Difficulty",
+    "year": "Year",
+    "allYears": "All years",
+    "course": "Course",
+    "allCategories": "All categories",
     "category": "Category",
     "brief": "Brief",
     "created": "Created",

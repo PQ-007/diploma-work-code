@@ -13,11 +13,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Folder, Layers } from "lucide-react";
+import { Search, Plus, Layers, RefreshCw, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProjectCard from "@/app/project/components/ProjectCard";
 import type { ProjectPayload } from "@/app/project/types";
+
+const PROJECT_TYPE_OPTIONS = [
+  { value: "diploma", labelKey: "project.typeValue.diploma" },
+  { value: "contest", labelKey: "project.typeValue.contest" },
+  { value: "intership", labelKey: "project.typeValue.intership" },
+  { value: "private", labelKey: "project.typeValue.private" },
+];
+
+const PROJECT_CATEGORY_OPTIONS = [
+  {
+    value: "creative_design",
+    labelKey: "project.categoryValue.creative_design",
+  },
+  { value: "mobile_dev", labelKey: "project.categoryValue.mobile_dev" },
+  { value: "game_dev", labelKey: "project.categoryValue.game_dev" },
+  { value: "web_dev", labelKey: "project.categoryValue.web_dev" },
+  { value: "hardware_iot", labelKey: "project.categoryValue.hardware_iot" },
+  { value: "ai", labelKey: "project.categoryValue.ai" },
+  { value: "other", labelKey: "project.categoryValue.other" },
+];
 
 function CardSkeleton() {
   return (
@@ -51,38 +71,110 @@ export default function ProjectPage() {
 
   const [projects, setProjects] = useState<ProjectPayload[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"public" | "my">("public");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [courseFilter, setCourseFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
 
-  const fetchProjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("scope", activeTab);
-      if (searchQuery) params.set("search", searchQuery);
-      if (sortBy) params.set("sort", sortBy);
-      if (difficultyFilter && difficultyFilter !== "all")
-        params.set("difficulty", difficultyFilter);
-      if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
+  const fetchProjects = useCallback(
+    async (background = false) => {
+      if (background) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError("");
 
-      const res = await fetch(`/api/projects?${params.toString()}`);
-      if (res.ok) {
+      try {
+        const params = new URLSearchParams();
+        params.set("scope", activeTab);
+        if (searchQuery) params.set("search", searchQuery);
+        if (sortBy) params.set("sort", sortBy);
+        if (difficultyFilter && difficultyFilter !== "all")
+          params.set("difficulty", difficultyFilter);
+        if (typeFilter && typeFilter !== "all") params.set("type", typeFilter);
+
+        const res = await fetch(`/api/projects?${params.toString()}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch projects");
+        }
+
         const data = await res.json();
         setProjects(data.items || []);
+      } catch {
+        setError(t("project.failedToLoad") || "Failed to load projects");
+        setProjects([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } catch {
-      setProjects([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, searchQuery, sortBy, difficultyFilter, typeFilter]);
+    },
+    [activeTab, searchQuery, sortBy, difficultyFilter, typeFilter, t],
+  );
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      void fetchProjects(true);
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void fetchProjects(true);
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [fetchProjects]);
+
+  const hasFilters =
+    Boolean(searchQuery.trim()) ||
+    sortBy !== "newest" ||
+    yearFilter !== "all" ||
+    courseFilter !== "all" ||
+    (difficultyFilter && difficultyFilter !== "all") ||
+    (typeFilter && typeFilter !== "all");
+
+  const availableYears = Array.from(
+    new Set(
+      projects
+        .map((project) =>
+          project.created_at
+            ? new Date(project.created_at).getFullYear()
+            : null,
+        )
+        .filter((year): year is number => Number.isFinite(year)),
+    ),
+  )
+    .sort((a, b) => b - a)
+    .map(String);
+
+  const displayedProjects = projects.filter((project) => {
+    const projectYear = project.created_at
+      ? String(new Date(project.created_at).getFullYear())
+      : "";
+    const projectCourse = (project.category || "").trim();
+
+    const matchesYear = yearFilter === "all" || projectYear === yearFilter;
+    const matchesCourse =
+      courseFilter === "all" || projectCourse === courseFilter;
+
+    return matchesYear && matchesCourse;
+  });
 
   return (
     <div className="space-y-6 pb-16 max-w-6xl items-center mx-auto">
@@ -94,33 +186,31 @@ export default function ProjectPage() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t("project.showcaseDescription") ||
-              "Discover and share academic projects built by students"}
+              "Browse student-built projects, share your work, and get feedback from the community."}
+            
           </p>
         </div>
-        {user && (
-          <Button onClick={() => router.push("/project/create")}>
-            <Plus className="h-4 w-4 mr-1" />
-            {t("project.newProject") || "New Project"}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={() => void fetchProjects(true)}
+            disabled={refreshing || loading}
+            title={t("common.refresh") || "Refresh"}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </Button>
-        )}
-      </div>
-
-      {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as "public" | "my")}
-      >
-        <TabsList>
-          <TabsTrigger value="public">
-            {t("project.publicProjects") || "Public Projects"}
-          </TabsTrigger>
           {user && (
-            <TabsTrigger value="my">
-              {t("project.myProjects") || "My Projects"}
-            </TabsTrigger>
+            <Button onClick={() => router.push("/project/create")}>
+              <Plus className="h-4 w-4 mr-1" />
+              {t("project.newProject") || "New Project"}
+            </Button>
           )}
-        </TabsList>
-      </Tabs>
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
@@ -148,6 +238,38 @@ export default function ProjectPage() {
             <SelectItem value="most_liked">
               {t("project.mostLiked") || "Most Liked"}
             </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder={t("project.year") || "Year"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {t("project.allYears") || "All years"}
+            </SelectItem>
+            {availableYears.map((year) => (
+              <SelectItem key={year} value={year}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={courseFilter} onValueChange={setCourseFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder={t("project.course") || "Course"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {t("project.allCategories") || "All categories"}
+            </SelectItem>
+            {PROJECT_CATEGORY_OPTIONS.map((course) => (
+              <SelectItem key={course.value} value={course.value}>
+                {t(course.labelKey) || course.value}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -181,21 +303,44 @@ export default function ProjectPage() {
             <SelectItem value="all">
               {t("project.allTypes") || "All"}
             </SelectItem>
-            <SelectItem value="coding">
-              {t("project.type.coding") || "Coding"}
-            </SelectItem>
-            <SelectItem value="research">
-              {t("project.type.research") || "Research"}
-            </SelectItem>
-            <SelectItem value="design">
-              {t("project.type.design") || "Design"}
-            </SelectItem>
-            <SelectItem value="other">
-              {t("project.type.other") || "Other"}
-            </SelectItem>
+            {PROJECT_TYPE_OPTIONS.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {t(type.labelKey) || type.value}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
+
+      {hasFilters && !loading && !error && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            {displayedProjects.length} {t("common.results") || "results"}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => {
+              setSearchQuery("");
+              setSortBy("newest");
+              setYearFilter("all");
+              setCourseFilter("all");
+              setDifficultyFilter("");
+              setTypeFilter("");
+            }}
+          >
+            {t("common.clearFilters") || "Clear filters"}
+          </Button>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Projects grid */}
       {loading ? (
@@ -204,9 +349,9 @@ export default function ProjectPage() {
             <CardSkeleton key={i} />
           ))}
         </div>
-      ) : projects.length > 0 ? (
+      ) : displayedProjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {projects.map((project) => (
+          {displayedProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>

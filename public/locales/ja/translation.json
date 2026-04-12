@@ -43,9 +43,21 @@
     "saveChanges": "変更を保存"
   },
 
+  "themeToggle": {
+    "theme": "テーマ",
+    "currentTheme": "現在のテーマ: {{theme}}",
+    "light": "ライト",
+    "lightDescription": "明るく見やすい表示",
+    "dark": "ダーク",
+    "darkDescription": "目に優しい表示",
+    "system": "システム",
+    "systemDescription": "システム設定に従う"
+  },
+
   "sidebar": {
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
+    "flashcards": "フラッシュカード",
     "contest": "コンテスト",
     "competitions": "コンペティション",
     "learn": "学習",
@@ -801,7 +813,18 @@
     "typeValue.diploma": "卒業研究",
     "typeValue.contest": "コンテスト",
     "typeValue.intership": "インターンシップ",
+    "categoryValue.creative_design": "クリエイティブデザイン",
+    "categoryValue.mobile_dev": "モバイル開発",
+    "categoryValue.game_dev": "ゲーム開発",
+    "categoryValue.web_dev": "ウェブ開発",
+    "categoryValue.hardware_iot": "ハードウェア / IoT",
+    "categoryValue.ai": "AI",
+    "categoryValue.other": "その他",
     "difficulty": "難易度",
+    "year": "年",
+    "allYears": "すべての年",
+    "course": "コース",
+    "allCategories": "すべてのカテゴリ",
     "category": "カテゴリ",
     "brief": "概要",
     "created": "作成日",

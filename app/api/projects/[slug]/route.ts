@@ -10,6 +10,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const mode = req.nextUrl.searchParams.get("mode");
+    const isEditMode = mode === "edit";
     const supabase = await createClient();
     const {
       data: { user },
@@ -47,11 +49,20 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Increment views
-    await supabase
-      .from("projects")
-      .update({ views: (project.views || 0) + 1 })
-      .eq("id", project.id);
+    let nextViews = project.views || 0;
+    if (!isEditMode) {
+      const incrementedViews = (project.views || 0) + 1;
+      const { error: incrementError } = await supabase
+        .from("projects")
+        .update({ views: incrementedViews })
+        .eq("id", project.id);
+
+      if (incrementError) {
+        console.warn("Project view increment failed", incrementError.message);
+      } else {
+        nextViews = incrementedViews;
+      }
+    }
 
     // Fetch related data in parallel
     const [
@@ -179,6 +190,7 @@ export async function GET(
     // Assemble result
     const result = {
       ...project,
+      views: nextViews,
       tags: tagNames,
       author: profilesById.get(project.created_by) || null,
       sections: sections || [],
@@ -225,7 +237,7 @@ export async function PUT(
 
     const { data: project } = await supabase
       .from("projects")
-      .select("id, created_by")
+      .select("id, created_by, description")
       .eq("slug", slug)
       .maybeSingle();
 
@@ -266,11 +278,63 @@ export async function PUT(
       tags,
     } = body;
 
+    const normalizedDescription =
+      typeof description === "string"
+        ? description.trim()
+        : typeof project.description === "string"
+          ? project.description.trim()
+          : "";
+
+    if (!normalizedDescription) {
+      return NextResponse.json(
+        { error: "About content is required" },
+        { status: 400 },
+      );
+    }
+
+    const normalizedTags =
+      tags !== undefined
+        ? Array.from(
+            new Set(
+              (Array.isArray(tags) ? tags : [])
+                .map((tag: unknown) =>
+                  typeof tag === "string" ? tag.trim().toLowerCase() : "",
+                )
+                .filter(Boolean),
+            ),
+          )
+        : null;
+
+    if (normalizedTags && normalizedTags.length === 0) {
+      return NextResponse.json(
+        { error: "At least one tag is required" },
+        { status: 400 },
+      );
+    }
+
+    if (normalizedTags === null) {
+      const { data: existingTagLinks, error: tagsError } = await supabase
+        .from("project_tags")
+        .select("tag_id")
+        .eq("project_id", project.id)
+        .limit(1);
+
+      if (tagsError) {
+        return NextResponse.json({ error: tagsError.message }, { status: 500 });
+      }
+
+      if (!existingTagLinks || existingTagLinks.length === 0) {
+        return NextResponse.json(
+          { error: "At least one tag is required" },
+          { status: 400 },
+        );
+      }
+    }
+
     // Build update payload (only include provided fields)
     const update: Record<string, unknown> = {};
     if (title !== undefined) update.title = title.trim();
-    if (description !== undefined)
-      update.description = description?.trim() || null;
+    if (description !== undefined) update.description = normalizedDescription;
     if (category !== undefined) update.category = category?.trim() || null;
     if (project_type !== undefined) update.type = project_type;
     if (difficulty !== undefined) update.difficulty = difficulty;
@@ -321,8 +385,8 @@ export async function PUT(
       await supabase.from("project_tags").delete().eq("project_id", project.id);
 
       // Insert new tags
-      for (const tagName of tags) {
-        const trimmed = tagName.trim().toLowerCase();
+      for (const tagName of normalizedTags || []) {
+        const trimmed = tagName;
         if (!trimmed) continue;
 
         let { data: existingTag } = await supabase
