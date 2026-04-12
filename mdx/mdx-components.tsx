@@ -22,6 +22,47 @@ import { Chart } from "./components/Chart";
 import { DataTable } from "./components/DataTable";
 import { ProTip } from "./components/ProTip";
 import { cn } from "@/lib/utils";
+import { Children, isValidElement } from "react";
+
+const PARAGRAPH_CLASS = "mb-6 text-[15px] leading-7 text-foreground";
+
+const BLOCK_LEVEL_TAGS = new Set([
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "div",
+  "dl",
+  "fieldset",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "header",
+  "hr",
+  "main",
+  "nav",
+  "ol",
+  "p",
+  "pre",
+  "section",
+  "table",
+  "ul",
+]);
+
+function hasBlockLevelChild(children: any) {
+  return Children.toArray(children).some((child) => {
+    if (!isValidElement(child)) return false;
+    return (
+      typeof child.type === "string" && BLOCK_LEVEL_TAGS.has(child.type)
+    );
+  });
+}
 
 export const components = {
   h1: createHeading(1),
@@ -80,9 +121,24 @@ export const components = {
   DataTable,
   ProTip,
   // Enhanced paragraph
-  p: (props: any) => (
-    <p className="mb-6 text-[15px] leading-7 text-foreground" {...props} />
-  ),
+  p: ({ children, className, ...props }: any) => {
+    const resolvedClassName = cn(PARAGRAPH_CLASS, className);
+
+    // Guard against invalid HTML (<p> containing block-level nodes) which breaks hydration.
+    if (hasBlockLevelChild(children)) {
+      return (
+        <div className={resolvedClassName} {...props}>
+          {children}
+        </div>
+      );
+    }
+
+    return (
+      <p className={resolvedClassName} {...props}>
+        {children}
+      </p>
+    );
+  },
   // Enhanced blockquote
   blockquote: (props: any) => (
     <blockquote
@@ -108,11 +164,11 @@ export const components = {
   hr: () => <hr className="my-8 border-t border-border" />,
   // Enhanced strong
   strong: (props: any) => (
-    <strong className="font-semibold text-foreground" {...props} />
+    <strong className="font-semibold text-blue-500" {...props} />
   ),
   // Enhanced emphasis
   em: (props: any) => (
-    <em className="italic text-muted-foreground" {...props} />
+    <em className="italic text-blue-300 " {...props} />
   ),
 };
 
