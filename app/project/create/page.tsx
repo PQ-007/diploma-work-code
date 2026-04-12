@@ -169,6 +169,7 @@ export default function CreateProjectPage() {
   /* ─── UI states ─── */
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadingAttach, setUploadingAttach] = useState(false);
@@ -297,17 +298,26 @@ export default function CreateProjectPage() {
       setError("Title is required.");
       return;
     }
+    if (!description.trim()) {
+      setError("About content is required.");
+      return;
+    }
+    const cleanedTags = tags.map((tag) => tag.trim()).filter(Boolean);
+    if (cleanedTags.length === 0) {
+      setError("At least one tag is required.");
+      return;
+    }
     setSaving(true);
     setError("");
     setSaveSuccess(false);
     try {
       const payload = {
         title: title.trim(),
-        description: description.trim() || undefined,
+        description: description.trim(),
         category: category || undefined,
         type: projectType,
         difficulty,
-        tags,
+        tags: cleanedTags,
         repository_url: repositoryUrl.trim() || undefined,
         demo_url: demoUrl.trim() || undefined,
         video_url: videoUrl.trim() || undefined,
@@ -374,6 +384,29 @@ export default function CreateProjectPage() {
     pendingImages,
     router,
   ]);
+
+  const handleDeleteProject = useCallback(async () => {
+    if (!editSlug) return;
+    if (!window.confirm("Delete this project? This action cannot be undone.")) {
+      return;
+    }
+
+    setDeleting(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/projects/${editSlug}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "Failed to delete project.");
+        return;
+      }
+      router.push("/project");
+    } finally {
+      setDeleting(false);
+    }
+  }, [editSlug, router]);
 
   /* ─── members ─── */
   const handleAddMember = useCallback(async () => {
@@ -584,12 +617,33 @@ export default function CreateProjectPage() {
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
-            <Button onClick={handleSave} disabled={saving} size="sm">
-              <SaveIcon
-                className={`h-4 w-4 mr-1 ${saving ? "animate-spin" : ""}`}
-              />
-              {saveLabel}
-            </Button>
+            <div className="flex items-center gap-2">
+              {editSlug && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={handleDeleteProject}
+                  disabled={deleting}
+                  title="Delete project"
+                >
+                  {deleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+              <Button
+                onClick={handleSave}
+                disabled={saving || deleting}
+                size="sm"
+              >
+                <SaveIcon
+                  className={`h-4 w-4 mr-1 ${saving ? "animate-spin" : ""}`}
+                />
+                {saveLabel}
+              </Button>
+            </div>
           </div>
 
           {/* Error */}
@@ -1333,7 +1387,7 @@ export default function CreateProjectPage() {
           {/* Save + View */}
           <Button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || deleting}
             className={`w-full transition-colors ${saveSuccess ? "bg-green-600 hover:bg-green-700" : ""}`}
           >
             <SaveIcon
@@ -1341,6 +1395,23 @@ export default function CreateProjectPage() {
             />
             {saveLabel}
           </Button>
+
+          {editSlug && (
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleDeleteProject}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Delete Project
+            </Button>
+          )}
+
           {editSlug && (
             <Button
               variant="outline"
