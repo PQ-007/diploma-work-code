@@ -146,32 +146,29 @@ export default function LibraryPage() {
   }, [user, fetchItems]);
 
   // ── Delete item ──
-  const handleDelete = useCallback(
-    async () => {
-      if (!deleteTarget || deleting) return;
-      const item = deleteTarget;
-      setDeleteTarget(null);
-      setDeleting(item.id);
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget || deleting) return;
+    const item = deleteTarget;
+    setDeleteTarget(null);
+    setDeleting(item.id);
 
-      const prevItems = items;
-      setItems((prev) => prev.filter((i) => i.id !== item.id));
-      if (selectedId === item.id) setSelectedId(null);
+    const prevItems = items;
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    if (selectedId === item.id) setSelectedId(null);
 
-      try {
-        const res = await fetch("/api/library", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: item.id, type: item.type }),
-        });
-        if (!res.ok) setItems(prevItems);
-      } catch {
-        setItems(prevItems);
-      } finally {
-        setDeleting(null);
-      }
-    },
-    [items, selectedId, deleting, deleteTarget],
-  );
+    try {
+      const res = await fetch("/api/library", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id, type: item.type }),
+      });
+      if (!res.ok) setItems(prevItems);
+    } catch {
+      setItems(prevItems);
+    } finally {
+      setDeleting(null);
+    }
+  }, [items, selectedId, deleting, deleteTarget]);
 
   // ── Filter based on tab ──
   const filteredItems = items.filter((item) => {
@@ -211,7 +208,6 @@ export default function LibraryPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto py-6 lg:py-5 max-w-7xl px-4">
-
         {/* ── Header ── */}
         <div className="flex items-start justify-between gap-4 flex-wrap mb-5">
           <div>
@@ -219,7 +215,6 @@ export default function LibraryPage() {
               <LibraryIcon className="h-6 w-6" />
               My Library
             </h1>
-            
           </div>
           <div className="flex items-center gap-2">
             {showDraftFilter && (
@@ -252,7 +247,7 @@ export default function LibraryPage() {
         <div className="flex items-center gap-0 border-b border-border mb-0">
           {TAB_CONFIG.map((tab) => {
             const isActive = activeTab === tab.value;
-            
+
             return (
               <button
                 key={tab.value}
@@ -268,7 +263,7 @@ export default function LibraryPage() {
               >
                 <tab.icon className="h-3.5 w-3.5" />
                 {tab.label}
-                
+
                 {isActive && (
                   <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t" />
                 )}
@@ -279,7 +274,6 @@ export default function LibraryPage() {
 
         {/* ── Two-column layout ── */}
         <div className="flex border-x border-b border-border overflow-hidden bg-card min-h-[72vh]">
-
           {/* ─── Left Panel ─── */}
           <div className="w-full md:w-[420px] lg:w-[460px] border-r border-border flex-shrink-0">
             <ScrollArea className="h-[72vh]">
@@ -397,7 +391,9 @@ function LibraryListItem({
       onClick={onSelect}
       onKeyDown={(e) => e.key === "Enter" && onSelect()}
       className={`w-full text-left p-4 cursor-pointer transition-colors ${
-        isSelected ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/40 border-l-2 border-l-transparent"
+        isSelected
+          ? "bg-primary/5 border-l-2 border-l-primary"
+          : "hover:bg-muted/40 border-l-2 border-l-transparent"
       }`}
     >
       {/* Top row: badge + time */}
@@ -411,18 +407,27 @@ function LibraryListItem({
             {TYPE_LABELS[item.type] || item.type}
           </Badge>
           {item.status === "published" && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0 bg-emerald-500/15 text-emerald-500 border border-emerald-500/20"
+            >
               Published
             </Badge>
           )}
           {isDeck && item.status === "public" && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-sky-500/15 text-sky-400 border border-sky-500/20 gap-0.5">
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0 bg-sky-500/15 text-sky-400 border border-sky-500/20 gap-0.5"
+            >
               <Globe className="h-2.5 w-2.5" />
               Public
             </Badge>
           )}
           {isDeck && item.status === "private" && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-muted text-muted-foreground border border-border gap-0.5">
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0 bg-muted text-muted-foreground border border-border gap-0.5"
+            >
               <Lock className="h-2.5 w-2.5" />
               Private
             </Badge>
@@ -435,7 +440,11 @@ function LibraryListItem({
 
       {/* Title */}
       <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-1 mb-1">
-        {item.title || <span className="text-muted-foreground font-normal italic">Untitled</span>}
+        {item.title || (
+          <span className="text-muted-foreground font-normal italic">
+            Untitled
+          </span>
+        )}
       </h3>
 
       {/* Deck card count or preview text */}
@@ -453,7 +462,9 @@ function LibraryListItem({
         </div>
       ) : (
         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-3">
-          {item.preview || <span className="italic text-muted-foreground/50">No preview</span>}
+          {item.preview || (
+            <span className="italic text-muted-foreground/50">No preview</span>
+          )}
         </p>
       )}
 
@@ -521,21 +532,29 @@ function RightPanel({ item }: { item: LibraryItem }) {
           <Icon className="h-3.5 w-3.5" />
           {TYPE_LABELS[item.type] || item.type}
         </Badge>
-        {isDeck && (
-          item.status === "public" ? (
-            <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-sky-500/15 text-sky-400 border border-sky-500/20 gap-1">
+        {isDeck &&
+          (item.status === "public" ? (
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0.5 bg-sky-500/15 text-sky-400 border border-sky-500/20 gap-1"
+            >
               <Globe className="h-3 w-3" />
               Public
             </Badge>
           ) : (
-            <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted text-muted-foreground border border-border gap-1">
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0.5 bg-muted text-muted-foreground border border-border gap-1"
+            >
               <Lock className="h-3 w-3" />
               Private
             </Badge>
-          )
-        )}
+          ))}
         {item.status === "published" && !isDeck && (
-          <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
+          <Badge
+            variant="secondary"
+            className="text-xs px-2 py-0.5 bg-emerald-500/15 text-emerald-500 border border-emerald-500/20"
+          >
             Published
           </Badge>
         )}
@@ -551,7 +570,9 @@ function RightPanel({ item }: { item: LibraryItem }) {
         <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Layers className="h-4 w-4" />
-            <span className="font-medium text-foreground">{item.cardCount ?? 0}</span>
+            <span className="font-medium text-foreground">
+              {item.cardCount ?? 0}
+            </span>
             {(item.cardCount ?? 0) === 1 ? "card" : "cards"}
           </div>
           <span className="text-muted-foreground/40">·</span>
@@ -565,7 +586,11 @@ function RightPanel({ item }: { item: LibraryItem }) {
       {!isDeck && item.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-5">
           {item.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="text-xs px-2.5 py-1">
+            <Badge
+              key={tag}
+              variant="secondary"
+              className="text-xs px-2.5 py-1"
+            >
               {tag}
             </Badge>
           ))}
@@ -587,8 +612,13 @@ function RightPanel({ item }: { item: LibraryItem }) {
                 Sample Cards
               </p>
               {item.cardPreviews.map((card, i) => (
-                <div key={i} className="rounded-lg border border-border bg-muted/30 p-4">
-                  <p className="text-sm font-medium text-foreground">{card.front}</p>
+                <div
+                  key={i}
+                  className="rounded-lg border border-border bg-muted/30 p-4"
+                >
+                  <p className="text-sm font-medium text-foreground">
+                    {card.front}
+                  </p>
                   <p className="text-sm text-muted-foreground mt-1.5 pt-1.5 border-t border-border/50">
                     {card.back}
                   </p>
@@ -599,7 +629,9 @@ function RightPanel({ item }: { item: LibraryItem }) {
             <div className="flex flex-col items-center justify-center py-10 text-center rounded-lg border border-dashed border-border">
               <Brain className="h-8 w-8 text-muted-foreground/30 mb-2" />
               <p className="text-sm text-muted-foreground">No cards yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-0.5">Open the deck to add your first card</p>
+              <p className="text-xs text-muted-foreground/60 mt-0.5">
+                Open the deck to add your first card
+              </p>
             </div>
           )}
 
@@ -618,7 +650,9 @@ function RightPanel({ item }: { item: LibraryItem }) {
           {item.body ? (
             <MarkdownPreview content={item.body} />
           ) : (
-            <p className="text-muted-foreground italic text-sm">No content yet</p>
+            <p className="text-muted-foreground italic text-sm">
+              No content yet
+            </p>
           )}
           <div className="mt-6">
             <Button asChild variant="outline" size="sm" className="gap-1.5">
@@ -637,7 +671,16 @@ function RightPanel({ item }: { item: LibraryItem }) {
 // ── Empty State ──
 
 function EmptyState({ tab }: { tab: string }) {
-  const configs: Record<string, { icon: React.ElementType; title: string; sub: string; href?: string; cta?: string }> = {
+  const configs: Record<
+    string,
+    {
+      icon: React.ElementType;
+      title: string;
+      sub: string;
+      href?: string;
+      cta?: string;
+    }
+  > = {
     all: {
       icon: LibraryIcon,
       title: "Your library is empty",
@@ -702,29 +745,54 @@ function MarkdownPreview({ content }: { content: string }) {
         const trimmed = line.trim();
 
         if (trimmed.startsWith("### "))
-          return <h3 key={i} className="text-base font-bold mt-5 mb-1">{trimmed.slice(4)}</h3>;
+          return (
+            <h3 key={i} className="text-base font-bold mt-5 mb-1">
+              {trimmed.slice(4)}
+            </h3>
+          );
         if (trimmed.startsWith("## "))
-          return <h2 key={i} className="text-lg font-bold mt-5 mb-1">{trimmed.slice(3)}</h2>;
+          return (
+            <h2 key={i} className="text-lg font-bold mt-5 mb-1">
+              {trimmed.slice(3)}
+            </h2>
+          );
         if (trimmed.startsWith("# "))
-          return <h1 key={i} className="text-xl font-bold mt-5 mb-1">{trimmed.slice(2)}</h1>;
+          return (
+            <h1 key={i} className="text-xl font-bold mt-5 mb-1">
+              {trimmed.slice(2)}
+            </h1>
+          );
         if (trimmed.startsWith("```"))
           return (
-            <div key={i} className="bg-muted/60 rounded px-3 py-1 text-xs font-mono text-muted-foreground">
+            <div
+              key={i}
+              className="bg-muted/60 rounded px-3 py-1 text-xs font-mono text-muted-foreground"
+            >
               {trimmed.slice(3) || "code"}
             </div>
           );
         if (trimmed.startsWith("> "))
           return (
-            <blockquote key={i} className="border-l-2 border-muted-foreground/30 pl-3 text-muted-foreground italic">
+            <blockquote
+              key={i}
+              className="border-l-2 border-muted-foreground/30 pl-3 text-muted-foreground italic"
+            >
               {trimmed.slice(2)}
             </blockquote>
           );
         if (trimmed.startsWith("- ") || trimmed.startsWith("* "))
-          return <li key={i} className="ml-4 list-disc text-muted-foreground">{trimmed.slice(2)}</li>;
-        if (!trimmed)
-          return <div key={i} className="h-2" />;
+          return (
+            <li key={i} className="ml-4 list-disc text-muted-foreground">
+              {trimmed.slice(2)}
+            </li>
+          );
+        if (!trimmed) return <div key={i} className="h-2" />;
 
-        return <p key={i} className="leading-relaxed text-muted-foreground">{trimmed}</p>;
+        return (
+          <p key={i} className="leading-relaxed text-muted-foreground">
+            {trimmed}
+          </p>
+        );
       })}
     </div>
   );

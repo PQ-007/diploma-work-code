@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { uniqueDeckSlug } from "@/lib/flashcards/slug";
+import { parseFront, parseBack } from "@/lib/flashcards/types";
+
+/** Normalize a card row so front/back are always proper objects, never raw strings. */
+function normalizeCard(card: Record<string, unknown>) {
+  return {
+    ...card,
+    front:        parseFront(card.front)        ?? { term: String(card.front ?? ""),        language: "en" },
+    back:         parseBack(card.back)          ?? { definition: String(card.back ?? ""),   translations: [] },
+    custom_front: card.custom_front ? (parseFront(card.custom_front) ?? null) : null,
+    custom_back:  card.custom_back  ? (parseBack(card.custom_back)  ?? null) : null,
+  };
+}
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -51,7 +63,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     const { data: cards } = await supabase
       .from("flashcards")
-      .select("id, front, back, source_type, source_id, created_at")
+      .select("id, deck_id, front, back, custom_front, custom_back, source_type, source_id, sm2_interval, sm2_repetition, sm2_ease, sm2_due_at, created_at")
       .eq("deck_id", deck.id)
       .order("created_at", { ascending: false });
 
@@ -62,8 +74,12 @@ export async function GET(req: NextRequest, { params }: Params) {
       .eq("id", deck.owner_id)
       .maybeSingle();
 
+    const normalizedCards = (cards || []).map((c) =>
+      normalizeCard(c as Record<string, unknown>),
+    );
+
     return NextResponse.json(
-      { deck, cards: cards || [], owner: ownerProfile, isOwner },
+      { deck, cards: normalizedCards, owner: ownerProfile, isOwner },
       { status: 200 },
     );
   } catch (error) {

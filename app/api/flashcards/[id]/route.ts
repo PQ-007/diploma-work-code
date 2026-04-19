@@ -1,15 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import type { FlashcardFront, FlashcardBack } from "@/lib/flashcards/types";
+import { parseFront as pF, parseBack as pB } from "@/lib/flashcards/types";
+
+function nc(c: Record<string, unknown>) {
+  return {
+    ...c,
+    front:        pF(c.front)        ?? { term: String(c.front ?? ""),        language: "en" },
+    back:         pB(c.back)         ?? { definition: String(c.back ?? ""),   translations: [] },
+    custom_front: c.custom_front ? (pF(c.custom_front) ?? null) : null,
+    custom_back:  c.custom_back  ? (pB(c.custom_back)  ?? null) : null,
+  };
+}
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
+const CARD_SELECT =
+  "id, user_id, deck_id, front, back, custom_front, custom_back, source_type, source_id, sm2_interval, sm2_repetition, sm2_ease, sm2_due_at, created_at";
+
 /* ═══════════════════════════════════════════
    GET /api/flashcards/[id]
    Owner only.
    ═══════════════════════════════════════════ */
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const supabase = await createClient();
     const {
@@ -27,7 +42,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     const { data: card } = await supabase
       .from("flashcards")
-      .select("id, user_id, deck_id, front, back, source_type, source_id, created_at")
+      .select(CARD_SELECT)
       .eq("id", cardId)
       .maybeSingle();
 
@@ -35,7 +50,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ flashcard: card }, { status: 200 });
+    return NextResponse.json({ flashcard: nc(card as Record<string, unknown>) }, { status: 200 });
   } catch (error) {
     console.error("Error fetching flashcard", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -44,7 +59,12 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 /* ═══════════════════════════════════════════
    PATCH /api/flashcards/[id]
-   Body: { front?, back?, deckId? }
+   Body: {
+     front?, back?,            // override base content (JSONB or string)
+     customFront?, customBack?, // set/update user override
+     resetCustom?: boolean,    // if true, clear custom_front/back
+     deckId?
+   }
    ═══════════════════════════════════════════ */
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
@@ -64,7 +84,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const { data: existing } = await supabase
       .from("flashcards")
-      .select("id, user_id")
+      .select("id, user_id, source_type")
       .eq("id", cardId)
       .maybeSingle();
 
@@ -73,22 +93,46 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const body = (await req.json()) as {
-      front?: string;
-      back?: string;
+      front?: unknown;
+      back?: unknown;
+      customFront?: unknown;
+      customBack?: unknown;
+      resetCustom?: boolean;
       deckId?: number;
     };
 
     const update: Record<string, unknown> = {};
+
     if (body.front !== undefined) {
-      const f = body.front.trim();
-      if (!f) return NextResponse.json({ error: "front cannot be empty" }, { status: 400 });
-      update.front = f;
+      const front = normalizeFront(body.front);
+      if (!front.term) {
+        return NextResponse.json({ error: "front.term cannot be empty" }, { status: 400 });
+      }
+      update.front = front;
     }
+
     if (body.back !== undefined) {
-      const b = body.back.trim();
-      if (!b) return NextResponse.json({ error: "back cannot be empty" }, { status: 400 });
-      update.back = b;
+      const back = normalizeBack(body.back);
+      if (!back.definition) {
+        return NextResponse.json({ error: "back.definition cannot be empty" }, { status: 400 });
+      }
+      update.back = back;
     }
+
+    // Custom overrides (for dict-linked cards edited by user)
+    if (body.customFront !== undefined) {
+      update.custom_front = body.customFront === null ? null : normalizeFront(body.customFront);
+    }
+    if (body.customBack !== undefined) {
+      update.custom_back = body.customBack === null ? null : normalizeBack(body.customBack);
+    }
+
+    // Reset custom overrides — revert to live dict content
+    if (body.resetCustom) {
+      update.custom_front = null;
+      update.custom_back = null;
+    }
+
     if (body.deckId !== undefined) {
       const deckId = Number(body.deckId);
       if (!Number.isFinite(deckId)) {
@@ -105,11 +149,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       update.deck_id = deckId;
     }
 
+    if (!Object.keys(update).length) {
+      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+    }
+
     const { data: card, error } = await supabase
       .from("flashcards")
       .update(update)
       .eq("id", cardId)
-      .select("id, deck_id, front, back, source_type, source_id, created_at")
+      .select(CARD_SELECT)
       .single();
 
     if (error || !card) {
@@ -119,7 +167,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    return NextResponse.json({ flashcard: card }, { status: 200 });
+    return NextResponse.json({ flashcard: nc(card as Record<string, unknown>) }, { status: 200 });
   } catch (error) {
     console.error("Error updating flashcard", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -129,7 +177,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 /* ═══════════════════════════════════════════
    DELETE /api/flashcards/[id]
    ═══════════════════════════════════════════ */
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const supabase = await createClient();
     const {
@@ -165,4 +213,41 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     console.error("Error deleting flashcard", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function normalizeFront(front: unknown): FlashcardFront {
+  if (typeof front === "string") {
+    return { term: front.trim(), language: "en" };
+  }
+  if (front && typeof front === "object") {
+    const f = front as Record<string, unknown>;
+    return {
+      term: String(f.term ?? f.text ?? "").trim(),
+      reading: f.reading ? String(f.reading) : undefined,
+      language: (f.language as "mn" | "ja" | "en") ?? "en",
+      partsOfSpeech: Array.isArray(f.partsOfSpeech) ? (f.partsOfSpeech as string[]) : undefined,
+    };
+  }
+  return { term: "", language: "en" };
+}
+
+function normalizeBack(back: unknown): FlashcardBack {
+  if (typeof back === "string") {
+    return { definition: back.trim(), translations: [] };
+  }
+  if (back && typeof back === "object") {
+    const b = back as Record<string, unknown>;
+    return {
+      definition: String(b.definition ?? b.text ?? "").trim(),
+      translations: Array.isArray(b.translations)
+        ? (b.translations as FlashcardBack["translations"])
+        : [],
+      examples: Array.isArray(b.examples)
+        ? (b.examples as FlashcardBack["examples"])
+        : undefined,
+    };
+  }
+  return { definition: "", translations: [] };
 }

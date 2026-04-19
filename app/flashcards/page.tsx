@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Brain, Plus, Compass, Library } from "lucide-react";
+import { Brain, Plus, Compass, Library, Target, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import DeckCard from "@/components/flashcards/DeckCard";
@@ -35,6 +35,7 @@ export default function FlashcardsPage() {
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DeckWithCount | null>(null);
+  const [dueToday, setDueToday] = useState<number>(0);
 
   const fetchDecks = useCallback(async () => {
     setLoading(true);
@@ -51,6 +52,18 @@ export default function FlashcardsPage() {
     }
   }, []);
 
+  const fetchDueCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/flashcards/stats");
+      if (res.ok) {
+        const json = await res.json();
+        setDueToday(json.due_today ?? 0);
+      }
+    } catch {
+      // silently ignore
+    }
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
@@ -58,13 +71,20 @@ export default function FlashcardsPage() {
       return;
     }
     fetchDecks();
-  }, [user, authLoading, router, fetchDecks]);
+    fetchDueCount();
+  }, [user, authLoading, router, fetchDecks, fetchDueCount]);
 
   const filtered = decks.filter((d) => {
     if (filter === "private") return !d.is_public;
     if (filter === "public") return d.is_public;
     return true;
   });
+
+  const tabCount = (v: Filter) => {
+    if (v === "all") return decks.length;
+    if (v === "private") return decks.filter((d) => !d.is_public).length;
+    return decks.filter((d) => d.is_public).length;
+  };
 
   const handleDeckSaved = (deck: Deck) => {
     setDecks((prev) => {
@@ -122,86 +142,105 @@ export default function FlashcardsPage() {
   };
 
   if (authLoading || !user) {
-    return (
-      <div className="min-h-screen bg-background" />
-    );
+    return <div className="min-h-screen bg-background" />;
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-5 max-w-7xl px-4">
+      <div className="mx-auto py-7 max-w-6xl px-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Brain className="h-6 w-6" />
-              My Flashcards
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Organize your study cards into decks. Make decks public to share
-              them.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
+          <div className="flex items-start gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "rgba(59,130,246,.1)", color: "#60a5fa" }}
             >
+              <Brain className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">My Flashcards</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Spaced-repetition decks · pulled from your dictionary saves,
+                articles, and custom cards.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5 h-7 text-[11px]">
               <Link href="/flashcards/browse">
-                <Compass className="h-3.5 w-3.5" />
+                <Compass className="h-3 w-3" />
                 Browse public decks
               </Link>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 h-7 text-[11px]"
               onClick={() => {
                 setEditingDeck(null);
                 setDeckDialogOpen(true);
               }}
             >
-              <Library className="h-3.5 w-3.5" />
+              <Library className="h-3 w-3" />
               New deck
             </Button>
             <Button
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 h-7 text-[11px]"
               onClick={() => setCardDialogOpen(true)}
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3 w-3" />
               New flashcard
             </Button>
           </div>
         </div>
 
+        {/* Due now callout */}
+        {dueToday > 0 && (
+          <div
+            className="rounded-xl mb-6 p-4 flex items-center gap-4 flex-wrap"
+            style={{
+              background: "var(--card)",
+              border: "1px solid color-mix(in oklab, var(--border) 40%, transparent)",
+            }}
+          >
+            <div
+              className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
+              style={{ background: "rgba(59,130,246,.1)", color: "#60a5fa" }}
+            >
+              <Target className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] font-semibold">
+                {dueToday} card{dueToday !== 1 ? "s" : ""} due for review
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                Stay consistent — reviewing now keeps your streak alive.
+              </div>
+            </div>
+            <Button asChild size="sm" className="gap-1 h-7 text-[11px]">
+              <Link href="/flashcards/stats">
+                Start review
+                <ChevronRight className="h-3 w-3" />
+              </Link>
+            </Button>
+          </div>
+        )}
+
         {/* Filter tabs */}
-        <div className="flex items-center gap-0 border-b border-border mb-6">
-          {([
-            { value: "all", label: "All" },
-            { value: "private", label: "Private" },
-            { value: "public", label: "Public" },
-          ] as const).map((tab) => {
-            const active = filter === tab.value;
-            return (
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div className="tab-rail">
+            {(["all", "private", "public"] as const).map((tab) => (
               <button
-                key={tab.value}
-                onClick={() => setFilter(tab.value)}
-                className={`relative px-5 py-2 text-sm font-medium transition-colors ${
-                  active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`tab${filter === tab ? " active" : ""}`}
               >
-                {tab.label}
-                {active && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-t" />
-                )}
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}{" "}
+                <span className="text-muted-foreground">{tabCount(tab)}</span>
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
         {/* Grid */}
@@ -211,36 +250,30 @@ export default function FlashcardsPage() {
               <Skeleton key={i} className="h-44 rounded-lg" />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
+        ) : filtered.length === 0 && decks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Brain className="h-12 w-12 text-muted-foreground/30 mb-4" />
             <p className="text-sm text-muted-foreground mb-1">
-              {decks.length === 0
-                ? "You don't have any decks yet"
-                : "No decks match this filter"}
+              You don&apos;t have any decks yet
             </p>
-            {decks.length === 0 && (
-              <>
-                <p className="text-xs text-muted-foreground/60 mb-6 max-w-sm">
-                  Create a deck to start grouping flashcards, or browse public
-                  decks made by other learners.
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setEditingDeck(null);
-                      setDeckDialogOpen(true);
-                    }}
-                  >
-                    Create your first deck
-                  </Button>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/flashcards/browse">Browse public decks</Link>
-                  </Button>
-                </div>
-              </>
-            )}
+            <p className="text-xs text-muted-foreground/60 mb-6 max-w-sm">
+              Create a deck to start grouping flashcards, or browse public decks
+              made by other learners.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingDeck(null);
+                  setDeckDialogOpen(true);
+                }}
+              >
+                Create your first deck
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/flashcards/browse">Browse public decks</Link>
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -256,6 +289,33 @@ export default function FlashcardsPage() {
                 onDelete={() => setDeleteTarget(deck)}
               />
             ))}
+
+            {/* New deck tile */}
+            <button
+              onClick={() => {
+                setEditingDeck(null);
+                setDeckDialogOpen(true);
+              }}
+              className="flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              style={{
+                minHeight: 200,
+                background: "color-mix(in oklab, var(--card) 60%, transparent)",
+                border: "1px dashed color-mix(in oklab, var(--border) 40%, transparent)",
+                borderRadius: 10,
+                padding: 16,
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
+              >
+                <Plus className="h-4 w-4" />
+              </div>
+              <div className="text-[13px] font-medium">New deck</div>
+              <div className="text-[11px] text-center text-muted-foreground">
+                Group cards by topic, JLPT level, or course chapter.
+              </div>
+            </button>
           </div>
         )}
       </div>
@@ -270,10 +330,7 @@ export default function FlashcardsPage() {
       <FlashcardFormDialog
         open={cardDialogOpen}
         onOpenChange={setCardDialogOpen}
-        onSaved={() => {
-          // Refresh to update card counts
-          fetchDecks();
-        }}
+        onSaved={() => fetchDecks()}
       />
 
       <AlertDialog

@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { uniqueDeckSlug } from "@/lib/flashcards/slug";
+import type { FlashcardFront, FlashcardBack } from "@/lib/flashcards/types";
 
 /* ═══════════════════════════════════════════
    POST /api/dictionary/flashcard
-   Convert an approved dictionary entry into a flashcard.
-   Body: { entryId, deckId? , deckName? }
-     - Provide deckId to add to an existing deck.
-     - Provide deckName to auto-create a new deck if none exists.
-     - If neither is given, falls back to a user-owned "Dictionary" deck (created on demand).
+   Convert a dictionary entry into a flashcard.
+   Works with any entry status (draft, approved, etc.).
+   Body: { entryId, deckId?, deckName? }
    ═══════════════════════════════════════════ */
 export async function POST(req: NextRequest) {
   try {
@@ -29,13 +28,10 @@ export async function POST(req: NextRequest) {
 
     const entryId = Number(body.entryId);
     if (!Number.isFinite(entryId)) {
-      return NextResponse.json(
-        { error: "entryId is required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "entryId is required" }, { status: 400 });
     }
 
-    // Fetch the entry
+    // Fetch the entry (any status allowed)
     const { data: entry } = await supabase
       .from("dictionary_entries")
       .select("id, term, reading, language_code, definition, status")
@@ -44,13 +40,6 @@ export async function POST(req: NextRequest) {
 
     if (!entry) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
-    }
-
-    if (entry.status !== "approved") {
-      return NextResponse.json(
-        { error: "Only approved entries can be converted to flashcards" },
-        { status: 400 },
-      );
     }
 
     // Resolve target deck
@@ -69,7 +58,6 @@ export async function POST(req: NextRequest) {
       targetDeckId = deck.id;
     } else {
       const deckName = body.deckName?.trim() || "Dictionary";
-      // Find or create a deck with this name for the current user
       const { data: existing } = await supabase
         .from("decks")
         .select("id")
@@ -83,12 +71,7 @@ export async function POST(req: NextRequest) {
         const slug = await uniqueDeckSlug(supabase, user.id, deckName);
         const { data: newDeck, error: deckErr } = await supabase
           .from("decks")
-          .insert({
-            owner_id: user.id,
-            name: deckName,
-            slug,
-            is_public: false,
-          })
+          .insert({ owner_id: user.id, name: deckName, slug, is_public: false })
           .select("id")
           .single();
         if (deckErr || !newDeck) {
@@ -112,35 +95,32 @@ export async function POST(req: NextRequest) {
 
     if (existingFlashcard) {
       return NextResponse.json(
-        {
-          flashcard_id: existingFlashcard.id,
-          deck_id: existingFlashcard.deck_id,
-          message: "Flashcard already exists",
-        },
+        { flashcard_id: existingFlashcard.id, deck_id: existingFlashcard.deck_id, message: "Flashcard already exists" },
         { status: 200 },
       );
     }
 
-    // Build front (term + reading) and back (definition + first translations)
-    let front = entry.term;
-    if (entry.reading) {
-      front += ` (${entry.reading})`;
-    }
-
-    let back = entry.definition;
-
+    // Fetch translations
     const { data: translations } = await supabase
       .from("dictionary_translations")
       .select("language_code, translated_term")
       .eq("entry_id", entryId)
       .limit(3);
 
-    if (translations?.length) {
-      const translationLines = translations
-        .map((t) => `[${t.language_code.toUpperCase()}] ${t.translated_term}`)
-        .join("\n");
-      back += "\n\n" + translationLines;
-    }
+    // Build structured JSONB front/back
+    const front: FlashcardFront = {
+      term: entry.term,
+      reading: entry.reading ?? undefined,
+      language: (entry.language_code as "mn" | "ja" | "en") ?? "en",
+    };
+
+    const back: FlashcardBack = {
+      definition: entry.definition,
+      translations: (translations || []).map((t) => ({
+        language: t.language_code as "mn" | "ja" | "en",
+        term: t.translated_term,
+      })),
+    };
 
     const { data: flashcard, error: flashcardError } = await supabase
       .from("flashcards")
