@@ -1,227 +1,265 @@
-// components/feed/RightSidebar.tsx
-"use client";
+"use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import * as React from "react"
+import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
+
+
+import { Label } from "@/components/ui/label"
 import {
-  Flame,
-  TrendingUp,
-  Trophy,
-  Users,
-  Menu,
-} from "lucide-react";
-import { useTransition } from "react";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInput,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar"
+import { Switch } from "@/components/ui/switch"
 
-interface RankingUser {
-  rank: number;
-  name: string;
-  avatar: string;
-  points: number;
-  change: number;
-  badge?: string;
+// This is sample data
+const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  navMain: [
+    {
+      title: "Inbox",
+      url: "#",
+      icon: Inbox,
+      isActive: true,
+    },
+    {
+      title: "Drafts",
+      url: "#",
+      icon: File,
+      isActive: false,
+    },
+    {
+      title: "Sent",
+      url: "#",
+      icon: Send,
+      isActive: false,
+    },
+    {
+      title: "Junk",
+      url: "#",
+      icon: ArchiveX,
+      isActive: false,
+    },
+    {
+      title: "Trash",
+      url: "#",
+      icon: Trash2,
+      isActive: false,
+    },
+  ],
+  mails: [
+    {
+      name: "William Smith",
+      email: "williamsmith@example.com",
+      subject: "Meeting Tomorrow",
+      date: "09:34 AM",
+      teaser:
+        "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
+    },
+    {
+      name: "Alice Smith",
+      email: "alicesmith@example.com",
+      subject: "Re: Project Update",
+      date: "Yesterday",
+      teaser:
+        "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
+    },
+    {
+      name: "Bob Johnson",
+      email: "bobjohnson@example.com",
+      subject: "Weekend Plans",
+      date: "2 days ago",
+      teaser:
+        "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
+    },
+    {
+      name: "Emily Davis",
+      email: "emilydavis@example.com",
+      subject: "Re: Question about Budget",
+      date: "2 days ago",
+      teaser:
+        "I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?",
+    },
+    {
+      name: "Michael Wilson",
+      email: "michaelwilson@example.com",
+      subject: "Important Announcement",
+      date: "1 week ago",
+      teaser:
+        "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
+    },
+    {
+      name: "Sarah Brown",
+      email: "sarahbrown@example.com",
+      subject: "Re: Feedback on Proposal",
+      date: "1 week ago",
+      teaser:
+        "Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?",
+    },
+    {
+      name: "David Lee",
+      email: "davidlee@example.com",
+      subject: "New Project Idea",
+      date: "1 week ago",
+      teaser:
+        "I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?",
+    },
+    {
+      name: "Olivia Wilson",
+      email: "oliviawilson@example.com",
+      subject: "Vacation Plans",
+      date: "1 week ago",
+      teaser:
+        "Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave.",
+    },
+    {
+      name: "James Martin",
+      email: "jamesmartin@example.com",
+      subject: "Re: Conference Registration",
+      date: "1 week ago",
+      teaser:
+        "I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end.",
+    },
+    {
+      name: "Sophia White",
+      email: "sophiawhite@example.com",
+      subject: "Team Dinner",
+      date: "1 week ago",
+      teaser:
+        "To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences.",
+    },
+  ],
 }
 
-interface TrendingTopic {
-  id: string;
-  name: string;
-  posts: number;
-  trend: "up" | "down" | "stable";
-}
-
-interface RightSidebarProps {
-  topUsers: RankingUser[];
-  trendingTopics: TrendingTopic[];
-}
-
-export function RightSidebar({ topUsers, trendingTopics }: RightSidebarProps) {
-  const t = useTransition();
-  const SidebarContent = () => (
-    <div className="space-y-6">
-      {/* Top Contributors */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-yellow-500" />
-              Top Contributors
-            </h3>
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              View All
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {topUsers.slice(0, 5).map((user) => (
-            <div
-              key={user.rank}
-              className="flex items-center justify-between group hover:bg-muted/50 p-2 rounded-lg transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  {user.badge && (
-                    <span className="absolute -top-1 -right-1 text-xs">
-                      {user.badge}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.points.toLocaleString()} pts
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-muted-foreground">
-                  #{user.rank}
-                </span>
-                {user.change !== 0 && (
-                  <Badge
-                    variant={user.change > 0 ? "default" : "destructive"}
-                    className="text-xs px-1"
-                  >
-                    {user.change > 0 ? "↑" : "↓"}
-                    {Math.abs(user.change)}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Weekly Leaderboard */}
-      <Card>
-        <CardHeader className="pb-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Flame className="h-4 w-4 text-orange-500" />
-            This Week's Leaders
-          </h3>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {topUsers.slice(0, 3).map((user) => (
-            <div
-              key={user.rank}
-              className="flex items-center gap-3 p-2 rounded-lg bg-muted/50"
-            >
-              <span className="text-2xl">{user.badge}</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  +{Math.floor(Math.random() * 500) + 100} pts this week
-                </p>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Trending Topics */}
-      <Card>
-        <CardHeader className="pb-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-blue-500" />
-            Trending Topics
-          </h3>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {trendingTopics.map((topic, index) => (
-            <div
-              key={topic.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-muted-foreground w-5">
-                  {index + 1}
-                </span>
-                <div>
-                  <p className="text-sm font-medium group-hover:text-primary transition-colors">
-                    #{topic.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {topic.posts.toLocaleString()} posts
-                  </p>
-                </div>
-              </div>
-              <div>
-                {topic.trend === "up" && (
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                )}
-                {topic.trend === "down" && (
-                  <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
-                )}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Suggested Users */}
-      <Card>
-        <CardHeader className="pb-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Users className="h-4 w-4 text-purple-500" />
-            Suggested for You
-          </h3>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {topUsers.slice(5, 8).map((user) => (
-            <div key={user.rank} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.points.toLocaleString()} pts
-                  </p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="h-7 text-xs">
-                Follow
-              </Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Note: I'm using state to show active item.
+  // IRL you should use the url/router.
+  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
+  const [mails, setMails] = React.useState(data.mails)
+  const { setOpen } = useSidebar()
 
   return (
-    <>
-      {/* Desktop Sidebar - Always visible on large screens */}
-      <div className="hidden lg:block w-[320px] sticky top-20 h-fit">
-        <SidebarContent />
-      </div>
+    <Sidebar
+      side="right"
+      collapsible="icon"
+      className="overflow-hidden *:data-[sidebar=sidebar]:flex-row-reverse"
+      {...props}
+    >
+      {/* This is the first sidebar */}
+      {/* We disable collapsible and adjust width to icon. */}
+      {/* This will make the sidebar appear as icons. */}
+      <Sidebar
+        collapsible="none"
+        className="w-[calc(var(--sidebar-width-icon)+1px)]! border-l"
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
+                <a href="#">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Command className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">Acme Inc</span>
+                    <span className="truncate text-xs">Enterprise</span>
+                  </div>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent className="px-1.5 md:px-0">
+              <SidebarMenu>
+                {data.navMain.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      tooltip={{
+                        children: item.title,
+                        hidden: false,
+                      }}
+                      onClick={() => {
+                        setActiveItem(item)
+                        const mail = data.mails.sort(() => Math.random() - 0.5)
+                        setMails(
+                          mail.slice(
+                            0,
+                            Math.max(5, Math.floor(Math.random() * 10) + 1)
+                          )
+                        )
+                        setOpen(true)
+                      }}
+                      isActive={activeItem?.title === item.title}
+                      className="px-2.5 md:px-2"
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          
+        </SidebarFooter>
+      </Sidebar>
 
-      {/* Mobile Sidebar - Sheet trigger for mobile/tablet */}
-      <div className="lg:hidden fixed bottom-4 right-4 z-50">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              className="h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
-            >
-              <Trophy className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[320px] overflow-y-auto">
-            <div className="py-4">
-              <SidebarContent />
+      {/* This is the second sidebar */}
+      {/* We disable collapsible and let it fill remaining space */}
+      <Sidebar collapsible="none" className="hidden flex-1 md:flex">
+        <SidebarHeader className="gap-3.5 border-b p-4">
+          <div className="flex w-full items-center justify-between">
+            <div className="text-base font-medium text-foreground">
+              {activeItem?.title}
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
-  );
+            <Label className="flex items-center gap-2 text-sm">
+              <span>Unreads</span>
+              <Switch className="shadow-none" />
+            </Label>
+          </div>
+          <SidebarInput placeholder="Type to search..." />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup className="px-0">
+            <SidebarGroupContent>
+              {mails.map((mail) => (
+                <a
+                  href="#"
+                  key={mail.email}
+                  className="flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <div className="flex w-full items-center gap-2">
+                    <span>{mail.name}</span>{" "}
+                    <span className="ml-auto text-xs">{mail.date}</span>
+                  </div>
+                  <span className="font-medium">{mail.subject}</span>
+                  <span className="line-clamp-2 w-[260px] text-xs whitespace-break-spaces">
+                    {mail.teaser}
+                  </span>
+                </a>
+              ))}
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+    </Sidebar>
+  )
 }
+
+export { AppSidebar as RightSidebar }
