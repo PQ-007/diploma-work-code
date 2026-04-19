@@ -12,6 +12,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import AddToDeckDialog from "@/components/flashcards/AddToDeckDialog";
 import {
   BookOpen,
   Pencil,
@@ -194,7 +196,7 @@ export default function DictionaryTermPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [savingFlashcard, setSavingFlashcard] = useState(false);
+  const [flashcardDialogOpen, setFlashcardDialogOpen] = useState(false);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [mnScript, setMnScript] = useState<string | null>(null);
 
@@ -283,22 +285,30 @@ export default function DictionaryTermPage() {
   };
 
   // --- Flashcard creation ---
-  const handleCreateFlashcard = async () => {
+  const handleOpenFlashcardDialog = () => {
     if (!user) return router.push("/signin");
-    setSavingFlashcard(true);
+    setFlashcardDialogOpen(true);
+  };
+
+  const handleConfirmFlashcard = async (args: {
+    deckId?: number;
+    deckName?: string;
+  }) => {
+    if (!data?.entry.id) return;
     try {
       const res = await fetch("/api/dictionary/flashcard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entry_id: data?.entry.id }),
+        body: JSON.stringify({ entryId: data.entry.id, ...args }),
       });
       const json = await res.json();
-      if (!res.ok) alert(json.error || t("dictionary.failedFlashcard"));
-      else alert(t("dictionary.flashcardCreated"));
+      if (!res.ok) {
+        toast.error(json.error || t("dictionary.failedFlashcard"));
+        return;
+      }
+      toast.success(t("dictionary.flashcardCreated"));
     } catch {
-      alert(t("dictionary.failedFlashcard"));
-    } finally {
-      setSavingFlashcard(false);
+      toast.error(t("dictionary.failedFlashcard"));
     }
   };
 
@@ -526,14 +536,9 @@ export default function DictionaryTermPage() {
                   variant="outline"
                   size="sm"
                   className="text-xs"
-                  onClick={handleCreateFlashcard}
-                  disabled={savingFlashcard}
+                  onClick={handleOpenFlashcardDialog}
                 >
-                  {savingFlashcard ? (
-                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  ) : (
-                    <CreditCard className="h-3.5 w-3.5 mr-1.5" />
-                  )}
+                  <CreditCard className="h-3.5 w-3.5 mr-1.5" />
                   {t("dictionary.flashcard")}
                 </Button>
               )}
@@ -907,6 +912,13 @@ export default function DictionaryTermPage() {
           </aside>
         </div>
       </div>
+
+      <AddToDeckDialog
+        open={flashcardDialogOpen}
+        onOpenChange={setFlashcardDialogOpen}
+        onConfirm={handleConfirmFlashcard}
+        title={t("dictionary.flashcard")}
+      />
     </div>
   );
 }

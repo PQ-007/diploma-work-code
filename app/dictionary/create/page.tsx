@@ -70,6 +70,7 @@ export default function DictionaryCreatePage() {
 
   const editSlug = searchParams.get("edit");
   const isEditMode = !!editSlug;
+  const fromFlashcardId = searchParams.get("fromFlashcard");
 
   // Form state
   const [term, setTerm] = useState("");
@@ -156,6 +157,28 @@ export default function DictionaryCreatePage() {
   useEffect(() => {
     if (isEditMode) loadEntry();
   }, [isEditMode, loadEntry]);
+
+  // Prefill from a flashcard (flashcard → dictionary entry proposal)
+  useEffect(() => {
+    if (!fromFlashcardId || isEditMode) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/flashcards/${fromFlashcardId}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const card = json.item || json.flashcard || json;
+        if (cancelled || !card) return;
+        if (typeof card.front === "string") setTerm(card.front);
+        if (typeof card.back === "string") setDefinition(card.back);
+      } catch {
+        // non-fatal
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fromFlashcardId, isEditMode]);
 
   // Duplicate check (debounced on term change)
   useEffect(() => {

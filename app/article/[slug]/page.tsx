@@ -56,6 +56,7 @@ import AuthorBox from "../components/AuthorBox";
 import ArticleCommentSection from "../components/ArticleCommentSection";
 import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSection";
 import { useArticleInteractions } from "@/hooks/useArticleInteractions";
+import FlashcardCapturePopover from "@/components/flashcards/FlashcardCapturePopover";
 
 type ArticleLangCode = "mn" | "en" | "jp";
 type TocNode = { item: TocEntry; children: TocNode[] };
@@ -940,6 +941,14 @@ export default function ModernArticlePage() {
                   </div>
                 )}
               </div>
+
+              {user && articleNumericId && (
+                <FlashcardCapturePopover
+                  containerRef={articleRef}
+                  sourceType="article"
+                  sourceId={articleNumericId}
+                />
+              )}
             </Card>
 
             {/* Mobile TOC (because your right sidebar disappears) */}

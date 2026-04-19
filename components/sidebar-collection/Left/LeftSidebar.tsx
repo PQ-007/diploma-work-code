@@ -145,7 +145,7 @@ const navData: SidebarData = {
     {
       titleKey: "sidebar.flashcards",
       icon: SwatchBook,
-      href: "/flashcard",
+      href: "/flashcards",
       items: [],
       authRequired: true,
     },

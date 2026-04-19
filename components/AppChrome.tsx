@@ -47,11 +47,11 @@ export function AppChrome({ children }: AppChromeProps) {
         </main>
       </div>
 
-      <div className="hidden md:block">
+      {/* <div className="hidden md:block">
         <SidebarProvider defaultOpen={false}>
           <RightSidebar />
         </SidebarProvider>
-      </div>
+      </div> */}
     </div>
   );
 }
