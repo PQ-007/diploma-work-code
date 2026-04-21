@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Brain, Plus, Compass, Library, Target, ChevronRight } from "lucide-react";
+import { Brain, Plus, Compass, Library, Target, ChevronRight, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import DeckCard from "@/components/flashcards/DeckCard";
@@ -36,6 +36,8 @@ export default function FlashcardsPage() {
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DeckWithCount | null>(null);
   const [dueToday, setDueToday] = useState<number>(0);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchDecks = useCallback(async () => {
     setLoading(true);
@@ -121,6 +123,30 @@ export default function FlashcardsPage() {
     }
   };
 
+  const handleTomlImport = async (file: File) => {
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const res = await fetch("/api/decks/import-toml", {
+        method: "POST",
+        headers: { "Content-Type": "application/toml" },
+        body: text,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json.error || "Import failed");
+        return;
+      }
+      const skippedMsg = json.skipped ? ` (${json.skipped} skipped)` : "";
+      toast.success(`Imported ${json.imported} card${json.imported !== 1 ? "s" : ""}${skippedMsg}`);
+      fetchDecks();
+    } catch {
+      toast.error("Failed to read file");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const target = deleteTarget;
@@ -172,6 +198,27 @@ export default function FlashcardsPage() {
                 Browse public decks
               </Link>
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 h-7 text-[11px]"
+              disabled={importing}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-3 w-3" />
+              {importing ? "Importing…" : "Import TOML"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".toml,text/plain,application/toml"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) handleTomlImport(file);
+              }}
+            />
             <Button
               variant="outline"
               size="sm"

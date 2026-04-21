@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parse as parseToml } from "smol-toml";
 import { createClient } from "@/utils/supabase/server";
 import type { FlashcardFront, FlashcardBack } from "@/lib/flashcards/types";
 
@@ -48,6 +49,17 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (contentType.includes("application/json")) {
       const body = (await req.json()) as { cards?: CardInput[] };
       cardInputs = body.cards ?? [];
+    } else if (contentType.includes("toml")) {
+      const text = await req.text();
+      try {
+        const parsed = parseToml(text) as { cards?: CardInput[] };
+        cardInputs = Array.isArray(parsed.cards) ? parsed.cards : [];
+      } catch (e) {
+        return NextResponse.json(
+          { error: `Invalid TOML: ${(e as Error).message}` },
+          { status: 400 },
+        );
+      }
     } else {
       // Treat as CSV text (tab-separated)
       const text = await req.text();

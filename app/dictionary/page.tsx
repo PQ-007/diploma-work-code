@@ -275,7 +275,7 @@ export default function DictionaryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-6xl px-4">
+      <div className="mx-auto py-6 lg:py-3 max-w-[1200px] px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

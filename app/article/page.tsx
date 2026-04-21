@@ -48,7 +48,7 @@ const calcReadTime = (body: string) => {
 };
 
 export default function ArticleBrowsePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [readingList, setReadingList] = useState(new Set<string>());
@@ -60,7 +60,7 @@ export default function ArticleBrowsePage() {
     error,
     refetch,
     isRefetching,
-  } = useArticles("published");
+  } = useArticles("published", language);
 
   // Filter articles based on tab and search
   const filteredArticles = (articles || []).filter((item) => {

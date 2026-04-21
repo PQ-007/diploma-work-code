@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Future Hub — Site Workflow / Navigation Map</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; background: #fff; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #666; margin: 0 0 20px; font-size: 13px; }
+  .diagram { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; overflow: auto; }
+  .legend { font-size: 12px; color: #444; margin-top: 12px; }
+  .legend span { display: inline-block; padding: 2px 8px; border-radius: 4px; margin-right: 8px; }
+</style>
+</head>
+<body>
+<h1>Future Hub — Site Workflow & Navigation Map</h1>
+<p class="sub">Home page as the root hub, branching to major sections and their sub-routes / actions.</p>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  Home(["Home<br/><code>/</code>"]):::root
+
+  %% Section hubs
+  Auth{{Auth}}:::hub
+  Learn{{Learn}}:::hub
+  Content{{Content}}:::hub
+  Flash{{Flashcards}}:::hub
+  Projects{{Projects &amp; Tools}}:::hub
+  User{{User}}:::hub
+
+  Home --> Auth
+  Home --> Learn
+  Home --> Content
+  Home --> Flash
+  Home --> Projects
+  Home --> User
+
+  %% Auth
+  Auth --> SignIn["Sign In<br/><code>/signin</code>"]
+  Auth --> SignUp["Sign Up<br/><code>/signup</code>"]
+  Auth --> Forgot["Forgot Password<br/><code>/forgot-password</code>"]
+  Auth --> Reset["Reset Password<br/><code>/auth/reset-password</code>"]
+
+  %% Learn
+  Learn --> LearnHub["Learn Hub<br/><code>/learn</code>"]
+  LearnHub --> Algo["Algorithms<br/><code>/learn/algorithm</code>"]
+  LearnHub --> DS["Data Structures<br/><code>/learn/data-structure</code>"]
+  LearnHub --> Lang["Programming Languages<br/><code>/learn/programming-lang</code>"]
+  LearnHub --> Res["Resources<br/><code>/learn/resources</code>"]
+  LearnHub --> Topic["Topic Detail<br/><code>/learn/[slug]</code>"]
+  Learn --> KTree["Knowledge Tree<br/><code>/knowledge-tree</code>"]
+  Learn --> Setup["Setup<br/><code>/setup</code>"]
+
+  %% Content
+  Content --> Articles["Articles<br/><code>/article</code>"]
+  Articles --> ArticleCreate["Create Article<br/><code>/article/create</code>"]
+  Articles --> ArticleDetail["Article Detail<br/><code>/article/[slug]</code>"]
+  Content --> Dict["Dictionary<br/><code>/dictionary</code>"]
+  Dict --> DictCreate["Create Entry<br/><code>/dictionary/create</code>"]
+  Dict --> DictDetail["Entry Detail<br/><code>/dictionary/[slug]</code>"]
+  Dict --> DictMod["Moderation<br/><code>/dictionary/moderation</code>"]
+  Content --> Disc["Discussions<br/><code>/discussions</code>"]
+
+  %% Flashcards
+  Flash --> FlashHome["Flashcards Home<br/><code>/flashcards</code>"]
+  FlashHome --> Browse["Browse Decks<br/><code>/flashcards/browse</code>"]
+  FlashHome --> DeckStudy["Deck Study<br/><code>/flashcards/[deckSlug]</code>"]
+  FlashHome --> Stats["Stats<br/><code>/flashcards/stats</code>"]
+
+  %% Projects
+  Projects --> ProjHub["Projects<br/><code>/project</code>"]
+  ProjHub --> ProjCreate["Create Project<br/><code>/project/create</code>"]
+  ProjHub --> ProjDetail["Project Detail<br/><code>/project/[slug]</code>"]
+  Projects --> Comp["Competition<br/><code>/competition</code>"]
+  Projects --> Store["Store<br/><code>/store</code>"]
+  Projects --> Library["Library<br/><code>/library</code>"]
+
+  %% User
+  User --> Profile["Profile<br/><code>/profile/[slug]</code>"]
+  Profile --> ProfileEdit["Edit Profile<br/><code>/profile/[slug]/edit</code>"]
+  User --> ChangePw["Change Password<br/><code>/profile/password</code>"]
+
+  classDef root fill:#2563eb,stroke:#1e40af,color:#fff,font-weight:bold;
+  classDef hub fill:#fde68a,stroke:#b45309,color:#111;
+</pre>
+</div>
+
+<p class="legend">
+  Rendered with Mermaid. To export: right-click the diagram → "Save image as…", or use browser print-to-PDF.
+</p>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', mindmap: { padding: 10 }, maxTextSize: 90000 });
+</script>
+</body>
+</html>

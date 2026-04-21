@@ -90,11 +90,17 @@ function transformArticle(
  * @example
  * const { data: articles, isLoading, error } = useArticles('published');
  */
-export function useArticles(status: string = "published") {
+export function useArticles(
+  status: string = "published",
+  language?: string,
+) {
   return useQuery({
-    queryKey: ["articles", status],
+    queryKey: ["articles", status, language || "default"],
     queryFn: async () => {
-      const res = await fetch(`/api/articles?status=${status}`);
+      const params = new URLSearchParams({ status });
+      if (language) params.set("lang", language);
+
+      const res = await fetch(`/api/articles?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch articles");
       const data = await res.json();
       return (data.items as ArticleAPIResponse[]).map(transformArticle);

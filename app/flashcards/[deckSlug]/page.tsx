@@ -218,6 +218,7 @@ export default function DeckDetailPage() {
     setImportLoading(true);
     try {
       const isJson = file.name.endsWith(".json");
+      const isToml = file.name.endsWith(".toml");
       const text = await file.text();
       let body: string;
       let contentType: string;
@@ -225,6 +226,9 @@ export default function DeckDetailPage() {
         const parsed = JSON.parse(text);
         body = JSON.stringify(Array.isArray(parsed) ? { cards: parsed } : parsed);
         contentType = "application/json";
+      } else if (isToml) {
+        body = text;
+        contentType = "application/toml";
       } else {
         body = text;
         contentType = "text/plain";
@@ -377,6 +381,7 @@ export default function DeckDetailPage() {
             <div className="inline-flex items-center p-0.5 rounded-lg gap-0.5" style={{ background: "var(--muted)" }}>
               {([
                 { key: "list"   as StudyMode, icon: List,     label: "List",                                disabled: false },
+                { key: "study"  as StudyMode, icon: Sparkles, label: "Study",                               disabled: cards.length === 0 },
                 { key: "review" as StudyMode, icon: Calendar, label: dueCount > 0 ? `Review (${dueCount})` : "Review", disabled: cards.length === 0 },
               ] as Array<{ key: StudyMode; icon: React.ComponentType<{ className?: string }>; label: string; disabled: boolean }>).map(({ key, icon: Icon, label, disabled }) => (
                 <button
@@ -387,7 +392,7 @@ export default function DeckDetailPage() {
                     mode === key
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  }${key === "review" && dueCount > 0 && mode !== "review" ? " text-primary" : ""}`}
                 >
                   <Icon className="h-3 w-3" />
                   {label}
@@ -423,10 +428,10 @@ export default function DeckDetailPage() {
                     <DropdownMenuItem asChild>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <Upload className="h-3.5 w-3.5 mr-2" />
-                        {importLoading ? "Importing…" : "Import cards (CSV/JSON)"}
+                        {importLoading ? "Importing…" : "Import cards (CSV/JSON/TOML)"}
                         <input
                           type="file"
-                          accept=".csv,.txt,.json"
+                          accept=".csv,.txt,.json,.toml"
                           className="hidden"
                           onChange={handleImport}
                         />
@@ -439,6 +444,7 @@ export default function DeckDetailPage() {
           </div>
         </div>
 
+        {/* Body */}
         { mode === "review" ? (
           <FlashcardView cards={dueCards.length > 0 ? dueCards : cards} sm2Mode />
         ) : cards.length === 0 ? (
