@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function ArticleItemSkeleton() {
   return (
-    <Card className="border-border/40 p-3.5 h-[190px] flex flex-col justify-between space-y-3">
+    <Card className="border-border/40 p-3.5 min-h-[190px] flex flex-col justify-between space-y-3">
       {/* Author row */}
       <div className="flex items-center gap-2">
         <Skeleton className="h-7 w-7 rounded-full" />
@@ -94,13 +94,17 @@ export function ArticleFeedSkeleton({ count = 5 }: { count?: number }) {
 export function ArticlePageSkeleton() {
   return (
     <div className="flex gap-8 xl:gap-12 justify-center">
-      <div className="flex-1 max-w-3xl space-y-6">
+      <div className="flex-1 max-w-3xl space-y-4">
+        {/* Search input skeleton */}
+        <Skeleton className="h-9 w-full rounded-md" />
+
         {/* Tabs skeleton */}
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-16 rounded-md" />
+            <Skeleton key={i} className="h-10 w-16 rounded-md" />
           ))}
         </div>
+
         <ArticleFeedSkeleton count={5} />
       </div>
       <aside className="hidden xl:block w-[320px]">

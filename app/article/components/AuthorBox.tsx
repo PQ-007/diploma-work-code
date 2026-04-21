@@ -72,7 +72,7 @@ export default function MinimalAuthorBox({ author }: Props) {
               >
                 {author.displayName || author.username}
               </Link>
-              {getRankIcon(rankingPoints)}
+              {getRankIcon(rankingPoints, 3.5)}
             </div>
 
             <div className="flex items-center gap-1 mt-1">

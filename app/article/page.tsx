@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AlertCircle, FileText, Flame, RefreshCw, Search } from "lucide-react";
@@ -47,7 +48,7 @@ const calcReadTime = (body: string) => {
 };
 
 export default function ArticleBrowsePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [readingList, setReadingList] = useState(new Set<string>());
@@ -59,7 +60,7 @@ export default function ArticleBrowsePage() {
     error,
     refetch,
     isRefetching,
-  } = useArticles("published");
+  } = useArticles("published", language);
 
   // Filter articles based on tab and search
   const filteredArticles = (articles || []).filter((item) => {
@@ -88,9 +89,12 @@ export default function ArticleBrowsePage() {
     return (
       <div className="min-h-screen bg-background">
         <div className="page-shell-wide py-6 lg:py-3">
-          <div className="mb-6 max-w-3xl mx-auto">
-            <div className="h-6 w-32 bg-muted-foreground/15 animate-pulse rounded-md mb-1" />
-            <div className="h-4 w-56 bg-muted-foreground/15 animate-pulse rounded-md" />
+          <div className="mb-6 max-w-6xl w-full px-3 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1.5">
+              <Skeleton className="h-6 w-32 rounded-md" />
+              <Skeleton className="h-4 w-56 rounded-md" />
+            </div>
+            <Skeleton className="h-8 w-8 rounded-md" />
           </div>
           <ArticlePageSkeleton />
         </div>
@@ -145,21 +149,6 @@ export default function ArticleBrowsePage() {
                 className="pl-9 h-9 text-sm"
               />
             </div>
-
-            {/* Category Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
-                {["all", "nextjs", "ai", "python", "rust"].map((tab) => (
-                  <TabsTrigger
-                    key={tab}
-                    value={tab}
-                    className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs capitalize"
-                  >
-                    {tab === "all" ? "All" : tab}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
 
             {/* Results info bar */}
             {(searchQuery || activeTab !== "all") && !error && (

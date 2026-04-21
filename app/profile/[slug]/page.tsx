@@ -26,14 +26,8 @@ import {
   UserMinus,
   UserPlus,
 } from "lucide-react";
-import {
-  ChessBishop,
-  ChessKing,
-  ChessKnight,
-  ChessPawn,
-  ChessQueen,
-  ChessRook,
-} from "lucide-react";
+import {getRankIcon} from "@/lib/utils/rankIcons";
+
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -135,19 +129,7 @@ interface ProfileApiResponse {
   }[];
 }
 
-const getRankIcon = (points: number) => {
-  if (points >= 2500)
-    return <ChessKing className="h-5 w-5 shrink-0 text-red-500" />;
-  if (points >= 2000)
-    return <ChessQueen className="h-5 w-5 shrink-0 text-orange-500" />;
-  if (points >= 1600)
-    return <ChessRook className="h-5 w-5 shrink-0 text-purple-500" />;
-  if (points >= 1200)
-    return <ChessBishop className="h-5 w-5  shrink-0 text-blue-500" />;
-  if (points >= 800)
-    return <ChessKnight className="h-5 w-5 shrink-0 text-green-500" />;
-  return <ChessPawn className="h-5 w-5 shrink-0 text-muted-foreground" />;
-};
+
 
 function relativeTime(dateStr: string | null): string {
   if (!dateStr) return "";
@@ -314,9 +296,9 @@ export default function ProfilePage() {
             <div className="flex-1 min-w-0 pt-3 sm:pt-4">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight flex items-center ">
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight flex items-center gap-1 ">
                     {profile.display_name || profile.user_name}
-                    {getRankIcon(stats.rankingPoint)}
+                    {getRankIcon(stats.rankingPoint, 5.5)}
                   </h1>
                   <p className="text-sm text-muted-foreground">
                     {profile.bio || profile.user_name}
@@ -354,6 +336,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
+                
                 <Badge className="gap-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 border-0">
                   <GraduationCap className="h-3 w-3" />
                   {(() => {
@@ -361,6 +344,8 @@ export default function ProfilePage() {
                       profile.email?.substring(1, 3) ?? "0",
                     );
                     const n = new Date().getFullYear() - enrollYear - 2000;
+                    if (isNaN(n)) return null;
+                    if (n > 5) return tr("profile.alumni", "Alumni");
                     return `${n} ${tr("profile.yearStudent", "year student")}`;
                   })()}
                 </Badge>

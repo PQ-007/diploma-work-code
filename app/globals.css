@@ -239,6 +239,132 @@ select,
   --shadow-2xl: var(--shadow-2xl);
 }
 
+/* ── Flashcard module utilities ────────────────────────────────────────────── */
+
+/* Japanese fonts */
+.font-jp {
+  font-family: var(--font-noto-sans-jp, "Noto Sans JP"), "Inter", sans-serif;
+}
+.font-jp-serif {
+  font-family: var(--font-noto-serif-jp, "Noto Serif JP"), "Georgia", serif;
+}
+
+/* 3-D flip card */
+.flip-scene {
+  perspective: 1600px;
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.25, 0.8, 0.4, 1);
+}
+.flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Keyboard hint badge */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: var(--muted-foreground);
+  line-height: 1;
+}
+
+/* Heatmap cell */
+.hm-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Underline tab rail (matches FutureHub nav) */
+.tab-rail {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tab:hover {
+  color: var(--foreground);
+}
+.tab.active {
+  color: var(--foreground);
+  border-bottom-color: var(--foreground);
+}
+
+/* Segmented control (List/Study) */
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--muted);
+  border-radius: 8px;
+  gap: 2px;
+}
+.seg button {
+  height: 26px;
+  padding: 0 12px;
+  font-size: 11px;
+  border-radius: 6px;
+  color: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.seg button:hover {
+  color: var(--foreground);
+}
+.seg button.active {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.seg button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Global Styles */
 * {
   box-sizing: border-box;

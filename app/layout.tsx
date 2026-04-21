@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 import { Toaster } from "sonner";
 import { AppChrome } from "@/components/AppChrome";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export default function RootLayout({
   children,
