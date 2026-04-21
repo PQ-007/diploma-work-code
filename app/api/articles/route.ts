@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const statusFilter = searchParams.get("status") || "published";
+    const requestedLanguage =
+      searchParams.get("lang")?.split("-")[0].toLowerCase() || null;
 
     // 1. Fetch base articles
     const { data: articles, error: articlesError } = await supabase
@@ -83,8 +85,22 @@ export async function GET(req: NextRequest) {
       });
     });
 
-    // 5. Get latest translation per article
+    // 5. Get translation per article, preferring requested language if available.
     const latestByArticle = new Map<
+      string,
+      {
+        article_id: string;
+        language_code: string;
+        title: string;
+        sub_title: string | null;
+        body: string;
+        published_at: string | null;
+        views: number | null;
+        created_at: string | null;
+        edited_at: string | null;
+      }
+    >();
+    const preferredByArticle = new Map<
       string,
       {
         article_id: string;
@@ -103,10 +119,19 @@ export async function GET(req: NextRequest) {
       if (!latestByArticle.has(t.article_id)) {
         latestByArticle.set(t.article_id, t);
       }
+
+      if (
+        requestedLanguage &&
+        t.language_code?.toLowerCase() === requestedLanguage &&
+        !preferredByArticle.has(t.article_id)
+      ) {
+        preferredByArticle.set(t.article_id, t);
+      }
     });
 
     // 6. Build response items
-    const items = Array.from(latestByArticle.values()).map((t) => {
+    const items = Array.from(latestByArticle.values()).map((fallback) => {
+      const t = preferredByArticle.get(fallback.article_id) || fallback;
       const articleData = articleMap.get(t.article_id);
       const authorId = articleData?.author_id || null;
       const author = authorId ? profilesById.get(authorId) : null;

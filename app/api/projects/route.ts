@@ -36,50 +36,51 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10), 50);
     const offset = (page - 1) * limit;
 
-    let query = supabase
-      .from("projects")
-      .select(
-        "id, title, slug, description, category, project_type, difficulty, status, is_public, thumbnail_url, progress, technologies, created_by, created_at, updated_at, views, likes_count",
-      );
+    const buildProjectsQuery = () => {
+      // Select all available columns so listing continues to work even when optional columns differ between environments.
+      let query = supabase.from("projects").select("*");
 
-    // Scope filtering
-    if (scope === "my" && user) {
-      query = query.eq("created_by", user.id);
-    } else if (scope === "member" && user) {
-      // Will be filtered after fetch using members
-      query = query.or(
-        `created_by.eq.${user.id},id.in.(select project_id from project_members where user_id = '${user.id}')`,
-      );
-    } else {
-      // Public scope
-      query = query.eq("is_public", true);
-    }
+      // Scope filtering
+      if (scope === "my" && user) {
+        query = query.eq("created_by", user.id);
+      } else if (scope === "member" && user) {
+        // Will be filtered after fetch using members
+        query = query.or(
+          `created_by.eq.${user.id},id.in.(select project_id from project_members where user_id = '${user.id}')`,
+        );
+      } else {
+        // Public scope
+        query = query.eq("is_public", true);
+      }
 
-    // Filters
-    if (category) query = query.eq("category", category);
-    if (difficulty) query = query.eq("difficulty", difficulty);
-    if (status) query = query.eq("status", status);
-    if (projectType) query = query.eq("project_type", projectType);
-    if (search)
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      // Filters
+      if (category) query = query.eq("category", category);
+      if (difficulty) query = query.eq("difficulty", difficulty);
+      if (status) query = query.eq("status", status);
+      // NOTE: project type filtering is handled client-side for schema-compatibility across environments.
+      if (search)
+        query = query.or(
+          `title.ilike.%${search}%,description.ilike.%${search}%`,
+        );
 
-    // Sorting
-    switch (sortBy) {
-      case "most_liked":
-        query = query.order("likes_count", { ascending: false });
-        break;
-      case "oldest":
-        query = query.order("created_at", { ascending: true });
-        break;
-      case "newest":
-      default:
-        query = query.order("created_at", { ascending: false });
-        break;
-    }
+      // Sorting
+      switch (sortBy) {
+        case "most_liked":
+          query = query.order("likes_count", { ascending: false });
+          break;
+        case "oldest":
+          query = query.order("created_at", { ascending: true });
+          break;
+        case "newest":
+        default:
+          query = query.order("created_at", { ascending: false });
+          break;
+      }
 
-    query = query.range(offset, offset + limit - 1);
+      return query.range(offset, offset + limit - 1);
+    };
 
-    const { data: projects, error } = await query;
+    const { data: projects, error } = await buildProjectsQuery();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -157,6 +158,8 @@ export async function GET(req: NextRequest) {
 
     const items = projects.map((p) => ({
       ...p,
+      type: (p as { type?: string }).type || "private",
+      technologies: (p as { technologies?: string[] }).technologies || [],
       tags: tagsByProject.get(p.id) || [],
       author: profilesById.get(p.created_by) || null,
       userLiked: userLikes.has(p.id),
@@ -188,17 +191,48 @@ export async function POST(req: NextRequest) {
       title,
       description,
       category,
-      project_type = "coding",
+      type: projectType = "private",
       difficulty = "beginner",
       technologies = [],
       repository_url,
       demo_url,
+      video_url,
       thumbnail_url,
+      is_public = false,
+      status: initialStatus = "draft",
       tags = [],
     } = body;
 
+    const normalizedDescription =
+      typeof description === "string" ? description.trim() : "";
+    const normalizedTags = Array.isArray(tags)
+      ? Array.from(
+          new Set(
+            tags
+              .map((tag: unknown) =>
+                typeof tag === "string" ? tag.trim().toLowerCase() : "",
+              )
+              .filter(Boolean),
+          ),
+        )
+      : [];
+
     if (!title || typeof title !== "string" || title.trim().length === 0) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    }
+
+    if (!normalizedDescription) {
+      return NextResponse.json(
+        { error: "About content is required" },
+        { status: 400 },
+      );
+    }
+
+    if (normalizedTags.length === 0) {
+      return NextResponse.json(
+        { error: "At least one tag is required" },
+        { status: 400 },
+      );
     }
 
     const slug = generateSlug(title);
@@ -209,16 +243,18 @@ export async function POST(req: NextRequest) {
       .insert({
         title: title.trim(),
         slug,
-        description: description?.trim() || null,
+        description: normalizedDescription,
         category: category?.trim() || null,
-        project_type,
+        type: projectType,
         difficulty,
         technologies,
         repository_url: repository_url?.trim() || null,
         demo_url: demo_url?.trim() || null,
         thumbnail_url: thumbnail_url?.trim() || null,
         created_by: user.id,
-        status: "draft",
+        is_public,
+        status: initialStatus,
+        ...(is_public ? { published_at: new Date().toISOString() } : {}),
       })
       .select("id, slug")
       .single();
@@ -263,9 +299,9 @@ export async function POST(req: NextRequest) {
     );
 
     // Handle tags
-    if (tags.length > 0) {
-      for (const tagName of tags) {
-        const trimmed = tagName.trim().toLowerCase();
+    if (normalizedTags.length > 0) {
+      for (const tagName of normalizedTags) {
+        const trimmed = tagName;
         if (!trimmed) continue;
 
         // Get or create tag

@@ -93,7 +93,7 @@ export default function Leaderboard({
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium truncate flex items-center gap-1">
                     <span className="truncate">{user.name}</span>
-                    {getRankIcon(user.points)}
+                    {getRankIcon(user.points, 3.5)}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
                     {isStudent

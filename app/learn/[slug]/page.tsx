@@ -23,250 +23,30 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-
-type Level = "beginner" | "intermediate" | "advanced";
-
-interface Lesson {
-  id: string;
-  title: string;
-  duration: number; // minutes
-  completed?: boolean;
-  preview?: boolean;
-}
-
-interface Module {
-  id: string;
-  title: string;
-  lessons: Lesson[];
-}
-
-interface Course {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  longDescription: string;
-  thumbnail: string;
-  instructor: string;
-  instructorAvatar: string;
-  instructorBio: string;
-  category: string;
-  level: Level;
-  duration: number;
-  lessons: number;
-  enrolled: number;
-  rating: number;
-  tags: string[];
-  progress?: number;
-  modules: Module[];
-  requirements: string[];
-  outcomes: string[];
-  lastUpdated: string;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Static data                                                        */
-/* ------------------------------------------------------------------ */
-
-const coursesMap: Record<string, Course> = {
-  "complete-react-developer": {
-    id: "1",
-    slug: "complete-react-developer",
-    title: "Complete React Developer Course",
-    description: "Master React from basics to advanced concepts including hooks, context, and performance.",
-    longDescription: "This comprehensive course takes you through the entire React ecosystem. You will start with the fundamentals — JSX, components, props, and state — then progress to hooks, context API, performance optimization, and testing. By the end, you will be able to build and deploy production-grade React applications with confidence.",
-    thumbnail: "/images/courses/react-developer.png",
-    instructor: "Sarah Johnson",
-    instructorAvatar: "/images/avatars/sarah.png",
-    instructorBio: "Senior Frontend Engineer at Meta. 10+ years of React experience and open-source contributor.",
-    category: "Frontend",
-    level: "intermediate",
-    duration: 24,
-    lessons: 156,
-    enrolled: 12547,
-    rating: 4.8,
-    tags: ["React", "JavaScript", "Frontend"],
-    progress: 65,
-    lastUpdated: "2025-06-15",
-    requirements: [
-      "Basic JavaScript knowledge (variables, functions, arrays)",
-      "Familiarity with HTML and CSS",
-      "A code editor (VS Code recommended)",
-      "Node.js 18+ installed on your machine",
-    ],
-    outcomes: [
-      "Build complex React applications from scratch",
-      "Master hooks, context, and state management patterns",
-      "Optimize performance with memoization and code splitting",
-      "Write unit and integration tests with React Testing Library",
-      "Deploy production apps to Vercel and AWS",
-    ],
-    modules: [
-      {
-        id: "m1",
-        title: "Getting Started with React",
-        lessons: [
-          { id: "l1", title: "Course Introduction", duration: 5, completed: true, preview: true },
-          { id: "l2", title: "Setting Up Your Environment", duration: 12, completed: true },
-          { id: "l3", title: "JSX Deep Dive", duration: 18, completed: true },
-          { id: "l4", title: "Your First Component", duration: 15, completed: true },
-        ],
-      },
-      {
-        id: "m2",
-        title: "Core Concepts",
-        lessons: [
-          { id: "l5", title: "Props and Data Flow", duration: 20, completed: true },
-          { id: "l6", title: "State and useState", duration: 22, completed: true },
-          { id: "l7", title: "Event Handling", duration: 14, completed: true },
-          { id: "l8", title: "Conditional Rendering", duration: 16, completed: true },
-          { id: "l9", title: "Lists and Keys", duration: 18, completed: true },
-        ],
-      },
-      {
-        id: "m3",
-        title: "Hooks in Depth",
-        lessons: [
-          { id: "l10", title: "useEffect and Side Effects", duration: 25, completed: true },
-          { id: "l11", title: "useRef and DOM Access", duration: 18, completed: true },
-          { id: "l12", title: "useContext for Global State", duration: 20 },
-          { id: "l13", title: "useReducer for Complex State", duration: 22 },
-          { id: "l14", title: "Custom Hooks", duration: 28 },
-        ],
-      },
-      {
-        id: "m4",
-        title: "Performance & Patterns",
-        lessons: [
-          { id: "l15", title: "React.memo and useMemo", duration: 20 },
-          { id: "l16", title: "useCallback and Avoiding Re-renders", duration: 18 },
-          { id: "l17", title: "Code Splitting with Suspense", duration: 22 },
-          { id: "l18", title: "Error Boundaries", duration: 15 },
-        ],
-      },
-      {
-        id: "m5",
-        title: "Testing & Deployment",
-        lessons: [
-          { id: "l19", title: "Unit Testing with Vitest", duration: 25 },
-          { id: "l20", title: "Integration Testing", duration: 20 },
-          { id: "l21", title: "Deploying to Vercel", duration: 12 },
-          { id: "l22", title: "Course Wrap-Up", duration: 8, preview: true },
-        ],
-      },
-    ],
-  },
-  "advanced-javascript-concepts": {
-    id: "2",
-    slug: "advanced-javascript-concepts",
-    title: "Advanced JavaScript Concepts",
-    description: "Deep dive into closures, prototypes, async programming, and modern ES6+ features.",
-    longDescription: "Go beyond the basics and truly understand how JavaScript works under the hood. This course covers execution context, the event loop, closures, prototypal inheritance, generators, proxies, and advanced async patterns. Perfect for developers who want to write cleaner, more efficient code.",
-    thumbnail: "/images/courses/advanced-js.png",
-    instructor: "Alex Rodriguez",
-    instructorAvatar: "/images/avatars/alex.png",
-    instructorBio: "JavaScript educator and author of 'JS Under the Hood'. Former engineer at Google.",
-    category: "Frontend",
-    level: "advanced",
-    duration: 16,
-    lessons: 89,
-    enrolled: 6754,
-    rating: 4.6,
-    tags: ["JavaScript", "Frontend"],
-    progress: 25,
-    lastUpdated: "2025-05-10",
-    requirements: [
-      "Solid understanding of JavaScript fundamentals",
-      "Experience building web applications",
-      "Familiarity with ES6 syntax",
-    ],
-    outcomes: [
-      "Understand execution context, scope chain, and closures deeply",
-      "Master prototypal inheritance and the class syntax",
-      "Handle complex async flows with generators and async iterators",
-      "Use Proxy and Reflect for meta-programming",
-    ],
-    modules: [
-      {
-        id: "m1",
-        title: "JavaScript Engine Internals",
-        lessons: [
-          { id: "l1", title: "How V8 Executes Your Code", duration: 20, completed: true, preview: true },
-          { id: "l2", title: "Execution Context & Call Stack", duration: 18, completed: true },
-          { id: "l3", title: "Scope Chain & Lexical Environment", duration: 22, completed: true },
-        ],
-      },
-      {
-        id: "m2",
-        title: "Closures & Prototypes",
-        lessons: [
-          { id: "l4", title: "Closures Explained", duration: 25, completed: true },
-          { id: "l5", title: "Practical Closure Patterns", duration: 20 },
-          { id: "l6", title: "Prototypal Inheritance", duration: 22 },
-          { id: "l7", title: "The Class Syntax", duration: 18 },
-        ],
-      },
-      {
-        id: "m3",
-        title: "Advanced Async",
-        lessons: [
-          { id: "l8", title: "The Event Loop Deep Dive", duration: 28 },
-          { id: "l9", title: "Generators & Iterators", duration: 24 },
-          { id: "l10", title: "Async Generators", duration: 20 },
-        ],
-      },
-    ],
-  },
-};
-
-/* fallback for any unrecognized slug */
-function getDefaultCourse(slug: string): Course {
-  return {
-    id: "0",
-    slug,
-    title: slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-    description: "Course details are loading...",
-    longDescription: "Detailed information about this course will be available soon. Check back later for full curriculum details, instructor information, and learning outcomes.",
-    thumbnail: "/images/courses/placeholder.svg",
-    instructor: "FutureHub Team",
-    instructorAvatar: "",
-    instructorBio: "The FutureHub education team.",
-    category: "General",
-    level: "beginner",
-    duration: 10,
-    lessons: 40,
-    enrolled: 1000,
-    rating: 4.5,
-    tags: [],
-    lastUpdated: "2025-01-01",
-    requirements: ["Basic programming knowledge"],
-    outcomes: ["Gain practical skills in the topic"],
-    modules: [
-      {
-        id: "m1",
-        title: "Introduction",
-        lessons: [
-          { id: "l1", title: "Welcome", duration: 5, preview: true },
-          { id: "l2", title: "Getting Started", duration: 10 },
-          { id: "l3", title: "Core Concepts", duration: 15 },
-        ],
-      },
-    ],
-  };
-}
+import {
+  coursesMap,
+  getDefaultCourse,
+  type Course,
+  type Level,
+} from "@/lib/data/courses";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
 const levelMeta: Record<Level, { label: string; color: string }> = {
-  beginner:     { label: "Beginner",     color: "bg-green-500/10 text-green-600 border-green-500/20" },
-  intermediate: { label: "Intermediate", color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20" },
-  advanced:     { label: "Advanced",     color: "bg-red-500/10 text-red-600 border-red-500/20" },
+  beginner: {
+    label: "Beginner",
+    color: "bg-green-500/10 text-green-600 border-green-500/20",
+  },
+  intermediate: {
+    label: "Intermediate",
+    color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  },
+  advanced: {
+    label: "Advanced",
+    color: "bg-red-500/10 text-red-600 border-red-500/20",
+  },
 };
 
 function formatNumber(n: number) {
@@ -361,12 +141,16 @@ export default function CourseDetailPage() {
 
   const isEnrolled = course.progress !== undefined;
   const meta = levelMeta[course.level];
-  const totalLessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
+  const totalLessons = course.modules.reduce(
+    (sum, m) => sum + m.lessons.length,
+    0,
+  );
   const completedLessons = course.modules.reduce(
     (sum, m) => sum + m.lessons.filter((l) => l.completed).length,
     0,
   );
-  const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const progressPercent =
+    totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
     <div className="min-h-screen pb-16 -mx-4 lg:-mx-8">
@@ -381,9 +165,16 @@ export default function CourseDetailPage() {
             </Button>
             <h1 className="text-base font-semibold truncate">{course.title}</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleShare} className="shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleShare}
+            className="shrink-0"
+          >
             <Share2 className="h-4 w-4 mr-1.5" />
-            {copied ? (t("learn.copied") || "Copied!") : (t("learn.share") || "Share")}
+            {copied
+              ? t("learn.copied") || "Copied!"
+              : t("learn.share") || "Share"}
           </Button>
         </div>
       </div>
@@ -404,10 +195,16 @@ export default function CourseDetailPage() {
             />
             {/* Overlay badges */}
             <div className="absolute top-3 left-3 flex items-center gap-2">
-              <Badge variant="outline" className={`text-xs font-semibold bg-background/80 backdrop-blur-sm ${meta.color}`}>
+              <Badge
+                variant="outline"
+                className={`text-xs font-semibold bg-background/80 backdrop-blur-sm ${meta.color}`}
+              >
                 {meta.label}
               </Badge>
-              <Badge variant="outline" className="text-xs bg-background/80 backdrop-blur-sm">
+              <Badge
+                variant="outline"
+                className="text-xs bg-background/80 backdrop-blur-sm"
+              >
                 {course.category}
               </Badge>
             </div>
@@ -419,7 +216,10 @@ export default function CourseDetailPage() {
             {/* Progress at bottom */}
             {isEnrolled && (
               <div className="absolute bottom-0 left-0 right-0 h-2 bg-black/20">
-                <div className="h-full bg-primary transition-all" style={{ width: `${progressPercent}%` }} />
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             )}
           </div>
@@ -427,8 +227,12 @@ export default function CourseDetailPage() {
           {/* Info Panel */}
           <Card className="p-5 space-y-4 h-fit">
             <div>
-              <h2 className="text-lg font-bold leading-tight">{course.title}</h2>
-              <p className="text-sm text-muted-foreground mt-1.5">{course.description}</p>
+              <h2 className="text-lg font-bold leading-tight">
+                {course.title}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1.5">
+                {course.description}
+              </p>
             </div>
 
             <Separator />
@@ -437,19 +241,28 @@ export default function CourseDetailPage() {
             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4 shrink-0" />
-                <span>{course.duration}h {t("learn.totalDuration") || "total"}</span>
+                <span>
+                  {course.duration}h {t("learn.totalDuration") || "total"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <BookOpen className="h-4 w-4 shrink-0" />
-                <span>{course.lessons} {t("learn.lessons") || "lessons"}</span>
+                <span>
+                  {course.lessons} {t("learn.lessons") || "lessons"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Users className="h-4 w-4 shrink-0" />
-                <span>{formatNumber(course.enrolled)} {t("learn.enrolled") || "enrolled"}</span>
+                <span>
+                  {formatNumber(course.enrolled)}{" "}
+                  {t("learn.enrolled") || "enrolled"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Star className="h-4 w-4 shrink-0" />
-                <span>{course.rating} {t("learn.rating") || "rating"}</span>
+                <span>
+                  {course.rating} {t("learn.rating") || "rating"}
+                </span>
               </div>
             </div>
 
@@ -473,8 +286,12 @@ export default function CourseDetailPage() {
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{course.instructor}</p>
-                <p className="text-xs text-muted-foreground line-clamp-1">{course.instructorBio}</p>
+                <p className="text-sm font-semibold truncate">
+                  {course.instructor}
+                </p>
+                <p className="text-xs text-muted-foreground line-clamp-1">
+                  {course.instructorBio}
+                </p>
               </div>
             </div>
 
@@ -484,7 +301,9 @@ export default function CourseDetailPage() {
             {isEnrolled ? (
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("learn.progress") || "Progress"}</span>
+                  <span className="text-muted-foreground">
+                    {t("learn.progress") || "Progress"}
+                  </span>
                   <span className="font-semibold">{progressPercent}%</span>
                 </div>
                 <Progress value={progressPercent} className="h-2" />
@@ -504,7 +323,11 @@ export default function CourseDetailPage() {
             {course.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {course.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs rounded-full">
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="text-xs rounded-full"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -528,7 +351,9 @@ export default function CourseDetailPage() {
           {/* Curriculum */}
           <TabsContent value="curriculum" className="mt-6 space-y-4">
             {course.modules.map((mod, mi) => {
-              const modCompleted = mod.lessons.filter((l) => l.completed).length;
+              const modCompleted = mod.lessons.filter(
+                (l) => l.completed,
+              ).length;
               const modTotal = mod.lessons.length;
               return (
                 <Card key={mod.id} className="overflow-hidden">
@@ -537,14 +362,16 @@ export default function CourseDetailPage() {
                       <span className="text-xs font-bold text-muted-foreground w-6 text-center">
                         {String(mi + 1).padStart(2, "0")}
                       </span>
-                      <h3 className="text-sm font-semibold truncate">{mod.title}</h3>
+                      <h3 className="text-sm font-semibold truncate">
+                        {mod.title}
+                      </h3>
                     </div>
                     <span className="text-xs text-muted-foreground shrink-0">
                       {modCompleted}/{modTotal}
                     </span>
                   </div>
                   <ul className="divide-y divide-border">
-                    {mod.lessons.map((lesson, li) => (
+                    {mod.lessons.map((lesson) => (
                       <li
                         key={lesson.id}
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/20 transition-colors"
@@ -554,11 +381,16 @@ export default function CourseDetailPage() {
                         ) : (
                           <span className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
                         )}
-                        <span className={`flex-1 text-sm truncate ${lesson.completed ? "text-muted-foreground" : ""}`}>
+                        <span
+                          className={`flex-1 text-sm truncate ${lesson.completed ? "text-muted-foreground" : ""}`}
+                        >
                           {lesson.title}
                         </span>
                         {lesson.preview && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0"
+                          >
                             {t("learn.preview") || "Preview"}
                           </Badge>
                         )}
@@ -577,7 +409,9 @@ export default function CourseDetailPage() {
           <TabsContent value="overview" className="mt-6 space-y-8">
             {/* About */}
             <section className="space-y-3">
-              <h3 className="text-base font-bold">{t("learn.aboutCourse") || "About this course"}</h3>
+              <h3 className="text-base font-bold">
+                {t("learn.aboutCourse") || "About this course"}
+              </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {course.longDescription}
               </p>
@@ -585,7 +419,9 @@ export default function CourseDetailPage() {
 
             {/* Outcomes */}
             <section className="space-y-3">
-              <h3 className="text-base font-bold">{t("learn.whatYouWillLearn") || "What you will learn"}</h3>
+              <h3 className="text-base font-bold">
+                {t("learn.whatYouWillLearn") || "What you will learn"}
+              </h3>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {course.outcomes.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm">
@@ -598,10 +434,15 @@ export default function CourseDetailPage() {
 
             {/* Requirements */}
             <section className="space-y-3">
-              <h3 className="text-base font-bold">{t("learn.requirements") || "Requirements"}</h3>
+              <h3 className="text-base font-bold">
+                {t("learn.requirements") || "Requirements"}
+              </h3>
               <ul className="space-y-1.5">
                 {course.requirements.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                  >
                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
                     <span>{item}</span>
                   </li>

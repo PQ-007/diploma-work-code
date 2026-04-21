@@ -3,19 +3,11 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import {
-  ChessBishop,
-  ChessKing,
-  ChessKnight,
-  ChessQueen,
-  ChessPawn,
-  ChessRook,
-  Plus,
-  Check,
-} from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import Link from "next/link";
+import { getRankIcon } from "@/lib/utils/rankIcons";
 
 type Props = {
   author: {
@@ -26,32 +18,31 @@ type Props = {
     bio: string;
     followersCount?: number;
   };
-  isOwnArticle?: boolean;
-  editHref?: string;
 };
 
-const getRankIcon = (rank: number) => {
-  if (rank >= 2500) return <ChessKing className="h-3.5 w-3.5 text-red-500" />;
-  if (rank >= 2000)
-    return <ChessQueen className="h-3.5 w-3.5 text-orange-500" />;
-  if (rank >= 1600)
-    return <ChessRook className="h-3.5 w-3.5 text-purple-500" />;
-  if (rank >= 1200)
-    return <ChessBishop className="h-3.5 w-3.5 text-blue-500" />;
-  if (rank >= 800)
-    return <ChessKnight className="h-3.5 w-3.5 text-green-500" />;
-  return <ChessPawn className="h-3.5 w-3.5 text-muted-foreground" />;
-};
-
-export default function MinimalAuthorBox({
-  author,
-  isOwnArticle = false,
-  editHref,
-}: Props) {
-  const { t } = useLanguage();
+export default function MinimalAuthorBox({ author }: Props) {
+  const { user } = useAuth();
   const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
   const rankingPoints = author.ranking; // normalize missing ranking
   const [isFollowing, setIsFollowing] = useState(false);
+  const currentUsername =
+    typeof user?.user_metadata?.username === "string"
+      ? user.user_metadata.username
+      : typeof user?.user_metadata?.user_name === "string"
+        ? user.user_metadata.user_name
+        : "";
+  const normalizedCurrentUsername = currentUsername
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  const normalizedAuthorUsername = (author.username || "")
+    .trim()
+    .replace(/^@/, "")
+    .toLowerCase();
+  const isSelf =
+    normalizedCurrentUsername.length > 0 &&
+    normalizedCurrentUsername === normalizedAuthorUsername;
+
   const handleFollowToggle = () => {
     setIsFollowing((prev) => !prev);
   };
@@ -81,7 +72,7 @@ export default function MinimalAuthorBox({
               >
                 {author.displayName || author.username}
               </Link>
-              {getRankIcon(rankingPoints)}
+              {getRankIcon(rankingPoints, 3.5)}
             </div>
 
             <div className="flex items-center gap-1 mt-1">
@@ -95,16 +86,7 @@ export default function MinimalAuthorBox({
           </div>
         </div>
 
-        {isOwnArticle ? (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-full px-3 text-[11px] font-bold"
-          >
-            <Link href={editHref || "#"}>{t("common.edit")}</Link>
-          </Button>
-        ) : (
+        {!isSelf && (
           <Button
             onClick={handleFollowToggle}
             variant={isFollowing ? "outline" : "secondary"}

@@ -7,7 +7,7 @@ import {
 } from "@/lib/types/content";
 import { AuthorRow } from "./shared/AuthorRow";
 import { InteractionButtons } from "./shared/InteractionButtons";
-import { Pin, CheckCircle2, FileText } from "lucide-react";
+import { Pin, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 interface ContentCardProps {
@@ -91,13 +91,17 @@ export function ContentCard({
     content.type === "discussion" && (content as DiscussionContent).pinned;
   const isAnswered =
     content.type === "discussion" && (content as DiscussionContent).answered;
+  const isDiscussion = content.type === "discussion";
 
   return (
     <article className={`group relative ${className}`}>
       <Card
-        className={`border-border/40 p-4 transition-all duration-300 hover:shadow-md ${
+        className={`relative border-border/40 p-4 transition-all duration-300 hover:shadow-md ${
           isPinned ? "border-foreground/20 bg-muted/20" : ""
-        }`}
+        } ${isDiscussion && onClick ? "cursor-pointer" : ""}`}
+        onClick={() => {
+          if (isDiscussion && onClick) onClick();
+        }}
       >
         <div className="space-y-3">
           {/* Badges for special states */}
@@ -133,6 +137,7 @@ export function ContentCard({
             onClick={(e) => {
               if (onClick) {
                 e.preventDefault();
+                e.stopPropagation();
                 onClick();
               }
             }}
@@ -155,40 +160,82 @@ export function ContentCard({
               )}
           </Link>
 
-          {/* Tags */}
-          {content.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {content.tags.slice(0, 4).map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="px-2 py-0.5 text-xs font-normal border border-border/40"
-                >
-                  {tag}
-                </Badge>
-              ))}
-              {content.tags.length > 4 && (
-                <Badge
-                  variant="secondary"
-                  className="px-2 py-0.5 text-xs font-normal border border-border/40 text-muted-foreground"
-                >
-                  +{content.tags.length - 4} more
-                </Badge>
+          {isDiscussion ? (
+            <>
+              {/* Tags */}
+              {content.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {content.tags.slice(0, 4).map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="px-2 py-0.5 text-xs font-normal border border-border/40"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                  {content.tags.length > 4 && (
+                    <Badge
+                      variant="secondary"
+                      className="px-2 py-0.5 text-xs font-normal border border-border/40 text-muted-foreground"
+                    >
+                      +{content.tags.length - 4} more
+                    </Badge>
+                  )}
+                </div>
               )}
+
+              {/* Interactions */}
+              <InteractionButtons
+                contentType={content.type}
+                stats={stats}
+                interactions={interactions}
+                onLike={onLike}
+                onBookmark={onBookmark}
+                onVote={onVote}
+                onComment={onComment}
+                disabled={disabled}
+              />
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="min-w-0 flex items-center gap-2 overflow-hidden">
+                {content.tags.length > 0 && (
+                  <div className="flex items-center gap-1.5 overflow-hidden">
+                    {content.tags.slice(0, 4).map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="px-2 py-0.5 text-xs font-normal border border-border/40 shrink-0"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                    {content.tags.length > 4 && (
+                      <Badge
+                        variant="secondary"
+                        className="px-2 py-0.5 text-xs font-normal border border-border/40 text-muted-foreground shrink-0"
+                      >
+                        +{content.tags.length - 4} more
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <InteractionButtons
+                contentType={content.type}
+                stats={stats}
+                interactions={interactions}
+                onLike={onLike}
+                onBookmark={onBookmark}
+                onVote={onVote}
+                onComment={onComment}
+                disabled={disabled}
+                showStats
+              />
             </div>
           )}
-
-          {/* Interactions */}
-          <InteractionButtons
-            contentType={content.type}
-            stats={stats}
-            interactions={interactions}
-            onLike={onLike}
-            onBookmark={onBookmark}
-            onVote={onVote}
-            onComment={onComment}
-            disabled={disabled}
-          />
         </div>
       </Card>
     </article>

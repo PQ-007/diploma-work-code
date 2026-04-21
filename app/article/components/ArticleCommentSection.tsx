@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   CornerDownRight,
   Loader2,
-  MessageCircle,
+  MessageSquare,
   Send,
   Trash2,
 } from "lucide-react";
@@ -252,7 +252,7 @@ const ArticleCommentSection = forwardRef<
       <Card className="bg-card/50 border-border/60 shadow-sm">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-5">
-            <MessageCircle className="h-5 w-5 text-muted-foreground" />
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               {t("articles.detail.comments.title", { count: comments.length })}
             </span>

@@ -26,7 +26,6 @@ export async function GET(req: NextRequest) {
         .eq("author_id", user.id)
         .order("created_at", { ascending: false });
 
-      // Apply status filter if specified
       if (statusFilter === "draft") {
         articlesQuery = articlesQuery.eq("status", "draft");
       }
@@ -156,6 +155,66 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // ── Flashcard Decks (show decks, not individual cards) ──
+    if (type === "all" || type === "flashcards") {
+      const { data: decks } = await supabase
+        .from("decks")
+        .select("id, name, slug, description, is_public, cloned_from_deck_id, created_at, updated_at")
+        .eq("owner_id", user.id)
+        .order("updated_at", { ascending: false });
+
+      if (decks?.length) {
+        // Fetch card counts per deck
+        const deckIds = decks.map((d) => d.id);
+        const { data: cardCounts } = await supabase
+          .from("flashcards")
+          .select("deck_id")
+          .in("deck_id", deckIds);
+
+        const countMap = new Map<number, number>();
+        (cardCounts || []).forEach((c) => {
+          countMap.set(c.deck_id, (countMap.get(c.deck_id) ?? 0) + 1);
+        });
+
+        // Fetch first 3 card fronts per deck for preview
+        const { data: previewCards } = await supabase
+          .from("flashcards")
+          .select("deck_id, front, back")
+          .in("deck_id", deckIds)
+          .order("created_at", { ascending: true });
+
+        const previewMap = new Map<number, Array<{ front: string; back: string }>>();
+        (previewCards || []).forEach((c) => {
+          const arr = previewMap.get(c.deck_id) ?? [];
+          if (arr.length < 3) {
+            arr.push({ front: c.front, back: c.back });
+            previewMap.set(c.deck_id, arr);
+          }
+        });
+
+        for (const deck of decks) {
+          const cardCount = countMap.get(deck.id) ?? 0;
+          const previews = previewMap.get(deck.id) ?? [];
+          const previewText = previews.map((p) => p.front).join(" · ") || deck.description || "";
+
+          items.push({
+            id: `deck-${deck.id}`,
+            type: "deck",
+            title: deck.name,
+            body: deck.description || "",
+            preview: previewText.slice(0, 200),
+            tags: [],
+            createdAt: deck.updated_at,
+            editUrl: `/flashcards/${encodeURIComponent(deck.slug)}`,
+            status: deck.is_public ? "public" : "private",
+            cardCount,
+            deckSlug: deck.slug,
+            cardPreviews: previews,
+          });
+        }
+      }
+    }
+
     // Sort all items by creation date (newest first)
     items.sort(
       (a, b) =>
@@ -189,7 +248,6 @@ export async function DELETE(req: NextRequest) {
     }
 
     if (type === "article") {
-      // Verify ownership
       const { data: article } = await supabase
         .from("articles")
         .select("id, author_id")
@@ -216,6 +274,25 @@ export async function DELETE(req: NextRequest) {
 
       await supabase.from("discussion_tags").delete().eq("discussion_id", id);
       await supabase.from("discussions").delete().eq("id", id);
+    } else if (type === "deck") {
+      // id is in format "deck-{numericId}"
+      const deckId = Number(id.replace("deck-", ""));
+      if (!Number.isFinite(deckId)) {
+        return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+      }
+
+      const { data: deck } = await supabase
+        .from("decks")
+        .select("id, owner_id")
+        .eq("id", deckId)
+        .single();
+
+      if (!deck || deck.owner_id !== user.id) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+
+      // Cards cascade via FK ON DELETE CASCADE
+      await supabase.from("decks").delete().eq("id", deckId);
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
@@ -225,11 +302,11 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-// ── Helpers ──
+// ── Types ──
 
 interface LibraryItem {
   id: string;
-  type: "article" | "question" | "project" | "flashcard";
+  type: "article" | "question" | "project" | "deck";
   title: string;
   body: string;
   preview: string;
@@ -237,6 +314,10 @@ interface LibraryItem {
   createdAt: string;
   editUrl: string;
   status?: string;
+  // deck-specific
+  cardCount?: number;
+  deckSlug?: string;
+  cardPreviews?: Array<{ front: string; back: string }>;
 }
 
 function stripToPreview(markdown: string): string {

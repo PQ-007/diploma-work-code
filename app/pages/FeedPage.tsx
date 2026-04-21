@@ -51,8 +51,34 @@ type FeedEntry =
   | { kind: "discussion"; data: DiscussionItemData; sortKey: string }
   | { kind: "poll"; data: PollData; sortKey: string };
 
+type ArticleApiItem = {
+  article_id: string;
+  title: string;
+  sub_title?: string | null;
+  published_at?: string | null;
+  tags?: string[];
+  author?: {
+    display_name?: string | null;
+    user_name?: string | null;
+    avatar_url?: string | null;
+    ranking_point?: number | null;
+  } | null;
+};
+
+type ArticlesResponse = {
+  items?: ArticleApiItem[];
+};
+
+type DiscussionsResponse = {
+  items?: DiscussionItemData[];
+};
+
+type PollsResponse = {
+  polls?: PollData[];
+};
+
 // --- Helpers ---
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
@@ -87,7 +113,7 @@ function PollCard({
         </Avatar>
         <span className="text-sm font-medium truncate flex items-center gap-1">
           {poll.author.display_name}
-          {getRankIcon(poll.author.ranking_point || 0)}
+          {getRankIcon(poll.author.ranking_point || 0, 3.5)}
         </span>
         <span className="text-xs text-muted-foreground ml-auto">
           {formatDate(poll.created_at)}
@@ -157,6 +183,37 @@ function PollCard({
   );
 }
 
+function FeedItemSkeleton() {
+  return (
+    <Card className="overflow-hidden border-border/40 p-3.5 h-[190px] flex flex-col justify-between space-y-3">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-7 w-7 rounded-full" />
+        <div className="space-y-1.5">
+          <Skeleton className="h-3.5 w-28 rounded" />
+          <Skeleton className="h-3 w-36 rounded" />
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Skeleton className="h-5 w-4/5 rounded" />
+        <Skeleton className="h-3.5 w-full rounded" />
+        <Skeleton className="h-3.5 w-4/5 rounded" />
+      </div>
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex gap-1.5">
+          <Skeleton className="h-5 w-12 rounded-full" />
+          <Skeleton className="h-5 w-10 rounded-full" />
+          <Skeleton className="h-5 w-14 rounded-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-4 w-10 rounded" />
+          <Skeleton className="h-4 w-10 rounded" />
+          <Skeleton className="h-6 w-6 rounded" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function FeedPage() {
   const { t } = useLanguage();
 
@@ -182,7 +239,11 @@ export default function FeedPage() {
           fetch("/api/polls"),
         ]);
 
-        const [articlesData, discussionsData, pollsData] = await Promise.all([
+        const [articlesData, discussionsData, pollsData]: [
+          ArticlesResponse,
+          DiscussionsResponse,
+          PollsResponse,
+        ] = await Promise.all([
           articlesRes.json(),
           discussionsRes.json(),
           pollsRes.json(),
@@ -191,7 +252,7 @@ export default function FeedPage() {
         const entries: FeedEntry[] = [];
 
         // Convert articles → ListItemData
-        (articlesData.items ?? []).forEach((a: any) => {
+        (articlesData.items ?? []).forEach((a) => {
           const item: ListItemData = {
             id: a.article_id,
             type: "blog",
@@ -219,19 +280,19 @@ export default function FeedPage() {
         });
 
         // Add discussions directly (already match DiscussionItemData shape)
-        (discussionsData.items ?? []).forEach((d: any) => {
+        (discussionsData.items ?? []).forEach((d) => {
           entries.push({
             kind: "discussion",
-            data: d as DiscussionItemData,
+            data: d,
             sortKey: d.created_at ?? "",
           });
         });
 
         // Add polls
-        (pollsData.polls ?? []).forEach((p: any) => {
+        (pollsData.polls ?? []).forEach((p) => {
           entries.push({
             kind: "poll",
-            data: p as PollData,
+            data: p,
             sortKey: p.created_at ?? "",
           });
         });
@@ -252,7 +313,11 @@ export default function FeedPage() {
   const toggleLike = useCallback((id: string) => {
     setLikedItems((prev) => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) {
+        s.delete(id);
+      } else {
+        s.add(id);
+      }
       return s;
     });
   }, []);
@@ -260,7 +325,11 @@ export default function FeedPage() {
   const toggleBookmark = useCallback((id: string) => {
     setBookmarkedItems((prev) => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) {
+        s.delete(id);
+      } else {
+        s.add(id);
+      }
       return s;
     });
   }, []);
@@ -390,9 +459,10 @@ export default function FeedPage() {
 
             {loading ? (
               <div className="space-y-4 mt-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-40 rounded-xl" />
-                ))}
+                <FeedItemSkeleton />
+                <FeedItemSkeleton />
+                <FeedItemSkeleton />
+                <FeedItemSkeleton />
               </div>
             ) : (
               <div className="space-y-4 mt-4">
