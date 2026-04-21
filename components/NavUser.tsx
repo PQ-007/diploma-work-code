@@ -125,7 +125,7 @@ export function NavUser() {
   // Use only profile data
   const userName = profileData?.user_name || "User";
   const displayName = profileData?.display_name || "User";
-  const displayAvatar = profileData?.avatar_url || null;
+  const displayAvatar = profileData?.avatar_url ?? undefined;
   const displayEmail = profileData?.email || "";
 
   const handleSignOut = async () => {

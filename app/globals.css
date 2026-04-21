@@ -243,10 +243,10 @@ select,
 
 /* Japanese fonts */
 .font-jp {
-  font-family: var(--font-noto-sans-jp), "Noto Sans JP", "Inter", sans-serif;
+  font-family: var(--font-noto-sans-jp, "Noto Sans JP"), "Inter", sans-serif;
 }
 .font-jp-serif {
-  font-family: var(--font-noto-serif-jp), "Noto Serif JP", "Georgia", serif;
+  font-family: var(--font-noto-serif-jp, "Noto Serif JP"), "Georgia", serif;
 }
 
 /* 3-D flip card */
@@ -312,7 +312,9 @@ select,
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
   white-space: nowrap;
   background: none;
   border-top: none;

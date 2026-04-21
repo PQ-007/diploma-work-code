@@ -17,16 +17,30 @@ import {
  * - Bishop:  1500-3499
  * - Pawn:    0-1499
  */
-export const getRankIcon = (rankingPoints: number, size: number) => {
+export const getRankIcon = (rankingPoints: number, size: number = 4) => {
   if (rankingPoints >= 10000)
-    return <ChessKing className={`h-${size} w-${size} shrink-0 text-red-500`} />;
+    return (
+      <ChessKing className={`h-${size} w-${size} shrink-0 text-red-500`} />
+    );
   if (rankingPoints >= 8000)
-    return <ChessQueen className={`h-${size} w-${size} shrink-0 text-orange-500`} />;
+    return (
+      <ChessQueen className={`h-${size} w-${size} shrink-0 text-orange-500`} />
+    );
   if (rankingPoints >= 6000)
-    return <ChessRook className={`h-${size} w-${size} shrink-0 text-purple-500`} />;
+    return (
+      <ChessRook className={`h-${size} w-${size} shrink-0 text-purple-500`} />
+    );
   if (rankingPoints >= 3500)
-    return <ChessKnight className={`h-${size} w-${size} shrink-0 text-green-500`} />;
+    return (
+      <ChessKnight className={`h-${size} w-${size} shrink-0 text-green-500`} />
+    );
   if (rankingPoints >= 1500)
-    return <ChessBishop className={`h-${size} w-${size} shrink-0 text-blue-500`}   />;
-  return <ChessPawn className={`h-${size} w-${size} shrink-0 text-muted-foreground`} />;
+    return (
+      <ChessBishop className={`h-${size} w-${size} shrink-0 text-blue-500`} />
+    );
+  return (
+    <ChessPawn
+      className={`h-${size} w-${size} shrink-0 text-muted-foreground`}
+    />
+  );
 };
