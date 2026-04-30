@@ -165,7 +165,7 @@ export const components = {
     <strong className="font-semibold text-blue-500" {...props} />
   ),
   // Enhanced emphasis
-  em: (props: any) => <em className="italic text-blue-300 " {...props} />,
+  em: (props: any) => <em className="italic " {...props} />,
 };
 
 export function CustomMDX(props: any) {
