@@ -961,5 +961,20 @@
     "imageUploadedNowRegister": "Image uploaded. Click Add file to register metadata.",
     "confirmDeleteFile": "Delete this file?",
     "noFilesYet": "No files added yet."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your preferences and account",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_system": "System",
+    "language": "Language",
+    "languageChanged": "Language updated",
+    "account": "Account",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "signedInAs": "Signed in as"
   }
 }

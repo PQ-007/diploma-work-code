@@ -946,5 +946,20 @@
     "imageUploadedNowRegister": "Зураг байршлаа. Одоо Add товчоор файлын мета өгөгдлийг бүртгэнэ үү.",
     "confirmDeleteFile": "Энэ файлыг устгах уу?",
     "noFilesYet": "Одоогоор файл алга."
+  },
+  "settings": {
+    "title": "Тохиргоо",
+    "subtitle": "Тохиргоо болон бүртгэлээ удирдах",
+    "appearance": "Харагдах байдал",
+    "theme": "Загвар",
+    "theme_light": "Цайвар",
+    "theme_dark": "Харанхуй",
+    "theme_system": "Системийн",
+    "language": "Хэл",
+    "languageChanged": "Хэл өөрчлөгдлөө",
+    "account": "Бүртгэл",
+    "editProfile": "Профайл засах",
+    "changePassword": "Нууц үг өөрчлөх",
+    "signedInAs": "Нэвтэрсэн хэрэглэгч"
   }
 }

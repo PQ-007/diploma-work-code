@@ -247,7 +247,6 @@ export async function POST(req: NextRequest) {
         category: category?.trim() || null,
         type: projectType,
         difficulty,
-        technologies,
         repository_url: repository_url?.trim() || null,
         demo_url: demo_url?.trim() || null,
         thumbnail_url: thumbnail_url?.trim() || null,

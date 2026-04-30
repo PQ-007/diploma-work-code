@@ -959,5 +959,20 @@
     "imageUploadedNowRegister": "画像をアップロードしました。Addを押してメタデータを登録してください。",
     "confirmDeleteFile": "このファイルを削除しますか？",
     "noFilesYet": "まだファイルがありません。"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "設定とアカウントを管理する",
+    "appearance": "外観",
+    "theme": "テーマ",
+    "theme_light": "ライト",
+    "theme_dark": "ダーク",
+    "theme_system": "システム",
+    "language": "言語",
+    "languageChanged": "言語を変更しました",
+    "account": "アカウント",
+    "editProfile": "プロフィール編集",
+    "changePassword": "パスワード変更",
+    "signedInAs": "ログイン中"
   }
 }

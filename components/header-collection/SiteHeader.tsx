@@ -172,6 +172,8 @@ export function SiteHeader() {
               </>
             ) : (
               <>
+                <ThemeToggleButton />
+                <LanguageToggleButton />
                 <Button
                   variant="outline"
                   size="sm"
