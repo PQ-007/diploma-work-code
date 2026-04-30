@@ -70,7 +70,7 @@ export default function ProjectPage() {
   const { t } = useLanguage();
 
   const [projects, setProjects] = useState<ProjectPayload[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"public" | "my">("public");

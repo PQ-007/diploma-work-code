@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Pencil, BarChart3, MessageSquare } from "lucide-react";
+import { Pencil, MessageSquare } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PollCreateDialog from "./PollCreateDialog";
 import DiscussionCreateDialog from "./DiscussionCreateDialog";
@@ -24,16 +24,6 @@ export default function PostCreationBox() {
         >
           <Pencil className="h-4 w-4" />
           {t("feed.postBox.post")}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs font-medium"
-          onClick={() => setPollOpen(true)}
-        >
-          <BarChart3 className="h-4 w-4" />
-          {t("feed.postBox.poll")}
         </Button>
 
         <Button

@@ -188,15 +188,31 @@ export async function POST(req: NextRequest) {
       title,
       body,
       tags = [],
+      type = "question",
+      poll_options = [],
     } = (await req.json()) as {
       title?: string;
       body?: string;
       tags?: string[];
+      type?: "question" | "poll";
+      poll_options?: string[];
     };
 
     if (!title?.trim()) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
+
+    if (type === "poll" && poll_options.filter((o) => o.trim()).length < 2) {
+      return NextResponse.json(
+        { error: "Poll requires at least 2 options" },
+        { status: 400 },
+      );
+    }
+
+    const bodyContent =
+      type === "poll"
+        ? JSON.stringify({ options: poll_options.filter((o) => o.trim()) })
+        : (body || "").trim();
 
     // Insert discussion
     const { data: disc, error: discError } = await supabase
@@ -204,7 +220,8 @@ export async function POST(req: NextRequest) {
       .insert({
         author_id: user.id,
         title: title.trim(),
-        body: (body || "").trim(),
+        body: bodyContent,
+        ...(type === "poll" ? { type: "poll" } : { type: "question" }),
       })
       .select("id")
       .single();

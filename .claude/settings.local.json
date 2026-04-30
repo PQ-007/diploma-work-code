@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(npm i *)",
-      "Bash(node -e \"console.log\\(require\\('smol-toml'\\).parse\\('a=1'\\)\\)\")"
+      "Bash(node -e \"console.log\\(require\\('smol-toml'\\).parse\\('a=1'\\)\\)\")",
+      "Bash(npm --version)"
     ]
   }
 }

@@ -45,8 +45,8 @@
     "saveChanges": "Өөрчлөлтийг хадгалах",
     "untitled": "Гарчиггүй"
   },
-
   "sidebar": {
+    "flashcards": "Флаш карт",
     "competitions": "Тэмцээн",
     "learn": "Сурах",
     "articles": "Нийтлэл",
@@ -90,7 +90,6 @@
     "upgrade": "Төлөвлөгөөг шинэчлэх",
     "logout": "Гарах"
   },
-
   "navigation": {
     "dashboard": "Хянах самбар",
     "competitions": "Тэмцээн",
@@ -102,7 +101,6 @@
     "profile": "Профайл",
     "settings": "Тохиргоо"
   },
-
   "dashboard": {
     "welcomeBack": "Тавтай морилно уу, {{name}}!",
     "overview": "Ерөнхий тойм",
@@ -136,7 +134,6 @@
     "endingSoon": "2 удахгүй дуусна",
     "todayChange": "Өнөөдөр +15"
   },
-
   "projects": {
     "title": "Төслүүд",
     "description": "Төслүүдээ удирдах, нийтлэх",
@@ -150,7 +147,6 @@
     "contributors": "Оролцогчид",
     "lastUpdated": "Сүүлд шинэчлэгдсэн"
   },
-
   "blogs": {
     "title": "Блогын нийтлэл",
     "description": "Мэдлэг, ойлголтоо хуваалцах",
@@ -160,7 +156,6 @@
     "category": "Ангилал",
     "tags": "Шошгууд"
   },
-
   "flashcards": {
     "title": "Флаш картууд",
     "description": "Завсарлагатай давталтаар сурах",
@@ -209,7 +204,6 @@
     "organizeDescription": "Өөрийн картуудыг багц болгон зохион байгуулаарай. Нийтийн горимоор хуваалцаарай.",
     "preview": "Урьдчилан үзэх"
   },
-
   "competitions": {
     "title": "Тэмцээнүүд",
     "subtitle": "Бодлого бодож, тэмцээнд оролцож шагнал хожоорой.",
@@ -237,7 +231,6 @@
       "pastResults": "Өнгөрсөн үр дүн"
     }
   },
-
   "profile": {
     "title": "Профайл",
     "bio": "Намтар",
@@ -289,7 +282,6 @@
       "networkError": "Сүлжээний алдаа - дахин оролдоно уу"
     }
   },
-
   "auth": {
     "signIn": "Нэвтрэх",
     "signUp": "Бүртгүүлэх",
@@ -335,10 +327,8 @@
     "languageChanged": "Хэл солигдсон",
     "languageChangedDesc": "Хэлийг {{lang}} руу солисон."
   },
-
   "feed": {
     "title": "Таны мэдээ",
-
     "tabs": {
       "all": "Бүгд",
       "projects": "Төслүүд",
@@ -379,7 +369,6 @@
       "discussion": "Асуулт асуух"
     }
   },
-
   "ranking": {
     "topRated": "Тэргүүлэгчид (оюутнууд)",
     "topContributors": "Тэргүүлэгчид (бусад)",
@@ -391,7 +380,6 @@
     "thisWeek": "Энэ долоо хоног",
     "rank": "Ранк"
   },
-
   "nav_user": {
     "profile": "Профайл",
     "library": "Миний сан",
@@ -400,7 +388,6 @@
     "language": "Хэл",
     "logout": "Гарах"
   },
-
   "create_button": {
     "create": "Үүсгэх",
     "project": "Төсөл",
@@ -414,7 +401,6 @@
     "discussions": "Асуулт",
     "discussions_disc": "Шинэ асуулт үүсгэх"
   },
-
   "articles": {
     "title": "Нийтлэлүүд",
     "subtitle": "Сонирхолтой нийтлэлүүдийг уншиж, бичээрэй",
@@ -565,7 +551,6 @@
       }
     }
   },
-
   "discussions": {
     "title": "Хэлэлцүүлэг",
     "subtitle": "Асуулт асуух, санаа хуваалцах",
@@ -582,10 +567,32 @@
       "general": "Ерөнхий",
       "unanswered": "Хариулаагүй",
       "ideas": "Санаа"
+    },
+    "create": {
+      "tabs": {
+        "question": "Асуулт",
+        "poll": "Санал асуулга"
+      },
+      "titleQuestion": "Шинэ асуулт",
+      "titlePoll": "Шинэ санал асуулга",
+      "titlePlaceholder": "Гарчиг",
+      "bodyPlaceholder": "Асуултаа тайлбарлана уу... (заавал биш)",
+      "tagPlaceholder": "Таг нэмэх",
+      "addTag": "Нэмэх",
+      "cancel": "Болих",
+      "postQuestion": "Асуулт нийтлэх",
+      "postPoll": "Санал асуулга нийтлэх",
+      "pollOptions": "Сонголтууд",
+      "optionPlaceholder": "{{n}}-р сонголт",
+      "addOption": "Сонголт нэмэх",
+      "pollQuestion": "Асуулт",
+      "pollQuestionPlaceholder": "Асуулт бичнэ үү...",
+      "pollEndDate": "Дуусах хугацаа (заавал биш)",
+      "optionsCount": "{{current}}/{{max}} сонголт"
     }
   },
-
   "dictionary": {
+    "stats": "Толь бичгийн статистик",
     "title": "Толь бичигт тавтай морилно уу",
     "subtitle": "Гол ойлголт, нэр томъёог сураарай.",
     "searchPlaceholder": "Нэр томъёо, тодорхойлолт, ангилал хайх...",
@@ -624,7 +631,6 @@
     "report": "Мэдэгдэх",
     "entryRejected": "Бичлэг татгалзсан",
     "relatedTerms": "Холбоотой нэр томъёо",
-
     "moderationHistory": "Хяналтын түүх",
     "noTranslations": "Орчуулга одоогоор байхгүй байна.",
     "noExamples": "Жишээ одоогоор байхгүй байна.",
@@ -715,7 +721,6 @@
       "en": "English"
     }
   },
-
   "store": {
     "title": "Дижитал дэлгүүр",
     "subtitle": "Загвар, курс, хөгжүүлэлтийн нөөц",
@@ -746,7 +751,6 @@
     "under100": "$100-аас доош",
     "over100": "$100-аас дээш"
   },
-
   "learn": {
     "title": "Сурах",
     "searchPlaceholder": "Курс, багш хайх...",
@@ -781,7 +785,6 @@
     "browseFullCatalog": "Мэргэжилтнүүдийн заадаг бүх курсыг үзнэ үү.",
     "tutorial": "Заавар"
   },
-
   "carousel": {
     "competition": "Тэмцээн",
     "event": "Үйл явдал",
@@ -790,8 +793,9 @@
     "learnMore": "Дэлгэрэнгүй",
     "registerNow": "Одоо бүртгүүлэх"
   },
-
   "project": {
+    "allYears": "Бүх онууд",
+    "allCategories": "Бүх ангилал",
     "title": "Төслүүд",
     "searchPlaceholder": "Хайх...",
     "beginnerFriendly": "Анхан шатанд зориулсан",
@@ -808,7 +812,6 @@
     "beginner": "ЭХЛЭГЧ",
     "intermediate": "ДУНД",
     "advanced": "АХИСАН",
-
     "showcase": "Бүтээлийн үзэсгэлэн",
     "showcaseDescription": "Оюутнуудын бүтээлүүдийг үзэх, хөгжүүлж буй ажлаа хуваалцах, санал хүсэлт авах.",
     "showcaseBanner": "Оюутнуудын бүтээлүүдийн үзэсгэлэн",
@@ -826,7 +829,6 @@
     "noProjectsFound": "Бүтээл, судагааны ажил олдсонгүй.",
     "noMyProjects": "Та одоогоор бүтээл үүсгээгүй байна.",
     "createFirst": "Эхний бүтээлөө үүсгэх",
-
     "createProject": "Бүтээл үүсгэх",
     "editProject": "Төсөл засах",
     "createDraft": "Ноорог үүсгэх",
@@ -842,6 +844,13 @@
     "typeValue.diploma": "Диплом",
     "typeValue.contest": "Тэмцээн",
     "typeValue.intership": "Дадлага",
+    "categoryValue.creative_design": "Бүтээлч дизайн",
+    "categoryValue.mobile_dev": "Мобайл хөгжүүлэлт",
+    "categoryValue.game_dev": "Тоглоомын хөгжүүлэлт",
+    "categoryValue.web_dev": "Веб хөгжүүлэлт",
+    "categoryValue.hardware_iot": "Төхөөрөмж ба IoT",
+    "categoryValue.ai": "Хиймэл оюун",
+    "categoryValue.other": "Бусад",
     "difficulty": "Түвшин",
     "category": "Категори",
     "about": "Бүтээлийн тухай",
@@ -861,14 +870,12 @@
     "addTag": "Шошго нэмэх...",
     "repositoryUrl": "Репозиторийн URL (заавал биш)",
     "demoUrl": "Демо URL (заавал биш)",
-
     "backToProjects": "Төслүүд рүү буцах",
     "confirmDelete": "Та энэ төслийг устгахдаа итгэлтэй байна уу?",
     "progress": "Явц",
     "repository": "Репозитори",
     "liveDemo": "Шууд демо",
     "files": "Файлууд",
-
     "status.draft": "Ноорог",
     "status.in_progress": "Хийгдэж байна",
     "status.completed": "Дууссан",
@@ -880,19 +887,16 @@
     "type.research": "Судалгаа",
     "type.design": "Дизайн",
     "type.other": "Бусад",
-
     "team": "Баг",
     "addMember": "Гишүүн нэмэх",
     "userIdPlaceholder": "Хэрэглэгчийн ID оруулах",
     "contributor": "Хувь нэмэр оруулагч",
     "viewer": "Үзэгч",
-
     "comments": "Сэтгэгдэл",
     "writeComment": "Сэтгэгдэл бичих...",
     "writeReply": "Хариулт бичих...",
     "postComment": "Сэтгэгдэл нийтлэх",
     "noComments": "Сэтгэгдэл байхгүй байна. Санал бодлоо хуваалцаарай!",
-
     "projectLog": "Төслийн шинэчлэлтүүд",
     "workspace": "Ажлын орчин",
     "kanban": "Даалгаврууд",
@@ -905,7 +909,6 @@
     "empty": "Хоосон",
     "owner": "Эзэмшигч",
     "member": "Гишүүн",
-
     "regularUpdate": "Ердийн шинэчлэлт",
     "teamUpdate": "Багийн шинэчлэлт",
     "logCreated": "Төсөл үүссэн",
@@ -914,7 +917,6 @@
     "logJoinedBody": "Багийн гишүүн төсөлд нэгдсэн бөгөөд хамтын ажиллагааны үүргүүд шинэчлэгдлээ.",
     "logCompleted": "Дууссан:",
     "noLog": "Одоогоор үйл ажиллагааны бүртгэл алга.",
-
     "updateType.regular": "Ердийн шинэчлэлт",
     "updateType.milestone": "Үе шатны шинэчлэлт",
     "updateType.release": "Хувилбарын шинэчлэлт",
@@ -929,7 +931,6 @@
     "confirmDeleteUpdate": "Энэ шинэчлэлтийг бүрмөсөн устгах уу?",
     "updateCreateFailed": "Шинэчлэлтийг нийтэлж чадсангүй.",
     "updateDeleteFailed": "Шинэчлэлтийг устгаж чадсангүй.",
-
     "configPage": "Тохиргоо",
     "uploadsPage": "Байршуулалт",
     "configSaved": "Тохиргоо амжилттай хадгалагдлаа.",

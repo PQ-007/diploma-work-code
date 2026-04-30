@@ -45,8 +45,8 @@
     "saveChanges": "変更を保存",
     "untitled": "無題"
   },
-
   "sidebar": {
+    "flashcards": "フラッシュカード",
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
     "contest": "コンテスト",
@@ -91,7 +91,6 @@
     "upgrade": "プランをアップグレード",
     "logout": "ログアウト"
   },
-
   "navigation": {
     "dashboard": "ダッシュボード",
     "competitions": "コンペティション",
@@ -103,7 +102,6 @@
     "profile": "プロフィール",
     "settings": "設定"
   },
-
   "dashboard": {
     "welcomeBack": "お帰りなさい、{{name}}さん！",
     "overview": "概要",
@@ -137,7 +135,6 @@
     "endingSoon": "間もなく終了2件",
     "todayChange": "今日+15"
   },
-
   "projects": {
     "title": "プロジェクト",
     "description": "プロジェクトを管理・公開",
@@ -151,7 +148,6 @@
     "contributors": "貢献者",
     "lastUpdated": "最終更新"
   },
-
   "blogs": {
     "title": "ブログ投稿",
     "description": "知識と洞察を共有",
@@ -161,7 +157,6 @@
     "category": "カテゴリー",
     "tags": "タグ"
   },
-
   "flashcards": {
     "title": "フラッシュカード",
     "description": "間隔反復で学習",
@@ -210,7 +205,6 @@
     "organizeDescription": "学習カードをデッキにまとめて整理。公開してシェアできます。",
     "preview": "プレビュー"
   },
-
   "competitions": {
     "title": "コンテスト",
     "subtitle": "複雑な問題を解決し、素晴らしい賞品を獲得しましょう。",
@@ -238,7 +232,6 @@
       "pastResults": "過去の結果"
     }
   },
-
   "profile": {
     "title": "プロフィール",
     "bio": "自己紹介",
@@ -290,7 +283,6 @@
       "networkError": "ネットワークエラー - もう一度お試しください"
     }
   },
-
   "auth": {
     "signIn": "サインイン",
     "signUp": "サインアップ",
@@ -336,7 +328,6 @@
     "languageChanged": "言語変更",
     "languageChangedDesc": "言語を{{lang}}に設定しました。"
   },
-
   "feed": {
     "title": "フィード",
     "description": "コミュニティの最新情報をチェック",
@@ -380,7 +371,6 @@
       "discussion": "ディスカッション"
     }
   },
-
   "ranking": {
     "topRated": "ユーザーランキング（学生）",
     "topContributors": "ユーザーランキング（他人）",
@@ -392,7 +382,6 @@
     "thisWeek": "今週",
     "rank": "Rank"
   },
-
   "nav_user": {
     "profile": "プロフィール",
     "roadmap": "ロードマップ",
@@ -400,7 +389,6 @@
     "language": "言語",
     "logout": "ログアウト"
   },
-
   "create_button": {
     "create": "作成",
     "project": "プロジェクト",
@@ -414,7 +402,6 @@
     "discussions": "ディスカッション",
     "discussions_disc": "新しいディスカッションを開始する"
   },
-
   "articles": {
     "title": "記事",
     "subtitle": "コミュニティの記事を発見",
@@ -565,7 +552,6 @@
       }
     }
   },
-
   "discussions": {
     "title": "ディスカッション",
     "subtitle": "質問し、アイデアを共有し、コミュニティとつながりましょう。",
@@ -582,9 +568,30 @@
       "general": "一般",
       "unanswered": "未回答",
       "ideas": "アイデア"
+    },
+    "create": {
+      "tabs": {
+        "question": "質問",
+        "poll": "投票"
+      },
+      "titleQuestion": "新しい質問",
+      "titlePoll": "新しい投票",
+      "titlePlaceholder": "タイトル",
+      "bodyPlaceholder": "質問を説明してください...（任意）",
+      "tagPlaceholder": "タグを追加",
+      "addTag": "追加",
+      "cancel": "キャンセル",
+      "postQuestion": "質問を投稿",
+      "postPoll": "投票を投稿",
+      "pollOptions": "投票の選択肢",
+      "optionPlaceholder": "選択肢 {{n}}",
+      "addOption": "選択肢を追加",
+      "pollQuestion": "質問",
+      "pollQuestionPlaceholder": "質問を入力してください...",
+      "pollEndDate": "終了日時（任意）",
+      "optionsCount": "{{current}}/{{max}} 個の選択肢"
     }
   },
-
   "dictionary": {
     "title": "辞書へようこそ",
     "subtitle": "重要な概念と用語を学びましょう。",
@@ -623,7 +630,6 @@
     "report": "報告",
     "entryRejected": "エントリーが却下されました",
     "relatedTerms": "関連用語",
-
     "moderationHistory": "審査履歴",
     "noTranslations": "翻訳はまだありません。",
     "noExamples": "例文はまだありません。",
@@ -715,7 +721,6 @@
       "en": "英語"
     }
   },
-
   "store": {
     "title": "デジタルストア",
     "subtitle": "プレミアムテンプレート、コース、開発リソース",
@@ -746,7 +751,6 @@
     "under100": "$100未満",
     "over100": "$100以上"
   },
-
   "learn": {
     "title": "学習",
     "searchPlaceholder": "コース、講師を検索...",
@@ -781,7 +785,6 @@
     "browseFullCatalog": "業界の専門家が教える全コースカタログを閲覧。",
     "tutorial": "チュートリアル"
   },
-
   "carousel": {
     "competition": "コンペティション",
     "event": "イベント",
@@ -790,7 +793,6 @@
     "learnMore": "詳しく見る",
     "registerNow": "今すぐ登録"
   },
-
   "project": {
     "title": "プロジェクト",
     "searchPlaceholder": "検索...",
@@ -841,6 +843,13 @@
     "typeValue.diploma": "卒業研究",
     "typeValue.contest": "コンテスト",
     "typeValue.intership": "インターンシップ",
+    "categoryValue.creative_design": "クリエイティブデザイン",
+    "categoryValue.mobile_dev": "モバイル開発",
+    "categoryValue.game_dev": "ゲーム開発",
+    "categoryValue.web_dev": "Web開発",
+    "categoryValue.hardware_iot": "ハードウェア・IoT",
+    "categoryValue.ai": "AI",
+    "categoryValue.other": "その他",
     "difficulty": "難易度",
     "category": "カテゴリ",
     "brief": "概要",
@@ -859,14 +868,12 @@
     "addTag": "タグを追加...",
     "repositoryUrl": "リポジトリURL（任意）",
     "demoUrl": "デモURL（任意）",
-
     "backToProjects": "プロジェクトに戻る",
     "confirmDelete": "このプロジェクトを削除してもよろしいですか？",
     "progress": "進捗",
     "repository": "リポジトリ",
     "liveDemo": "ライブデモ",
     "files": "ファイル",
-
     "status.draft": "下書き",
     "status.in_progress": "進行中",
     "status.completed": "完了",
@@ -878,7 +885,6 @@
     "type.research": "研究",
     "type.design": "デザイン",
     "type.other": "その他",
-
     "section.overview": "概要",
     "section.goals": "目標",
     "section.architecture": "アーキテクチャ / デザイン",
@@ -888,26 +894,22 @@
     "writeContent": "Markdownで内容を記述...",
     "clickToEdit": "編集をクリックして内容を追加...",
     "noContent": "まだ内容がありません。",
-
     "milestones": "マイルストーン",
     "completed": "完了",
     "addMilestone": "マイルストーンを追加",
     "milestoneTitle": "マイルストーン名",
     "milestoneDescription": "説明（任意）",
     "noMilestones": "マイルストーンはまだありません",
-
     "team": "チーム",
     "addMember": "メンバーを追加",
     "userIdPlaceholder": "ユーザーIDを入力",
     "contributor": "コントリビューター",
     "viewer": "閲覧者",
-
     "comments": "コメント",
     "writeComment": "コメントを書く...",
     "writeReply": "返信を書く...",
     "postComment": "コメントを投稿",
     "noComments": "まだコメントはありません。最初に感想を共有しましょう！",
-
     "projectLog": "プロジェクト更新",
     "workspace": "ワークスペース",
     "kanban": "タスク",
@@ -920,7 +922,6 @@
     "empty": "空です",
     "owner": "オーナー",
     "member": "メンバー",
-
     "regularUpdate": "通常更新",
     "teamUpdate": "チーム更新",
     "logCreated": "プロジェクトが作成されました",
@@ -929,7 +930,6 @@
     "logJoinedBody": "チームメンバーが参加し、共同作業の役割が更新されました。",
     "logCompleted": "完了:",
     "noLog": "まだアクティビティはありません。",
-
     "updateType.regular": "通常更新",
     "updateType.milestone": "マイルストーン更新",
     "updateType.release": "リリース更新",
@@ -944,7 +944,6 @@
     "confirmDeleteUpdate": "この更新を完全に削除しますか？",
     "updateCreateFailed": "更新の公開に失敗しました。",
     "updateDeleteFailed": "更新の削除に失敗しました。",
-
     "configPage": "設定",
     "uploadsPage": "アップロード",
     "configSaved": "設定を保存しました。",
