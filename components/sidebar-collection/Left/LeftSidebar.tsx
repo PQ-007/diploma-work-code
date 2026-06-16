@@ -27,74 +27,22 @@ import {
   Bird,
   Blocks,
   ChevronRight,
-  Clock,
   Flame,
   GraduationCap,
   Hammer,
   MessagesSquare,
-  Rocket,
-  Scroll,
-  Settings,
-  Store,
   SwatchBook,
-  Swords,
   Telescope,
-  Trophy
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { NavItem, SidebarData } from "./type";
+import { featureFlags } from "@/lib/featureFlags";
 
 // Navigation data structure (using translation keys)
 const navData: SidebarData = {
   navMain: [
-    {
-      titleKey: "sidebar.competitions",
-      icon: Swords,
-      href: "/competition",
-      items: [
-        {
-          titleKey: "sidebar.ongoing",
-          href: "/competition/ongoing",
-          icon: Clock,
-        },
-        {
-          titleKey: "sidebar.upcoming",
-          href: "/competition/upcoming",
-          icon: Rocket,
-        },
-        { titleKey: "sidebar.past", href: "/competition/past", icon: Trophy },
-      ],
-    },
-    // {
-    //   titleKey: "sidebar.learn",
-    //   icon: GraduationCap,
-    //   href: "/learn",
-    //   authRequired: true,
-    //   items: [
-    //     {
-    //       titleKey: "sidebar.algorithm",
-    //       href: "/learn/algorithm",
-    //       icon: Brain,
-    //     },
-    //     {
-    //       titleKey: "sidebar.dataStructures",
-    //       href: "/learn/data-structure",
-    //       icon: Blocks,
-    //     },
-    //     {
-    //       titleKey: "sidebar.languages",
-    //       href: "/learn/programming-lang",
-    //       icon: Code,
-    //     },
-    //     {
-    //       titleKey: "sidebar.resources",
-    //       href: "/learn/resources",
-    //       icon: Library,
-    //     },
-    //   ],
-    // },
     {
       titleKey: "sidebar.articles",
       icon: Telescope,
@@ -136,38 +84,18 @@ const navData: SidebarData = {
       items: [],
     },
     {
-      titleKey: "sidebar.knowledgeTree",
-      icon: Scroll,
-      href: "/knowledge-tree",
-      items: [],
-      authRequired: true,
-    },
-    {
       titleKey: "sidebar.flashcards",
       icon: SwatchBook,
       href: "/flashcards",
       items: [],
       authRequired: true,
+      flag: "flashcards", // Parked (Phase 2) — hidden unless NEXT_PUBLIC_ENABLE_FLASHCARDS=true
     },
     {
       titleKey: "sidebar.dictionary",
       icon: Blocks,
       href: "/dictionary",
       items: [],
-    },
-    {
-      titleKey: "sidebar.store",
-      icon: Store,
-      href: "/store",
-      items: [],
-      authRequired: true,
-    },
-    {
-      titleKey: "sidebar.settings",
-      icon: Settings,
-      href: "/settings",
-      items: [],
-      authRequired: true,
     },
   ],
   
@@ -345,11 +273,11 @@ export function LeftSidebar({
       </SidebarHeader>
       <SidebarContent className="gap-0">
         <NavMain
-          items={
-            isAuthenticated
-              ? navData.navMain
-              : navData.navMain.filter((item) => !item.authRequired)
-          }
+          items={navData.navMain.filter(
+            (item) =>
+              (isAuthenticated || !item.authRequired) &&
+              (!item.flag || featureFlags[item.flag]),
+          )}
         />
         
       </SidebarContent>

@@ -32,6 +32,7 @@ import {
   Omega,
   Pi,
   Route,
+  Settings,
   Sigma,
   Sun,
   UserRound,
@@ -207,6 +208,15 @@ export function NavUser() {
             <div className="flex">
               <UserRound className="mr-2 h-4 w-4" />
               <span>{t("nav_user.profile")}</span>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push("/settings")}
+            className="cursor-pointer"
+          >
+            <div className="flex">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>{t("nav_user.settings")}</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem

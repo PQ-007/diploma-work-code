@@ -1,3 +1,5 @@
+import type { FeatureFlag } from "@/lib/featureFlags";
+
 // Tree data interface
 export interface EnhancedTreeNode {
   key: string;
@@ -27,6 +29,8 @@ export interface NavItem {
   href: string;
   items?: NavSubItem[];
   authRequired?: boolean;
+  /** Hidden unless the matching feature flag is enabled (parked features). */
+  flag?: FeatureFlag;
 }
 
 export interface LibrarySubItem {

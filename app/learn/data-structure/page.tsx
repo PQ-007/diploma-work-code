@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * @deprecated FutureHub refocus (Phase 1): the Learn section is mock/placeholder
+ * content with no backend and is slated for removal. It is NOT one of the four
+ * cores (Articles · Projects · Dictionary · Discussions). Do not build on this.
+ * See futurehub-docs/docs/features/deprecated.md.
+ */
+
 import {
   Hash,
   Layers,

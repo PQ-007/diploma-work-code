@@ -21,6 +21,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { useTranslation } from "react-i18next";
+import { featureFlags } from "@/lib/featureFlags";
 
 const CreateButton = () => {
   const router = useRouter();
@@ -42,12 +43,17 @@ const CreateButton = () => {
           description: t("create_button.article_disc"),
           action: () => handleAction("/article/create"),
         },
-        {
-          icon: SwatchBook,
-          label: t("create_button.flashcards"),
-          description: t("create_button.flashcards_disc"),
-          action: () => handleAction("/flashcards/create"),
-        },
+        // Parked (Phase 2) — hidden unless NEXT_PUBLIC_ENABLE_FLASHCARDS=true
+        ...(featureFlags.flashcards
+          ? [
+              {
+                icon: SwatchBook,
+                label: t("create_button.flashcards"),
+                description: t("create_button.flashcards_disc"),
+                action: () => handleAction("/flashcards/create"),
+              },
+            ]
+          : []),
       ],
     },
     {

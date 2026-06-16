@@ -384,6 +384,7 @@
   },
   "nav_user": {
     "profile": "プロフィール",
+    "settings": "設定",
     "roadmap": "ロードマップ",
     "theme": "テーマ",
     "language": "言語",

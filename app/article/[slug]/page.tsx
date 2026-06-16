@@ -55,7 +55,7 @@ import { ArticlePayload, RelatedLink, TocEntry } from "../type";
 import AuthorBox from "../components/AuthorBox";
 import ArticleCommentSection from "../components/ArticleCommentSection";
 import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSection";
-import { useArticleInteractions } from "@/hooks/useArticleInteractions";
+import { useArticleEngagement } from "@/lib/hooks/mutations/useArticleEngagement";
 import FlashcardCapturePopover from "@/components/flashcards/FlashcardCapturePopover";
 
 type ArticleLangCode = "mn" | "en" | "jp";
@@ -138,7 +138,7 @@ export default function ModernArticlePage() {
   const articleNumericId = article?.id ? Number(article.id) : null;
   const commentRef = useRef<ArticleCommentSectionHandle>(null);
   const { isLiked, likesCount, toggleLike, isBookmarked, toggleBookmark } =
-    useArticleInteractions({ articleId: articleNumericId });
+    useArticleEngagement({ articleId: articleNumericId });
 
   // Sidebar demo content (wireframe: Definitions + Related links)
   const definitions = useMemo(
