@@ -62,7 +62,7 @@ export async function fetchTagsForContent(
   // 4. Group tags by content ID
   const tagsByContent = new Map<string, string[]>();
 
-  tagLinks.forEach((link: any) => {
+  tagLinks.forEach((link: Record<string, unknown>) => {
     const contentId = link[idColumn] as string;
     const tagName = tagsById.get(String(link.tag_id));
 

@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "gen:types": "supabase gen types typescript --project-id ${SUPABASE_PROJECT_ID:-jzmuodzerajihkrsxpol} --schema public > lib/types/database.ts"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

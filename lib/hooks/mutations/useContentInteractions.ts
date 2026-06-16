@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ContentType } from "@/lib/types/content";
+import { ContentType, ContentItem } from "@/lib/types/content";
 
 const applyDiscussionVote = (
   likes: number,
@@ -132,7 +132,7 @@ export function useContentBookmark(
 
         queryClient.setQueryData(
           key,
-          data.map((entry: any) => {
+          data.map((entry: ContentItem) => {
             if (entry?.content?.id !== contentId) return entry;
             return {
               ...entry,
@@ -174,8 +174,8 @@ export function useContentBookmark(
       return { previousLists, previousDetail };
     },
     onError: (_error, _variables, context) => {
-      context?.previousLists?.forEach(([key, data]: [unknown, unknown]) => {
-        queryClient.setQueryData(key as any, data);
+      context?.previousLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
 
       if (context?.previousDetail) {
@@ -237,7 +237,7 @@ export function useDiscussionVote(discussionId: string) {
 
         queryClient.setQueryData(
           key,
-          data.map((entry: any) => {
+          data.map((entry: ContentItem) => {
             if (entry?.content?.id !== discussionId) return entry;
             const next = applyDiscussionVote(
               Number(entry?.stats?.likes || 0),
@@ -281,11 +281,9 @@ export function useDiscussionVote(discussionId: string) {
       return { previousDiscussionLists, previousDiscussionDetail };
     },
     onError: (_error, _vote, context) => {
-      context?.previousDiscussionLists?.forEach(
-        ([key, data]: [unknown, unknown]) => {
-          queryClient.setQueryData(key as any, data);
-        },
-      );
+      context?.previousDiscussionLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
 
       if (context?.previousDiscussionDetail) {
         queryClient.setQueryData(

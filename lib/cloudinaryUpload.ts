@@ -32,7 +32,12 @@ export async function uploadImageToCloudinary(
     body: formData,
   });
 
-  let json: any;
+  type CloudinaryResponse = {
+    secure_url?: string;
+    public_id?: string;
+    error?: { message?: string };
+  };
+  let json: CloudinaryResponse | undefined;
   if (!res.ok) {
     try {
       json = await res.json();

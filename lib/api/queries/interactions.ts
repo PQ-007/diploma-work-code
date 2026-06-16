@@ -1,6 +1,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
+ * The interaction tables/columns are addressed via dynamic string names, so the
+ * query builder cannot infer row shapes. Treat results as generic keyed rows.
+ */
+const asRows = (data: unknown): Record<string, unknown>[] =>
+  (data as Record<string, unknown>[] | null) ?? [];
+
+/**
  * Interface for interaction counts
  */
 export interface InteractionCounts {
@@ -78,21 +85,21 @@ export async function fetchInteractionCounts(
   });
 
   // Count reactions/likes
-  (reactionsData.data || []).forEach((r: any) => {
+  asRows(reactionsData.data).forEach((r) => {
     const id = r[tables.idField] as string;
     const current = counts.get(id);
     if (current) current.likes++;
   });
 
   // Count comments
-  (commentsData.data || []).forEach((c: any) => {
+  asRows(commentsData.data).forEach((c) => {
     const id = c[tables.idField] as string;
     const current = counts.get(id);
     if (current) current.comments++;
   });
 
   // Count bookmarks
-  (bookmarksData.data || []).forEach((b: any) => {
+  asRows(bookmarksData.data).forEach((b) => {
     const id = b[tables.idField] as string;
     const current = counts.get(id);
     if (current) current.bookmarks++;
@@ -175,7 +182,7 @@ export async function fetchUserInteractions(
   });
 
   // Mark liked items
-  (likesData.data || []).forEach((item: any) => {
+  asRows(likesData.data).forEach((item) => {
     const id = item[tables.idField] as string;
     const current = interactions.get(id);
     if (current) {
@@ -188,7 +195,7 @@ export async function fetchUserInteractions(
   });
 
   // Mark bookmarked items
-  (bookmarksData.data || []).forEach((item: any) => {
+  asRows(bookmarksData.data).forEach((item) => {
     const id = item[tables.idField] as string;
     const current = interactions.get(id);
     if (current) current.isBookmarked = true;

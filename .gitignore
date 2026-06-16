@@ -21,6 +21,8 @@
 # production
 /build
 
+#docs
+/futurehub-docs
 # misc
 .DS_Store
 *.pem

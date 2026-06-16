@@ -1,11 +1,17 @@
 /* ------------------------------------------------------------------ */
 /*  Project Module — TypeScript Types                                 */
+/*                                                                    */
+/*  Row/enum shapes are derived from the generated Supabase schema    */
+/*  (`@/lib/types/database`) so they stay in sync with the database.  */
+/*  View-model extensions (author, replies, etc.) are layered on top. */
 /* ------------------------------------------------------------------ */
 
-export type ProjectStatus = "draft" | "in_progress" | "completed" | "archived";
+import type { Tables, Enums } from "@/lib/types/database";
+
+export type ProjectStatus = Enums<"project_status">;
 /** Maps to the project_type enum in the DB (column name: `type`) */
-export type ProjectType = "diploma" | "contest" | "intership" | "private";
-/** Maps to the project_category enum stored as text in the `category` column */
+export type ProjectType = Enums<"project_type">;
+/** Stored as free text in the `category` column (not a DB enum). */
 export type ProjectCategory =
   | "creative_design"
   | "mobile_dev"
@@ -14,8 +20,8 @@ export type ProjectCategory =
   | "hardware_iot"
   | "ai"
   | "other";
-export type ProjectDifficulty = "beginner" | "intermediate" | "advanced";
-export type ProjectMemberRole = "owner" | "contributor" | "viewer";
+export type ProjectDifficulty = Enums<"project_difficulty">;
+export type ProjectMemberRole = Enums<"project_member_role">;
 
 export interface ProjectAuthor {
   id: string;
@@ -36,12 +42,9 @@ export interface ProjectSection {
   updated_at: string;
 }
 
-export interface ProjectMember {
-  user_id: string;
-  role: ProjectMemberRole;
-  joined_at: string;
+export type ProjectMember = Omit<Tables<"project_members">, "project_id"> & {
   profile?: ProjectAuthor;
-}
+};
 
 export type KanbanStatus = "todo" | "in_progress" | "done";
 
@@ -58,28 +61,12 @@ export interface ProjectMilestone {
   created_at: string;
 }
 
-export interface ProjectComment {
-  id: number;
-  project_id: number;
-  user_id: string;
-  parent_id: number | null;
-  body: string;
-  created_at: string;
-  updated_at: string;
+export type ProjectComment = Tables<"project_comments"> & {
   author?: ProjectAuthor;
   replies?: ProjectComment[];
-}
+};
 
-export interface ProjectFile {
-  id: number;
-  project_id: number;
-  uploaded_by: string;
-  file_name: string;
-  file_url: string;
-  file_type: string | null;
-  file_size: number | null;
-  created_at: string;
-}
+export type ProjectFile = Tables<"project_files">;
 
 export type ProjectUpdateType =
   | "regular"
@@ -87,19 +74,13 @@ export type ProjectUpdateType =
   | "release"
   | "announcement";
 
-export interface ProjectUpdate {
-  id: number;
-  project_id: number;
-  created_by: string;
-  title: string;
-  body: string;
+export type ProjectUpdate = Omit<
+  Tables<"project_updates">,
+  "update_type"
+> & {
   update_type: ProjectUpdateType;
-  image_url: string | null;
-  published_at: string;
-  created_at: string;
-  updated_at: string;
   author?: ProjectAuthor | null;
-}
+};
 
 export interface ProjectPayload {
   id: number;
