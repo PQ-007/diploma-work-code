@@ -272,31 +272,6 @@ export async function POST(req: NextRequest) {
       role: "owner",
     });
 
-    // Create default sections
-    const defaultSections = [
-      { title: "Overview", section_type: "overview", sort_order: 0 },
-      { title: "Goals", section_type: "goals", sort_order: 1 },
-      { title: "Architecture", section_type: "architecture", sort_order: 2 },
-      {
-        title: "Implementation",
-        section_type: "implementation",
-        sort_order: 3,
-      },
-      { title: "Results", section_type: "results", sort_order: 4 },
-      {
-        title: "Lessons Learned",
-        section_type: "lessons_learned",
-        sort_order: 5,
-      },
-    ];
-
-    await supabase.from("project_sections").insert(
-      defaultSections.map((s) => ({
-        ...s,
-        project_id: project.id,
-      })),
-    );
-
     // Handle tags
     if (normalizedTags.length > 0) {
       for (const tagName of normalizedTags) {

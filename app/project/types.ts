@@ -31,35 +31,9 @@ export interface ProjectAuthor {
   ranking_point?: number | null;
 }
 
-export interface ProjectSection {
-  id: number;
-  project_id: number;
-  title: string;
-  section_type: string;
-  content: string | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
 export type ProjectMember = Omit<Tables<"project_members">, "project_id"> & {
   profile?: ProjectAuthor;
 };
-
-export type KanbanStatus = "todo" | "in_progress" | "done";
-
-export interface ProjectMilestone {
-  id: number;
-  project_id: number;
-  title: string;
-  description: string | null;
-  due_date: string | null;
-  completed: boolean;
-  completed_at: string | null;
-  kanban_status: KanbanStatus;
-  sort_order: number;
-  created_at: string;
-}
 
 export type ProjectComment = Tables<"project_comments"> & {
   author?: ProjectAuthor;
@@ -67,20 +41,6 @@ export type ProjectComment = Tables<"project_comments"> & {
 };
 
 export type ProjectFile = Tables<"project_files">;
-
-export type ProjectUpdateType =
-  | "regular"
-  | "milestone"
-  | "release"
-  | "announcement";
-
-export type ProjectUpdate = Omit<
-  Tables<"project_updates">,
-  "update_type"
-> & {
-  update_type: ProjectUpdateType;
-  author?: ProjectAuthor | null;
-};
 
 export interface ProjectPayload {
   id: number;
@@ -107,11 +67,8 @@ export interface ProjectPayload {
   tags: string[];
   author?: ProjectAuthor;
   members?: ProjectMember[];
-  sections?: ProjectSection[];
-  milestones?: ProjectMilestone[];
   comments?: ProjectComment[];
   files?: ProjectFile[];
-  updates?: ProjectUpdate[];
   userLiked?: boolean;
   isOwner?: boolean;
   isMember?: boolean;

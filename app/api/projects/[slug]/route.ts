@@ -66,28 +66,15 @@ export async function GET(
 
     // Fetch related data in parallel
     const [
-      { data: sections },
       { data: members },
-      { data: milestones },
       { data: comments },
       { data: files },
-      { data: updates },
       { data: tagLinks },
     ] = await Promise.all([
-      supabase
-        .from("project_sections")
-        .select("*")
-        .eq("project_id", project.id)
-        .order("sort_order", { ascending: true }),
       supabase
         .from("project_members")
         .select("user_id, role, joined_at")
         .eq("project_id", project.id),
-      supabase
-        .from("project_milestones")
-        .select("*")
-        .eq("project_id", project.id)
-        .order("sort_order", { ascending: true }),
       supabase
         .from("project_comments")
         .select("*")
@@ -97,12 +84,6 @@ export async function GET(
         .from("project_files")
         .select("*")
         .eq("project_id", project.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("project_updates")
-        .select("*")
-        .eq("project_id", project.id)
-        .order("published_at", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase
         .from("project_tags")
@@ -127,7 +108,6 @@ export async function GET(
         project.created_by,
         ...(members || []).map((m) => m.user_id),
         ...(comments || []).map((c) => c.user_id),
-        ...(updates || []).map((u) => u.created_by),
       ]),
     ].filter(Boolean);
 
@@ -193,18 +173,12 @@ export async function GET(
       views: nextViews,
       tags: tagNames,
       author: profilesById.get(project.created_by) || null,
-      sections: sections || [],
       members: (members || []).map((m) => ({
         ...m,
         profile: profilesById.get(m.user_id) || null,
       })),
-      milestones: milestones || [],
       comments: topLevelComments,
       files: files || [],
-      updates: (updates || []).map((update) => ({
-        ...update,
-        author: profilesById.get(update.created_by) || null,
-      })),
       userLiked,
       isOwner: !!isOwner,
       isMember,
