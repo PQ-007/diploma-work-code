@@ -381,20 +381,14 @@ export default function ProfileEditPage() {
       {/* ═══════ Header: Banner + Avatar ═══════ */}
       <div className="relative rounded-2xl overflow-hidden">
         {/* Banner — clickable to pick gradient */}
-        <div
-          className={`h-32 sm:h-40 bg-gradient-to-r ${bannerGradient} relative group cursor-pointer`}
-        >
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <Palette className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </div>
+        <div className={`h-32 sm:h-40 bg-gradient-to-r ${bannerGradient}`} />
 
         <div className="relative bg-card border border-border border-t-0 rounded-b-2xl px-6 pb-5 pt-0">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Avatar — editable */}
-            <div className="-mt-8 relative shrink-0 group">
+            <div className="group relative -mt-8 w-fit shrink-0 self-start">
               <div
-                className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor}` : "bg-border"} shadow-[0_0_18px_rgba(251,191,36,0.3)]`}
+                className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor}` : "bg-border"}`}
               >
                 <Avatar className="h-24 w-24 border-4 border-card">
                   <AvatarImage src={avatarUrl || ""} />
@@ -501,7 +495,7 @@ export default function ProfileEditPage() {
       </div>
 
       {/* ═══════ Banner Gradient Picker ═══════ */}
-      <Card className="border-border/60">
+      <Card className="gap-3">
         <CardHeader>
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Palette className="h-4 w-4" />
@@ -530,7 +524,7 @@ export default function ProfileEditPage() {
       </Card>
 
       {/* ═══════ Avatar Ring Color Picker ═══════ */}
-      <Card className="border-border/60">
+      <Card className="gap-3">
         <CardHeader>
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             {tr("profile.edit.avatarRingColor", "Avatar Ring Color")}
@@ -569,7 +563,7 @@ export default function ProfileEditPage() {
         {/* Left Column */}
         <div className="space-y-4">
           {/* Skills */}
-          <Card className="border-border/60">
+          <Card className="gap-3">
             <CardHeader>
               <CardTitle className="text-sm font-semibold">
                 {tr("profile.skills", "Skills")}
@@ -632,7 +626,7 @@ export default function ProfileEditPage() {
           </Card>
 
           {/* Language Skills */}
-          <Card className="border-border/60">
+          <Card className="gap-3">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
@@ -798,24 +792,13 @@ export default function ProfileEditPage() {
             </CardContent>
           </Card>
 
-          {/* Engagement — read-only display */}
-          <Card className="border-border/60 opacity-60">
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold text-muted-foreground">
-                {tr("profile.engagement", "Engagement")}
-                <span className="text-[10px] font-normal ml-2">
-                  ({tr("profile.edit.readOnly", "read-only")})
-                </span>
-              </CardTitle>
-            </CardHeader>
-          </Card>
         </div>
 
         {/* Right Column */}
         <div className="space-y-4">
           {/* Pinned Articles */}
           {articles.length > 0 && (
-            <Card className="border-border/60">
+            <Card className="gap-3">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Pin className="h-3.5 w-3.5 -rotate-45" />
@@ -836,20 +819,20 @@ export default function ProfileEditPage() {
                         onClick={() => togglePinnedArticle(article.id)}
                         className={`w-full flex items-center gap-2 rounded-md px-3 py-2 text-left transition-colors ${
                           isPinned
-                            ? "bg-amber-500/10 border border-amber-500/30"
-                            : "border border-transparent hover:bg-muted"
+                            ? "border border-primary/30 bg-primary/5"
+                            : "border border-transparent hover:bg-accent/60"
                         }`}
                       >
                         <div
                           className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${
                             isPinned
-                              ? "bg-amber-500 border-amber-500"
-                              : "border-border"
+                              ? "border-primary bg-primary"
+                              : "border-input"
                           }`}
                         >
-                          {isPinned && <Check className="h-3 w-3 text-white" />}
+                          {isPinned && <Check className="size-3 text-primary-foreground" />}
                         </div>
-                        <span className="text-xs text-foreground line-clamp-1 flex-1">
+                        <span className="line-clamp-1 flex-1 text-sm text-foreground">
                           {article.title}
                         </span>
                       </button>
@@ -862,7 +845,7 @@ export default function ProfileEditPage() {
 
           {/* Pinned Projects */}
           {projects.length > 0 && (
-            <Card className="border-border/60">
+            <Card className="gap-3">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Pin className="h-3.5 w-3.5 -rotate-45" />
@@ -883,20 +866,20 @@ export default function ProfileEditPage() {
                         onClick={() => togglePinnedProject(project.id)}
                         className={`w-full flex items-center gap-2 rounded-md px-3 py-2 text-left transition-colors ${
                           isPinned
-                            ? "bg-amber-500/10 border border-amber-500/30"
-                            : "border border-transparent hover:bg-muted"
+                            ? "border border-primary/30 bg-primary/5"
+                            : "border border-transparent hover:bg-accent/60"
                         }`}
                       >
                         <div
                           className={`h-4 w-4 rounded border flex items-center justify-center shrink-0 ${
                             isPinned
-                              ? "bg-amber-500 border-amber-500"
-                              : "border-border"
+                              ? "border-primary bg-primary"
+                              : "border-input"
                           }`}
                         >
-                          {isPinned && <Check className="h-3 w-3 text-white" />}
+                          {isPinned && <Check className="size-3 text-primary-foreground" />}
                         </div>
-                        <span className="text-xs text-foreground line-clamp-1 flex-1">
+                        <span className="line-clamp-1 flex-1 text-sm text-foreground">
                           {project.title}
                         </span>
                       </button>

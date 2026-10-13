@@ -3,8 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Field, FormAlert } from "@/components/common/Form";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { Logo } from "@/components/brand/Logo";
+
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
+  const p = (k: string) => t(`auth.pw.${k}`);
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
@@ -53,13 +64,13 @@ export default function ResetPasswordPage() {
     setMessage(null);
 
     if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(p("tooShort"));
       setLoading(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(p("mismatch"));
       setLoading(false);
       return;
     }
@@ -74,94 +85,40 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      setMessage("Password updated successfully. Redirecting to sign in...");
+      setMessage(p("resetDone"));
       setTimeout(() => {
         router.push("/signin");
       }, 1200);
     } catch {
-      setError("Unexpected error. Please try again.");
+      setError(p("unexpected"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-background p-4">
-      <section className="mx-auto mt-10 w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-foreground">
-          Reset password
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Set your new password for your account.
-        </p>
+    <div className="flex min-h-dvh items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md space-y-5">
+        {/* Brand on the standalone reset page */}
+        <Link href="/" className="inline-flex" aria-label="FutureHub home"><Logo /></Link>
+        <PageHeader className="!mb-0" title={p("resetTitle")} subtitle={p("resetSubtitle")} />
+        {!ready && <FormAlert tone="warning">{p("noSession")}</FormAlert>}
+        {error && <FormAlert>{error}</FormAlert>}
+        {message && <FormAlert tone="info">{message}</FormAlert>}
 
-        {!ready && (
-          <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
-            Recovery session not found. Please open the latest reset link from
-            your email.
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mt-4 rounded-lg border border-emerald-400/40 bg-emerald-400/10 p-3 text-sm text-emerald-200">
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleResetPassword} className="mt-5 space-y-4">
-          <div>
-            <label
-              htmlFor="new-password"
-              className="mb-2 block text-sm font-medium text-foreground"
-            >
-              New password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete="new-password"
-              className="block w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/25"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirm-password"
-              className="mb-2 block text-sm font-medium text-foreground"
-            >
-              Confirm new password
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete="new-password"
-              className="block w-full rounded-lg border border-border bg-secondary px-4 py-3 text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/25"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || !ready}
-            className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Updating..." : "Update password"}
-          </button>
+        <form onSubmit={handleResetPassword} className="space-y-4 rounded-xl border bg-card p-5 shadow-xs sm:p-6">
+          <Field label={p("new")} htmlFor="new-password" hint={p("hint")}>
+            <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
+          </Field>
+          <Field label={p("confirm")} htmlFor="confirm-password">
+            <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
+          </Field>
+          <Button type="submit" size="lg" className="w-full" disabled={loading || !ready}>
+            {loading ? <Loader2 className="animate-spin" /> : null}
+            {loading ? p("updating") : p("submitReset")}
+          </Button>
         </form>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

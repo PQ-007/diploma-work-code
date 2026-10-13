@@ -199,7 +199,28 @@
     "languageChanged": "言語変更",
     "languageChangedDesc": "言語を{{lang}}に設定しました。",
     "linkInvalidTitle": "このリンクは無効か、有効期限が切れています",
-    "linkInvalidDesc": "確認・パスワード再設定のリンクは一度しか使えず、一定時間で失効します。サインインするか、新しい再設定リンクをリクエストしてください。"
+    "linkInvalidDesc": "確認・パスワード再設定のリンクは一度しか使えず、一定時間で失効します。サインインするか、新しい再設定リンクをリクエストしてください。",
+    "pw": {
+      "changeTitle": "パスワードを変更",
+      "changeSubtitle": "サインインに使うパスワードを更新します。",
+      "resetTitle": "新しいパスワードを設定",
+      "resetSubtitle": "アカウントの新しいパスワードを選んでください。",
+      "current": "現在のパスワード",
+      "new": "新しいパスワード",
+      "confirm": "新しいパスワード（確認）",
+      "hint": "6文字以上。",
+      "submitChange": "パスワードを変更",
+      "submitReset": "新しいパスワードを保存",
+      "updating": "保存中…",
+      "tooShort": "6文字以上にしてください。",
+      "mismatch": "パスワードが一致しません。",
+      "mustSignIn": "パスワードを変更するにはサインインしてください。",
+      "wrongCurrent": "現在のパスワードが正しくありません。",
+      "changed": "パスワードを変更しました。",
+      "resetDone": "パスワードを保存しました。サインイン画面へ移動します…",
+      "noSession": "このリンクは無効です。サインイン画面から新しいリンクをリクエストしてください。",
+      "unexpected": "問題が発生しました。もう一度お試しください。"
+    }
   },
   "feed": {
     "title": "フィード",
@@ -939,5 +960,27 @@
       "discussion": "ディスカッション",
       "term": "用語"
     }
+  },
+  "setup": {
+    "callYou": "何とお呼びすればいいですか？",
+    "callYouHint": "表示名と一意のユーザー名を選んでください。",
+    "displayName": "表示名",
+    "username": "ユーザー名",
+    "bio": "自己紹介",
+    "optional": "（任意）",
+    "bioPlaceholder": "自己紹介を書いてください…",
+    "pickAvatar": "アバターを選ぶ",
+    "avatarHint": "写真をアップロードするか、生成スタイルを選んでください。",
+    "uploadPhoto": "写真をアップロード",
+    "chooseBanner": "バナーを選ぶ",
+    "bannerHint": "プロフィールのヘッダー色を選んでください。",
+    "interests": "何に興味がありますか？",
+    "interestsHint": "スキルや興味を最大8つ選んでください。",
+    "back": "戻る",
+    "next": "次へ",
+    "saving": "保存中…",
+    "finish": "設定を完了",
+    "networkError": "ネットワークエラー。もう一度お試しください。",
+    "genericError": "問題が発生しました。"
   }
 }

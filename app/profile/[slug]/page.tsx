@@ -255,7 +255,7 @@ export default function ProfilePage() {
         <div className="relative bg-card border border-border border-t-0 rounded-b-2xl px-6 pb-5 pt-0">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Avatar */}
-            <div className="-mt-8 relative shrink-0">
+            <div className="relative -mt-8 w-fit shrink-0 self-start">
               <div
                 className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor}` : "bg-border"}`}
               >

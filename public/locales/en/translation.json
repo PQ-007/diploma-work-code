@@ -199,7 +199,28 @@
     "languageChanged": "Language Changed",
     "languageChangedDesc": "Language set to {{lang}}.",
     "linkInvalidTitle": "This link is invalid or has expired",
-    "linkInvalidDesc": "Confirmation and password-reset links can only be used once and expire after a while. Sign in, or request a new reset link."
+    "linkInvalidDesc": "Confirmation and password-reset links can only be used once and expire after a while. Sign in, or request a new reset link.",
+    "pw": {
+      "changeTitle": "Change password",
+      "changeSubtitle": "Update the password you use to sign in.",
+      "resetTitle": "Set a new password",
+      "resetSubtitle": "Choose a new password for your account.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "hint": "At least 6 characters.",
+      "submitChange": "Change password",
+      "submitReset": "Save new password",
+      "updating": "Saving…",
+      "tooShort": "Use at least 6 characters.",
+      "mismatch": "The passwords don’t match.",
+      "mustSignIn": "Sign in to change your password.",
+      "wrongCurrent": "The current password is incorrect.",
+      "changed": "Password changed.",
+      "resetDone": "Password saved. Taking you to sign in…",
+      "noSession": "This reset link is no longer valid. Request a new one from the sign-in page.",
+      "unexpected": "Something went wrong. Please try again."
+    }
   },
   "feed": {
     "title": "Your Feed",
@@ -940,5 +961,27 @@
       "discussion": "Discussion",
       "term": "Term"
     }
+  },
+  "setup": {
+    "callYou": "What should we call you?",
+    "callYouHint": "Choose a display name and a unique username.",
+    "displayName": "Display name",
+    "username": "Username",
+    "bio": "Bio",
+    "optional": "(optional)",
+    "bioPlaceholder": "Tell us about yourself…",
+    "pickAvatar": "Pick your avatar",
+    "avatarHint": "Upload a photo or choose a generated style.",
+    "uploadPhoto": "Upload photo",
+    "chooseBanner": "Choose your banner",
+    "bannerHint": "Pick a gradient for your profile header.",
+    "interests": "What are you into?",
+    "interestsHint": "Select up to 8 skills or interests.",
+    "back": "Back",
+    "next": "Next",
+    "saving": "Saving…",
+    "finish": "Finish setup",
+    "networkError": "Network error — please try again.",
+    "genericError": "Something went wrong."
   }
 }

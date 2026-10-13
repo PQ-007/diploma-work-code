@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -64,6 +65,8 @@ const SKILL_OPTIONS = [
 ];
 
 export default function SetupPage() {
+  const { t } = useTranslation();
+  const s = (k: string) => t(`setup.${k}`);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const supabase = createClient();
@@ -170,14 +173,14 @@ export default function SetupPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        setError(result.error || "Something went wrong");
+        setError(result.error || s("genericError"));
         return;
       }
 
       router.push("/");
     } catch (err) {
       console.error("Setup error:", err);
-      setError("Network error — please try again");
+      setError(s("networkError"));
     } finally {
       setSaving(false);
     }
@@ -278,19 +281,19 @@ export default function SetupPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <User className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-bold text-foreground">
-                    What should we call you?
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    {s("callYou")}
                   </h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Choose a display name and a unique username.
+                  {s("callYouHint")}
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">
-                    Display Name
+                    {s("displayName")}
                   </label>
                   <Input
                     value={displayName}
@@ -303,7 +306,7 @@ export default function SetupPage() {
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">
-                    Username
+                    {s("username")}
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
@@ -327,15 +330,15 @@ export default function SetupPage() {
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">
-                    Bio{" "}
+                    {s("bio")}{" "}
                     <span className="text-muted-foreground font-normal">
-                      (optional)
+                      {s("optional")}
                     </span>
                   </label>
                   <Textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Tell us about yourself..."
+                    placeholder={s("bioPlaceholder")}
                     rows={2}
                     maxLength={160}
                     className="resize-none"
@@ -354,12 +357,12 @@ export default function SetupPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Camera className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-bold text-foreground">
-                    Pick your avatar
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    {s("pickAvatar")}
                   </h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload a photo or choose a generated style.
+                  {s("avatarHint")}
                 </p>
               </div>
 
@@ -376,7 +379,7 @@ export default function SetupPage() {
                   ) : (
                     <Camera className="h-4 w-4" />
                   )}
-                  Upload Photo
+                  {s("uploadPhoto")}
                 </Button>
                 {avatarUrl && (
                   <Button
@@ -439,12 +442,12 @@ export default function SetupPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Palette className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-bold text-foreground">
-                    Choose your banner
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    {s("chooseBanner")}
                   </h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Pick a gradient for your profile header.
+                  {s("bannerHint")}
                 </p>
               </div>
 
@@ -477,12 +480,12 @@ export default function SetupPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-bold text-foreground">
-                    What are you into?
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    {s("interests")}
                   </h2>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Select up to 8 skills or interests.
+                  {s("interestsHint")}
                 </p>
               </div>
 
@@ -528,7 +531,7 @@ export default function SetupPage() {
                 className="gap-1"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Back
+                {s("back")}
               </Button>
             ) : (
               <div />
@@ -541,7 +544,7 @@ export default function SetupPage() {
                 size="sm"
                 className="gap-1"
               >
-                Next
+                {s("next")}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
@@ -554,12 +557,12 @@ export default function SetupPage() {
                 {saving ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
+                    {s("saving")}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Finish Setup
+                    {s("finish")}
                   </>
                 )}
               </Button>
