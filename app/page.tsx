@@ -7,10 +7,12 @@ import { useTranslation } from "react-i18next";
 import { LogoMark } from "@/components/brand/Logo";
 import { FeedCard, type FeedItem, type FeedKind } from "@/components/feed/FeedCard";
 import Leaderboard from "@/components/Leaderboard";
+import { Chip, ChipRow } from "@/components/common/Chip";
+import { EmptyState } from "@/components/common/States";
+import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
 
 /* ── API shapes (only the fields the feed uses) ─────────────────────────── */
 interface Author { display_name?: string | null; user_name?: string | null; avatar_url?: string | null }
@@ -91,10 +93,10 @@ export default function HomePage() {
             <p className="mt-1 text-sm text-muted-foreground">{t("home.introText")}</p>
           </div>
           <div className="flex gap-2">
-            <Button asChild className="rounded-full">
+            <Button asChild>
               <Link href="/signup">{t("auth.signUp")}</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full">
+            <Button asChild variant="outline">
               <Link href="/signin">{t("auth.signIn")}</Link>
             </Button>
           </div>
@@ -105,31 +107,20 @@ export default function HomePage() {
         <section aria-labelledby="feed-title" className="min-w-0">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <h2 id="feed-title" className="text-xl font-semibold tracking-tight">{t("home.latest")}</h2>
-            <div role="tablist" className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <ChipRow label={t("home.latest")}>
               {FILTERS.map((f) => (
-                <button
-                  key={f.key}
-                  role="tab"
-                  aria-selected={filter === f.key}
-                  onClick={() => setFilter(f.key)}
-                  className={cn(
-                    "shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                    filter === f.key
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                  )}
-                >
+                <Chip key={f.key} selected={filter === f.key} onClick={() => setFilter(f.key)}>
                   {t(f.label)}
-                </button>
+                </Chip>
               ))}
-            </div>
+            </ChipRow>
           </div>
 
           <div className="space-y-3">
             {loading
               ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)
               : feed.length === 0
-                ? <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">{t("home.empty")}</p>
+                ? <EmptyState icon={Inbox} title={t("home.empty")} />
                 : feed.map((item) => <FeedCard key={item.id} item={item} />)}
           </div>
         </section>

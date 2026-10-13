@@ -1,29 +1,25 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { BookOpen, FileEdit, LayoutGrid, List, Plus } from "lucide-react";
+import { TermCard } from "@/components/cards/TermCard";
+import { Chip, ChipRow } from "@/components/common/Chip";
+import { Pagination } from "@/components/common/Pagination";
+import { SearchInput } from "@/components/common/SearchInput";
+import { EmptyState } from "@/components/common/States";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import {
-  Search,
-  Bookmark,
-  ExternalLink,
-  LayoutGrid,
-  List,
-  Clock,
-  Plus,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  FileEdit,
-  BookOpen,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 interface DictionaryEntry {
@@ -59,57 +55,6 @@ interface SearchSuggestion {
   similarity_score: number;
 }
 
-// --- Status badge helper ---
-function StatusBadge({
-  status,
-  labels,
-}: {
-  status: string;
-  labels: Record<string, string>;
-}) {
-  const config: Record<
-    string,
-    { label: string; className: string; icon: React.ReactNode }
-  > = {
-    approved: {
-      label: labels.approved,
-      className:
-        "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1",
-      icon: <CheckCircle className="h-3 w-3" />,
-    },
-    pending_review: {
-      label: labels.pending_review,
-      className: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-      icon: <Clock className="h-3 w-3 mr-1" />,
-    },
-    draft: {
-      label: labels.draft,
-      className: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-      icon: <FileEdit className="h-3 w-3 mr-1" />,
-    },
-    rejected: {
-      label: labels.rejected,
-      className: "bg-red-500/20 text-red-400 border-red-500/30",
-      icon: <AlertCircle className="h-3 w-3 mr-1" />,
-    },
-  };
-  const c = config[status] || config.draft;
-  return (
-    <Badge className={`${c.className} text-[10px]`}>
-      {c.icon}
-      
-    </Badge>
-  );
-}
-
-function LanguageBadge({ code }: { code: string }) {
-  const labels: Record<string, string> = { mn: "MN", ja: "JA", en: "EN" };
-  return (
-    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-      {labels[code] || code.toUpperCase()}
-    </Badge>
-  );
-}
 const letterTabs = [
   "ALL",
   "A",
@@ -155,12 +100,6 @@ const sortOptions = [
 export default function DictionaryPage() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  const statusLabels = {
-    approved: t("dictionary.status.approved"),
-    pending_review: t("dictionary.status.pending_review"),
-    draft: t("dictionary.status.draft"),
-    rejected: t("dictionary.status.rejected"),
-  };
   const [activeLetter, setActiveLetter] = useState("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
@@ -272,18 +211,20 @@ export default function DictionaryPage() {
   };
 
   const totalPages = Math.ceil(totalEntries / limit);
+  const isDrafts = statusFilter === "my_drafts";
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
-      <div>
+    <div className="mx-auto grid w-full max-w-6xl gap-8 xl:grid-cols-[minmax(0,1fr)_17rem]">
+      <div className="min-w-0 space-y-4">
         <PageHeader
+          className="!mb-2"
           title={t("dictionary.title")}
           subtitle={t("dictionary.subtitle")}
           actions={
             user && (
-              <Button asChild size="sm" className="h-9 rounded-full">
+              <Button asChild>
                 <Link href="/dictionary/create">
-                  <Plus className="size-4" />
+                  <Plus />
                   <span className="hidden sm:inline">{t("dictionary.addNewTerm")}</span>
                 </Link>
               </Button>
@@ -291,387 +232,208 @@ export default function DictionaryPage() {
           }
         />
 
-        <div className="flex gap-8 xl:gap-12 justify-center">
-          {/* Main Content */}
-          <div className="min-w-0 flex-1 space-y-6">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("dictionary.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="h-10 rounded-full bg-card pl-9"
-              />
-              {/* Autocomplete suggestions */}
-              {showSuggestions && suggestions.length > 0 && (
-                <Card className="absolute z-50 w-full mt-1 border-border/40 shadow-lg">
-                  <CardContent className="p-0">
-                    {suggestions.map((s) => (
-                      <Link
-                        key={s.id}
-                        href={`/dictionary/${s.slug}`}
-                        className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors"
-                      >
-                        <span className="text-sm">{s.term}</span>
-                        <LanguageBadge code={s.language_code} />
-                      </Link>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Filters row */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Language filter */}
-              <div className="flex items-center gap-1">
-                {languageFilters.map((lf) => (
-                  <Button
-                    key={lf.value}
-                    variant={
-                      languageFilter === lf.value ? "secondary" : "ghost"
-                    }
-                    size="sm"
-                    className="h-7 px-2.5 text-xs"
-                    onClick={() => {
-                      setLanguageFilter(lf.value);
-                      setPage(1);
-                    }}
+        {/* Search + suggestions */}
+        <div className="relative">
+          <SearchInput
+            value={searchQuery}
+            onChange={(v) => {
+              setSearchQuery(v);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            placeholder={t("dictionary.searchPlaceholder")}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border bg-popover p-1 shadow-md">
+              {suggestions.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href={`/dictionary/${s.slug}`}
+                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-accent"
                   >
-                    {lf.label}
-                  </Button>
-                ))}
-              </div>
+                    {s.term}
+                    <span className="font-mono text-[10px] uppercase text-muted-foreground">{s.language_code}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-              <div className="h-4 w-px bg-border" />
-
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
+        {/* Toolbar: language · sort · drafts · view */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex h-8 items-center gap-0.5 rounded-lg bg-muted p-0.5" role="group" aria-label="Language">
+            {languageFilters.map((lf) => (
+              <button
+                key={lf.value}
+                type="button"
+                aria-pressed={languageFilter === lf.value}
+                onClick={() => {
+                  setLanguageFilter(lf.value);
                   setPage(1);
                 }}
-                className="h-7 px-2 text-xs bg-muted/40 rounded-md border border-border/40 text-foreground"
+                className={cn(
+                  "h-7 rounded-md px-2.5 font-mono text-xs font-semibold transition-colors",
+                  languageFilter === lf.value ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
+                )}
               >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {t(opt.labelKey)}
-                  </option>
-                ))}
-              </select>
+                {lf.label}
+              </button>
+            ))}
+          </div>
 
-              {/* My Drafts toggle */}
-              {user && (
-                <>
-                  <div className="h-4 w-px bg-border" />
-                  <Button
-                    variant={
-                      statusFilter === "my_drafts" ? "secondary" : "ghost"
-                    }
-                    size="sm"
-                    className="h-7 px-2.5 text-xs"
-                    onClick={() => {
-                      setStatusFilter(
-                        statusFilter === "my_drafts" ? "approved" : "my_drafts",
-                      );
-                      setPage(1);
-                    }}
-                  >
-                    <FileEdit className="h-3 w-3 mr-1" />
-                    {t("dictionary.myDrafts")}
-                  </Button>
-                </>
-              )}
+          <Select
+            value={sortBy}
+            onValueChange={(v) => {
+              setSortBy(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger size="sm" className="w-auto min-w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {t(opt.labelKey)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-              {/* View mode */}
-              <div className="ml-auto flex items-center gap-1">
-                <Button
-                  variant={viewMode === "grid" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-7 px-2.5 text-xs"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-7 px-2.5 text-xs"
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Letter Tabs */}
-            <Tabs
-              value={activeLetter}
-              onValueChange={(val) => {
-                setActiveLetter(val);
-                setSearchQuery("");
+          {user && (
+            <Chip
+              selected={isDrafts}
+              onClick={() => {
+                setStatusFilter(isDrafts ? "approved" : "my_drafts");
                 setPage(1);
               }}
             >
-              <TabsList className="scrollbar-none flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto bg-muted/60 p-1 sm:flex-wrap">
-                {letterTabs.map((letter) => (
-                  <TabsTrigger
-                    key={letter}
-                    value={letter}
-                    className="min-w-7 shrink-0 grow-0 px-2 py-1 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                  >
-                    {letter}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+              <FileEdit />
+              {t("dictionary.myDrafts")}
+            </Chip>
+          )}
 
-            {/* Entries Grid / List */}
-            {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : entries.length === 0 ? (
-              <div className="text-center py-16 space-y-3">
-                <BookOpen className="h-10 w-10 mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  {debouncedSearch
-                    ? t("dictionary.noEntriesForSearch", {
-                        search: debouncedSearch,
-                      })
-                    : statusFilter === "my_drafts"
-                      ? t("dictionary.noDraftsYet")
-                      : t("dictionary.noEntriesForLetter")}
-                </p>
-                {user && (
-                  <Link href="/dictionary/create">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs mt-2"
-                    >
-                      <Plus className="h-3.5 w-3.5 mr-1" />
-                      {t("dictionary.createFirstEntry")}
-                    </Button>
-                  </Link>
+          <div className="ml-auto inline-flex h-8 items-center gap-0.5 rounded-lg bg-muted p-0.5" role="group" aria-label="View">
+            {([["grid", LayoutGrid], ["list", List]] as const).map(([mode, Icon]) => (
+              <button
+                key={mode}
+                type="button"
+                aria-label={mode}
+                aria-pressed={viewMode === mode}
+                onClick={() => setViewMode(mode)}
+                className={cn(
+                  "flex size-7 items-center justify-center rounded-md transition-colors",
+                  viewMode === mode ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
                 )}
-              </div>
-            ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {entries.map((entry) => (
-                  <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
-                    <div className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group h-full bg-card rounded-md p-4 flex flex-col">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                            {entry.display_term || entry.term}
-                          </h3>
-                          {entry.reading && (
-                            <span className="text-xs text-muted-foreground">
-                              ({entry.reading})
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-                          <LanguageBadge code={entry.language_code} />
-                          {(entry.translation_languages || []).map((lang) => (
-                            <LanguageBadge key={lang} code={lang} />
-                          ))}
-                          <StatusBadge
-                            status={entry.status}
-                            labels={statusLabels}
-                          />
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                        {entry.display_definition || entry.definition}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-1">
-                          {entry.tags.slice(0, 2).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-[10px] font-normal px-1.5 py-0"
-                            >
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                          <span>
-                            {t("dictionary.views", { count: entry.views })}
-                          </span>
-                          {user && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleToggleSave(entry.id, entry.saved);
-                              }}
-                              className="hover:text-foreground transition-colors"
-                            >
-                              <Bookmark
-                                className={`h-3 w-3 ${entry.saved ? "fill-current" : ""}`}
-                              />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 pt-1">
-                        <Avatar className="h-4 w-4">
-                          <AvatarImage src={entry.author.avatar_url} />
-                          <AvatarFallback className="text-[8px]">
-                            {entry.author.display_name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-[10px] text-muted-foreground">
-                          {entry.author.display_name}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {entries.map((entry) => (
-                  <Link key={entry.id} href={`/dictionary/${entry.slug}`}>
-                    <Card className="border-border/40 hover:shadow-sm transition-all duration-200 cursor-pointer group">
-                      <CardContent className="p-3 flex items-center gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-sm font-semibold group-hover:text-foreground/90 transition-colors">
-                              {entry.display_term || entry.term}
-                            </h3>
-                            {entry.reading && (
-                              <span className="text-xs text-muted-foreground">
-                                ({entry.reading})
-                              </span>
-                            )}
-                            <LanguageBadge code={entry.language_code} />
-                            {(entry.translation_languages || []).map((lang) => (
-                              <LanguageBadge key={lang} code={lang} />
-                            ))}
-                            <StatusBadge
-                              status={entry.status}
-                              labels={statusLabels}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1 mt-0.5">
-                            {entry.display_definition || entry.definition}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="text-[10px] text-muted-foreground">
-                            {t("dictionary.views", { count: entry.views })}
-                          </span>
-                          {user && (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleToggleSave(entry.id, entry.saved);
-                              }}
-                            >
-                              <Bookmark
-                                className={`h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors ${entry.saved ? "fill-current" : ""}`}
-                              />
-                            </button>
-                          )}
-                          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
-                  {t("dictionary.pagination.previous")}
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  {t("dictionary.pagination.pageOf", {
-                    page,
-                    totalPages,
-                  })}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage(page + 1)}
-                >
-                  {t("dictionary.pagination.next")}
-                </Button>
-              </div>
-            )}
+              >
+                <Icon className="size-4" />
+              </button>
+            ))}
           </div>
-
-          {/* Right Sidebar */}
-          <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
-            {/* Stats */}
-            <Card className="border-border/40">
-              <CardContent className="p-4 space-y-3">
-                <h3 className="text-sm font-semibold">
-                  {t("dictionary.stats")}
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center">
-                    <p className="text-lg font-bold">{totalEntries}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {t("dictionary.statsTotalEntries")}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold">
-                      {languageFilters.length}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {t("dictionary.statsLanguages")}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Can't find the term? */}
-            <Card className="border-border/40">
-              <CardContent className="p-4 text-center space-y-2">
-                <BookOpen className="h-6 w-6 mx-auto text-muted-foreground" />
-                <h3 className="text-sm font-semibold">
-                  {t("dictionary.cantFindTerm")}
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {t("dictionary.cantFindTermDesc")}
-                </p>
-                <Link href="/dictionary/create">
-                  <Button size="sm" className="text-xs mt-1">
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    {t("dictionary.addNewTerm")}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </aside>
         </div>
+
+        {/* A–Z */}
+        {!debouncedSearch && (
+          <ChipRow label="Alphabet" className="!gap-1">
+            {letterTabs.map((letter) => (
+              <button
+                key={letter}
+                type="button"
+                aria-pressed={activeLetter === letter}
+                onClick={() => {
+                  setActiveLetter(letter);
+                  setPage(1);
+                }}
+                className={cn(
+                  "h-8 min-w-8 shrink-0 rounded-md px-2 text-xs font-semibold transition-colors",
+                  activeLetter === letter
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                )}
+              >
+                {letter === "ALL" ? t("common.all") : letter}
+              </button>
+            ))}
+          </ChipRow>
+        )}
+
+        {!loading && (
+          <p className="text-sm text-muted-foreground">{t("dictionary.termCount", { count: totalEntries })}</p>
+        )}
+
+        {/* Results */}
+        {loading ? (
+          <div className={cn("grid gap-3", viewMode === "grid" && "sm:grid-cols-2 lg:grid-cols-3")}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className={cn("rounded-xl", viewMode === "grid" ? "h-40" : "h-16")} />
+            ))}
+          </div>
+        ) : entries.length === 0 ? (
+          <EmptyState
+            icon={BookOpen}
+            title={
+              debouncedSearch
+                ? t("dictionary.noEntriesForSearch", { search: debouncedSearch })
+                : isDrafts
+                  ? t("dictionary.noDraftsYet")
+                  : t("dictionary.noEntriesForLetter")
+            }
+            action={
+              user && (
+                <Button asChild variant="secondary" size="sm">
+                  <Link href="/dictionary/create">
+                    <Plus />
+                    {t("dictionary.createFirstEntry")}
+                  </Link>
+                </Button>
+              )
+            }
+          />
+        ) : (
+          <div className={cn("grid gap-3", viewMode === "grid" && "sm:grid-cols-2 lg:grid-cols-3")}>
+            {entries.map((entry) => (
+              <TermCard
+                key={entry.id}
+                entry={entry}
+                layout={viewMode === "grid" ? "grid" : "row"}
+                onToggleSave={user ? handleToggleSave : undefined}
+              />
+            ))}
+          </div>
+        )}
+
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
       </div>
+
+      {/* Sidebar */}
+      <aside className="hidden space-y-4 xl:block xl:sticky xl:top-6 xl:self-start">
+        <div className="rounded-xl border bg-card p-4 shadow-xs">
+          <h2 className="text-sm font-semibold">{t("dictionary.stats")}</h2>
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-center">
+            <div className="rounded-lg bg-muted/60 py-2.5">
+              <dt className="text-[11px] text-muted-foreground">{t("dictionary.statsTotalEntries")}</dt>
+              <dd className="text-lg font-semibold tabular-nums">{totalEntries}</dd>
+            </div>
+            <div className="rounded-lg bg-muted/60 py-2.5">
+              <dt className="text-[11px] text-muted-foreground">{t("dictionary.statsLanguages")}</dt>
+              <dd className="text-lg font-semibold tabular-nums">{languageFilters.length}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center shadow-xs">
+          <BookOpen className="mx-auto size-6 text-primary" />
+          <h2 className="mt-2 text-sm font-semibold">{t("dictionary.cantFindTerm")}</h2>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{t("dictionary.cantFindTermDesc")}</p>
+          <Button asChild variant="secondary" size="sm" className="mt-3">
+            <Link href="/dictionary/create">
+              <Plus />
+              {t("dictionary.addNewTerm")}
+            </Link>
+          </Button>
+        </div>
+      </aside>
     </div>
   );
 }

@@ -46,7 +46,11 @@
     "untitled": "無題",
     "comingSoon": "近日公開",
     "comingSoonDesc": "このセクションは現在準備中です。次回のアップデートをお待ちください。",
-    "refresh": "更新"
+    "refresh": "更新",
+    "retry": "再試行",
+    "clearSearch": "検索をクリア",
+    "loadFailed": "問題が発生しました",
+    "readTime": "{{count}}分で読めます"
   },
   "sidebar": {
     "home": "ホーム",
@@ -415,6 +419,11 @@
         "hoursAgo": "{{count}}時間前",
         "daysAgo": "{{count}}日前"
       }
+    },
+    "status": {
+      "draft": "下書き",
+      "published": "公開済み",
+      "archieved": "アーカイブ"
     }
   },
   "discussions": {
@@ -582,7 +591,8 @@
       "ja": "日本語",
       "en": "英語"
     },
-    "stats": "辞書の統計"
+    "stats": "辞書の統計",
+    "termCount": "{{count}} 件の用語"
   },
   "project": {
     "title": "プロジェクト",

@@ -1,27 +1,9 @@
-import { ContentCard } from "@/components/content/ContentCard";
-import { ContentItem, ArticleContent } from "@/lib/types/content";
+import { ArticleCard } from "@/components/cards/ArticleCard";
 import { useContentInteractions } from "@/lib/hooks/mutations/useContentInteractions";
+import type { ArticleContent, ContentItem } from "@/lib/types/content";
 
-interface ArticleCardWrapperProps {
-  item: ContentItem<ArticleContent>;
-}
-
-/**
- * Wrapper component for ContentCard that handles article-specific interactions.
- * This component is needed to properly use hooks for each article item.
- */
-export function ArticleCardWrapper({ item }: ArticleCardWrapperProps) {
-  const { like, bookmark } = useContentInteractions(
-    item.content.id,
-    item.content.type,
-  );
-
-  return (
-    <ContentCard
-      item={item}
-      onLike={() => like.mutate()}
-      onBookmark={() => bookmark.mutate()}
-      disabled={like.isPending || bookmark.isPending}
-    />
-  );
+/** Hooks need one component per list item, so the card's mutations live here. */
+export function ArticleCardWrapper({ item }: { item: ContentItem<ArticleContent> }) {
+  const { bookmark } = useContentInteractions(item.content.id, item.content.type);
+  return <ArticleCard item={item} onBookmark={() => bookmark.mutate()} busy={bookmark.isPending} />;
 }

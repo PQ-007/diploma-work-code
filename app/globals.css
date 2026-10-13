@@ -43,6 +43,8 @@
   --accent-foreground: #14286e;
   --destructive: #d4202c;
   --destructive-foreground: #ffffff;
+  --success: #0f8a5f;
+  --warning: #b46a07;
   --border: #e1e6ef;
   --input: #d5dcea;
   --ring: #6ba3d2;
@@ -122,6 +124,8 @@
   --accent-foreground: #e6ebf5;
   --destructive: #f0505b;
   --destructive-foreground: #ffffff;
+  --success: #3ccf8e;
+  --warning: #f2b35a;
   --border: #1f2944;
   --input: #263254;
   --ring: #8ab8e3;
@@ -201,6 +205,8 @@
   --color-brand-blue: var(--brand-blue);
   --color-brand-red: var(--brand-red);
   --color-brand-sky: var(--brand-sky);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

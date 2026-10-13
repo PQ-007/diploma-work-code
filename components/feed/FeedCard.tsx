@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { Blocks, Eye, FileText, FolderGit2, Heart, MessageSquare, ThumbsUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { LanguageBadge } from "@/components/common/LanguageBadge";
+import { Stat } from "@/components/common/Stat";
+import { TagList } from "@/components/common/Tag";
+import { UserChip } from "@/components/common/UserChip";
+import { Badge } from "@/components/ui/badge";
 import { relativeTime } from "@/lib/utils/relativeTime";
 
 export type FeedKind = "article" | "project" | "discussion" | "term";
@@ -24,10 +27,10 @@ export interface FeedItem {
 }
 
 const KIND = {
-  article: { icon: FileText, label: "home.kind.article", tone: "bg-brand-blue/10 text-brand-blue" },
-  project: { icon: FolderGit2, label: "home.kind.project", tone: "bg-brand-sky/15 text-[color:var(--brand-blue)]" },
-  discussion: { icon: MessageSquare, label: "home.kind.discussion", tone: "bg-brand-red/10 text-brand-red" },
-  term: { icon: Blocks, label: "home.kind.term", tone: "bg-muted text-muted-foreground" },
+  article: { icon: FileText, label: "home.kind.article", tone: "brand" },
+  project: { icon: FolderGit2, label: "home.kind.project", tone: "sky" },
+  discussion: { icon: MessageSquare, label: "home.kind.discussion", tone: "danger" },
+  term: { icon: Blocks, label: "home.kind.term", tone: "neutral" },
 } as const;
 
 /** Strip markdown so excerpts read as plain text. */
@@ -50,55 +53,32 @@ export function FeedCard({ item }: { item: FeedItem }) {
       <div className="flex gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium", kind.tone)}>
-              <kind.icon className="size-3" />
+            <Badge variant={kind.tone}>
+              <kind.icon />
               {t(kind.label)}
-            </span>
-            {item.author && (
-              <span className="inline-flex min-w-0 items-center gap-1.5">
-                <Avatar className="size-5">
-                  {item.author.avatarUrl && <AvatarImage src={item.author.avatarUrl} alt="" />}
-                  <AvatarFallback className="text-[10px]">{item.author.name.slice(0, 1)}</AvatarFallback>
-                </Avatar>
-                <span className="truncate font-medium text-foreground/80">{item.author.name}</span>
-              </span>
-            )}
-            {item.meta && <span>{item.meta}</span>}
+            </Badge>
+            {item.author && <UserChip name={item.author.name} avatarUrl={item.author.avatarUrl} />}
+            {item.meta && <LanguageBadge code={item.meta.toLowerCase()} />}
             <span aria-hidden>·</span>
             <time dateTime={item.createdAt}>{relativeTime(item.createdAt, i18n.language)}</time>
           </div>
 
-          <h3 className="text-base font-semibold leading-snug text-foreground sm:text-[1.05rem]">
+          <h3 className="text-base font-semibold leading-snug tracking-tight sm:text-[1.05rem]">
             <Link href={item.href} className="outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:underline">
               {item.title}
             </Link>
           </h3>
-
-          {excerpt && (
-            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{excerpt}</p>
-          )}
+          {excerpt && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{excerpt}</p>}
 
           {(item.tags?.length || item.stats) && (
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground">
-              {item.tags?.slice(0, 3).map((tag) => (
-                <span key={tag} className="rounded-md bg-secondary px-1.5 py-0.5 text-secondary-foreground">
-                  #{tag}
-                </span>
-              ))}
+            <div className="mt-3 flex items-center gap-3">
+              <TagList tags={item.tags} max={3} className="min-w-0 flex-1" />
               {item.stats && (
-                <span className="ml-auto inline-flex items-center gap-3">
-                  {item.stats.views != null && (
-                    <span className="inline-flex items-center gap-1"><Eye className="size-3.5" />{item.stats.views}</span>
-                  )}
-                  {item.stats.likes != null && (
-                    <span className="inline-flex items-center gap-1"><Heart className="size-3.5" />{item.stats.likes}</span>
-                  )}
-                  {item.stats.votes != null && (
-                    <span className="inline-flex items-center gap-1"><ThumbsUp className="size-3.5" />{item.stats.votes}</span>
-                  )}
-                  {item.stats.comments != null && (
-                    <span className="inline-flex items-center gap-1"><MessageSquare className="size-3.5" />{item.stats.comments}</span>
-                  )}
+                <span className="ml-auto flex shrink-0 items-center gap-3">
+                  {item.stats.views != null && <Stat icon={Eye} value={item.stats.views} />}
+                  {item.stats.likes != null && <Stat icon={Heart} value={item.stats.likes} />}
+                  {item.stats.votes != null && <Stat icon={ThumbsUp} value={item.stats.votes} />}
+                  {item.stats.comments != null && <Stat icon={MessageSquare} value={item.stats.comments} />}
                 </span>
               )}
             </div>

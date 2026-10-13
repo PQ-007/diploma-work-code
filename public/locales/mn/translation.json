@@ -46,7 +46,11 @@
     "untitled": "Гарчиггүй",
     "comingSoon": "Тун удахгүй",
     "comingSoonDesc": "Энэ хэсгийг одоо хөгжүүлж байна. Дараагийн шинэчлэлтээр нэмэгдэнэ.",
-    "refresh": "Шинэчлэх"
+    "refresh": "Шинэчлэх",
+    "retry": "Дахин оролдох",
+    "clearSearch": "Хайлт цэвэрлэх",
+    "loadFailed": "Алдаа гарлаа",
+    "readTime": "{{count}} мин унших"
   },
   "sidebar": {
     "home": "Нүүр",
@@ -414,6 +418,11 @@
         "hoursAgo": "{{count}} цагийн өмнө",
         "daysAgo": "{{count}} хоногийн өмнө"
       }
+    },
+    "status": {
+      "draft": "Ноорог",
+      "published": "Нийтлэгдсэн",
+      "archieved": "Архивласан"
     }
   },
   "discussions": {
@@ -561,9 +570,9 @@
     },
     "status": {
       "approved": "Баталгаажсан",
-      "pending_review": "ХЯНАГДАЖ БАЙНА",
-      "draft": "НООРОГ",
-      "rejected": "ТАТГАЛЗСАН"
+      "pending_review": "Хянагдаж буй",
+      "draft": "Ноорог",
+      "rejected": "Татгалзсан"
     },
     "sort": {
       "relevance": "Хамаарал",
@@ -581,7 +590,8 @@
       "mn": "Монгол",
       "ja": "日本語",
       "en": "English"
-    }
+    },
+    "termCount": "{{count}} нэр томьёо"
   },
   "project": {
     "allYears": "Бүх онууд",

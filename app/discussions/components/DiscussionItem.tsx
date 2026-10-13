@@ -1,17 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client";
+
+import { ArrowBigDown, ArrowBigUp, Bookmark, CheckCircle2, MessageSquare, Pin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
-import {
-  MessageSquare,
-  ArrowBigUp,
-  ArrowBigDown,
-  Bookmark,
-  CheckCircle2,
-  Pin,
-} from "lucide-react";
-import { getRankIcon } from "@/lib/utils/rankIcons";
+import { TagList } from "@/components/common/Tag";
+import { UserChip } from "@/components/common/UserChip";
+import { cn } from "@/lib/utils";
+import { relativeTime } from "@/lib/utils/relativeTime";
 
 export interface DiscussionItemData {
   id: string;
@@ -42,179 +38,84 @@ interface DiscussionItemProps {
   disabled?: boolean;
 }
 
-function timeAgo(dateStr: string) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+/** Q&A row: vote column on the left, question on the right. */
+export default function DiscussionItem({ item, onVote, onBookmark, onClick, disabled }: DiscussionItemProps) {
+  const { t, i18n } = useTranslation();
+  const excerpt = item.body?.replace(/\s+/g, " ").trim();
 
-export default function DiscussionItem({
-  item,
-  onVote,
-  onBookmark,
-  onClick,
-  disabled,
-}: DiscussionItemProps) {
   return (
-    <Card
-      className={`overflow-hidden border-border/40 transition-all duration-200 hover:shadow-lg ${
-        item.pinned ? "border-foreground/20 bg-muted/20" : ""
-      } cursor-pointer`}
-      onClick={() => onClick(item.id)}
+    <article
+      className={cn(
+        "group relative flex gap-3 rounded-xl border bg-card p-3 shadow-xs transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-sm sm:gap-4 sm:p-4",
+        item.pinned && "border-primary/30 bg-accent/30",
+      )}
     >
-      {/* Author header */}
-      <div className="px-4 flex items-center gap-3">
-        <Link
-          href={`/profile/${item.author.user_name || item.author.id}`}
-          className="flex items-center gap-3 flex-1 min-w-0"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+      {/* Votes */}
+      <div className="relative z-10 flex w-10 shrink-0 flex-col items-center rounded-lg bg-muted/60 py-1">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Upvote"
+          aria-pressed={item.userVote === "up"}
+          disabled={disabled}
+          onClick={() => onVote(item.id, "up")}
+          className={cn("size-7", item.userVote === "up" ? "text-primary" : "text-muted-foreground")}
         >
-          <Avatar className="h-9 w-9 border border-border/40">
-            <AvatarImage src={item.author.avatar_url} />
-            <AvatarFallback className="text-xs font-medium">
-              {item.author.display_name?.[0]?.toUpperCase() || "?"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold truncate">
-                {item.author.display_name}
-              </span>
-              {getRankIcon(item.author.ranking_point || 0)}
-              {item.pinned && (
-                <Pin className="h-3 w-3 text-muted-foreground shrink-0" />
-              )}
-              {item.answered && (
-                <Badge
-                  variant="secondary"
-                  className="shrink-0 text-[10px] font-normal border border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10 px-1.5 py-0"
-                >
-                  <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
-                  Answered
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span>{timeAgo(item.created_at)}</span>
-              <span>·</span>
-              <span>{item.author.ranking_point || 0} points</span>
-            </div>
-          </div>
-        </Link>
+          <ArrowBigUp className="size-5" fill={item.userVote === "up" ? "currentColor" : "none"} />
+        </Button>
+        <span className="text-sm font-semibold tabular-nums">{item.votes}</span>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Downvote"
+          aria-pressed={item.userVote === "down"}
+          disabled={disabled}
+          onClick={() => onVote(item.id, "down")}
+          className={cn("size-7", item.userVote === "down" ? "text-destructive" : "text-muted-foreground")}
+        >
+          <ArrowBigDown className="size-5" fill={item.userVote === "down" ? "currentColor" : "none"} />
+        </Button>
       </div>
 
-      {/* Post body — clickable to open modal */}
-      <button
-        className="w-full text-left px-4 pb-2 cursor-pointer focus:outline-none"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClick(item.id);
-        }}
-      >
-        <h2 className="text-[15px] font-semibold leading-snug mb-1">
-          {item.title}
-        </h2>
-        {item.body && (
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-            {item.body}
-          </p>
+      {/* Question */}
+      <div className="min-w-0 flex-1">
+        {(item.pinned || item.answered) && (
+          <div className="mb-1.5 flex gap-1.5">
+            {item.pinned && <Badge variant="brand"><Pin />Pinned</Badge>}
+            {item.answered && <Badge variant="success"><CheckCircle2 />{t("discussions.answered", "Answered")}</Badge>}
+          </div>
         )}
-      </button>
-
-      {/* Tags */}
-      {item.tags.length > 0 && (
-        <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-          {item.tags.slice(0, 4).map((tag) => (
-            <Badge
-              key={tag}
-              variant="secondary"
-              className="px-1.5 py-0 text-[10px] font-normal border border-border/40"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {/* Action bar — Facebook-style */}
-      <div className="border-t border-border/30 px-2 py-1 flex items-center justify-between">
-        {/* Vote */}
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-8 gap-1 px-2 hover:bg-transparent hover:text-primary ${
-              item.userVote === "up" ? "text-primary" : "text-muted-foreground "
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onVote(item.id, "up");
-            }}
+        <h3 className="text-[1.02rem] font-semibold leading-snug tracking-tight">
+          <button
+            type="button"
+            onClick={() => onClick(item.id)}
+            className="text-left outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:underline"
           >
-            <ArrowBigUp
-              className="h-5 w-5"
-              fill={item.userVote === "up" ? "currentColor" : "none"}
-            />
-          </Button>
-          <span className="text-xs font-semibold tabular-nums min-w-[2ch] text-center text-muted-foreground">
-            {item.votes}
+            {item.title}
+          </button>
+        </h3>
+        {excerpt && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{excerpt}</p>}
+        <TagList tags={item.tags} max={3} className="mt-2.5" />
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <UserChip name={item.author.display_name} avatarUrl={item.author.avatar_url} username={item.author.user_name} />
+          <time dateTime={item.created_at}>{relativeTime(item.created_at, i18n.language)}</time>
+          <span className="inline-flex items-center gap-1">
+            <MessageSquare className="size-3.5" />
+            {item.commentCount}
           </span>
           <Button
             variant="ghost"
-            size="sm"
-            className={`h-8 gap-1 px-2 hover:bg-transparent hover:text-destructive ${
-              item.userVote === "down"
-                ? "text-destructive"
-                : "text-muted-foreground"
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onVote(item.id, "down");
-            }}
-          >
-            <ArrowBigDown
-              className="h-5 w-5"
-              fill={item.userVote === "down" ? "currentColor" : "none"}
-            />
-          </Button>
-        </div>
-
-        <div className="flex items-center">
-          {/* Comment indicator */}
-          <div className="h-8 px-3 inline-flex items-center gap-1.5 text-muted-foreground">
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span className="text-xs">{item.commentCount}</span>
-          </div>
-
-          {/* Bookmark */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-8 px-2 hover:bg-transparent ${
-              item.bookmarked
-                ? "text-primary"
-                : "text-muted-foreground hover:text-primary"
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onBookmark(item.id);
-            }}
+            size="icon-sm"
+            aria-label="Bookmark"
+            aria-pressed={item.bookmarked}
             disabled={disabled}
+            onClick={() => onBookmark(item.id)}
+            className={cn("relative z-10 ml-auto -my-1 -mr-1.5", item.bookmarked ? "text-primary" : "text-muted-foreground")}
           >
-            <Bookmark
-              className="h-4 w-4"
-              fill={item.bookmarked ? "currentColor" : "none"}
-            />
+            <Bookmark fill={item.bookmarked ? "currentColor" : "none"} />
           </Button>
         </div>
       </div>
-    </Card>
+    </article>
   );
 }

@@ -46,7 +46,11 @@
     "untitled": "Untitled",
     "comingSoon": "Coming soon",
     "comingSoonDesc": "We're still building this section. Check back after the next update.",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "retry": "Try again",
+    "clearSearch": "Clear search",
+    "loadFailed": "Something went wrong",
+    "readTime": "{{count}} min read"
   },
   "sidebar": {
     "home": "Home",
@@ -416,6 +420,11 @@
         "hoursAgo": "{{count}}h ago",
         "daysAgo": "{{count}}d ago"
       }
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archieved": "Archived"
     }
   },
   "discussions": {
@@ -563,9 +572,9 @@
     },
     "status": {
       "approved": "Verified",
-      "pending_review": "PENDING REVIEW",
-      "draft": "DRAFT",
-      "rejected": "REJECTED"
+      "pending_review": "Pending review",
+      "draft": "Draft",
+      "rejected": "Rejected"
     },
     "sort": {
       "relevance": "Relevance",
@@ -583,7 +592,8 @@
       "mn": "Монгол",
       "ja": "日本語",
       "en": "English"
-    }
+    },
+    "termCount": "{{count}} terms"
   },
   "project": {
     "title": "Projects",
