@@ -16,6 +16,7 @@ import {
   FileText,
   MessageSquare,
   MousePointerClick,
+  SwatchBook,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
@@ -46,6 +47,12 @@ const CreateButton = () => {
           label: t("create_button.dictionary"),
           description: t("create_button.dictionary_disc"),
           action: () => handleAction("/dictionary/create"),
+        },
+        {
+          icon: SwatchBook,
+          label: t("create_button.flashcards"),
+          description: t("create_button.flashcards_disc"),
+          action: () => handleAction("/flashcards"),
         },
       ],
     },

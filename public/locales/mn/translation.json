@@ -228,6 +228,17 @@
       "discussion": "Асуулт асуух"
     }
   },
+  "ranking": {
+    "topRated": "Тэргүүлэгчид (оюутнууд)",
+    "topContributors": "Тэргүүлэгчид (бусад)",
+    "weeklyLeaders": "Энэ долоо хоногийн шилдгүүд",
+    "trendingTopics": "Тренд сэдвүүд",
+    "suggestedUsers": "Санал болгож буй хэрэглэгчид",
+    "viewAll": "Бүгдийг харах",
+    "posts": "Постууд",
+    "thisWeek": "Энэ долоо хоног",
+    "rank": "Ранк"
+  },
   "nav_user": {
     "profile": "Профайл",
     "settings": "Тохиргоо",
@@ -245,6 +256,8 @@
     "article_disc": "Шинэ нийтлэл бичих",
     "dictionary": "Нэр томьёо",
     "dictionary_disc": "Техникийн нэр томьёо нэмэх",
+    "flashcards": "Флаш картууд",
+    "flashcards_disc": "Флаш карт үүсгэх",
     "discussions": "Асуулт",
     "discussions_disc": "Шинэ асуулт үүсгэх"
   },

@@ -230,6 +230,17 @@
       "discussion": "ディスカッション"
     }
   },
+  "ranking": {
+    "topRated": "ユーザーランキング（学生）",
+    "topContributors": "ユーザーランキング（他人）",
+    "weeklyLeaders": "週間リーダー",
+    "trendingTopics": "トレンドトピック",
+    "suggestedUsers": "おすすめユーザー",
+    "viewAll": "すべて見る",
+    "posts": "投稿",
+    "thisWeek": "今週",
+    "rank": "Rank"
+  },
   "nav_user": {
     "profile": "プロフィール",
     "settings": "設定",
@@ -246,6 +257,8 @@
     "article_disc": "新しい記事を書く",
     "dictionary": "用語",
     "dictionary_disc": "技術用語を追加する",
+    "flashcards": "フラッシュカード",
+    "flashcards_disc": "テキストからフラッシュカードを作成する",
     "discussions": "ディスカッション",
     "discussions_disc": "新しいディスカッションを開始する"
   },

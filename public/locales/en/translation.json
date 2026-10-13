@@ -230,6 +230,17 @@
       "discussion": "Discussion"
     }
   },
+  "ranking": {
+    "topRated": "Rankings (Students)",
+    "topContributors": "Rankings (Others)",
+    "weeklyLeaders": "This Week's Leaders",
+    "trendingTopics": "Trending Topics",
+    "suggestedUsers": "Suggested for You",
+    "viewAll": "View All",
+    "posts": "posts",
+    "thisWeek": "this week",
+    "rank": "Rank"
+  },
   "nav_user": {
     "profile": "Profile",
     "settings": "Settings",
@@ -247,6 +258,8 @@
     "article_disc": "Write a new article",
     "dictionary": "Dictionary term",
     "dictionary_disc": "Add a technical term",
+    "flashcards": "Flashcards",
+    "flashcards_disc": "Make flashcards from text",
     "discussions": "Discussions",
     "discussions_disc": "Start a new discussion"
   },
