@@ -45,7 +45,8 @@
     "saveChanges": "変更を保存",
     "untitled": "無題",
     "comingSoon": "近日公開",
-    "comingSoonDesc": "このセクションは現在準備中です。次回のアップデートをお待ちください。"
+    "comingSoonDesc": "このセクションは現在準備中です。次回のアップデートをお待ちください。",
+    "refresh": "更新"
   },
   "sidebar": {
     "flashcards": "フラッシュカード",
@@ -142,7 +143,8 @@
       "pinned": "固定済み",
       "genericError": "問題が発生しました",
       "networkError": "ネットワークエラー - もう一度お試しください"
-    }
+    },
+    "alumni": "卒業生"
   },
   "auth": {
     "signIn": "サインイン",
@@ -454,7 +456,8 @@
       "pollQuestion": "質問",
       "pollQuestionPlaceholder": "質問を入力してください...",
       "pollEndDate": "終了日時（任意）",
-      "optionsCount": "{{current}}/{{max}} 個の選択肢"
+      "optionsCount": "{{current}}/{{max}} 個の選択肢",
+      "failed": "投稿できませんでした"
     }
   },
   "dictionary": {
@@ -580,7 +583,8 @@
       "mn": "モンゴル語",
       "ja": "日本語",
       "en": "英語"
-    }
+    },
+    "stats": "辞書の統計"
   },
   "project": {
     "title": "プロジェクト",
@@ -749,7 +753,14 @@
     "confirmDeleteFile": "このファイルを削除しますか？",
     "noFilesYet": "まだファイルがありません。",
     "notFound": "プロジェクトが見つかりません",
-    "notFoundDesc": "このプロジェクトは存在しないか、非公開です。"
+    "notFoundDesc": "このプロジェクトは存在しないか、非公開です。",
+    "failedToLoad": "プロジェクトを読み込めませんでした",
+    "year": "年度",
+    "allYears": "すべての年度",
+    "course": "カテゴリー",
+    "allCategories": "すべてのカテゴリー",
+    "noMyProjectsDesc": "まだプロジェクトを作成していません。",
+    "noProjectsFoundDesc": "別の検索語やフィルターをお試しください。"
   },
   "settings": {
     "title": "設定",
@@ -765,5 +776,15 @@
     "editProfile": "プロフィール編集",
     "changePassword": "パスワード変更",
     "signedInAs": "ログイン中"
+  },
+  "themeToggle": {
+    "theme": "テーマ",
+    "currentTheme": "現在のテーマ: {{theme}}",
+    "light": "ライト",
+    "lightDescription": "明るい背景",
+    "dark": "ダーク",
+    "darkDescription": "暗い背景",
+    "system": "システム",
+    "systemDescription": "デバイスの設定に合わせる"
   }
 }

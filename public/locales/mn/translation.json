@@ -45,7 +45,8 @@
     "saveChanges": "Өөрчлөлтийг хадгалах",
     "untitled": "Гарчиггүй",
     "comingSoon": "Тун удахгүй",
-    "comingSoonDesc": "Энэ хэсгийг одоо хөгжүүлж байна. Дараагийн шинэчлэлтээр нэмэгдэнэ."
+    "comingSoonDesc": "Энэ хэсгийг одоо хөгжүүлж байна. Дараагийн шинэчлэлтээр нэмэгдэнэ.",
+    "refresh": "Шинэчлэх"
   },
   "sidebar": {
     "flashcards": "Флаш карт",
@@ -141,7 +142,8 @@
       "pinned": "тогтоосон",
       "genericError": "Алдаа гарлаа",
       "networkError": "Сүлжээний алдаа - дахин оролдоно уу"
-    }
+    },
+    "alumni": "Төгсөгч"
   },
   "auth": {
     "signIn": "Нэвтрэх",
@@ -453,7 +455,8 @@
       "pollQuestion": "Асуулт",
       "pollQuestionPlaceholder": "Асуулт бичнэ үү...",
       "pollEndDate": "Дуусах хугацаа (заавал биш)",
-      "optionsCount": "{{current}}/{{max}} сонголт"
+      "optionsCount": "{{current}}/{{max}} сонголт",
+      "failed": "Нийтэлж чадсангүй"
     }
   },
   "dictionary": {
@@ -736,7 +739,12 @@
     "confirmDeleteFile": "Энэ файлыг устгах уу?",
     "noFilesYet": "Одоогоор файл алга.",
     "notFound": "Төсөл олдсонгүй",
-    "notFoundDesc": "Энэ төсөл байхгүй эсвэл хаалттай байна."
+    "notFoundDesc": "Энэ төсөл байхгүй эсвэл хаалттай байна.",
+    "failedToLoad": "Төслүүдийг ачаалж чадсангүй",
+    "year": "Он",
+    "course": "Ангилал",
+    "noMyProjectsDesc": "Та одоогоор төсөл үүсгээгүй байна.",
+    "noProjectsFoundDesc": "Өөр хайлт эсвэл шүүлтүүр ашиглаад үзнэ үү."
   },
   "settings": {
     "title": "Тохиргоо",
@@ -752,5 +760,15 @@
     "editProfile": "Профайл засах",
     "changePassword": "Нууц үг өөрчлөх",
     "signedInAs": "Нэвтэрсэн хэрэглэгч"
+  },
+  "themeToggle": {
+    "theme": "Загвар",
+    "currentTheme": "Одоогийн загвар: {{theme}}",
+    "light": "Цайвар",
+    "lightDescription": "Цайвар дэвсгэр",
+    "dark": "Бараан",
+    "darkDescription": "Бараан дэвсгэр",
+    "system": "Систем",
+    "systemDescription": "Төхөөрөмжийн тохиргоог дагах"
   }
 }

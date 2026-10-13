@@ -45,7 +45,8 @@
     "saveChanges": "Save Changes",
     "untitled": "Untitled",
     "comingSoon": "Coming soon",
-    "comingSoonDesc": "We're still building this section. Check back after the next update."
+    "comingSoonDesc": "We're still building this section. Check back after the next update.",
+    "refresh": "Refresh"
   },
   "sidebar": {
     "flashcards": "Flashcards",
@@ -142,7 +143,8 @@
       "pinned": "pinned",
       "genericError": "Something went wrong",
       "networkError": "Network error - please try again"
-    }
+    },
+    "alumni": "Alumni"
   },
   "auth": {
     "signIn": "Sign In",
@@ -455,7 +457,8 @@
       "pollQuestion": "Question",
       "pollQuestionPlaceholder": "Ask a question...",
       "pollEndDate": "End date (optional)",
-      "optionsCount": "{{current}}/{{max}} options"
+      "optionsCount": "{{current}}/{{max}} options",
+      "failed": "Failed to post"
     }
   },
   "dictionary": {
@@ -751,7 +754,14 @@
     "confirmDeleteFile": "Delete this file?",
     "noFilesYet": "No files added yet.",
     "notFound": "Project not found",
-    "notFoundDesc": "This project doesn't exist, or it's private."
+    "notFoundDesc": "This project doesn't exist, or it's private.",
+    "failedToLoad": "Failed to load projects",
+    "year": "Year",
+    "allYears": "All years",
+    "course": "Category",
+    "allCategories": "All categories",
+    "noMyProjectsDesc": "You haven't created any projects yet.",
+    "noProjectsFoundDesc": "Try a different search or filter."
   },
   "settings": {
     "title": "Settings",
@@ -767,5 +777,15 @@
     "editProfile": "Edit Profile",
     "changePassword": "Change Password",
     "signedInAs": "Signed in as"
+  },
+  "themeToggle": {
+    "theme": "Theme",
+    "currentTheme": "Current theme: {{theme}}",
+    "light": "Light",
+    "lightDescription": "Light background",
+    "dark": "Dark",
+    "darkDescription": "Dark background",
+    "system": "System",
+    "systemDescription": "Follow your device setting"
   }
 }
