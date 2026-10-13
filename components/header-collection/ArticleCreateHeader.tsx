@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CheckCircle2, Loader2, Clock, SaveIcon, Check, X } from "lucide-react";
 import { useArticleEditor } from "@/app/article/create/ArticleEditorContext";
@@ -89,30 +89,6 @@ export function ArticleCreateHeader() {
     hasUnsavedChanges,
   } = useArticleEditor();
 
-  const statusChipClass =
-    status === "published"
-      ? "border-transparent bg-primary text-primary-foreground"
-      : "border-border bg-muted text-muted-foreground";
-
-  const statusDotClass =
-    status === "published" ? "bg-white/90" : "bg-muted-foreground/70";
-
-  const autoSaveLabel = isAutoSaving
-    ? t("articles.create.autoSaving")
-    : lastAutoSave
-      ? formatRelativeTime(lastAutoSave, language)
-      : hasUnsavedChanges
-        ? t("articles.create.unsavedChanges")
-        : t("articles.create.autoSaveEnabled");
-
-  const autoSaveToneClass = isAutoSaving
-    ? "text-blue-600 border-blue-500/30"
-    : lastAutoSave
-      ? "text-green-600 border-green-500/30"
-      : hasUnsavedChanges
-        ? "text-orange-500 border-orange-500/30"
-        : "text-muted-foreground border-border";
-
   const saveLabel = justSaved
     ? t("articles.create.saved")
     : isEditMode
@@ -127,125 +103,56 @@ export function ArticleCreateHeader() {
     ? t("articles.create.unpublishing")
     : t("articles.create.unpublish");
 
-  const statusLabel =
-    status === "published"
-      ? t("articles.create.published")
-      : t("articles.create.draft");
+  const autoSave = (() => {
+    if (!autoSaveEnabled) return null;
+    if (isAutoSaving) return { icon: <Loader2 className="size-3.5 animate-spin" />, text: t("articles.create.autoSaving"), tone: "text-primary" };
+    if (lastAutoSave) return { icon: <CheckCircle2 className="size-3.5" />, text: t("articles.create.autoSaved", { time: formatRelativeTime(lastAutoSave, language) }), tone: "text-success" };
+    if (hasUnsavedChanges) return { icon: <Clock className="size-3.5" />, text: t("articles.create.unsavedChanges"), tone: "text-warning" };
+    return { icon: <CheckCircle2 className="size-3.5" />, text: t("articles.create.autoSaveEnabled"), tone: "text-muted-foreground" };
+  })();
 
   return (
-    <header className="sticky top-0 z-40 flex h-[var(--header-h)] shrink-0 items-center border-b bg-background/85 px-3 backdrop-blur-md sm:px-4">
-      <div className="flex w-full items-center gap-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <SidebarTrigger />
+    <header className="sticky top-0 z-40 shrink-0 border-b bg-background/85 backdrop-blur-md">
+      {/* One row from md; on phones the title drops to its own full-width row */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:h-[var(--header-h)] md:flex-nowrap md:py-0">
+        <SidebarTrigger className="size-9 text-muted-foreground" />
+
+        <div className="order-last w-full md:order-none md:w-auto md:min-w-0 md:flex-1">
           <input
             autoFocus
             type="text"
-            className="h-10 w-full rounded-lg bg-background px-4 py-1.5 text-base font-semibold md:text-lg"
+            className="h-10 w-full rounded-lg border border-transparent bg-transparent px-3 text-base font-semibold outline-none transition-colors placeholder:text-muted-foreground hover:border-input focus:border-ring md:text-lg"
             placeholder={t("articles.create.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            aria-label={t("articles.create.titlePlaceholder")}
           />
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-medium shrink-0">
-          <Badge variant="default" className={`gap-1 ${statusChipClass}`}>
-            <span
-              className={`h-2 w-2 rounded-full ${statusDotClass}`}
-              aria-hidden
-            />
-            {status === "published"
-              ? t("articles.create.published")
-              : t("articles.create.draft")}
-          </Badge>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <StatusBadge kind="article" value={status} />
 
-          {autoSaveEnabled && (
-            <>
-              <div className="h-6 w-px bg-border mx-1" aria-hidden />
-              <div className="flex items-center gap-1.5 text-sm font-medium">
-                {isAutoSaving ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin text-blue-600" />
-                    <span className="text-blue-600">
-                      {t("articles.create.autoSaving")}
-                    </span>
-                  </>
-                ) : lastAutoSave ? (
-                  <>
-                    <CheckCircle2 size={14} className="text-green-600" />
-                    <span className="text-green-600">
-                      {t("articles.create.autoSaved", {
-                        time: formatRelativeTime(lastAutoSave, language),
-                      })}
-                    </span>
-                  </>
-                ) : hasUnsavedChanges ? (
-                  <>
-                    <Clock size={14} className="text-orange-500" />
-                    <span className="text-orange-500">
-                      {t("articles.create.unsavedChanges")}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={14} className="text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {t("articles.create.autoSaveEnabled")}
-                    </span>
-                  </>
-                )}
-              </div>
-            </>
+          {autoSave && (
+            <span className={`hidden items-center gap-1.5 text-xs font-medium sm:inline-flex ${autoSave.tone}`} title={autoSave.text}>
+              {autoSave.icon}
+              <span className="hidden lg:inline">{autoSave.text}</span>
+            </span>
           )}
 
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 rounded-full"
-            onClick={handleSaveDraft}
-            disabled={isSaving || isPublishing}
-            title={saveLabel}
-            aria-label={saveLabel}
-          >
-            {isSaving ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <SaveIcon size={16} />
-            )}
+          <Button variant="secondary" size="sm" onClick={handleSaveDraft} disabled={isSaving || isPublishing} aria-label={saveLabel}>
+            {isSaving ? <Loader2 className="animate-spin" /> : <SaveIcon />}
+            <span className="hidden sm:inline">{saveLabel}</span>
           </Button>
 
-          {status !== "published" && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 rounded-full"
-              onClick={handlePublish}
-              disabled={isPublishing || isSaving || !articleId}
-              title={publishLabel}
-              aria-label={publishLabel}
-            >
-              {isPublishing ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Check size={16} />
-              )}
+          {status === "published" ? (
+            <Button variant="outline" size="sm" onClick={handleUnpublish} disabled={isPublishing || isSaving || !articleId}>
+              {isPublishing ? <Loader2 className="animate-spin" /> : <X />}
+              {unpublishLabel}
             </Button>
-          )}
-
-          {status === "published" && (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 rounded-full"
-              onClick={handleUnpublish}
-              disabled={isPublishing || isSaving || !articleId}
-              title={unpublishLabel}
-              aria-label={unpublishLabel}
-            >
-              {isPublishing ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <X size={16} />
-              )}
+          ) : (
+            <Button size="sm" onClick={handlePublish} disabled={isPublishing || isSaving || !articleId}>
+              {isPublishing ? <Loader2 className="animate-spin" /> : <Check />}
+              {publishLabel}
             </Button>
           )}
         </div>
