@@ -23,6 +23,8 @@ export type ArticlePayload = {
   base_lang_code?: string | null;
   available_translations?: string[];
   published_at: string | null;
+  /** Article creation time; shown when an old article has no publish date. */
+  created_at?: string | null;
   edited_at?: string | null;
   author?: AuthorPayload | null;
   views?: number; // Optional views property added

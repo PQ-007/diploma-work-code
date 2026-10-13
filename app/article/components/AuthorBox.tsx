@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
 import { Plus, Check } from "lucide-react";
 import Link from "next/link";
 import { getRankIcon } from "@/lib/utils/rankIcons";
@@ -21,6 +21,7 @@ type Props = {
 };
 
 export default function MinimalAuthorBox({ author }: Props) {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const profileHref = `/profile/${author.username?.replace(/^@/, "")}`;
   const rankingPoints = author.ranking; // normalize missing ranking
@@ -76,11 +77,9 @@ export default function MinimalAuthorBox({ author }: Props) {
             </div>
 
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
-                {Intl.NumberFormat("en-US", { notation: "compact" }).format(
-                  author.followersCount ?? 0,
-                )}{" "}
-                Followers
+              <span className="text-xs text-muted-foreground">
+                {Intl.NumberFormat(i18n.language, { notation: "compact" }).format(author.followersCount ?? 0)}{" "}
+                {t("profile.followers", "followers")}
               </span>
             </div>
           </div>
@@ -91,22 +90,17 @@ export default function MinimalAuthorBox({ author }: Props) {
             onClick={handleFollowToggle}
             variant={isFollowing ? "outline" : "secondary"}
             size="sm"
-            className={cn(
-              "h-8 rounded-full px-3 text-[11px] font-bold transition-all duration-200 active:scale-95",
-              isFollowing
-                ? "bg-transparent border-primary/20 text-primary hover:bg-primary/5"
-                : "hover:bg-primary hover:text-primary-foreground",
-            )}
+            aria-pressed={isFollowing}
           >
             {isFollowing ? (
               <span className="flex items-center gap-1">
-                <Check className="h-3 w-3" />
-                <span>Following</span>
+                <Check className="size-3.5" />
+                <span>{t("profile.following", "Following")}</span>
               </span>
             ) : (
               <span className="flex items-center gap-1">
-                <Plus className="h-3 w-3" />
-                <span>Follow</span>
+                <Plus className="size-3.5" />
+                <span>{t("feed.actions.follow", "Follow")}</span>
               </span>
             )}
           </Button>
@@ -114,8 +108,8 @@ export default function MinimalAuthorBox({ author }: Props) {
       </div>
 
       {author.bio && (
-        <p className="text-[12px] leading-[1.4] text-muted-foreground/80 line-clamp-2 italic font-serif">
-          "{author.bio}"
+        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+          &ldquo;{author.bio}&rdquo;
         </p>
       )}
     </div>

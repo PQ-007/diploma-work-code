@@ -107,21 +107,21 @@ function CommentItem({
           <div className="flex items-center gap-2 mt-1.5">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              size="xs"
+              className="text-muted-foreground"
               onClick={() => onReply(comment.id)}
             >
-              <CornerDownRight className="h-3 w-3 mr-1" />
+              <CornerDownRight />
               {t("articles.detail.comments.reply")}
             </Button>
             {isOwn && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                size="xs"
+                className="text-muted-foreground hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                 onClick={() => onDelete(comment.id)}
               >
-                <Trash2 className="h-3 w-3 mr-1" />
+                <Trash2 />
                 {t("articles.detail.comments.delete")}
               </Button>
             )}
@@ -249,11 +249,11 @@ const ArticleCommentSection = forwardRef<
 
   return (
     <div ref={sectionRef}>
-      <Card className="bg-card/50 border-border/60 shadow-sm">
-        <div className="p-6">
+      <Card className="py-0">
+        <div className="p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-5">
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <MessageSquare className="size-5 text-primary" />
+            <span className="text-base font-semibold">
               {t("articles.detail.comments.title", { count: comments.length })}
             </span>
           </div>

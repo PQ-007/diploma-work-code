@@ -57,7 +57,7 @@ const extractRelatedLinks = (body: string): RelatedLink[] => {
 // --- Main Page ---
 
 export default function ModernArticlePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("");
   const [article, setArticle] = useState<ArticlePayload | null>(null);
@@ -362,12 +362,13 @@ export default function ModernArticlePage() {
     loadMDX();
   }, [slug, selectedLanguage, t]);
 
-  const publishedAtText = article?.published_at
-    ? new Date(article.published_at).toLocaleDateString()
+  const shownDate = article?.published_at || article?.created_at;
+  const publishedAtText = shownDate
+    ? new Date(shownDate).toLocaleDateString(language, { year: "numeric", month: "short", day: "numeric" })
     : t("articles.detail.noDate");
 
   const editedAtText = article?.edited_at
-    ? new Date(article.edited_at).toLocaleDateString()
+    ? new Date(article.edited_at).toLocaleDateString(language, { year: "numeric", month: "short", day: "numeric" })
     : null;
 
   const displayTitle = article?.title || t("articles.untitled");

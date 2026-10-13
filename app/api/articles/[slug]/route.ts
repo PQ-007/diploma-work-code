@@ -189,6 +189,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
       {
         id: String(article.id),
         status: article.status,
+        created_at: article.created_at,
         author,
         ...selectedTranslation,
         views: nextViews,
