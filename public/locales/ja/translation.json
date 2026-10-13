@@ -438,7 +438,7 @@
     "noDiscussions": "このカテゴリーにはディスカッションがありません。",
     "stats": "ディスカッション統計",
     "totalThreads": "総スレッド数",
-    "answered": "回答済み",
+    "answered": "解決済み",
     "unanswered": "未回答",
     "topContributors": "トップ貢献者",
     "tabs": {
@@ -469,8 +469,16 @@
       "pollQuestionPlaceholder": "質問を入力してください...",
       "pollEndDate": "終了日時（任意）",
       "optionsCount": "{{current}}/{{max}} 個の選択肢",
-      "failed": "投稿できませんでした"
-    }
+      "failed": "投稿できませんでした",
+      "titleLabel": "質問",
+      "bodyLabel": "詳細",
+      "tagsLabel": "タグ"
+    },
+    "pinned": "固定",
+    "noComments": "まだ返信はありません。最初に回答しましょう。",
+    "writeComment": "返信を書く…",
+    "signInToReply": "返信するにはサインイン",
+    "send": "送信"
   },
   "dictionary": {
     "title": "辞書へようこそ",

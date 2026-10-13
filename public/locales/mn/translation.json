@@ -437,7 +437,7 @@
     "noDiscussions": "Энэ ангилалд хэлэлцүүлэг олдсонгүй.",
     "stats": "Хэлэлцүүлгийн статистик",
     "totalThreads": "Нийт сэдэв",
-    "answered": "Хариулсан",
+    "answered": "Хариулагдсан",
     "unanswered": "Хариулаагүй",
     "topContributors": "Шилдэг хувь нэмэр оруулагчид",
     "tabs": {
@@ -468,8 +468,16 @@
       "pollQuestionPlaceholder": "Асуулт бичнэ үү...",
       "pollEndDate": "Дуусах хугацаа (заавал биш)",
       "optionsCount": "{{current}}/{{max}} сонголт",
-      "failed": "Нийтэлж чадсангүй"
-    }
+      "failed": "Нийтэлж чадсангүй",
+      "titleLabel": "Асуулт",
+      "bodyLabel": "Дэлгэрэнгүй",
+      "tagsLabel": "Шошго"
+    },
+    "pinned": "Тогтоосон",
+    "noComments": "Хариулт алга. Анхны хариултыг бичээрэй.",
+    "writeComment": "Хариулт бичих…",
+    "signInToReply": "Хариулахын тулд нэвтэрнэ үү",
+    "send": "Илгээх"
   },
   "dictionary": {
     "stats": "Толь бичгийн статистик",

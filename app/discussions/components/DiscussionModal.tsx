@@ -23,6 +23,10 @@ import {
   Send,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { Tag } from "@/components/common/Tag";
+import { relativeTime } from "@/lib/utils/relativeTime";
 
 interface CommentAuthor {
   id: string;
@@ -66,16 +70,6 @@ interface DiscussionModalProps {
   onCommentCountChange?: (id: string, delta: number) => void;
 }
 
-function timeAgo(dateStr: string) {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
 
 export default function DiscussionModal({
   discussionId,
@@ -85,6 +79,7 @@ export default function DiscussionModal({
   onBookmarkChange,
   onCommentCountChange,
 }: DiscussionModalProps) {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [disc, setDisc] = useState<DiscussionDetail | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -191,7 +186,7 @@ export default function DiscussionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0">
+      <DialogContent className="flex h-[92dvh] max-h-[92dvh] max-w-[calc(100%-1rem)] flex-col gap-0 p-0 sm:h-auto sm:max-h-[85vh] sm:max-w-2xl">
         {loading || !disc ? (
           <div className="flex items-center justify-center py-20">
             <DialogTitle className="sr-only">Loading discussion</DialogTitle>
@@ -221,20 +216,17 @@ export default function DiscussionModal({
                     )}
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {timeAgo(disc.created_at)}
+                    {relativeTime(disc.created_at, i18n.language)}
                   </span>
                 </div>
                 {disc.answered && (
-                  <Badge
-                    variant="secondary"
-                    className="text-xs border border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10"
-                  >
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Answered
+                  <Badge variant="success">
+                    <CheckCircle2 />
+                    {t("discussions.answered")}
                   </Badge>
                 )}
               </div>
-              <DialogTitle className="text-base font-bold mt-2 leading-snug">
+              <DialogTitle className="mt-3 text-lg font-semibold leading-snug tracking-tight">
                 {disc.title}
               </DialogTitle>
             </DialogHeader>
@@ -249,13 +241,7 @@ export default function DiscussionModal({
               {disc.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {disc.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="px-2 py-0.5 text-xs font-normal border border-border/40"
-                    >
-                      {tag}
-                    </Badge>
+                    <Tag key={tag} name={tag} />
                   ))}
                 </div>
               )}
@@ -300,7 +286,7 @@ export default function DiscussionModal({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-8 w-8 ${disc.bookmarked ? "text-blue-500" : "text-muted-foreground hover:text-blue-500"}`}
+                    className={`h-8 w-8 ${disc.bookmarked ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
                     onClick={handleBookmark}
                     disabled={!user}
                   >
@@ -318,7 +304,7 @@ export default function DiscussionModal({
               <div className="px-5 py-3 space-y-3">
                 {comments.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">
-                    No comments yet. Be the first to reply!
+                    {t("discussions.noComments")}
                   </p>
                 ) : (
                   comments.map((c) => (
@@ -330,7 +316,7 @@ export default function DiscussionModal({
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/50 rounded-xl px-3 py-2">
+                        <div className="rounded-xl rounded-tl-sm bg-muted/60 px-3 py-2">
                           <span className="text-xs font-semibold">
                             {c.author.display_name}
                           </span>
@@ -339,7 +325,7 @@ export default function DiscussionModal({
                           </p>
                         </div>
                         <span className="text-[10px] text-muted-foreground ml-3 mt-0.5">
-                          {timeAgo(c.created_at)}
+                          {relativeTime(c.created_at, i18n.language)}
                         </span>
                       </div>
                     </div>
@@ -348,11 +334,19 @@ export default function DiscussionModal({
               </div>
             </ScrollArea>
 
+            {!user && (
+              <div className="border-t px-5 py-3 text-center">
+                <Button asChild variant="secondary" size="sm">
+                  <Link href="/signin">{t("discussions.signInToReply")}</Link>
+                </Button>
+              </div>
+            )}
+
             {/* Comment Input */}
             {user && (
               <div className="px-5 py-3 border-t border-border/40 flex items-end gap-2">
                 <Textarea
-                  placeholder="Write a comment..."
+                  placeholder={t("discussions.writeComment")}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className="min-h-[40px] max-h-[120px] resize-none text-sm"
@@ -365,14 +359,15 @@ export default function DiscussionModal({
                 />
                 <Button
                   size="icon"
-                  className="h-10 w-10 shrink-0"
+                  aria-label={t("discussions.send")}
+                  className="shrink-0"
                   onClick={handleComment}
                   disabled={!commentText.trim() || submitting}
                 >
                   {submitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="animate-spin" />
                   ) : (
-                    <Send className="h-4 w-4" />
+                    <Send />
                   )}
                 </Button>
               </div>

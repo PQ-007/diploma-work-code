@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -62,15 +62,18 @@ function DiscussionsPageContent() {
   const searchParams = useSearchParams();
   const wantsCreate = searchParams.get("create") === "1";
   const openId = searchParams.get("open");
-  useEffect(() => {
-    if (wantsCreate && user) setCreateOpen(true);
-  }, [wantsCreate, user]);
-  useEffect(() => {
-    if (openId) {
-      setSelectedId(openId);
-      setModalOpen(true);
-    }
-  }, [openId]);
+  // React-recommended "adjust state when a prop changes" (no effect round-trip).
+  const [handledCreate, setHandledCreate] = useState(false);
+  if (wantsCreate && user && !handledCreate) {
+    setHandledCreate(true);
+    setCreateOpen(true);
+  }
+  const [handledOpenId, setHandledOpenId] = useState<string | null>(null);
+  if (openId && openId !== handledOpenId) {
+    setHandledOpenId(openId);
+    setSelectedId(openId);
+    setModalOpen(true);
+  }
 
   // Use React Query hook - automatic caching and state management!
   const { data: discussions, isLoading, error, refetch } = useDiscussions();

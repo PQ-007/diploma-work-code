@@ -470,8 +470,16 @@
       "pollQuestionPlaceholder": "Ask a question...",
       "pollEndDate": "End date (optional)",
       "optionsCount": "{{current}}/{{max}} options",
-      "failed": "Failed to post"
-    }
+      "failed": "Failed to post",
+      "titleLabel": "Question",
+      "bodyLabel": "Details",
+      "tagsLabel": "Tags"
+    },
+    "pinned": "Pinned",
+    "noComments": "No replies yet. Be the first to answer.",
+    "writeComment": "Write a reply…",
+    "signInToReply": "Sign in to reply",
+    "send": "Send"
   },
   "dictionary": {
     "stats": "Dictionary Stats",

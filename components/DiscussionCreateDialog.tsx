@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/common/Form";
 import {
   Dialog,
   DialogContent,
@@ -88,23 +88,31 @@ export default function DiscussionCreateDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare className="size-5 text-primary" />
             {t("discussions.create.titleQuestion")}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3 py-1">
-          <Input
-            placeholder={t("discussions.create.titlePlaceholder")}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Textarea
-            placeholder={t("discussions.create.bodyPlaceholder")}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            className="min-h-[100px]"
-          />
+        <div className="space-y-4 py-1">
+          <Field label={t("discussions.create.titleLabel")} htmlFor="disc-title" required>
+            <Input
+              id="disc-title"
+              autoFocus
+              placeholder={t("discussions.create.titlePlaceholder")}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </Field>
+          <Field label={t("discussions.create.bodyLabel")} htmlFor="disc-body">
+            <Textarea
+              id="disc-body"
+              placeholder={t("discussions.create.bodyPlaceholder")}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className="min-h-28"
+            />
+          </Field>
+          <Field label={t("discussions.create.tagsLabel")}>
           <TagRow
             tagInput={tagInput}
             tags={tags}
@@ -114,11 +122,12 @@ export default function DiscussionCreateDialog({
             addLabel={t("discussions.create.addTag")}
             placeholder={t("discussions.create.tagPlaceholder")}
           />
+          </Field>
         </div>
 
         <DialogFooter>
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => {
               reset();
               onOpenChange(false);
@@ -129,9 +138,9 @@ export default function DiscussionCreateDialog({
           </Button>
           <Button onClick={handleCreate} disabled={!canSubmit || creating}>
             {creating ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+              <Loader2 className="animate-spin" />
             ) : (
-              <MessageSquare className="h-4 w-4 mr-1.5" />
+              <MessageSquare />
             )}
             {t("discussions.create.postQuestion")}
           </Button>
@@ -174,8 +183,7 @@ function TagRow({
           className="flex-1"
         />
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
           onClick={onAddTag}
           disabled={!tagInput.trim() || tags.length >= 5}
         >
@@ -185,12 +193,17 @@ function TagRow({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2">
           {tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 pr-1 text-xs">
-              {tag}
-              <button onClick={() => onRemoveTag(tag)} className="hover:text-foreground">
-                <X className="h-3 w-3" />
+            <span key={tag} className="inline-flex h-7 items-center gap-1 rounded-md bg-secondary pl-2 pr-1 text-xs text-secondary-foreground">
+              #{tag}
+              <button
+                type="button"
+                onClick={() => onRemoveTag(tag)}
+                aria-label={`Remove ${tag}`}
+                className="flex size-5 items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive"
+              >
+                <X className="size-3" />
               </button>
-            </Badge>
+            </span>
           ))}
         </div>
       )}
