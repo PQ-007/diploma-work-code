@@ -49,7 +49,6 @@
     "refresh": "Refresh"
   },
   "sidebar": {
-    "flashcards": "Flashcards",
     "internship": "Internship",
     "post-grad": "Post-Grad-Life",
     "contest": "Contest",
@@ -265,8 +264,6 @@
     "article_disc": "Write a new article",
     "dictionary": "Dictionary term",
     "dictionary_disc": "Add a technical term",
-    "flashcards": "Flashcards",
-    "flashcards_disc": "Make flashcards from text",
     "discussions": "Discussions",
     "discussions_disc": "Start a new discussion"
   },

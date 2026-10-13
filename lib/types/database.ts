@@ -854,47 +854,6 @@ export type Database = {
           },
         ];
       };
-      flashcards: {
-        Row: {
-          id: number;
-          user_id: string;
-          front: string;
-          back: string;
-          source_type: string | null;
-          source_id: number | null;
-          deck: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: number;
-          user_id: string;
-          front: string;
-          back: string;
-          source_type?: string | null;
-          source_id?: number | null;
-          deck?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: number;
-          user_id?: string;
-          front?: string;
-          back?: string;
-          source_type?: string | null;
-          source_id?: number | null;
-          deck?: string | null;
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "flashcards_user_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       language_skills: {
         Row: {
           id: number;

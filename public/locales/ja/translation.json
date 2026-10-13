@@ -49,7 +49,6 @@
     "refresh": "更新"
   },
   "sidebar": {
-    "flashcards": "フラッシュカード",
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
     "contest": "コンテスト",
@@ -264,8 +263,6 @@
     "article_disc": "新しい記事を書く",
     "dictionary": "用語",
     "dictionary_disc": "技術用語を追加する",
-    "flashcards": "フラッシュカード",
-    "flashcards_disc": "テキストからフラッシュカードを作成する",
     "discussions": "ディスカッション",
     "discussions_disc": "新しいディスカッションを開始する"
   },

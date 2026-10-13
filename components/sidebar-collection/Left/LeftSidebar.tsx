@@ -33,7 +33,6 @@ import {
   MessagesSquare,
   Scroll,
   Store,
-  SwatchBook,
   Telescope,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -84,13 +83,6 @@ const navData: SidebarData = {
       titleKey: "sidebar.knowledgeTree",
       icon: Scroll,
       href: "/knowledge-tree",
-      items: [],
-      authRequired: true,
-    },
-    {
-      titleKey: "sidebar.flashcards",
-      icon: SwatchBook,
-      href: "/flashcards",
       items: [],
       authRequired: true,
     },

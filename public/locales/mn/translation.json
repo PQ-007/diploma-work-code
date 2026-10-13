@@ -49,7 +49,6 @@
     "refresh": "Шинэчлэх"
   },
   "sidebar": {
-    "flashcards": "Флаш карт",
     "competitions": "Тэмцээн",
     "learn": "Сурах",
     "articles": "Нийтлэл",
@@ -263,8 +262,6 @@
     "article_disc": "Шинэ нийтлэл бичих",
     "dictionary": "Нэр томьёо",
     "dictionary_disc": "Техникийн нэр томьёо нэмэх",
-    "flashcards": "Флаш картууд",
-    "flashcards_disc": "Флаш карт үүсгэх",
     "discussions": "Асуулт",
     "discussions_disc": "Шинэ асуулт үүсгэх"
   },
