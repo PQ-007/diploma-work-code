@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shuffle, RotateCw, BookMarked } from "lucide-react";
+import { Shuffle, RotateCw } from "lucide-react";
 import type { Flashcard } from "@/lib/flashcards/types";
 import { effectiveFront, effectiveBack } from "@/lib/flashcards/types";
 
@@ -207,24 +207,6 @@ export default function FlashcardView({
               Term{isJapanese ? " · 動詞" : ""}
             </div>
 
-            {/* Source badge */}
-            {card.source_type === "dictionary" && (
-              <div className="mb-3">
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] gap-1"
-                  style={{
-                    background: "rgba(37,99,235,.16)",
-                    color: "#60a5fa",
-                    border: "1px solid rgba(37,99,235,.3)",
-                  }}
-                >
-                  <BookMarked className="h-2.5 w-2.5" />
-                  Dictionary
-                </Badge>
-              </div>
-            )}
-
             {/* Term — large */}
             <div
               className={isJapanese ? "font-jp-serif" : ""}
@@ -299,19 +281,6 @@ export default function FlashcardView({
                   </span>
                 )}
               </div>
-              {card.source_type === "dictionary" && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] gap-1"
-                  style={{
-                    background: "rgba(37,99,235,.16)",
-                    color: "#60a5fa",
-                    border: "1px solid rgba(37,99,235,.3)",
-                  }}
-                >
-                  Dictionary
-                </Badge>
-              )}
             </div>
 
             {/* Definition + translations */}

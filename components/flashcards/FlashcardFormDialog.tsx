@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,17 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   BookOpen,
   Loader2,
-  Search,
   Sparkles,
   X,
   Zap,
   ChevronLeft,
-  RotateCcw,
-  BookMarked,
 } from "lucide-react";
 import { toast } from "sonner";
 import type {
@@ -45,19 +41,8 @@ import { parseFront, parseBack } from "@/lib/flashcards/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type Mode = "pick" | "dict" | "quick";
+type Mode = "pick" | "detailed" | "quick";
 type Lang = "mn" | "ja" | "en";
-
-interface DictLookupEntry {
-  id: number;
-  term: string;
-  reading?: string;
-  language_code: string;
-  definition: string;
-  status: string;
-  slug: string;
-  translations: Array<{ language_code: string; translated_term: string }>;
-}
 
 interface FlashcardFormDialogProps {
   open: boolean;
@@ -89,7 +74,7 @@ export default function FlashcardFormDialog({
   const isEdit = !!initial;
 
   // ── UI state ─────────────────────────────────────────────────────────────
-  const [mode, setMode] = useState<Mode>(isEdit ? "dict" : "pick");
+  const [mode, setMode] = useState<Mode>(isEdit ? "detailed" : "pick");
   const [decks, setDecks] = useState<DeckWithCount[]>([]);
   const [loadingDecks, setLoadingDecks] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -97,7 +82,7 @@ export default function FlashcardFormDialog({
   // ── Deck selection ────────────────────────────────────────────────────────
   const [deckId, setDeckId] = useState<number | null>(null);
 
-  // ── Dictionary style fields ───────────────────────────────────────────────
+  // ── Detailed card fields ───────────────────────────────────────────────
   const [lang, setLang] = useState<Lang>("en");
   const [term, setTerm] = useState("");
   const [reading, setReading] = useState("");
@@ -107,19 +92,12 @@ export default function FlashcardFormDialog({
     Record<Lang, string>
   >({ mn: "", ja: "", en: "" });
 
-  // ── Dictionary / Jisho lookup state ──────────────────────────────────────
-  const [lookupQuery, setLookupQuery] = useState("");
-  const [lookupResults, setLookupResults] = useState<DictLookupEntry[]>([]);
-  const [lookingUp, setLookingUp] = useState(false);
-  const [linkedEntry, setLinkedEntry] = useState<DictLookupEntry | null>(null);
+  // ── Jisho lookup state ────────────────────────────────────────────────────
   const [jishoLoading, setJishoLoading] = useState(false);
-  const [proposeToDict, setProposeToDict] = useState(false);
 
   // ── Quick card fields ─────────────────────────────────────────────────────
   const [quickFront, setQuickFront] = useState("");
   const [quickBack, setQuickBack] = useState("");
-
-  const lookupDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Init ──────────────────────────────────────────────────────────────────
   const loadDecks = useCallback(async () => {
@@ -143,7 +121,7 @@ export default function FlashcardFormDialog({
       // Parse front/back — handles both object (JSONB) and string (text column) forms
       const eff = parseFront(initial.custom_front ?? initial.front);
       const effBack = parseBack(initial.custom_back ?? initial.back);
-      setMode("dict");
+      setMode("detailed");
       setLang(((eff?.language) ?? "en") as Lang);
       setTerm(eff?.term ?? "");
       setReading(eff?.reading ?? "");
@@ -155,7 +133,6 @@ export default function FlashcardFormDialog({
       });
       setTranslations(trans);
       setDeckId(initial.deck_id ?? defaultDeckId ?? null);
-      setLinkedEntry(null);
     } else {
       setMode("pick");
       setLang("en");
@@ -167,10 +144,6 @@ export default function FlashcardFormDialog({
       setQuickFront(defaultFront ?? "");
       setQuickBack(defaultBack ?? "");
       setDeckId(defaultDeckId ?? null);
-      setLinkedEntry(null);
-      setLookupQuery("");
-      setLookupResults([]);
-      setProposeToDict(false);
     }
   }, [open, isEdit, initial, defaultDeckId, defaultFront, defaultBack, loadDecks]);
 
@@ -178,33 +151,6 @@ export default function FlashcardFormDialog({
   useEffect(() => {
     if (deckId == null && decks.length > 0) setDeckId(decks[0].id);
   }, [decks, deckId]);
-
-  // ── Live lookup debounce ──────────────────────────────────────────────────
-  useEffect(() => {
-    const q = lookupQuery.trim();
-    if (!q || q.length < 2) {
-      setLookupResults([]);
-      return;
-    }
-    if (lookupDebounce.current) clearTimeout(lookupDebounce.current);
-    lookupDebounce.current = setTimeout(async () => {
-      setLookingUp(true);
-      try {
-        const res = await fetch(
-          `/api/flashcards/lookup?q=${encodeURIComponent(q)}&lang=${lang}`,
-        );
-        if (res.ok) {
-          const json = await res.json();
-          setLookupResults(json.entries ?? []);
-        }
-      } finally {
-        setLookingUp(false);
-      }
-    }, 300);
-    return () => {
-      if (lookupDebounce.current) clearTimeout(lookupDebounce.current);
-    };
-  }, [lookupQuery, lang]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -233,21 +179,6 @@ export default function FlashcardFormDialog({
     } finally {
       setJishoLoading(false);
     }
-  };
-
-  const handleLinkEntry = (entry: DictLookupEntry) => {
-    setLinkedEntry(entry);
-    setTerm(entry.term);
-    setReading(entry.reading ?? "");
-    setLang((entry.language_code as Lang) ?? "en");
-    setDefinition(entry.definition);
-    const trans: Record<Lang, string> = { mn: "", ja: "", en: "" };
-    (entry.translations ?? []).forEach((t) => {
-      if (t.language_code in trans) trans[t.language_code as Lang] = t.translated_term;
-    });
-    setTranslations(trans);
-    setLookupResults([]);
-    setLookupQuery("");
   };
 
   const handleCreateDeck = async () => {
@@ -285,7 +216,7 @@ export default function FlashcardFormDialog({
         return;
       }
 
-      // Dictionary style
+      // Detailed card
       if (!term.trim()) { toast.error("Term is required"); return; }
       if (!definition.trim()) { toast.error("Definition is required"); return; }
 
@@ -307,46 +238,7 @@ export default function FlashcardFormDialog({
         translations: transArr,
       };
 
-      // Determine source type/id
-      let finalSourceType = sourceType || "custom";
-      let finalSourceId = sourceId;
-
-      if (linkedEntry) {
-        finalSourceType = "dictionary";
-        finalSourceId = linkedEntry.id;
-      }
-
-      // Propose to dictionary if no linked entry and checkbox is checked
-      if (proposeToDict && !linkedEntry) {
-        const propRes = await fetch("/api/dictionary/entries", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            term: term.trim(),
-            definition: definition.trim(),
-            languageCode: lang,
-            reading: reading.trim() || undefined,
-            createFlashcard: false,
-          }),
-        });
-        if (propRes.ok) {
-          const propJson = await propRes.json();
-          finalSourceType = "dictionary";
-          finalSourceId = propJson.entry?.id;
-          toast.info("Entry proposed to dictionary — pending review");
-        }
-      }
-
-      if (isEdit && initial) {
-        // Save as custom override (preserves dict link)
-        if (initial.source_type === "dictionary" && !linkedEntry) {
-          await saveCustomOverride(initial.id, front, back);
-        } else {
-          await saveCard(front, back, finalSourceType, finalSourceId);
-        }
-      } else {
-        await saveCard(front, back, finalSourceType, finalSourceId);
-      }
+      await saveCard(front, back, sourceType || "custom", sourceId);
     } finally {
       setSaving(false);
     }
@@ -375,42 +267,6 @@ export default function FlashcardFormDialog({
     toast.success(isEdit ? "Flashcard updated" : "Flashcard created");
     onSaved(json.flashcard);
     onOpenChange(false);
-  };
-
-  const saveCustomOverride = async (
-    cardId: number,
-    customFront: FlashcardFront,
-    customBack: FlashcardBack,
-  ) => {
-    const res = await fetch(`/api/flashcards/${cardId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customFront, customBack }),
-    });
-    const json = await res.json();
-    if (!res.ok) { toast.error(json.error || "Failed to save"); return; }
-    toast.success("Customization saved");
-    onSaved(json.flashcard);
-    onOpenChange(false);
-  };
-
-  const handleResetToDict = async () => {
-    if (!initial) return;
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/flashcards/${initial.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resetCustom: true }),
-      });
-      const json = await res.json();
-      if (!res.ok) { toast.error(json.error || "Failed"); return; }
-      toast.success("Reset to dictionary content");
-      onSaved(json.flashcard);
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
   };
 
   // ── Deck selector shared UI ───────────────────────────────────────────────
@@ -464,17 +320,17 @@ export default function FlashcardFormDialog({
 
             <div className="grid grid-cols-2 gap-3 py-2">
               <button
-                onClick={() => setMode("dict")}
+                onClick={() => setMode("detailed")}
                 className="group flex flex-col items-start gap-2 rounded-xl border border-border/60 bg-card/50 hover:bg-card hover:border-primary/40 p-4 text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                   <BookOpen className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">Dictionary style</p>
+                  <p className="text-sm font-semibold">Detailed card</p>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
                     Structured with term, reading, definition, and translations.
-                    Link to dictionary or Jisho.
+                    Japanese terms can be filled from Jisho.
                   </p>
                 </div>
               </button>
@@ -550,8 +406,8 @@ export default function FlashcardFormDialog({
           </>
         )}
 
-        {/* ── Dictionary style ────────────────────────────────────── */}
-        {mode === "dict" && (
+        {/* ── Detailed card ───────────────────────────────────────── */}
+        {mode === "detailed" && (
           <>
             <DialogHeader>
               {!isEdit && (
@@ -562,86 +418,16 @@ export default function FlashcardFormDialog({
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <DialogTitle>Dictionary style</DialogTitle>
+                  <DialogTitle>Detailed card</DialogTitle>
                 </div>
               )}
               {isEdit && <DialogTitle>Edit flashcard</DialogTitle>}
               <DialogDescription>
-                {linkedEntry ? (
-                  <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                    <BookMarked className="h-3.5 w-3.5" />
-                    Linked to dictionary:{" "}
-                    <span className="font-medium">{linkedEntry.term}</span>
-                    <button
-                      onClick={() => setLinkedEntry(null)}
-                      className="ml-1 text-muted-foreground hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ) : (
-                  "Structured card with term, reading, and translations."
-                )}
+                Structured card with term, reading, and translations.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-2">
-              {/* Dict lookup search */}
-              {!isEdit && (
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Search className="h-3 w-3" />
-                    Look up in dictionary
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      value={lookupQuery}
-                      onChange={(e) => setLookupQuery(e.target.value)}
-                      placeholder="Search term..."
-                      className="h-8 text-sm pr-8"
-                    />
-                    {lookingUp && (
-                      <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
-                  {lookupResults.length > 0 && (
-                    <div className="rounded-md border border-border/60 bg-popover shadow-sm divide-y divide-border/40 max-h-40 overflow-y-auto">
-                      {lookupResults.map((e) => (
-                        <button
-                          key={e.id}
-                          onClick={() => handleLinkEntry(e)}
-                          className="w-full flex items-start gap-3 p-2.5 text-left hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-sm">{e.term}</span>
-                              {e.reading && (
-                                <span className="text-xs text-muted-foreground">
-                                  ({e.reading})
-                                </span>
-                              )}
-                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                {e.status}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                              {e.definition}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {lookupQuery.length >= 2 && !lookingUp && lookupResults.length === 0 && (
-                    <p className="text-xs text-muted-foreground px-1">
-                      Not in dictionary — fill form below to create a new card.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <Separator />
-
               {/* Language + Term + Reading */}
               <div className="grid grid-cols-[120px_1fr] gap-3">
                 <div className="space-y-1.5">
@@ -770,43 +556,6 @@ export default function FlashcardFormDialog({
               {/* Deck selector */}
               <DeckSelector />
 
-              {/* Propose to dictionary (only new cards, no linked entry) */}
-              {!isEdit && !linkedEntry && (
-                <div className="flex items-start gap-2.5">
-                  <Checkbox
-                    id="propose"
-                    checked={proposeToDict}
-                    onCheckedChange={(v) => setProposeToDict(!!v)}
-                    className="mt-0.5"
-                  />
-                  <Label htmlFor="propose" className="text-xs text-muted-foreground cursor-pointer leading-relaxed">
-                    Also propose this term to the dictionary
-                    <br />
-                    <span className="text-muted-foreground/60">
-                      Creates a draft entry pending moderator review.
-                    </span>
-                  </Label>
-                </div>
-              )}
-
-              {/* Reset to dictionary (edit mode, dict-linked) */}
-              {isEdit && initial?.source_type === "dictionary" && (
-                <div className="flex items-center justify-between rounded-md border border-border/50 bg-muted/30 px-3 py-2">
-                  <span className="text-xs text-muted-foreground">
-                    Editing stores a custom override. The dictionary link is preserved.
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-[11px] gap-1 ml-2"
-                    onClick={handleResetToDict}
-                    disabled={saving}
-                  >
-                    <RotateCcw className="h-3 w-3" />
-                    Reset
-                  </Button>
-                </div>
-              )}
             </div>
 
             <DialogFooter>

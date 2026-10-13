@@ -17,9 +17,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
+  ArrowLeft,
   Bookmark,
   Calendar,
   ExternalLink,
+  FolderX,
   Github,
   Globe,
   Heart,
@@ -28,7 +30,7 @@ import {
   Share2,
   Users,
 } from "lucide-react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
@@ -58,10 +60,6 @@ const TYPE_LABELS: Record<string, string> = {
 /*  Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-function getSeedImage(seed: string, index: number) {
-  return `https://picsum.photos/seed/future-hub-${encodeURIComponent(seed)}-${index}/1600/900`;
-}
-
 function isImageUrl(url: string, fileType?: string | null) {
   if (fileType && fileType.startsWith("image/")) return true;
   return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(url);
@@ -73,131 +71,6 @@ function getYouTubeId(url?: string | null): string | null {
     /(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
   );
   return m ? m[1] : null;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Placeholder project (demo / fallback)                              */
-/* ------------------------------------------------------------------ */
-
-function buildPlaceholderProject(slug: string): ProjectPayload {
-  const now = new Date();
-  const twoDaysAgo = new Date(now);
-  twoDaysAgo.setDate(now.getDate() - 2);
-  const fiveDaysAgo = new Date(now);
-  fiveDaysAgo.setDate(now.getDate() - 5);
-  const inFourDays = new Date(now);
-  inFourDays.setDate(now.getDate() + 4);
-  const inSevenDays = new Date(now);
-  inSevenDays.setDate(now.getDate() + 7);
-
-  return {
-    id: 999001,
-    title: "FutureHub Testing Project",
-    slug,
-    description:
-      "Placeholder showcase content for QA/testing. This sample simulates project summary, team, files, links, and discussion state.",
-    category: "web_dev",
-    type: "private",
-    difficulty: "intermediate",
-    status: "in_progress",
-    is_public: true,
-    repository_url: "https://github.com/example/future-hub-testing-project",
-    demo_url: "https://example.com/future-hub-testing-project",
-    video_url: null,
-    thumbnail_url: getSeedImage(slug, 0),
-    progress: 62,
-    technologies: ["Next.js", "TypeScript", "Supabase", "Tailwind"],
-    created_by: "test-user-owner",
-    created_at: fiveDaysAgo.toISOString(),
-    updated_at: now.toISOString(),
-    published_at: fiveDaysAgo.toISOString(),
-    views: 284,
-    likes_count: 17,
-    tags: ["test", "placeholder", "intro-page", "ui-qa"],
-    author: {
-      id: "test-user-owner",
-      user_name: "futurehub_owner",
-      display_name: "FutureHub Owner",
-      avatar_url: getSeedImage(slug, 9),
-    },
-    members: [
-      {
-        user_id: "test-user-owner",
-        role: "owner",
-        joined_at: fiveDaysAgo.toISOString(),
-        profile: {
-          id: "test-user-owner",
-          user_name: "futurehub_owner",
-          display_name: "FutureHub Owner",
-          avatar_url: getSeedImage(slug, 9),
-        },
-      },
-      {
-        user_id: "test-user-contributor",
-        role: "contributor",
-        joined_at: twoDaysAgo.toISOString(),
-        profile: {
-          id: "test-user-contributor",
-          user_name: "tester_contributor",
-          display_name: "QA Contributor",
-          avatar_url: getSeedImage(slug, 10),
-        },
-      },
-    ],
-    comments: [
-      {
-        id: 1001,
-        project_id: 999001,
-        user_id: "test-user-contributor",
-        parent_id: null,
-        body: "This is placeholder discussion data for UI testing.",
-        created_at: now.toISOString(),
-        updated_at: now.toISOString(),
-        author: {
-          id: "test-user-contributor",
-          user_name: "tester_contributor",
-          display_name: "QA Contributor",
-          avatar_url: getSeedImage(slug, 10),
-        },
-        replies: [],
-      },
-    ],
-    files: [
-      {
-        id: 2001,
-        project_id: 999001,
-        uploaded_by: "test-user-owner",
-        file_name: "Project Deck.pdf",
-        file_url: "https://example.com/files/project-deck.pdf",
-        file_type: "application/pdf",
-        file_size: 823411,
-        created_at: now.toISOString(),
-      },
-      {
-        id: 2002,
-        project_id: 999001,
-        uploaded_by: "test-user-owner",
-        file_name: "Architecture Mockup.png",
-        file_url: getSeedImage(slug, 11),
-        file_type: "image/png",
-        file_size: 452311,
-        created_at: now.toISOString(),
-      },
-      {
-        id: 2003,
-        project_id: 999001,
-        uploaded_by: "test-user-owner",
-        file_name: "UI Wireframe.png",
-        file_url: getSeedImage(slug, 12),
-        file_type: "image/png",
-        file_size: 301200,
-        created_at: now.toISOString(),
-      },
-    ],
-    userLiked: false,
-    isOwner: true,
-    isMember: true,
-  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -239,8 +112,6 @@ function PageSkeleton() {
 export default function ProjectDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  const searchParams = useSearchParams();
-  const demoMode = searchParams.get("demo") === "1";
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -260,16 +131,6 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (!slug) return;
     (async () => {
-      if (demoMode) {
-        const demo = buildPlaceholderProject(slug);
-        setProject(demo);
-        setLiked(false);
-        setLikesCount(demo.likes_count || 0);
-        setIsOwner(true);
-        setIsMember(true);
-        setLoading(false);
-        return;
-      }
       try {
         const res = await fetch(`/api/projects/${slug}`);
         if (!res.ok) throw new Error("not found");
@@ -280,17 +141,12 @@ export default function ProjectDetailPage() {
         setIsOwner(data.isOwner || false);
         setIsMember(data.isMember || false);
       } catch {
-        const fallback = buildPlaceholderProject(slug);
-        setProject(fallback);
-        setLiked(false);
-        setLikesCount(fallback.likes_count || 0);
-        setIsOwner(true);
-        setIsMember(true);
+        setProject(null);
       } finally {
         setLoading(false);
       }
     })();
-  }, [slug, demoMode]);
+  }, [slug]);
 
   /* ─── default selected media after load ─── */
   useEffect(() => {
@@ -356,7 +212,21 @@ export default function ProjectDetailPage() {
   );
 
   if (loading) return <PageSkeleton />;
-  if (!project) return null;
+  if (!project) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <FolderX className="h-12 w-12 text-muted-foreground mb-4" />
+        <h1 className="text-xl font-bold mb-2">{t("project.notFound")}</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          {t("project.notFoundDesc")}
+        </p>
+        <Button size="sm" onClick={() => router.push("/project")}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t("project.backToProjects")}
+        </Button>
+      </div>
+    );
+  }
 
   /* ─── derived ─── */
   const youTubeId = getYouTubeId(project.video_url);

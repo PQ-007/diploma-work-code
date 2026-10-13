@@ -43,7 +43,9 @@
     "uploading": "アップロード中...",
     "reply": "返信",
     "saveChanges": "変更を保存",
-    "untitled": "無題"
+    "untitled": "無題",
+    "comingSoon": "近日公開",
+    "comingSoonDesc": "このセクションは現在準備中です。次回のアップデートをお待ちください。"
   },
   "sidebar": {
     "flashcards": "フラッシュカード",
@@ -486,8 +488,6 @@
     "share": "共有",
     "save": "保存",
     "saved": "保存済み",
-    "flashcard": "フラッシュカード",
-    "report": "報告",
     "entryRejected": "エントリーが却下されました",
     "relatedTerms": "関連用語",
     "moderationHistory": "審査履歴",
@@ -511,8 +511,6 @@
     "createdLabel": "作成日",
     "moderationApproved": "承認",
     "moderationRejected": "却下",
-    "failedFlashcard": "フラッシュカードの作成に失敗しました",
-    "flashcardCreated": "フラッシュカードを作成しました！",
     "create": {
       "title": "辞書エントリーを作成",
       "editTitle": "下書きを編集",
@@ -746,7 +744,9 @@
     "fileNameUrlRequired": "ファイル名とURLは必須です。",
     "imageUploadedNowRegister": "画像をアップロードしました。Addを押してメタデータを登録してください。",
     "confirmDeleteFile": "このファイルを削除しますか？",
-    "noFilesYet": "まだファイルがありません。"
+    "noFilesYet": "まだファイルがありません。",
+    "notFound": "プロジェクトが見つかりません",
+    "notFoundDesc": "このプロジェクトは存在しないか、非公開です。"
   },
   "settings": {
     "title": "設定",

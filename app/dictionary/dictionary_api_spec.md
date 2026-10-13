@@ -286,39 +286,7 @@ Same as POST /api/dictionary (all fields optional).
 
 ---
 
-## 7. POST /api/dictionary/flashcard
-
-**Create a flashcard from an approved entry.**
-
-### Request Body
-
-```json
-{
-  "entry_id": 1
-}
-```
-
-### Response 201
-
-```json
-{
-  "flashcard": {
-    "id": "uuid",
-    "front": "Machine Learning",
-    "back": "A subset of AI that enables systems to learn from data.\n\n---\nМашин сургалт\n機械学習"
-  }
-}
-```
-
-### Errors
-
-- 401: Unauthorized
-- 400: Entry not approved / flashcard already exists
-- 404: Entry not found
-
----
-
-## 8. POST /api/dictionary/duplicate-check
+## 7. POST /api/dictionary/duplicate-check
 
 **Check for similar/duplicate terms before creating.**
 
@@ -350,7 +318,7 @@ Same as POST /api/dictionary (all fields optional).
 
 ---
 
-## 9. POST /api/dictionary/propose-edit
+## 8. POST /api/dictionary/propose-edit
 
 **Propose an edit to an approved entry (creates new pending revision).**
 
@@ -387,7 +355,7 @@ Same as POST /api/dictionary (all fields optional).
 
 ---
 
-## 10. GET /api/dictionary/moderate
+## 9. GET /api/dictionary/moderate
 
 **List moderation queue (teacher/admin only).**
 
@@ -436,7 +404,7 @@ Same as POST /api/dictionary (all fields optional).
 
 ---
 
-## 11. POST /api/dictionary/moderate
+## 10. POST /api/dictionary/moderate
 
 **Approve or reject a pending revision (teacher/admin only).**
 

@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
 /* ═══════════════════════════════════════════
    POST /api/flashcards
-   Body (dictionary style):
+   Body (detailed card):
      { front: FlashcardFront, back: FlashcardBack, deckId, sourceType?, sourceId? }
    Body (quick / legacy):
      { front: string, back: string, deckId, sourceType?, sourceId? }

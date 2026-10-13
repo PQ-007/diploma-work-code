@@ -37,7 +37,6 @@ import {
   Download,
   Upload,
   BarChart2,
-  BookMarked,
   List,
   Sparkles,
   Calendar,
@@ -67,12 +66,6 @@ type StudyMode = "list" | "review";
 
 function sourceStyle(sourceType: string | null) {
   switch (sourceType) {
-    case "dictionary":
-      return {
-        background: "rgba(37,99,235,.16)",
-        color: "#60a5fa",
-        border: "1px solid rgba(37,99,235,.3)",
-      };
     case "article":
       return {
         background: "rgba(168,85,247,.16)",
@@ -90,7 +83,6 @@ function sourceStyle(sourceType: string | null) {
 
 function sourceLabel(sourceType: string | null) {
   switch (sourceType) {
-    case "dictionary": return "Dictionary";
     case "article": return "Article";
     default: return "Custom";
   }
@@ -539,17 +531,6 @@ export default function DeckDetailPage() {
                       >
                         {sourceLabel(card.source_type)}
                       </span>
-                      {card.source_type === "dictionary" && (
-                        <span
-                          className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                          style={{
-                            border: "1px solid var(--border)",
-                            color: "var(--muted-foreground)",
-                          }}
-                        >
-                          Linked
-                        </span>
-                      )}
                       {(card.custom_front || card.custom_back) && (
                         <span
                           className="text-[10px] font-medium px-1.5 py-0.5 rounded"
@@ -592,22 +573,6 @@ export default function DeckDetailPage() {
                           <Pencil className="h-3.5 w-3.5 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        {card.source_type === "dictionary" && card.source_id && (
-                          <DropdownMenuItem asChild>
-                            <Link href="/dictionary">
-                              <BookMarked className="h-3.5 w-3.5 mr-2" />
-                              View in dictionary
-                            </Link>
-                          </DropdownMenuItem>
-                        )}
-                        {(!card.source_type || card.source_type === "custom") && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dictionary/create?fromFlashcard=${card.id}`)}
-                          >
-                            <BookOpen className="h-3.5 w-3.5 mr-2" />
-                            Propose as dictionary entry
-                          </DropdownMenuItem>
-                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => setDeleteCard(card)}

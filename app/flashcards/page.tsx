@@ -186,8 +186,8 @@ export default function FlashcardsPage() {
             <div>
               <h1 className="text-xl font-bold tracking-tight">My Flashcards</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Spaced-repetition decks · pulled from your dictionary saves,
-                articles, and custom cards.
+                Spaced-repetition decks from articles, Jisho, and your own
+                cards.
               </p>
             </div>
           </div>

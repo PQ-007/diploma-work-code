@@ -43,7 +43,9 @@
     "uploading": "Байршуулж байна...",
     "reply": "Хариулах",
     "saveChanges": "Өөрчлөлтийг хадгалах",
-    "untitled": "Гарчиггүй"
+    "untitled": "Гарчиггүй",
+    "comingSoon": "Тун удахгүй",
+    "comingSoonDesc": "Энэ хэсгийг одоо хөгжүүлж байна. Дараагийн шинэчлэлтээр нэмэгдэнэ."
   },
   "sidebar": {
     "flashcards": "Флаш карт",
@@ -487,8 +489,6 @@
     "share": "Хуваалцах",
     "save": "Хадгалах",
     "saved": "Хадгалсан",
-    "flashcard": "Флашкарт",
-    "report": "Мэдэгдэх",
     "entryRejected": "Бичлэг татгалзсан",
     "relatedTerms": "Холбоотой нэр томъёо",
     "moderationHistory": "Хяналтын түүх",
@@ -511,8 +511,6 @@
     "createdLabel": "Үүсгэсэн",
     "moderationApproved": "Зөвшөөрсөн",
     "moderationRejected": "Татгалзсан",
-    "failedFlashcard": "Флашкарт үүсгэхэд алдаа гарлаа",
-    "flashcardCreated": "Флашкарт үүслээ!",
     "create": {
       "title": "Толь бичгийн бичлэг үүсгэх",
       "editTitle": "Ноорог засах",
@@ -733,7 +731,9 @@
     "fileNameUrlRequired": "Файлын нэр болон URL шаардлагатай.",
     "imageUploadedNowRegister": "Зураг байршлаа. Одоо Add товчоор файлын мета өгөгдлийг бүртгэнэ үү.",
     "confirmDeleteFile": "Энэ файлыг устгах уу?",
-    "noFilesYet": "Одоогоор файл алга."
+    "noFilesYet": "Одоогоор файл алга.",
+    "notFound": "Төсөл олдсонгүй",
+    "notFoundDesc": "Энэ төсөл байхгүй эсвэл хаалттай байна."
   },
   "settings": {
     "title": "Тохиргоо",

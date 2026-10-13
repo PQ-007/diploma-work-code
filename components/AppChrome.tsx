@@ -1,9 +1,7 @@
 "use client";
 
 import { LeftSidebar } from "@/components/sidebar-collection/Left/LeftSidebar";
-import { RightSidebar } from "@/components/sidebar-collection/Right/RightSidebar";
 import { ResolvedHeader } from "@/components/header-collection/SiteHeader";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -46,12 +44,6 @@ export function AppChrome({ children }: AppChromeProps) {
           </div>
         </main>
       </div>
-
-      {/* <div className="hidden md:block">
-        <SidebarProvider defaultOpen={false}>
-          <RightSidebar />
-        </SidebarProvider>
-      </div> */}
     </div>
   );
 }

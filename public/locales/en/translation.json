@@ -43,7 +43,9 @@
     "uploading": "Uploading...",
     "reply": "Reply",
     "saveChanges": "Save Changes",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "comingSoon": "Coming soon",
+    "comingSoonDesc": "We're still building this section. Check back after the next update."
   },
   "sidebar": {
     "flashcards": "Flashcards",
@@ -488,8 +490,6 @@
     "share": "Share",
     "save": "Save",
     "saved": "Saved",
-    "flashcard": "Flashcard",
-    "report": "Report",
     "entryRejected": "Entry Rejected",
     "relatedTerms": "Related Terms",
     "moderationHistory": "Moderation History",
@@ -513,8 +513,6 @@
     "createdLabel": "Created",
     "moderationApproved": "Approved",
     "moderationRejected": "Rejected",
-    "failedFlashcard": "Failed to create flashcard",
-    "flashcardCreated": "Flashcard created!",
     "create": {
       "title": "Create Dictionary Entry",
       "editTitle": "Edit Draft Entry",
@@ -748,7 +746,9 @@
     "fileNameUrlRequired": "File name and URL are required.",
     "imageUploadedNowRegister": "Image uploaded. Click Add file to register metadata.",
     "confirmDeleteFile": "Delete this file?",
-    "noFilesYet": "No files added yet."
+    "noFilesYet": "No files added yet.",
+    "notFound": "Project not found",
+    "notFoundDesc": "This project doesn't exist, or it's private."
   },
   "settings": {
     "title": "Settings",

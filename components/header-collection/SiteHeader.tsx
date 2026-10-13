@@ -7,7 +7,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 // --- Shadcn Breadcrumb Imports ---
 import Link from "next/link";
 import {
@@ -27,8 +26,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 // --- Component Imports ---
 import CreateButton from "../button-collection/CreateButton";
-import NotificationButton from "../button-collection/NotificationButton";
-import SearchButton from "../button-collection/SearchButton";
 import ThemeToggleButton from "../button-collection/ThemeToggleButton";
 import { NavUser } from "../NavUser";
 import { LanguageToggleButton } from "../button-collection/LanguageSwitcherButton";
@@ -137,7 +134,6 @@ export function SiteHeader() {
   const pathname = usePathname() || "/";
   const { user, loading } = useAuth();
   const { t } = useLanguage();
-  const [isSearchOpen, setIsSearchOpen] = useState(true);
 
   // Generate breadcrumb items
   const breadcrumbItems: BreadcrumbItemType[] = pathname
@@ -167,7 +163,7 @@ export function SiteHeader() {
               <>
                 <ThemeToggleButton />
                 <LanguageToggleButton />
-                <NotificationButton />
+                <CreateButton />
                 <NavUser />
               </>
             ) : (

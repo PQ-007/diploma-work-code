@@ -14,7 +14,6 @@ The Dictionary module is a centralized, multilingual glossary (MN/JA/EN) for Fut
 
 - `profiles.role` is a `user_type` enum with values: `'user'`, `'teacher'`, `'admin'`.
 - Only `teacher` and `admin` roles are moderators.
-- A `flashcards` table exists (or will be created) with at minimum: `id`, `user_id`, `front`, `back`, `source_type`, `source_id`, `created_at`.
 - The existing `tags` table is shared across articles, discussions, and dictionary.
 
 ---
@@ -84,7 +83,7 @@ LIMIT 20 OFFSET $2;
 │ ┌─ Featured Term of the Day ────────────────────────┐   │
 │ │ [Image] "API (Application Programming Interface)" │   │
 │ │ A set of protocols for building software...        │   │
-│ │ [Full Definition] [Save as Flashcard]              │   │
+│ │ [Full Definition]                                  │   │
 │ └────────────────────────────────────────────────────┘   │
 │                                                         │
 │ Browse Glossary    [Grid] [List]  [+ New Entry]         │
@@ -118,7 +117,7 @@ Right sidebar:
 │ Reading: エーピーアイ (ja)                                │
 │ Language: EN | Contributor: @bilguun · Updated 3d ago   │
 │                                                         │
-│ [✏️ Suggest Edit] [📤 Share] [🔖 Save] [📇 Flashcard]    │
+│ [✏️ Suggest Edit] [📤 Share] [🔖 Save]                  │
 │                                                         │
 │ Tags: #programming #web-development #backend            │
 │ ─────────────────────────────────────────────────────── │
@@ -231,7 +230,7 @@ Right sidebar: Related Articles, Related Terms, Resources
 ## F) Definition of Done Checklist
 
 - [ ] **Database**: All DDL tables created in Supabase with indexes + RLS policies active
-- [ ] **API**: All 8 endpoints functional (create, list, search, detail, propose-edit, approve, reject, convert-flashcard)
+- [ ] **API**: All endpoints functional (create, list, search, detail, propose-edit, approve, reject)
 - [ ] **Search**: Full-text search returns relevant results; trigram fuzzy matching works for typos
 - [ ] **Duplicate Detection**: Warning shown when creating entry similar to existing one
 - [ ] **Status Workflow**: DRAFT → PENDING_REVIEW → APPROVED → REJECTED transitions enforced
@@ -241,7 +240,6 @@ Right sidebar: Related Articles, Related Terms, Resources
 - [ ] **UI - Entry Detail**: All 4 tabs render correctly with real data
 - [ ] **UI - Create/Edit**: Form validates, submits, shows duplicate warnings
 - [ ] **UI - Moderation Queue**: Lists pending items, approve/reject with reason works
-- [ ] **Flashcard Integration**: "Save as Flashcard" creates a flashcard from approved entry
 - [ ] **i18n**: All user-facing strings use `t()` keys; MN/JA/EN translations in locale files
 - [ ] **Mobile**: All pages responsive, usable on 375px+ screens
 - [ ] **Testing**: Unit tests for validation/duplicate detection; integration tests for RLS; API contract tests pass

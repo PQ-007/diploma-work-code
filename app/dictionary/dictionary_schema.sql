@@ -195,27 +195,6 @@ CREATE TABLE public.dictionary_saves (
 );
 
 -- ============================================================================
--- 9. FLASHCARDS table (if not already existing)
--- ============================================================================
-CREATE TABLE IF NOT EXISTS public.flashcards (
-  id          bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
-  user_id     uuid NOT NULL,
-  front       text NOT NULL,
-  back        text NOT NULL,
-  source_type text,                             -- 'dictionary', 'article', 'manual'
-  source_id   bigint,                           -- dictionary_entries.id if source_type='dictionary'
-  deck        text DEFAULT 'default',
-  created_at  timestamptz NOT NULL DEFAULT now(),
-
-  CONSTRAINT flashcards_pkey PRIMARY KEY (id),
-  CONSTRAINT flashcards_user_fkey FOREIGN KEY (user_id)
-    REFERENCES public.profiles(id)
-);
-
-CREATE INDEX idx_flashcards_user ON public.flashcards (user_id);
-CREATE INDEX idx_flashcards_source ON public.flashcards (source_type, source_id);
-
--- ============================================================================
 -- 10. HELPER FUNCTION — Auto-update updated_at timestamp
 -- ============================================================================
 CREATE OR REPLACE FUNCTION update_dictionary_updated_at()
@@ -243,7 +222,6 @@ ALTER TABLE public.dictionary_entry_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dictionary_revisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dictionary_moderation_actions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dictionary_saves ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.flashcards ENABLE ROW LEVEL SECURITY;
 
 -- ── dictionary_entries ──
 
@@ -445,22 +423,5 @@ CREATE POLICY "dict_saves_insert"
 
 CREATE POLICY "dict_saves_delete"
   ON public.dictionary_saves FOR DELETE
-  TO authenticated
-  USING (user_id = auth.uid());
-
--- ── flashcards ──
-
-CREATE POLICY "flashcards_select_own"
-  ON public.flashcards FOR SELECT
-  TO authenticated
-  USING (user_id = auth.uid());
-
-CREATE POLICY "flashcards_insert_own"
-  ON public.flashcards FOR INSERT
-  TO authenticated
-  WITH CHECK (user_id = auth.uid());
-
-CREATE POLICY "flashcards_delete_own"
-  ON public.flashcards FOR DELETE
   TO authenticated
   USING (user_id = auth.uid());
