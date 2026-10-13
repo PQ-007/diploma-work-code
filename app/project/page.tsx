@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -13,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Search, Plus, Layers, RefreshCw, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -191,55 +191,49 @@ function ProjectPageContent() {
   });
 
   return (
-    <div className="space-y-6 pb-16 max-w-6xl items-center mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {t("project.showcase") || "Project Showcase"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t("project.showcaseDescription") ||
-              "Browse student-built projects, share your work, and get feedback from the community."}
-            
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => void fetchProjects(true)}
-            disabled={refreshing || loading}
-            title={t("common.refresh") || "Refresh"}
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-            />
-          </Button>
-          {user && (
-            <Button onClick={() => router.push("/project/create")}>
-              <Plus className="h-4 w-4 mr-1" />
-              {t("project.newProject") || "New Project"}
+    <div className="mx-auto w-full max-w-6xl space-y-5">
+      <PageHeader
+        className="!mb-0"
+        title={t("project.showcase")}
+        subtitle={t("project.showcaseDescription")}
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-9 text-muted-foreground"
+              onClick={() => void fetchProjects(true)}
+              disabled={refreshing || loading}
+              title={t("common.refresh")}
+              aria-label={t("common.refresh")}
+            >
+              <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
-          )}
-        </div>
-      </div>
+            {user && (
+              <Button className="rounded-full" onClick={() => router.push("/project/create")}>
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">{t("project.newProject")}</span>
+              </Button>
+            )}
+          </>
+        }
+      />
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
+      {/* Search on its own row on phones; filters scroll sideways instead of wrapping */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="relative w-full lg:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={t("project.searchProjects") || "Search projects..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="h-10 rounded-full bg-card pl-10"
           />
         </div>
+        <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0 [&>*]:shrink-0">
 
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="h-9 w-[140px] rounded-full bg-card">
             <SelectValue placeholder={t("project.sortBy") || "Sort by"} />
           </SelectTrigger>
           <SelectContent>
@@ -256,7 +250,7 @@ function ProjectPageContent() {
         </Select>
 
         <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="h-9 w-[120px] rounded-full bg-card">
             <SelectValue placeholder={t("project.year") || "Year"} />
           </SelectTrigger>
           <SelectContent>
@@ -272,7 +266,7 @@ function ProjectPageContent() {
         </Select>
 
         <Select value={courseFilter} onValueChange={setCourseFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="h-9 w-[140px] rounded-full bg-card">
             <SelectValue placeholder={t("project.course") || "Course"} />
           </SelectTrigger>
           <SelectContent>
@@ -288,7 +282,7 @@ function ProjectPageContent() {
         </Select>
 
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="h-9 w-[140px] rounded-full bg-card">
             <SelectValue
               placeholder={t("project.difficulty") || "Difficulty"}
             />
@@ -310,7 +304,7 @@ function ProjectPageContent() {
         </Select>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="h-9 w-[140px] rounded-full bg-card">
             <SelectValue placeholder={t("project.type") || "Type"} />
           </SelectTrigger>
           <SelectContent>
@@ -324,6 +318,7 @@ function ProjectPageContent() {
             ))}
           </SelectContent>
         </Select>
+        </div>
       </div>
 
       {hasFilters && !loading && !error && (

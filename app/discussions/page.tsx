@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -117,47 +118,38 @@ function DiscussionsPageContent() {
   const unansweredCount = totalThreads - answeredCount;
 
   return (
-    <div className="min-h-screen bg-background max-w-6xl mx-auto">
-      <div className="mx-auto py-6 lg:py-3 ">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">
-              {t("sidebar.discussions")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("discussions.subtitle")}
-            </p>
-          </div>
-          {user && (
-            <Button
-              size="sm"
-              className="text-xs"
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              {t("discussions.newDiscussion")}
-            </Button>
-          )}
-        </div>
+    <div className="mx-auto w-full max-w-3xl">
+      <div>
+        <PageHeader
+          title={t("sidebar.discussions")}
+          subtitle={t("discussions.subtitle")}
+          actions={
+            user && (
+              <Button size="sm" className="h-9 rounded-full" onClick={() => setCreateOpen(true)}>
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">{t("discussions.newDiscussion")}</span>
+              </Button>
+            )
+          }
+        />
 
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Content */}
-          <div className="flex-1 ">
+          <div className="min-w-0 flex-1">
             {/* Category Tabs */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="mb-6"
             >
-              <TabsList className="h-10 bg-muted/40 backdrop-blur-sm flex-wrap gap-1">
+              <TabsList className="scrollbar-none flex h-10 w-full justify-start gap-1 overflow-x-auto bg-muted/60 sm:w-auto">
                 {tabKeys.map((tab) => {
                   const Icon = tab.icon;
                   return (
                     <TabsTrigger
                       key={tab.value}
                       value={tab.value}
-                      className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-3 py-1 text-xs"
+                      className="shrink-0 grow-0 px-3 py-1 text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
                     >
                       <Icon className="h-3.5 w-3.5 mr-1.5" />
                       {t(tab.labelKey)}

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,6 @@ import {
   LayoutGrid,
   List,
   Clock,
-  Flame,
   Plus,
   Loader2,
   CheckCircle,
@@ -274,31 +274,26 @@ export default function DictionaryPage() {
   const totalPages = Math.ceil(totalEntries / limit);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-[1200px] px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">
-              {t("dictionary.title")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("dictionary.subtitle")}
-            </p>
-          </div>
-          {user && (
-            <Link href="/dictionary/create">
-              <Button size="sm" className="text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                {t("dictionary.addNewTerm")}
+    <div className="mx-auto w-full max-w-6xl">
+      <div>
+        <PageHeader
+          title={t("dictionary.title")}
+          subtitle={t("dictionary.subtitle")}
+          actions={
+            user && (
+              <Button asChild size="sm" className="h-9 rounded-full">
+                <Link href="/dictionary/create">
+                  <Plus className="size-4" />
+                  <span className="hidden sm:inline">{t("dictionary.addNewTerm")}</span>
+                </Link>
               </Button>
-            </Link>
-          )}
-        </div>
+            )
+          }
+        />
 
         <div className="flex gap-8 xl:gap-12 justify-center">
           {/* Main Content */}
-          <div className="flex-1 max-w-7xl space-y-6">
+          <div className="min-w-0 flex-1 space-y-6">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -311,7 +306,7 @@ export default function DictionaryPage() {
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="pl-9 h-10"
+                className="h-10 rounded-full bg-card pl-9"
               />
               {/* Autocomplete suggestions */}
               {showSuggestions && suggestions.length > 0 && (
@@ -425,12 +420,12 @@ export default function DictionaryPage() {
                 setPage(1);
               }}
             >
-              <TabsList className="h-auto bg-muted/40 backdrop-blur-sm flex-wrap gap-0.5 p-1">
+              <TabsList className="scrollbar-none flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto bg-muted/60 p-1 sm:flex-wrap">
                 {letterTabs.map((letter) => (
                   <TabsTrigger
                     key={letter}
                     value={letter}
-                    className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-2 py-1 text-xs font-medium"
+                    className="min-w-7 shrink-0 grow-0 px-2 py-1 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
                   >
                     {letter}
                   </TabsTrigger>
@@ -631,40 +626,6 @@ export default function DictionaryPage() {
 
           {/* Right Sidebar */}
           <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
-            {/* Popular Topics */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <Flame className="h-4 w-4" />
-                {t("dictionary.popularTopics")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "programming",
-                      "database",
-                      "algorithm",
-                      "math",
-                      "kanji",
-                      "web-dev",
-                    ].map((topic) => (
-                      <Badge
-                        key={topic}
-                        variant="secondary"
-                        className="text-xs font-normal cursor-pointer hover:bg-secondary/80 transition-colors"
-                        onClick={() => {
-                          setSearchQuery(topic);
-                          setPage(1);
-                        }}
-                      >
-                        #{topic}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Stats */}
             <Card className="border-border/40">
               <CardContent className="p-4 space-y-3">

@@ -1,12 +1,11 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AlertCircle, FileText, Flame, RefreshCw, Search } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { AlertCircle, FileText, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 
 // --- New Unified System ---
@@ -19,32 +18,6 @@ import {
   ArticlePageSkeleton,
 } from "@/app/article/components/ArticleSkeleton";
 
-const popularTags = [
-  { name: "React", count: 128 },
-  { name: "TypeScript", count: 96 },
-  { name: "Next.js", count: 84 },
-  { name: "Python", count: 72 },
-  { name: "AI", count: 67 },
-  { name: "Rust", count: 54 },
-  { name: "System Design", count: 48 },
-  { name: "DevOps", count: 41 },
-];
-
-const stripMarkdown = (value: string) =>
-  value
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/[>*#_\-\[\]\(\)!]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const calcReadTime = (body: string) => {
-  const words = stripMarkdown(body || "")
-    .split(/\s+/)
-    .filter(Boolean).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return `${minutes} min`;
-};
 
 export default function ArticleBrowsePage() {
   const { t, language } = useLanguage();
@@ -80,73 +53,92 @@ export default function ArticleBrowsePage() {
   });
 
   const totalCount = articles?.length || 0;
+
+  // Most used tags across the loaded articles.
+  const popularTags = Object.entries(
+    (articles || []).reduce<Record<string, number>>((acc, item) => {
+      for (const tag of item.content.tags) acc[tag] = (acc[tag] || 0) + 1;
+      return acc;
+    }, {}),
+  )
+    .sort((x, y) => y[1] - x[1])
+    .slice(0, 12)
+    .map(([name, count]) => ({ name, count }));
   const filteredCount = filteredArticles.length;
 
   // Initial full-page skeleton
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="page-shell-wide py-6 lg:py-3">
-          <div className="mb-6 max-w-6xl w-full px-3 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="space-y-1.5">
-              <Skeleton className="h-6 w-32 rounded-md" />
-              <Skeleton className="h-4 w-56 rounded-md" />
-            </div>
-            <Skeleton className="h-8 w-8 rounded-md" />
-          </div>
-          <ArticlePageSkeleton />
+      <div className="mx-auto w-full max-w-3xl space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-40 rounded-md" />
+          <Skeleton className="h-4 w-64 rounded-md" />
         </div>
+        <ArticlePageSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="page-shell-wide py-6 lg:py-3">
-        {/* Page Header */}
-        <div className="mb-6 max-w-6xl w-full px-3 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">
-              {t("articles.title")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("articles.subtitle")}
-              {totalCount > 0 && (
-                <span className="ml-1">
-                  &middot; {totalCount} {t("common.published")}
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              onClick={() => refetch()}
-              disabled={isRefetching}
-              title={t("articles.refreshArticles")}
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
-              />
-            </Button>
-          </div>
-        </div>
+    <div className="mx-auto w-full max-w-3xl">
+      <PageHeader
+        title={t("articles.title")}
+        subtitle={
+          <>
+            {t("articles.subtitle")}
+            {totalCount > 0 && <> &middot; {totalCount} {t("common.published")}</>}
+          </>
+        }
+        actions={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-9 text-muted-foreground hover:text-foreground"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            title={t("articles.refreshArticles")}
+            aria-label={t("articles.refreshArticles")}
+          >
+            <RefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
+          </Button>
+        }
+      />
 
-        <div className="flex gap-8 xl:gap-12 justify-center">
-          {/* Main Feed */}
-          <div className="flex-1 max-w-3xl space-y-4">
-            {/* Search Bar */}
+          <div className="space-y-4">
+            {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                type="search"
                 placeholder={t("articles.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm"
+                className="h-10 rounded-full bg-card pl-9 text-sm"
               />
             </div>
+
+            {/* Popular tags (real counts) */}
+            {popularTags.length > 0 && (
+              <div className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+                {popularTags.map((tag) => {
+                  const selected = searchQuery === tag.name;
+                  return (
+                    <button
+                      key={tag.name}
+                      onClick={() => setSearchQuery(selected ? "" : tag.name)}
+                      className={`shrink-0 rounded-full border px-3 py-1 text-xs transition-colors ${
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      }`}
+                    >
+                      #{tag.name}
+                      <span className="ml-1 opacity-70">{tag.count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Results info bar */}
             {(searchQuery || activeTab !== "all") && !error && (
@@ -261,42 +253,6 @@ export default function ArticleBrowsePage() {
               </div>
             )}
           </div>
-
-          {/* Right Sidebar */}
-          <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
-            {/* Popular Tags */}
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3">
-                <Flame className="h-4 w-4" />
-                {t("articles.popularTags")}
-              </h3>
-              <Card className="border-border/40">
-                <CardContent className="p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {popularTags.map((tag) => (
-                      <Badge
-                        key={tag.name}
-                        variant="secondary"
-                        className="text-xs font-normal cursor-pointer hover:bg-secondary/80 transition-colors"
-                        onClick={() => {
-                          setSearchQuery(tag.name);
-                          setActiveTab("all");
-                        }}
-                      >
-                        #{tag.name}
-                        <span className="ml-1 text-muted-foreground">
-                          {tag.count}
-                        </span>
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-          </aside>
-        </div>
-      </div>
     </div>
   );
 }
