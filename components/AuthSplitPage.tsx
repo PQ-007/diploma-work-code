@@ -176,7 +176,12 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
       return;
     }
 
-    const derivedEmail = `${normalizedCode}@nmct.edu.mn`;
+    // Accounts created outside the student-code flow (e.g. admins) sign in
+    // with their full email; everyone else types just the student code.
+    const isEmailLogin = normalizedCode.includes("@");
+    const derivedEmail = isEmailLogin
+      ? normalizedCode
+      : `${normalizedCode}@nmct.edu.mn`;
 
     try {
       const { data, error: signInError } =
@@ -191,7 +196,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
       }
 
       const userCode = data?.user?.user_metadata?.studentCode;
-      if (!userCode || userCode.toLowerCase() !== normalizedCode) {
+      if (!isEmailLogin && (!userCode || userCode.toLowerCase() !== normalizedCode)) {
         setError("Student code does not match this account.");
         await supabase.auth.signOut();
         return;
@@ -430,7 +435,9 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                   htmlFor="student-code"
                   className="mb-2 block text-sm font-medium text-foreground"
                 >
-                  {t("auth.studentCodeLabel")}
+                  {isFormSignIn && !isForgotScreen
+                    ? t("auth.studentCodeOrEmailLabel")
+                    : t("auth.studentCodeLabel")}
                 </label>
                 <input
                   id="student-code"

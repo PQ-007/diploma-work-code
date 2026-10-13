@@ -158,6 +158,7 @@
     "signUpTitle": "Бүртгэл үүсгэх",
     "signUpSubtitle": "Сургуулийн имэйлээр бүртгэх учир оюутны код шаардлагатай",
     "studentCodeLabel": "Оюутны код",
+    "studentCodeOrEmailLabel": "Оюутны код эсвэл имэйл",
     "emailLabel": "И-мэйл хаяг",
     "studentCodePlaceholder": "s2x....",
     "passwordLabel": "Нууц үг",
@@ -186,7 +187,9 @@
     "signOutFailed": "Гарах амжилтгүй болсон",
     "signOutFailedDesc": "Гарах үед алдаа гарлаа. Дахин оролдоно уу.",
     "languageChanged": "Хэл солигдсон",
-    "languageChangedDesc": "Хэлийг {{lang}} руу солисон."
+    "languageChangedDesc": "Хэлийг {{lang}} руу солисон.",
+    "linkInvalidTitle": "Энэ холбоос хүчингүй эсвэл хугацаа нь дууссан байна",
+    "linkInvalidDesc": "Баталгаажуулах болон нууц үг сэргээх холбоосыг зөвхөн нэг удаа ашиглах боломжтой бөгөөд тодорхой хугацааны дараа хүчингүй болно. Нэвтэрнэ үү, эсвэл шинэ холбоос авна уу."
   },
   "feed": {
     "title": "Таны мэдээ",

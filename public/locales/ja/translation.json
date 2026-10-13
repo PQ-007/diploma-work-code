@@ -159,6 +159,7 @@
     "signUpTitle": "アカウント作成",
     "signUpSubtitle": "サインアップして始めましょう",
     "studentCodeLabel": "学生コード",
+    "studentCodeOrEmailLabel": "学籍番号またはメール",
     "emailLabel": "メールアドレス",
     "studentCodePlaceholder": "s2x....",
     "passwordLabel": "パスワード",
@@ -187,7 +188,9 @@
     "signOutFailed": "サインアウト失敗",
     "signOutFailedDesc": "サインアウト中にエラーが発生しました。もう一度お試しください。",
     "languageChanged": "言語変更",
-    "languageChangedDesc": "言語を{{lang}}に設定しました。"
+    "languageChangedDesc": "言語を{{lang}}に設定しました。",
+    "linkInvalidTitle": "このリンクは無効か、有効期限が切れています",
+    "linkInvalidDesc": "確認・パスワード再設定のリンクは一度しか使えず、一定時間で失効します。サインインするか、新しい再設定リンクをリクエストしてください。"
   },
   "feed": {
     "title": "フィード",

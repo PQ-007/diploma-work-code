@@ -159,6 +159,7 @@
     "signUpTitle": "Create Your Account",
     "signUpSubtitle": "Sign up to get started",
     "studentCodeLabel": "Student code",
+    "studentCodeOrEmailLabel": "Student code or email",
     "emailLabel": "Email address",
     "studentCodePlaceholder": "s2x....",
     "passwordLabel": "Password",
@@ -187,7 +188,9 @@
     "signOutFailed": "Sign-out failed",
     "signOutFailedDesc": "An error occurred during sign-out. Please try again.",
     "languageChanged": "Language Changed",
-    "languageChangedDesc": "Language set to {{lang}}."
+    "languageChangedDesc": "Language set to {{lang}}.",
+    "linkInvalidTitle": "This link is invalid or has expired",
+    "linkInvalidDesc": "Confirmation and password-reset links can only be used once and expire after a while. Sign in, or request a new reset link."
   },
   "feed": {
     "title": "Your Feed",
