@@ -76,8 +76,6 @@ interface ProjectInfoSidebarProps {
   youTubeId: string | null;
   thumbnailInputRef: RefObject<HTMLInputElement | null>;
   thumbnailUrl: string;
-  description: string;
-  setDescription: Dispatch<SetStateAction<string>>;
   projectType: ProjectType;
   setProjectType: Dispatch<SetStateAction<ProjectType>>;
   category: ProjectCategory | "";
@@ -115,8 +113,6 @@ export function ProjectInfoSidebar({
   youTubeId,
   thumbnailInputRef,
   thumbnailUrl,
-  description,
-  setDescription,
   projectType,
   setProjectType,
   category,
@@ -265,24 +261,6 @@ export function ProjectInfoSidebar({
           )}
         </div>
 
-        {/* Brief description (single editable line) */}
-        <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Brief
-          </p>
-          <Input
-            placeholder="One-line description…"
-            value={description.split("\n")[0].slice(0, 120)}
-            onChange={(e) => {
-              const rest = description.includes("\n")
-                ? description.slice(description.indexOf("\n"))
-                : "";
-              setDescription(e.target.value + rest);
-            }}
-            className="h-7 text-xs bg-muted/30 border-border/60"
-            maxLength={120}
-          />
-        </div>
 
         {/* Type selector */}
         <div className="space-y-1">

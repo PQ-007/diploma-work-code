@@ -288,8 +288,6 @@ export default function CreateProjectPage() {
           youTubeId={youTubeId}
           thumbnailInputRef={thumbnailInputRef}
           thumbnailUrl={thumbnailUrl}
-          description={description}
-          setDescription={setDescription}
           projectType={projectType}
           setProjectType={setProjectType}
           category={category}
