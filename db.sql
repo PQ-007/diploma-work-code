@@ -66,8 +66,10 @@ CREATE TABLE public.articles (
   created_at timestamp without time zone DEFAULT now(),
   series text,
   base_lang_code text DEFAULT 'mn'::text,
+  project_id bigint,
   CONSTRAINT articles_pkey PRIMARY KEY (id),
-  CONSTRAINT article_author FOREIGN KEY (author_id) REFERENCES public.profiles(id)
+  CONSTRAINT article_author FOREIGN KEY (author_id) REFERENCES public.profiles(id),
+  CONSTRAINT articles_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
 );
 CREATE TABLE public.bookmarked_articles (
   user_id uuid NOT NULL,

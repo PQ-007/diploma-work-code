@@ -255,6 +255,7 @@ export type Database = {
           created_at: string | null;
           series: string | null;
           base_lang_code: string | null;
+          project_id: number | null;
         };
         Insert: {
           id?: number;
@@ -263,6 +264,7 @@ export type Database = {
           created_at?: string | null;
           series?: string | null;
           base_lang_code?: string | null;
+          project_id?: number | null;
         };
         Update: {
           id?: number;
@@ -271,6 +273,7 @@ export type Database = {
           created_at?: string | null;
           series?: string | null;
           base_lang_code?: string | null;
+          project_id?: number | null;
         };
         Relationships: [
           {
@@ -278,6 +281,13 @@ export type Database = {
             columns: ["author_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "articles_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
             referencedColumns: ["id"];
           },
         ];

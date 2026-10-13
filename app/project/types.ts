@@ -42,6 +42,16 @@ export type ProjectComment = Tables<"project_comments"> & {
 
 export type ProjectFile = Tables<"project_files">;
 
+/** An article written about a project (write-up or devlog), returned by the
+ *  project detail API. `id` is the article id — link to `/article/<id>`. */
+export interface ProjectLinkedArticle {
+  id: string;
+  title: string | null;
+  status: string;
+  published_at: string | null;
+  language_code: string | null;
+}
+
 export interface ProjectPayload {
   id: number;
   title: string;
@@ -69,6 +79,7 @@ export interface ProjectPayload {
   members?: ProjectMember[];
   comments?: ProjectComment[];
   files?: ProjectFile[];
+  articles?: ProjectLinkedArticle[];
   userLiked?: boolean;
   isOwner?: boolean;
   isMember?: boolean;

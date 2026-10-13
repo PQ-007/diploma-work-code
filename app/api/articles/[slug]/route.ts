@@ -12,6 +12,7 @@ interface ArticlePatchBody {
   status?: "draft" | "published";
   base_lang_code?: string | null;
   series?: string | null;
+  project_id?: number | null;
 }
 
 const ALLOWED_STATUSES = new Set(["draft", "published"]);
@@ -258,7 +259,8 @@ export async function PATCH(
       typeof payload.status === "undefined" &&
       typeof payload.base_lang_code === "undefined" &&
       typeof payload.series === "undefined" &&
-      typeof payload.language_code === "undefined"
+      typeof payload.language_code === "undefined" &&
+      typeof payload.project_id === "undefined"
     ) {
       return NextResponse.json(
         { error: "No changes provided" },
@@ -379,6 +381,7 @@ export async function PATCH(
       status?: "draft" | "published";
       base_lang_code?: string | null;
       series?: string | null;
+      project_id?: number | null;
     } = {};
 
     if (payload.status) articlePatch.status = payload.status;
@@ -387,6 +390,9 @@ export async function PATCH(
     }
     if (typeof payload.series !== "undefined") {
       articlePatch.series = payload.series;
+    }
+    if (typeof payload.project_id !== "undefined") {
+      articlePatch.project_id = payload.project_id;
     }
 
     if (Object.keys(articlePatch).length > 0) {

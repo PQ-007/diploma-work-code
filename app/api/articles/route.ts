@@ -11,6 +11,7 @@ interface ArticleRequestBody {
   tags?: string[];
   language_code?: string;
   status?: string;
+  project_id?: number | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -187,6 +188,7 @@ export async function POST(req: NextRequest) {
     tags = [],
     language_code = "en",
     status = "draft",
+    project_id = null,
   } = (await req.json()) as ArticleRequestBody;
 
   if (!title || !body) {
@@ -198,7 +200,11 @@ export async function POST(req: NextRequest) {
 
   const { data: article, error: articleError } = await supabase
     .from("articles")
-    .insert({ author_id: user.id, status })
+    .insert({
+      author_id: user.id,
+      status,
+      ...(project_id != null ? { project_id } : {}),
+    })
     .select("id")
     .single();
 

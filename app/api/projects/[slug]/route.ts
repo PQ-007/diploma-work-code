@@ -167,6 +167,60 @@ export async function GET(
       }
     });
 
+    // Linked articles (write-up + devlogs) written about this project.
+    const { data: linkedArticleRows } = await supabase
+      .from("articles")
+      .select("id, status, created_at")
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: true });
+
+    const linkedArticleIds = (linkedArticleRows || []).map((a) => a.id);
+    let linkedArticles: Array<{
+      id: string;
+      title: string | null;
+      status: string;
+      published_at: string | null;
+      language_code: string | null;
+    }> = [];
+
+    if (linkedArticleIds.length) {
+      const { data: linkedTranslations } = await supabase
+        .from("article_translations")
+        .select("article_id, language_code, title, published_at")
+        .in("article_id", linkedArticleIds)
+        .order("published_at", { ascending: false });
+
+      const metaByArticle = new Map<
+        string,
+        {
+          title: string | null;
+          language_code: string | null;
+          published_at: string | null;
+        }
+      >();
+      (linkedTranslations || []).forEach((tr) => {
+        const key = String(tr.article_id);
+        if (!metaByArticle.has(key)) {
+          metaByArticle.set(key, {
+            title: tr.title,
+            language_code: tr.language_code,
+            published_at: tr.published_at,
+          });
+        }
+      });
+
+      linkedArticles = (linkedArticleRows || []).map((a) => {
+        const meta = metaByArticle.get(String(a.id));
+        return {
+          id: String(a.id),
+          title: meta?.title ?? null,
+          status: a.status,
+          published_at: meta?.published_at ?? null,
+          language_code: meta?.language_code ?? null,
+        };
+      });
+    }
+
     // Assemble result
     const result = {
       ...project,
@@ -179,6 +233,7 @@ export async function GET(
       })),
       comments: topLevelComments,
       files: files || [],
+      articles: linkedArticles,
       userLiked,
       isOwner: !!isOwner,
       isMember,

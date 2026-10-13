@@ -28,7 +28,7 @@ export async function GET(_: Request, context: { params: RouteParams }) {
     // Resolve that to the canonical articles.id when needed.
     let { data: article, error: articleError } = await supabase
       .from("articles")
-      .select("id, author_id, status, created_at, base_lang_code, series")
+      .select("id, author_id, status, created_at, base_lang_code, series, project_id")
       .eq("id", articleId)
       .maybeSingle();
 
@@ -45,7 +45,7 @@ export async function GET(_: Request, context: { params: RouteParams }) {
         const { data: resolvedArticle, error: resolvedArticleError } =
           await supabase
             .from("articles")
-            .select("id, author_id, status, created_at, base_lang_code, series")
+            .select("id, author_id, status, created_at, base_lang_code, series, project_id")
             .eq("id", articleId)
             .maybeSingle();
 
@@ -119,6 +119,7 @@ export async function GET(_: Request, context: { params: RouteParams }) {
           status: article.status,
           author_id: article.author_id,
           created_at: article.created_at,
+          project_id: article.project_id ?? null,
         },
         settings: {
           base_lang_code: article.base_lang_code,

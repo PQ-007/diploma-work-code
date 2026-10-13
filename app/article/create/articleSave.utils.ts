@@ -9,6 +9,8 @@ export interface ArticleSavePayload {
   status: ArticleStatus;
   base_lang_code?: string | null;
   series?: string | null;
+  /** Optional link to a project this article is written about. */
+  project_id?: number | null;
 }
 
 interface BuildSaveRequestOptions {
