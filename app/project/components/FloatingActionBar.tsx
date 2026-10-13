@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface FloatingActionBarProps {
   liked: boolean;
@@ -12,51 +12,27 @@ interface FloatingActionBarProps {
   onShare: () => void;
 }
 
-export default function FloatingActionBar({
-  liked,
-  likesCount,
-  onLike,
-  onCommentClick,
-  onShare,
-}: FloatingActionBarProps) {
+/** Phone/tablet reader actions, floating above the bottom tab bar (desktop uses the side rail). */
+export default function FloatingActionBar({ liked, likesCount, onLike, onCommentClick, onShare }: FloatingActionBarProps) {
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-4 duration-500 lg:hidden">
-      <div className="flex items-center gap-1 p-1.5 bg-background/80 backdrop-blur-md border shadow-2xl rounded-full ring-1 ring-black/5">
+    <div className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+0.75rem)] z-30 flex justify-center px-4 md:bottom-6 lg:hidden">
+      <div className="flex items-center gap-0.5 rounded-full border bg-card/95 p-1 shadow-lg backdrop-blur-md">
         <Button
           variant="ghost"
           size="icon"
           onClick={onLike}
-          className={`rounded-full hover:bg-red-50 hover:text-red-500 transition-colors ${
-            liked ? "text-red-500 bg-red-50" : "text-muted-foreground"
-          }`}
+          aria-pressed={liked}
           aria-label="Like"
+          className={cn("rounded-full", liked ? "bg-brand-red/10 text-brand-red hover:bg-brand-red/15" : "text-muted-foreground")}
         >
-          <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+          <Heart fill={liked ? "currentColor" : "none"} />
         </Button>
-        {likesCount > 0 && (
-          <span className="text-xs font-medium text-muted-foreground pr-1">
-            {likesCount}
-          </span>
-        )}
-        <Separator orientation="vertical" className="h-6" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full text-muted-foreground hover:text-foreground"
-          aria-label="Comment"
-          onClick={onCommentClick}
-        >
-          <MessageSquare className="h-5 w-5" />
+        <span className="pr-1.5 text-xs font-medium tabular-nums text-muted-foreground">{likesCount}</span>
+        <Button variant="ghost" size="icon" onClick={onCommentClick} aria-label="Comment" className="rounded-full text-muted-foreground">
+          <MessageSquare />
         </Button>
-        <Separator orientation="vertical" className="h-6" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full text-muted-foreground hover:text-foreground"
-          aria-label="Share"
-          onClick={onShare}
-        >
-          <Share2 className="h-5 w-5" />
+        <Button variant="ghost" size="icon" onClick={onShare} aria-label="Share" className="rounded-full text-muted-foreground">
+          <Share2 />
         </Button>
       </div>
     </div>

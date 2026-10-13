@@ -768,7 +768,8 @@
     "course": "カテゴリー",
     "allCategories": "すべてのカテゴリー",
     "noMyProjectsDesc": "まだプロジェクトを作成していません。",
-    "noProjectsFoundDesc": "別の検索語やフィルターをお試しください。"
+    "noProjectsFoundDesc": "別の検索語やフィルターをお試しください。",
+    "details": "詳細"
   },
   "settings": {
     "title": "設定",

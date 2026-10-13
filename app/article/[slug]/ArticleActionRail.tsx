@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Bookmark, Check, Heart, Languages, MessageSquare, Pencil, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,20 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Bookmark,
-  Check,
-  Heart,
-  Languages,
-  MessageSquare,
-  MoreHorizontal,
-  Pencil,
-  Share2,
-} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 import { ARTICLE_LANGS, type ArticleLangCode } from "./articleLang";
-
-type MoreAction = "request-translation" | "report-article" | "report-author";
 
 interface ArticleActionRailProps {
   isLiked: boolean;
@@ -38,211 +27,115 @@ interface ArticleActionRailProps {
   onShare: () => void;
   isOwnArticle: boolean;
   articleEditHref: string;
-  onMoreAction: (action: MoreAction) => void;
 }
 
-export default function ArticleActionRail({
-  isLiked,
-  onToggleLike,
-  isBookmarked,
-  onToggleBookmark,
-  likesCount,
-  onCommentClick,
-  availableTranslations,
-  selectedLanguage,
-  loading,
-  onSelectLanguage,
-  onShare,
-  isOwnArticle,
-  articleEditHref,
-  onMoreAction,
-}: ArticleActionRailProps) {
+/**
+ * Reader actions. Desktop: sticky vertical rail beside the article.
+ * Phones/tablets: compact bar floating above the bottom tab bar.
+ */
+export default function ArticleActionRail(props: ArticleActionRailProps) {
+  const {
+    isLiked, onToggleLike, isBookmarked, onToggleBookmark, likesCount, onCommentClick,
+    availableTranslations, selectedLanguage, loading, onSelectLanguage, onShare, isOwnArticle, articleEditHref,
+  } = props;
   const { t } = useLanguage();
-  const desktopLanguageMenuRef = useRef<HTMLDivElement | null>(null);
-  const [isDesktopLanguageMenuOpen, setIsDesktopLanguageMenuOpen] =
-    useState(false);
 
-  useEffect(() => {
-    if (!isDesktopLanguageMenuOpen) return;
+  const languageMenu = (side: "right" | "top") => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={t("articles.detail.languageSelector")} className="rounded-full text-muted-foreground">
+          <Languages />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side={side} align="start" className="w-36">
+        {ARTICLE_LANGS.map((lang) => {
+          const available = availableTranslations.includes(lang.code);
+          const selected = selectedLanguage === lang.code;
+          return (
+            <DropdownMenuItem
+              key={lang.code}
+              disabled={!available || loading}
+              onClick={() => !selected && onSelectLanguage(lang.code)}
+              className="justify-between"
+            >
+              {lang.label}
+              {selected && <Check className="size-4 text-primary" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
-    const handleOutsideClick = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (!desktopLanguageMenuRef.current?.contains(target)) {
-        setIsDesktopLanguageMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [isDesktopLanguageMenuOpen]);
+  const like = (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onToggleLike}
+      aria-pressed={isLiked}
+      aria-label={t("feed.actions.like")}
+      className={cn("rounded-full", isLiked ? "bg-brand-red/10 text-brand-red hover:bg-brand-red/15" : "text-muted-foreground")}
+    >
+      <Heart fill={isLiked ? "currentColor" : "none"} />
+    </Button>
+  );
+  const bookmark = (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onToggleBookmark}
+      aria-pressed={isBookmarked}
+      aria-label={t("feed.actions.bookmark")}
+      className={cn("rounded-full", isBookmarked ? "bg-primary/10 text-primary hover:bg-primary/15" : "text-muted-foreground")}
+    >
+      <Bookmark fill={isBookmarked ? "currentColor" : "none"} />
+    </Button>
+  );
+  const comment = (
+    <Button variant="ghost" size="icon" onClick={onCommentClick} aria-label={t("feed.actions.comment")} className="rounded-full text-muted-foreground">
+      <MessageSquare />
+    </Button>
+  );
+  const share = (
+    <Button variant="ghost" size="icon" onClick={onShare} aria-label={t("common.share")} className="rounded-full text-muted-foreground">
+      <Share2 />
+    </Button>
+  );
+  const edit = isOwnArticle && (
+    <Button asChild variant="ghost" size="icon" aria-label={t("common.edit")} className="rounded-full text-muted-foreground">
+      <Link href={articleEditHref}>
+        <Pencil />
+      </Link>
+    </Button>
+  );
 
   return (
-    <aside className="hidden lg:block">
-      <div className="sticky top-6">
-        <div className="flex">
-          {/* Action stack */}
-          <div className="flex flex-col items-center gap-3">
-            {/* Like action */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`rounded-full border ${
-                isLiked
-                  ? "text-destructive border-destructive/40 bg-destructive/10"
-                  : "border-border hover:bg-muted"
-              }`}
-              onClick={onToggleLike}
-              aria-label={t("feed.actions.like")}
-            >
-              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
-            </Button>
+    <>
+      {/* Desktop rail */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-6 flex flex-col items-center gap-1 rounded-full border bg-card p-1.5 shadow-xs">
+          {like}
+          <span className="pb-1 text-xs font-medium tabular-nums text-muted-foreground">{likesCount}</span>
+          {bookmark}
+          {comment}
+          {languageMenu("right")}
+          {share}
+          {edit}
+        </div>
+      </aside>
 
-            {/* Bookmark action */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`rounded-full border ${
-                isBookmarked
-                  ? "text-primary border-primary/40 bg-primary/10 "
-                  : "border-border hover:bg-muted"
-              }`}
-              onClick={onToggleBookmark}
-              aria-label={t("feed.actions.bookmark")}
-            >
-              <Bookmark
-                className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`}
-              />
-            </Button>
-
-            {/* Comment action */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full border border-border hover:bg-muted"
-              aria-label={t("feed.actions.comment")}
-              onClick={onCommentClick}
-            >
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-
-            {/* Language selector */}
-            <div className="relative" ref={desktopLanguageMenuRef}>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="rounded-full border border-border hover:bg-muted"
-                aria-label={t("articles.detail.languageSelector")}
-                onClick={() => setIsDesktopLanguageMenuOpen((prev) => !prev)}
-              >
-                <Languages className="h-5 w-5" />
-              </Button>
-
-              {isDesktopLanguageMenuOpen && (
-                <div className="absolute left-14 top-1/2 z-50 w-28 -translate-y-1/2 rounded-2xl border border-border/70 bg-background/95 p-2 shadow-2xl backdrop-blur-md">
-                  <div className="space-y-1">
-                    {ARTICLE_LANGS.map((lang) => {
-                      const isAvailable = availableTranslations.includes(
-                        lang.code,
-                      );
-                      const isSelected = selectedLanguage === lang.code;
-
-                      return (
-                        <Button
-                          key={lang.code}
-                          type="button"
-                          variant="ghost"
-                          className={`h-8 w-full justify-between rounded-lg px-3 text-sm font-semibold ${
-                            isSelected
-                              ? "bg-primary text-primary-foreground hover:bg-primary"
-                              : "text-foreground hover:bg-muted"
-                          } ${
-                            !isAvailable
-                              ? "opacity-50 text-muted-foreground cursor-not-allowed hover:bg-transparent"
-                              : ""
-                          }`}
-                          disabled={!isAvailable || loading}
-                          onClick={() => {
-                            if (isAvailable && !loading && !isSelected) {
-                              onSelectLanguage(lang.code);
-                            }
-                            setIsDesktopLanguageMenuOpen(false);
-                          }}
-                        >
-                          <span>{lang.label}</span>
-                          {isSelected && <Check className="h-4 w-4" />}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Share action */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full border border-border hover:bg-muted"
-              aria-label={t("common.share")}
-              onClick={onShare}
-            >
-              <Share2 className="h-5 w-5" />
-            </Button>
-
-            {isOwnArticle && (
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className="rounded-full border border-border hover:bg-muted"
-                aria-label={t("common.edit")}
-              >
-                <Link href={articleEditHref}>
-                  <Pencil className="h-5 w-5" />
-                </Link>
-              </Button>
-            )}
-
-            {/* More action */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full border border-border hover:bg-muted"
-                  aria-label={t("articles.detail.moreActions")}
-                >
-                  <MoreHorizontal className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="right" align="start">
-                <DropdownMenuItem
-                  onClick={() => onMoreAction("request-translation")}
-                >
-                  {t("articles.detail.requestTranslation")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onMoreAction("report-article")}
-                >
-                  {t("articles.detail.reportArticle")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onMoreAction("report-author")}>
-                  {t("articles.detail.reportAuthor")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <div className="h-px w-10 bg-border my-1" />
-
-            <div className="text-[11px] text-muted-foreground text-center">
-              <div className="font-semibold text-foreground/80">
-                {likesCount}
-              </div>
-              <div>{t("feed.stats.likes")}</div>
-            </div>
-          </div>
+      {/* Phone / tablet bar, above the bottom tabs */}
+      <div className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+0.75rem)] z-30 flex justify-center px-4 md:bottom-6 lg:hidden">
+        <div className="flex items-center gap-0.5 rounded-full border bg-card/95 p-1 shadow-lg backdrop-blur-md">
+          {like}
+          <span className="pr-1.5 text-xs font-medium tabular-nums text-muted-foreground">{likesCount}</span>
+          {bookmark}
+          {comment}
+          {languageMenu("top")}
+          {share}
+          {edit}
         </div>
       </div>
-    </aside>
+    </>
   );
 }

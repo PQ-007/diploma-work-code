@@ -769,7 +769,8 @@
     "course": "Category",
     "allCategories": "All categories",
     "noMyProjectsDesc": "You haven't created any projects yet.",
-    "noProjectsFoundDesc": "Try a different search or filter."
+    "noProjectsFoundDesc": "Try a different search or filter.",
+    "details": "Details"
   },
   "settings": {
     "title": "Settings",

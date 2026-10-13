@@ -1,16 +1,15 @@
 "use client";
 
-import BackToTopButton from "@/app/project/components/BackToTopButton";
+import { BackToTop } from "@/components/common/BackToTop";
 import FloatingActionBar from "@/app/project/components/FloatingActionBar";
 import ProjectComments from "@/app/project/components/ProjectComments";
 import ProjectMediaViewer from "./ProjectMediaViewer";
-import type {
-  ProjectComment,
-  ProjectDifficulty,
-  ProjectPayload,
-} from "@/app/project/types";
+import type { ProjectComment, ProjectPayload } from "@/app/project/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { Tag } from "@/components/common/Tag";
+import { UserChip } from "@/components/common/UserChip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,28 +36,76 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /*  Constants                                                           */
 /* ------------------------------------------------------------------ */
 
-const difficultyColors: Record<ProjectDifficulty, string> = {
-  beginner: "bg-green-500/10 text-green-500 border-green-500/20",
-  intermediate: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-  advanced: "bg-red-500/10 text-red-500 border-red-500/20",
-};
+/** Key facts about a project as a definition list (sidebar on xl, card below "About" otherwise). */
+function ProjectFacts({ project, t }: { project: ProjectPayload; t: (k: string) => string }) {
+  return (
+    <dl className="divide-y text-sm">
+      <div className="flex items-center justify-between gap-3 py-2.5 first:pt-0">
+        <dt className="text-muted-foreground">{t("project.type")}</dt>
+        <dd><StatusBadge kind="projectType" value={project.type} /></dd>
+      </div>
+      <div className="flex items-center justify-between gap-3 py-2.5">
+        <dt className="text-muted-foreground">{t("project.status")}</dt>
+        <dd><StatusBadge kind="project" value={project.status} /></dd>
+      </div>
+      {project.category && (
+        <div className="flex items-center justify-between gap-3 py-2.5">
+          <dt className="text-muted-foreground">{t("project.category")}</dt>
+          <dd className="font-medium">{t(`project.categoryValue.${project.category}`)}</dd>
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-3 py-2.5">
+        <dt className="text-muted-foreground">{t("project.difficulty")}</dt>
+        <dd><StatusBadge kind="difficulty" value={project.difficulty} /></dd>
+      </div>
+      <div className="space-y-1.5 py-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-muted-foreground">{t("project.progress")}</dt>
+          <dd className="font-medium tabular-nums">{project.progress}%</dd>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary" style={{ width: `${project.progress}%` }} />
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3 py-2.5">
+        <dt className="text-muted-foreground">{t("project.created")}</dt>
+        <dd className="font-medium">{new Date(project.created_at).toLocaleDateString()}</dd>
+      </div>
+      {project.tags.length > 0 && (
+        <div className="space-y-2 pt-2.5 last:pb-0">
+          <dt className="text-muted-foreground">{t("project.tags")}</dt>
+          <dd className="flex flex-wrap gap-1.5">
+            {project.tags.map((tag) => <Tag key={tag} name={tag} />)}
+          </dd>
+        </div>
+      )}
+    </dl>
+  );
+}
 
-const difficultyLabel: Record<ProjectDifficulty, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  advanced: "Advanced",
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  private: "Private",
-  diploma: "Diploma",
-  contest: "Contest",
-  intership: "Internship",
-};
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
-/* ------------------------------------------------------------------ */
+function ProjectLinks({ project, t }: { project: ProjectPayload; t: (k: string) => string }) {
+  if (!project.repository_url && !project.demo_url) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {project.demo_url && (
+        <Button asChild size="sm">
+          <a href={project.demo_url} target="_blank" rel="noopener noreferrer">
+            <Globe />
+            {t("project.liveDemo")}
+          </a>
+        </Button>
+      )}
+      {project.repository_url && (
+        <Button asChild size="sm" variant="outline">
+          <a href={project.repository_url} target="_blank" rel="noopener noreferrer">
+            <Github />
+            {t("project.repository")}
+          </a>
+        </Button>
+      )}
+    </div>
+  );
+}
 
 function isImageUrl(url: string, fileType?: string | null) {
   if (fileType && fileType.startsWith("image/")) return true;
@@ -318,9 +365,32 @@ export default function ProjectDetailPage() {
         {/* ═══ Main content ═══ */}
         <main className="space-y-8 min-w-0">
           {/* ── Title ── */}
-          <h1 className="text-3xl md:text-4xl lg:text-[46px] leading-[1.05] font-black uppercase tracking-tight text-foreground">
-            {project.title}
-          </h1>
+          <header className="space-y-3">
+            <div className="flex flex-wrap gap-1.5">
+              <StatusBadge kind="projectType" value={project.type} />
+              <StatusBadge kind="project" value={project.status} />
+              <StatusBadge kind="difficulty" value={project.difficulty} />
+            </div>
+            <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl">
+              {project.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+              <UserChip
+                size="sm"
+                name={project.author?.display_name || project.author?.user_name || t("project.unknownUser")}
+                avatarUrl={project.author?.avatar_url}
+                username={project.author?.user_name}
+                subtitle={t("project.leadContributor")}
+              />
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="size-3.5" />
+                {new Date(project.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="xl:hidden">
+              <ProjectLinks project={project} t={t} />
+            </div>
+          </header>
 
           {/* ── Steam-style media viewer ── */}
           <ProjectMediaViewer
@@ -335,35 +405,33 @@ export default function ProjectDetailPage() {
           />
 
           {/* ── About ── */}
-          <Card className="border-border/80 bg-card/90 text-card-foreground p-5 sm:p-6 space-y-5">
-            <h2 className="text-xl font-black uppercase tracking-tight">
-              {t("project.about") || "About The Project"}
-            </h2>
+          <Card className="gap-4 p-5 sm:p-6">
+            <h2 className="text-base font-semibold">{t("project.about")}</h2>
 
-            <p className="text-sm sm:text-[15px] leading-7 text-muted-foreground">
-              {project.description || "No description provided."}
+            <p className="whitespace-pre-line text-[15px] leading-7 text-foreground/85">
+              {project.description}
             </p>
 
             {/* Technologies (legacy data) */}
             {project.technologies && project.technologies.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {project.technologies.map((tech) => (
-                  <Badge
-                    key={tech}
-                    variant="outline"
-                    className="text-xs px-2.5 py-0.5 rounded-full border-border/60"
-                  >
-                    {tech}
-                  </Badge>
+                  <Tag key={tech} name={tech} />
                 ))}
               </div>
             )}
           </Card>
 
+          {/* ── Facts (sidebar holds them on xl) ── */}
+          <Card className="gap-3 p-5 xl:hidden">
+            <h2 className="text-base font-semibold">{t("project.details")}</h2>
+            <ProjectFacts project={project} t={t} />
+          </Card>
+
           {/* ── Team ── */}
           {teamMembers.length > 1 && (
-            <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
-              <div className="flex items-center gap-2 mb-4">
+            <Card className="gap-4 p-4 sm:p-5">
+              <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-base font-semibold">
                   {t("project.team") || "Team"}
@@ -406,10 +474,7 @@ export default function ProjectDetailPage() {
                         )}
                       </div>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="text-[11px] uppercase shrink-0"
-                    >
+                    <Badge variant={member.role === "owner" ? "brand" : "neutral"} className="capitalize">
                       {member.role}
                     </Badge>
                   </div>
@@ -420,8 +485,8 @@ export default function ProjectDetailPage() {
 
           {/* ── Attachments (non-image files) ── */}
           {nonImageFiles.length > 0 && (
-            <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
-              <h3 className="text-base font-semibold mb-4">
+            <Card className="gap-4 p-4 sm:p-5">
+              <h3 className="text-base font-semibold">
                 {t("project.files") || "Files"}
               </h3>
               <div className="space-y-2">
@@ -447,10 +512,7 @@ export default function ProjectDetailPage() {
           )}
 
           {/* ── Comments ── */}
-          <Card
-            ref={commentsRef}
-            className="border-border/80 bg-card/90 p-5 sm:p-6"
-          >
+          <Card ref={commentsRef} className="p-5 sm:p-6">
             <ProjectComments
               slug={slug}
               comments={(project.comments as ProjectComment[]) || []}
@@ -462,187 +524,15 @@ export default function ProjectDetailPage() {
 
         {/* ═══ Right sidebar ═══ */}
         <aside className="hidden xl:flex xl:flex-col gap-3 sticky top-[84px] self-start">
-          {/* ── Contributor Spotlight ── */}
-          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground space-y-2.5">
-            <div className="flex items-start gap-3">
-              <Avatar className="h-10 w-10 border border-border">
-                <AvatarImage src={project.author?.avatar_url || undefined} />
-                <AvatarFallback>
-                  {(project.author?.display_name || "U")
-                    .charAt(0)
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">
-                  {project.author?.display_name ||
-                    project.author?.user_name ||
-                    t("project.unknownUser") ||
-                    "Unknown"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {t("project.leadContributor") || "Lead contributor"}
-                </p>
-              </div>
-            </div>
-            {(project.repository_url || project.demo_url) && (
-              <div className="grid grid-cols-1 gap-2 pt-1">
-                {project.repository_url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent"
-                  >
-                    <a
-                      href={project.repository_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="h-3.5 w-3.5 mr-2" />
-                      {t("project.repository") || "Repository"}
-                    </a>
-                  </Button>
-                )}
-                {project.demo_url && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    className="w-full justify-start border-border bg-muted/30 hover:bg-accent"
-                  >
-                    <a
-                      href={project.demo_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Globe className="h-3.5 w-3.5 mr-2" />
-                      {t("project.liveDemo") || "Live Demo"}
-                    </a>
-                  </Button>
-                )}
-              </div>
-            )}
-          </Card>
+          {(project.repository_url || project.demo_url) && (
+            <Card className="gap-3 p-4">
+              <ProjectLinks project={project} t={t} />
+            </Card>
+          )}
 
-          {/* ── Project info card ── */}
-          <Card className="border-border/80 bg-card/90 p-4 text-card-foreground space-y-3">
-            {/* Thumbnail */}
-            {project.thumbnail_url && (
-              <div
-                className="rounded-md overflow-hidden border border-border cursor-pointer group"
-                onClick={() => setSelectedMediaId("thumbnail")}
-              >
-                <img
-                  src={project.thumbnail_url}
-                  alt={project.title}
-                  className="w-full aspect-video object-cover transition-opacity group-hover:opacity-80"
-                />
-              </div>
-            )}
-
-            {/* Brief */}
-            {project.description && (
-              <div className="space-y-1">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {t("project.brief") || "Brief"}
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                  {project.description}
-                </p>
-              </div>
-            )}
-
-            {/* Project Type + Category */}
-            <div className="border-t border-border/40 pt-2.5 grid grid-cols-1 gap-2.5">
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {t("project.type") || "Project Type"}
-                  </p>
-                  <Badge
-                    variant="outline"
-                    className="text-xs border-primary/35 text-primary bg-primary/5 uppercase"
-                  >
-                    {t(`project.typeValue.${project.type}`) ||
-                      TYPE_LABELS[project.type] ||
-                      project.type}
-                  </Badge>
-                </div>
-                {project.category && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {t("project.category") || "Category"}
-                    </p>
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {project.category.replace(/_/g, " ")}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Tags */}
-            {project.tags.length > 0 && (
-              <div className="space-y-1.5 border-t border-border/40 pt-2.5">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {t("project.tags") || "Tags"}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary text-primary-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Created date */}
-            <div className="flex justify-between items-center text-xs border-t border-border/40 pt-2.5">
-              <span className="text-muted-foreground">
-                {t("project.created") || "Created"}
-              </span>
-              <span className="text-foreground flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {new Date(project.created_at).toLocaleDateString()}
-              </span>
-            </div>
-
-            {/* Progress */}
-            <div className="space-y-1.5 border-t border-border/40 pt-2.5">
-              <div className="flex justify-between items-center">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {t("project.progress") || "Progress"}
-                </p>
-                <span className="text-xs font-semibold">
-                  {project.progress}%
-                </span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${project.progress}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Difficulty */}
-            <div className="space-y-1.5 border-t border-border/40 pt-2.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                {t("project.difficulty") || "Difficulty"}
-              </p>
-              <Badge
-                variant="outline"
-                className={`text-xs ${difficultyColors[project.difficulty]}`}
-              >
-                {t(`project.difficulty.${project.difficulty}`) ||
-                  difficultyLabel[project.difficulty]}
-              </Badge>
-            </div>
+          <Card className="gap-3 p-4">
+            <h2 className="text-sm font-semibold">{t("project.details")}</h2>
+            <ProjectFacts project={project} t={t} />
           </Card>
         </aside>
       </div>
@@ -655,7 +545,7 @@ export default function ProjectDetailPage() {
         onShare={handleShare}
       />
 
-      <BackToTopButton />
+      <BackToTop />
     </div>
   );
 }

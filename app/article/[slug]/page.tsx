@@ -3,16 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { components as mdxComponents } from "@/mdx/mdx-components";
@@ -28,7 +19,7 @@ import {
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import BackToTopButton from "../components/BackToTopButton";
+import { BackToTop } from "@/components/common/BackToTop";
 
 import RightPanelCard from "../components/RightPanelCard";
 import TocItem from "../components/TocItem";
@@ -70,7 +61,7 @@ export default function ModernArticlePage() {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState("");
   const [article, setArticle] = useState<ArticlePayload | null>(null);
-  const [MdxContent, setMdxContent] = useState<React.ComponentType<any> | null>(
+  const [MdxContent, setMdxContent] = useState<React.ComponentType<Record<string, unknown>> | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
@@ -85,27 +76,10 @@ export default function ModernArticlePage() {
   const [availableTranslations, setAvailableTranslations] = useState<
     ArticleLangCode[]
   >([]);
-  const [activeMoreAction, setActiveMoreAction] = useState<
-    "request-translation" | "report-article" | "report-author" | null
-  >(null);
-  const [moreActionMessage, setMoreActionMessage] = useState("");
   const articleRef = useRef<HTMLDivElement | null>(null);
 
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
-
-  // Redirect to create page if slug is "create" to prevent routing conflict
-  useEffect(() => {
-    if (slug === "create") {
-      window.location.href = "/article/create";
-      return;
-    }
-  }, [slug]);
-
-  // Early return if slug is "create" to prevent API calls and errors
-  if (slug === "create") {
-    return <div>{t("articles.detail.redirecting")}</div>;
-  }
 
   const articleNumericId = article?.id ? Number(article.id) : null;
   const commentRef = useRef<ArticleCommentSectionHandle>(null);
@@ -478,31 +452,7 @@ export default function ModernArticlePage() {
     toast.error(t("articles.detail.shareFailed"));
   };
 
-  const getMoreActionText = () => {
-    if (activeMoreAction === "request-translation") {
-      return {
-        title: t("articles.detail.requestTranslation"),
-        description: t("articles.detail.requestTranslationDescription"),
-      };
-    }
-    if (activeMoreAction === "report-article") {
-      return {
-        title: t("articles.detail.reportArticle"),
-        description: t("articles.detail.reportArticleDescription"),
-      };
-    }
-    return {
-      title: t("articles.detail.reportAuthor"),
-      description: t("articles.detail.reportAuthorDescription"),
-    };
-  };
 
-  const submitMoreAction = () => {
-    if (!activeMoreAction) return;
-    toast.success(t("articles.detail.requestSubmitted"));
-    setActiveMoreAction(null);
-    setMoreActionMessage("");
-  };
 
   const headingSelector = "h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]";
 
@@ -678,7 +628,6 @@ export default function ModernArticlePage() {
             onShare={handleShare}
             isOwnArticle={isOwnArticle}
             articleEditHref={articleEditHref}
-            onMoreAction={setActiveMoreAction}
           />
 
           {/* Article column */}
@@ -831,49 +780,8 @@ export default function ModernArticlePage() {
         </div>
       </div>
 
-      <BackToTopButton />
+      <BackToTop />
 
-      <Dialog
-        open={Boolean(activeMoreAction)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setActiveMoreAction(null);
-            setMoreActionMessage("");
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{getMoreActionText().title}</DialogTitle>
-            <DialogDescription>
-              {getMoreActionText().description}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Textarea
-            value={moreActionMessage}
-            onChange={(event) => setMoreActionMessage(event.target.value)}
-            placeholder={t("articles.detail.actionMessagePlaceholder")}
-            className="min-h-[110px]"
-          />
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setActiveMoreAction(null);
-                setMoreActionMessage("");
-              }}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="button" onClick={submitMoreAction}>
-              {t("articles.detail.submitRequest")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
