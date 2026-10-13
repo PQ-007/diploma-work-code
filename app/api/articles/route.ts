@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { fetchTagsForContent } from "@/lib/api/queries/tags";
+import { ensureTagIds, fetchTagsForContent } from "@/lib/api/queries/tags";
 import { fetchAuthorProfiles } from "@/lib/api/queries/profiles";
 import { fetchInteractionCounts } from "@/lib/api/queries/interactions";
 
@@ -247,48 +247,18 @@ export async function POST(req: NextRequest) {
   }
 
   if (tagNames.length) {
-    const { data: tagRows, error: tagError } = await supabase
-      .from("tags")
-      .upsert(
-        tagNames.map((name) => ({ name })),
-        { onConflict: "name", ignoreDuplicates: true },
-      )
-      .select("id, name");
-
-    if (tagError) {
-      return NextResponse.json({ error: tagError.message }, { status: 500 });
+    let tagIds: Map<string, number>;
+    try {
+      tagIds = await ensureTagIds(supabase, tagNames);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to save tags";
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
-    if (tagRows && tagRows.length) {
-      // TODO: Re-enable usage tracking after schema migration
-      // Update usage count for existing tags
-      // for (const tag of tagRows) {
-      //   // Get current usage count
-      //   const { data: currentTag } = await supabase
-      //     .from("tags")
-      //     .select("usage_count")
-      //     .eq("id", tag.id)
-      //     .single();
-
-      //   const currentCount = currentTag?.usage_count || 0;
-
-      //   await supabase
-      //     .from("tags")
-      //     .update({
-      //       usage_count: currentCount + 1,
-      //       last_used_at: new Date().toISOString()
-      //     })
-      //     .eq("id", tag.id);
-      // }
-
-      const tagLinks = tagRows.map((tag) => ({
-        article_id: article.id,
-        tag_id: tag.id,
-      }));
-
-      const { error: linkError } = await supabase
-        .from("article_tags")
-        .insert(tagLinks);
+    if (tagIds.size) {
+      const { error: linkError } = await supabase.from("article_tags").insert(
+        [...tagIds.values()].map((tag_id) => ({ article_id: article.id, tag_id })),
+      );
 
       if (linkError) {
         return NextResponse.json({ error: linkError.message }, { status: 500 });

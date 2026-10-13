@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { ensureTagIds } from "@/lib/api/queries/tags";
 
 /* ═══════════════════════════════════════════
    GET /api/dictionary/[slug]
@@ -365,17 +366,11 @@ export async function PUT(
         .from("dictionary_entry_tags")
         .delete()
         .eq("entry_id", entry.id);
-      for (const tagName of tags) {
-        const { data: tagRow } = await supabase
-          .from("tags")
-          .upsert({ name: tagName.trim() }, { onConflict: "name" })
-          .select("id")
-          .single();
-        if (tagRow) {
-          await supabase
-            .from("dictionary_entry_tags")
-            .insert({ entry_id: entry.id, tag_id: tagRow.id });
-        }
+      const tagIds = await ensureTagIds(supabase, tags);
+      if (tagIds.size) {
+        await supabase.from("dictionary_entry_tags").insert(
+          [...tagIds.values()].map((tag_id) => ({ entry_id: entry.id, tag_id })),
+        );
       }
     }
 

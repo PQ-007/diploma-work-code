@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { ensureTagIds } from "@/lib/api/queries/tags";
 
 /* ═══════════════════════════════════════════
    GET /api/discussions
@@ -216,21 +217,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert tags and link
-    if (tags.length) {
-      for (const tagName of tags) {
-        const { data: tagRow } = await supabase
-          .from("tags")
-          .upsert({ name: tagName.trim() }, { onConflict: "name" })
-          .select("id")
-          .single();
-
-        if (tagRow) {
-          await supabase
-            .from("discussion_tags")
-            .insert({ discussion_id: disc.id, tag_id: tagRow.id });
-        }
-      }
+    // Create missing tags and link
+    const tagIds = await ensureTagIds(supabase, tags);
+    if (tagIds.size) {
+      await supabase.from("discussion_tags").insert(
+        [...tagIds.values()].map((tag_id) => ({ discussion_id: disc.id, tag_id })),
+      );
     }
 
     return NextResponse.json({ id: disc.id }, { status: 201 });

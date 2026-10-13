@@ -75,3 +75,34 @@ export async function fetchTagsForContent(
 
   return tagsByContent;
 }
+
+/**
+ * Returns name -> id for the given tag names, creating any that don't exist.
+ *
+ * Inserts with ON CONFLICT DO NOTHING and then selects, because `tags` has no
+ * UPDATE policy: a plain upsert (ON CONFLICT DO UPDATE) is rejected by RLS for
+ * every tag that already exists, and DO NOTHING returns only the new rows.
+ */
+export async function ensureTagIds(
+  supabase: SupabaseClient,
+  names: string[],
+): Promise<Map<string, number>> {
+  const unique = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
+  if (!unique.length) return new Map();
+
+  const { error: insertError } = await supabase
+    .from("tags")
+    .upsert(
+      unique.map((name) => ({ name })),
+      { onConflict: "name", ignoreDuplicates: true },
+    );
+  if (insertError) throw insertError;
+
+  const { data, error } = await supabase
+    .from("tags")
+    .select("id, name")
+    .in("name", unique);
+  if (error) throw error;
+
+  return new Map((data || []).map((t) => [t.name as string, t.id as number]));
+}
