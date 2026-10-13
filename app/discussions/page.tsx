@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,6 @@ import { DiscussionCardWrapper } from "./components/DiscussionCardWrapper";
 
 // --- Components Import ---
 import DiscussionModal from "./components/DiscussionModal";
-import TrendingTopics from "@/components/TrendingTopics";
 import DiscussionCreateDialog from "@/components/DiscussionCreateDialog";
 
 const tabKeys = [
@@ -38,6 +38,14 @@ const tabKeys = [
 ];
 
 export default function DiscussionsPage() {
+  return (
+    <Suspense>
+      <DiscussionsPageContent />
+    </Suspense>
+  );
+}
+
+function DiscussionsPageContent() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
@@ -48,6 +56,12 @@ export default function DiscussionsPage() {
 
   // New discussion dialog
   const [createOpen, setCreateOpen] = useState(false);
+
+  // The global "Create → Discussion" menu links to /discussions?create=1
+  const wantsCreate = useSearchParams().get("create") === "1";
+  useEffect(() => {
+    if (wantsCreate && user) setCreateOpen(true);
+  }, [wantsCreate, user]);
 
   // Use React Query hook - automatic caching and state management!
   const { data: discussions, isLoading, error, refetch } = useDiscussions();
@@ -201,11 +215,6 @@ export default function DiscussionsPage() {
               </div>
             )}
           </div>
-
-          {/* Right Sidebar */}
-          <aside className="hidden xl:block w-[300px] space-y-5 sticky top-8 h-fit">
-            <TrendingTopics trendingTopics={[]} t={t} />
-          </aside>
         </div>
       </div>
 

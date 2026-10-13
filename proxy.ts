@@ -6,10 +6,6 @@ import { NextResponse, type NextRequest } from "next/server";
  * Users who are not signed in will be redirected to /signin.
  */
 const protectedPrefixes = [
-  "/store",
-  "/learn",
-  "/knowledge-tree",
-  "/library",
   "/article/create",
   "/project/create",
   "/dictionary/create",
@@ -94,10 +90,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/store/:path*",
-    "/learn/:path*",
-    "/knowledge-tree/:path*",
-    "/library/:path*",
     "/profile/:path*",
     "/article/create",
     "/project/create",

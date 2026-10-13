@@ -17,7 +17,6 @@ import {
   FolderGit2,
   GraduationCap,
   Heart,
-  Layers,
   Loader2,
   MessageSquare,
   MoreHorizontal,
@@ -537,13 +536,6 @@ export default function ProfilePage() {
                 <FolderGit2 className="h-3.5 w-3.5" />
                 {tr("sidebar.projects", "Projects")}
               </TabsTrigger>
-              <TabsTrigger value="flashcards">
-                <Layers className="h-3.5 w-3.5" />
-                {tr("navigation.flashcards", "Flashcards")}
-              </TabsTrigger>
-              <TabsTrigger value="certificates">
-                {tr("profile.certificates", "Certificates")}
-              </TabsTrigger>
             </TabsList>
 
             {/* Articles Tab */}
@@ -578,21 +570,6 @@ export default function ProfilePage() {
                   </p>
                 </div>
               )}
-            </TabsContent>
-
-            {/* Flashcards Tab */}
-            <TabsContent value="flashcards" className="mt-2">
-              <Card className="border-border/60">
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <Layers className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">
-                    {tr(
-                      "profile.noFlashcardsYet",
-                      "No flashcard sets created yet.",
-                    )}
-                  </p>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             {/* Projects Tab */}
@@ -634,17 +611,6 @@ export default function ProfilePage() {
               )}
             </TabsContent>
 
-            {/* Certificates Tab */}
-            <TabsContent value="certificates" className="mt-2">
-              <div className="rounded-lg border border-border/60 bg-card p-8 text-center text-muted-foreground">
-                <p className="text-sm">
-                  {tr(
-                    "profile.noCertificatesYet",
-                    "No certificates earned yet.",
-                  )}
-                </p>
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </div>

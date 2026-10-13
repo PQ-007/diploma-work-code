@@ -25,7 +25,6 @@ import {
   ChevronDown,
   ChevronUp,
   Globe,
-  Library,
   LogOut,
   Monitor,
   Moon,
@@ -217,15 +216,6 @@ export function NavUser() {
             <div className="flex">
               <Settings className="mr-2 h-4 w-4" />
               <span>{t("nav_user.settings")}</span>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => router.push("/library")}
-            className="cursor-pointer"
-          >
-            <div className="flex">
-              <Library className="mr-2 h-4 w-4" />
-              <span>{t("nav_user.library")}</span>
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem

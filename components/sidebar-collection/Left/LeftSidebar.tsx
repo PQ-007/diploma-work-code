@@ -31,14 +31,12 @@ import {
   GraduationCap,
   Hammer,
   MessagesSquare,
-  SwatchBook,
   Telescope,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { NavItem, SidebarData } from "./type";
-import { featureFlags } from "@/lib/featureFlags";
 
 // Navigation data structure (using translation keys)
 const navData: SidebarData = {
@@ -78,14 +76,6 @@ const navData: SidebarData = {
       icon: MessagesSquare,
       href: "/discussions",
       items: [],
-    },
-    {
-      titleKey: "sidebar.flashcards",
-      icon: SwatchBook,
-      href: "/flashcards",
-      items: [],
-      authRequired: true,
-      flag: "flashcards", // Parked (Phase 2) — hidden unless NEXT_PUBLIC_ENABLE_FLASHCARDS=true
     },
     {
       titleKey: "sidebar.dictionary",
@@ -271,8 +261,7 @@ export function LeftSidebar({
         <NavMain
           items={navData.navMain.filter(
             (item) =>
-              (isAuthenticated || !item.authRequired) &&
-              (!item.flag || featureFlags[item.flag]),
+              isAuthenticated || !item.authRequired,
           )}
         />
         

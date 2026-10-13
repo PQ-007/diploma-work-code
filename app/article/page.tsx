@@ -18,7 +18,6 @@ import {
   ArticleFeedSkeleton,
   ArticlePageSkeleton,
 } from "@/app/article/components/ArticleSkeleton";
-import ReadingList from "@/components/ReadingList";
 
 const popularTags = [
   { name: "React", count: 128 },
@@ -51,7 +50,6 @@ export default function ArticleBrowsePage() {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [readingList, setReadingList] = useState(new Set<string>());
 
   // Use React Query hook - automatic caching and state management!
   const {
@@ -296,7 +294,6 @@ export default function ArticleBrowsePage() {
               </Card>
             </div>
 
-            <ReadingList readingListCount={readingList.size} />
           </aside>
         </div>
       </div>

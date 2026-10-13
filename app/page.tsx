@@ -6,9 +6,7 @@ import { Anvil, ArrowRight, Blocks, MessagesSquare, Telescope } from "lucide-rea
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
- * Home is a clean entry point into FutureHub's four cores
- * (FutureHub refocus — Phase 3). The previous mixed feed lives on in
- * @/app/pages/FeedPage and can be reused on a core page later.
+ * Home is a clean entry point into FutureHub's four cores.
  */
 const cores = [
   {
