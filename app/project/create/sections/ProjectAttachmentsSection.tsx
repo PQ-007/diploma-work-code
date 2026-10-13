@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import type { ChangeEvent, Dispatch, RefObject, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -40,11 +41,13 @@ export function ProjectAttachmentsSection({
   handleAddFile,
   handleDeleteFile,
 }: ProjectAttachmentsSectionProps) {
+  const { t } = useTranslation();
+  const f = (k: string) => t(`project.form.${k}`);
   return (
-    <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
+    <Card className="gap-4 p-4 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <Upload className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-base font-semibold">Attachments</h3>
+        <h3 className="text-base font-semibold">{f("attachments")}</h3>
       </div>
 
       {nonImageFiles.length > 0 && (
@@ -83,28 +86,28 @@ export function ProjectAttachmentsSection({
 
       {editSlug ? (
         <div className="rounded-md border border-dashed border-border/60 bg-muted/20 p-4 space-y-2.5">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            Add File
+          <p className="text-xs font-medium text-muted-foreground">
+            {f("addFile")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Input
-              placeholder="File name"
+              placeholder={f("fileName")}
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
-              className="h-8 text-xs"
+              
             />
             <Input
-              placeholder="File type (optional)"
+              placeholder={f("fileType")}
               value={fileType}
               onChange={(e) => setFileType(e.target.value)}
-              className="h-8 text-xs"
+              
             />
           </div>
           <Input
-            placeholder="File URL"
+            placeholder={f("fileUrl")}
             value={fileUrl}
             onChange={(e) => setFileUrl(e.target.value)}
-            className="h-8 text-xs"
+            
           />
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 cursor-pointer rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors">
@@ -124,9 +127,7 @@ export function ProjectAttachmentsSection({
               />
             </label>
             <Button
-              variant="outline"
-              size="sm"
-              className="h-8"
+              variant="secondary"
               onClick={handleAddFile}
               disabled={savingFile || uploadingAttach}
             >
@@ -139,7 +140,7 @@ export function ProjectAttachmentsSection({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Save the project first to attach files.
+          {f("saveFirstFiles")}
         </p>
       )}
     </Card>

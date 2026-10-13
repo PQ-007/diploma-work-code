@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import type {
   ChangeEvent,
   Dispatch,
@@ -57,6 +58,8 @@ export function ProjectMediaSection({
   handleGalleryUpload,
   handleDeleteFile,
 }: ProjectMediaSectionProps) {
+  const { t } = useTranslation();
+  const f = (k: string) => t(`project.form.${k}`);
   return (
     <div className="space-y-2">
       {/* Main viewer */}
@@ -78,7 +81,7 @@ export function ProjectMediaSection({
         ) : selectedMediaId === "youtube" && youTubeId ? (
           <iframe
             src={`https://www.youtube.com/embed/${youTubeId}?autoplay=1`}
-            title="Project preview"
+            title={title || f("titlePlaceholder")}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 w-full h-full"
@@ -99,15 +102,15 @@ export function ProjectMediaSection({
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors flex flex-col items-center justify-center gap-2">
               <ImagePlus className="h-7 w-7 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
               <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity drop-shadow">
-                Change Thumbnail
+                {f("changeThumbnail")}
               </span>
             </div>
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground group-hover:text-primary transition-colors">
             <ImagePlus className="h-10 w-10" />
-            <span className="text-sm font-medium">Upload Thumbnail</span>
-            <span className="text-xs opacity-60">Recommended 16:9</span>
+            <span className="text-sm font-medium">{f("uploadThumbnail")}</span>
+            <span className="text-xs opacity-60">{f("recommended")}</span>
           </div>
         )}
         <input
@@ -203,7 +206,7 @@ export function ProjectMediaSection({
           ) : (
             <>
               <Plus className="h-4 w-4" />
-              <span className="text-[10px] font-medium">Add Photo</span>
+              <span className="text-xs font-medium">{f("addPhoto")}</span>
             </>
           )}
           <input
@@ -227,7 +230,7 @@ export function ProjectMediaSection({
             }}
             className="hover:text-destructive transition-colors"
           >
-            Remove thumbnail
+            {f("removeThumbnail")}
           </button>
         ) : (
           <span />

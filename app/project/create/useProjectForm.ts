@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +55,8 @@ export interface MemberEntry {
 
 export function useProjectForm() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const f = (k: string) => t(`project.form.${k}`);
   const searchParams = useSearchParams();
   const editSlug = searchParams.get("edit");
   const { user, loading: authLoading } = useAuth();
@@ -178,7 +181,7 @@ export function useProjectForm() {
       const r = await uploadImageToCloudinary(file);
       setThumbnailUrl(r.secureUrl);
     } catch {
-      setError("Failed to upload thumbnail.");
+      setError(f("errUploadThumb"));
     } finally {
       setUploadingThumbnail(false);
       e.target.value = "";
@@ -222,7 +225,7 @@ export function useProjectForm() {
         ]);
       }
     } catch {
-      setError("Failed to upload image.");
+      setError(f("errUploadImage"));
     } finally {
       setUploadingGallery(false);
       e.target.value = "";
@@ -232,16 +235,16 @@ export function useProjectForm() {
   /* ─── save project ─── */
   const handleSave = useCallback(async () => {
     if (!title.trim()) {
-      setError("Title is required.");
+      setError(f("errTitle"));
       return;
     }
     if (!description.trim()) {
-      setError("About content is required.");
+      setError(f("errAbout"));
       return;
     }
     const cleanedTags = tags.map((tag) => tag.trim()).filter(Boolean);
     if (cleanedTags.length === 0) {
-      setError("At least one tag is required.");
+      setError(f("errTags"));
       return;
     }
     setSaving(true);
@@ -324,7 +327,7 @@ export function useProjectForm() {
 
   const handleDeleteProject = useCallback(async () => {
     if (!editSlug) return;
-    if (!window.confirm("Delete this project? This action cannot be undone.")) {
+    if (!window.confirm(f("confirmDelete"))) {
       return;
     }
 
@@ -348,11 +351,11 @@ export function useProjectForm() {
   /* ─── members ─── */
   const handleAddMember = useCallback(async () => {
     if (!editSlug) {
-      setMemberError("Save the project first.");
+      setMemberError(f("errSaveFirst"));
       return;
     }
     if (!memberUsername.trim()) {
-      setMemberError("Enter a username.");
+      setMemberError(f("errUsername"));
       return;
     }
     setAddingMember(true);
@@ -391,7 +394,7 @@ export function useProjectForm() {
       });
       if (!res.ok) {
         setMembers(snapshot);
-        setMemberError("Failed to remove member.");
+        setMemberError(f("errRemoveMember"));
       }
     },
     [editSlug, members],
@@ -424,7 +427,7 @@ export function useProjectForm() {
       setFileType((p) => p || file.type || "image");
       setFileSize((p) => p || String(file.size));
     } catch {
-      setError("Upload failed.");
+      setError(f("errUpload"));
     } finally {
       setUploadingAttach(false);
       e.target.value = "";
@@ -433,11 +436,11 @@ export function useProjectForm() {
 
   const handleAddFile = useCallback(async () => {
     if (!editSlug) {
-      setError("Save the project first.");
+      setError(f("errSaveFirst"));
       return;
     }
     if (!fileName.trim() || !fileUrl.trim()) {
-      setError("File name and URL required.");
+      setError(f("errFileFields"));
       return;
     }
     setSavingFile(true);
@@ -480,7 +483,7 @@ export function useProjectForm() {
       });
       if (!res.ok) {
         setFiles(snap);
-        setError("Failed to delete file.");
+        setError(f("errDeleteFile"));
       }
     },
     [editSlug, files],

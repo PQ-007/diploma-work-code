@@ -4,6 +4,8 @@ export const dynamic = "force-dynamic";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check, Loader2, Save, Trash2, X } from "lucide-react";
 import { useProjectForm } from "./useProjectForm";
 import { ProjectMediaSection } from "./sections/ProjectMediaSection";
@@ -16,6 +18,8 @@ import { ProjectInfoSidebar } from "./sections/ProjectInfoSidebar";
 /* ------------------------------------------------------------------ */
 
 export default function CreateProjectPage() {
+  const { t } = useTranslation();
+  const f = (k: string) => t(`project.form.${k}`);
   const {
     // refs
     titleRef,
@@ -109,50 +113,37 @@ export default function CreateProjectPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background">
-        <div className="mx-auto max-w-7xl px-4 py-8 space-y-6">
-          <div className="h-14 w-1/2 bg-muted animate-pulse rounded" />
-          <div className="aspect-video bg-muted animate-pulse rounded-md" />
-          <div className="h-48 bg-muted animate-pulse rounded-lg" />
-        </div>
+        <div className="mx-auto max-w-7xl space-y-6">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="aspect-video rounded-xl" />
+        <Skeleton className="h-48 rounded-xl" />
       </div>
     );
   }
 
   const SaveIcon = saving ? Loader2 : saveSuccess ? Check : Save;
-  const saveLabel = saving
-    ? "Saving…"
-    : saveSuccess
-      ? "Saved!"
-      : editSlug
-        ? "Save Changes"
-        : "Create Project";
+  const saveLabel = saving ? f("saving") : saveSuccess ? f("saved") : editSlug ? f("save") : f("create");
 
   return (
-    <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%)]" />
-
-      <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6">
+    <div className="mx-auto max-w-7xl">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         {/* ═══ Main content ═══ */}
         <main className="space-y-8 min-w-0">
           {/* Mobile top bar */}
-          <div className="flex items-center justify-between lg:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/project")}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
+          {/* Top bar until the sidebar (with Save) sits beside the content at xl */}
+          <div className="sticky top-0 z-20 -mx-1 flex items-center justify-between gap-2 bg-background/90 px-1 py-2 backdrop-blur-md xl:hidden">
+            <Button variant="ghost" size="sm" onClick={() => router.push("/project")}>
+              <ArrowLeft />
+              {f("back")}
             </Button>
             <div className="flex items-center gap-2">
               {editSlug && (
                 <Button
-                  variant="destructive"
-                  size="icon"
+                  variant="destructive-soft"
+                  size="icon-sm"
                   onClick={handleDeleteProject}
                   disabled={deleting}
-                  title="Delete project"
+                  aria-label={f("delete")}
                 >
                   {deleting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -166,9 +157,7 @@ export default function CreateProjectPage() {
                 disabled={saving || deleting}
                 size="sm"
               >
-                <SaveIcon
-                  className={`h-4 w-4 mr-1 ${saving ? "animate-spin" : ""}`}
-                />
+                <SaveIcon className={saving ? "size-4 animate-spin" : "size-4"} />
                 {saveLabel}
               </Button>
             </div>
@@ -193,14 +182,12 @@ export default function CreateProjectPage() {
                 setTitle(e.target.value);
                 resizeTitle();
               }}
-              placeholder="YOUR PROJECT TITLE"
+              placeholder={f("titlePlaceholder")}
               rows={1}
-              className="w-full resize-none overflow-hidden bg-transparent p-0 border-0 outline-none ring-0 focus:ring-0 text-3xl md:text-4xl lg:text-[46px] leading-[1.05] font-black uppercase tracking-tight text-foreground placeholder:text-foreground/20"
+              className="w-full resize-none overflow-hidden bg-transparent p-0 border-0 outline-none ring-0 focus:ring-0 text-2xl font-semibold leading-tight tracking-tight sm:text-3xl text-foreground placeholder:text-foreground/20"
               style={{ minHeight: "1.05em" }}
             />
-            <p className="text-[10px] text-muted-foreground/40 pl-0.5">
-              Click above to edit title
-            </p>
+            <p className="text-xs text-muted-foreground">{f("titleHint")}</p>
           </div>
 
           {/* ── Steam-style media viewer ── */}
@@ -226,17 +213,15 @@ export default function CreateProjectPage() {
           />
 
           {/* ── About card ── */}
-          <Card className="border-border/80 bg-card/90 text-card-foreground p-5 sm:p-6 space-y-5">
-            <h2 className="text-xl font-black uppercase tracking-tight">
-              About The Project
-            </h2>
+          <Card className="gap-4 p-5 sm:p-6">
+            <h2 className="text-base font-semibold">{f("about")}</h2>
 
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your project, its goals, and what makes it unique…"
+              placeholder={f("aboutPlaceholder")}
               rows={6}
-              className="w-full resize-none bg-transparent rounded-md border border-dashed border-border/40 hover:border-border/70 focus:border-primary/50 p-2 -mx-2 text-sm sm:text-[15px] leading-7 text-muted-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:text-foreground transition-colors"
+              className="w-full resize-y rounded-lg border border-input bg-card px-3 py-2.5 text-[15px] leading-7 text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
             />
           </Card>
 

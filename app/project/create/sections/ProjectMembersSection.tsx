@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import type { Dispatch, SetStateAction } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -43,11 +44,13 @@ export function ProjectMembersSection({
   handleRemoveMember,
   handleChangeRole,
 }: ProjectMembersSectionProps) {
+  const { t } = useTranslation();
+  const f = (k: string) => t(`project.form.${k}`);
   return (
-    <Card className="border-border/80 bg-card/90 p-4 sm:p-5">
+    <Card className="gap-4 p-4 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <UserPlus className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-base font-semibold">Team Members</h3>
+        <h3 className="text-base font-semibold">{f("team")}</h3>
       </div>
 
       {/* Current members */}
@@ -58,7 +61,7 @@ export function ProjectMembersSection({
               key={m.user_id}
               className="flex items-center gap-3 rounded-md border border-border p-3"
             >
-              <Avatar className="h-7 w-7 border border-border flex-shrink-0">
+              <Avatar className="size-8 shrink-0 border">
                 <AvatarImage src={m.profile?.avatar_url || undefined} />
                 <AvatarFallback className="text-xs">
                   {(m.profile?.display_name || m.profile?.user_name || "U")
@@ -82,19 +85,19 @@ export function ProjectMembersSection({
                   handleChangeRole(m.user_id, v as ProjectMemberRole)
                 }
               >
-                <SelectTrigger className="h-7 w-28 text-xs">
+                <SelectTrigger size="sm" className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="owner">Owner</SelectItem>
-                  <SelectItem value="contributor">Contributor</SelectItem>
-                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="owner">{f("owner")}</SelectItem>
+                  <SelectItem value="contributor">{f("contributor")}</SelectItem>
+                  <SelectItem value="viewer">{f("viewer")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive flex-shrink-0"
+                className="size-8 text-muted-foreground hover:text-destructive flex-shrink-0"
                 onClick={() => handleRemoveMember(m.user_id)}
               >
                 <X className="h-3.5 w-3.5" />
@@ -119,24 +122,22 @@ export function ProjectMembersSection({
               handleAddMember();
             }
           }}
-          className="h-8 text-xs flex-1"
+          className="flex-1"
         />
         <Select
           value={memberRole}
           onValueChange={(v) => setMemberRole(v as ProjectMemberRole)}
         >
-          <SelectTrigger className="h-8 w-28 text-xs">
+          <SelectTrigger className="w-32">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="contributor">Contributor</SelectItem>
-            <SelectItem value="viewer">Viewer</SelectItem>
+            <SelectItem value="contributor">{f("contributor")}</SelectItem>
+            <SelectItem value="viewer">{f("viewer")}</SelectItem>
           </SelectContent>
         </Select>
         <Button
-          variant="outline"
-          size="sm"
-          className="h-8 px-3"
+          variant="secondary"
           onClick={handleAddMember}
           disabled={addingMember}
         >
@@ -149,7 +150,7 @@ export function ProjectMembersSection({
       </div>
       {!editSlug && (
         <p className="text-[11px] text-muted-foreground mt-2">
-          Save the project first to add team members.
+          {f("saveFirstMembers")}
         </p>
       )}
     </Card>

@@ -6,20 +6,19 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FormSection } from "@/components/common/Form";
+import { LanguageBadge } from "@/components/common/LanguageBadge";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   Check,
   ChevronRight,
   Globe,
   Key,
-  Loader2,
   Monitor,
   Moon,
   Palette,
-  Settings,
   Sun,
   UserRound,
 } from "lucide-react";
@@ -79,152 +78,104 @@ export default function SettingsPage() {
     toast.success(t("settings.languageChanged"));
   };
 
+  const row =
+    "flex w-full items-center justify-between rounded-lg px-3 py-3 text-sm transition-colors hover:bg-accent/60";
+
   if (authLoading || profileLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="mx-auto w-full max-w-2xl space-y-4">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-36 rounded-xl" />
+        <Skeleton className="h-44 rounded-xl" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Settings className="h-6 w-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-xl font-bold">{t("settings.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("settings.subtitle")}</p>
+    <div className="mx-auto w-full max-w-2xl space-y-5">
+      <PageHeader className="!mb-1" title={t("settings.title")} subtitle={t("settings.subtitle")} />
+
+      <FormSection title={<span className="inline-flex items-center gap-2"><Palette className="size-4 text-primary" />{t("settings.appearance")}</span>}>
+        <div role="radiogroup" aria-label={t("settings.theme")} className="grid grid-cols-3 gap-2">
+          {THEMES.map(({ value, icon: Icon }) => {
+            const active = theme === value;
+            return (
+              <button
+                key={value}
+                role="radio"
+                aria-checked={active}
+                onClick={() => setTheme(value)}
+                className={`flex flex-col items-center gap-1.5 rounded-lg border py-3.5 text-sm font-medium transition-colors ${
+                  active ? "border-primary bg-primary/5 text-primary" : "text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-5" />
+                {t(`settings.theme_${value}`)}
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </FormSection>
 
-      {/* Appearance */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            {t("settings.appearance")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">{t("settings.theme")}</p>
-            <div className="flex gap-2">
-              {THEMES.map(({ value, icon: Icon }) => (
-                <button
-                  key={value}
-                  onClick={() => setTheme(value)}
-                  className={`flex-1 flex flex-col items-center gap-1.5 rounded-lg border py-3 text-xs font-medium transition-all ${
-                    theme === value
-                      ? "border-primary bg-primary/5 text-primary"
-                      : "border-border text-muted-foreground hover:border-border/80 hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {t(`settings.theme_${value}`)}
-                  {theme === value && <Check className="h-3 w-3" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <FormSection title={<span className="inline-flex items-center gap-2"><Globe className="size-4 text-primary" />{t("settings.language")}</span>}>
+        <div role="radiogroup" aria-label={t("settings.language")} className="-mx-1 space-y-1">
+          {LANGUAGES.map((lang) => {
+            const active = language === lang.code;
+            return (
+              <button
+                key={lang.code}
+                role="radio"
+                aria-checked={active}
+                onClick={() => handleLanguageChange(lang.code)}
+                className={`${row} ${active ? "bg-accent text-accent-foreground" : "text-foreground"}`}
+              >
+                <span className="flex items-center gap-3">
+                  <LanguageBadge code={lang.code} active={active} />
+                  <span className="font-medium">{lang.native}</span>
+                </span>
+                {active && <Check className="size-4 text-primary" />}
+              </button>
+            );
+          })}
+        </div>
+      </FormSection>
 
-      {/* Language */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            {t("settings.language")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-1.5">
-            {LANGUAGES.map((lang) => {
-              const isActive = language === lang.code;
-              return (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  className={`w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                    isActive
-                      ? "bg-primary/8 border border-primary/20 text-foreground"
-                      : "border border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-medium">{lang.native}</span>
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] px-1.5 py-0"
-                    >
-                      {lang.code.toUpperCase()}
-                    </Badge>
-                  </div>
-                  {isActive && <Check className="h-4 w-4 text-primary" />}
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Account */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <UserRound className="h-4 w-4" />
-            {t("settings.account")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-1">
+      <FormSection title={<span className="inline-flex items-center gap-2"><UserRound className="size-4 text-primary" />{t("settings.account")}</span>}>
+        <div className="-mx-1 space-y-1">
           {userName && (
-            <Link
-              href={`/profile/${userName}/edit`}
-              className="flex items-center justify-between rounded-lg border border-transparent px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <UserRound className="h-4 w-4" />
+            <Link href={`/profile/${userName}/edit`} className={row}>
+              <span className="flex items-center gap-2.5">
+                <UserRound className="size-4 text-muted-foreground" />
                 {t("settings.editProfile")}
-              </div>
-              <ChevronRight className="h-4 w-4" />
+              </span>
+              <ChevronRight className="size-4 text-muted-foreground" />
             </Link>
           )}
-          <Separator className="my-1" />
-          <Link
-            href="/profile/password"
-            className="flex items-center justify-between rounded-lg border border-transparent px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Key className="h-4 w-4" />
+          <Link href="/profile/password" className={row}>
+            <span className="flex items-center gap-2.5">
+              <Key className="size-4 text-muted-foreground" />
               {t("settings.changePassword")}
-            </div>
-            <ChevronRight className="h-4 w-4" />
+            </span>
+            <ChevronRight className="size-4 text-muted-foreground" />
           </Link>
-        </CardContent>
-      </Card>
-
-      {/* Account info */}
-      <Card className="border-border/60">
-        <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">{t("settings.signedInAs")}</p>
-              <p className="text-sm font-medium">{user?.email}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                router.push("/");
-              }}
-            >
-              {t("nav_user.logout")}
-            </Button>
+        </div>
+        <div className="flex items-center justify-between gap-3 border-t pt-4">
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">{t("settings.signedInAs")}</p>
+            <p className="truncate text-sm font-medium">{user?.email}</p>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="destructive-soft"
+            size="sm"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.push("/");
+            }}
+          >
+            {t("nav_user.logout")}
+          </Button>
+        </div>
+      </FormSection>
     </div>
   );
 }
