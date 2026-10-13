@@ -154,7 +154,7 @@ export default function ArticleActionRail({
                           variant="ghost"
                           className={`h-8 w-full justify-between rounded-lg px-3 text-sm font-semibold ${
                             isSelected
-                              ? "bg-blue-600 text-white hover:bg-blue-600"
+                              ? "bg-primary text-primary-foreground hover:bg-primary"
                               : "text-foreground hover:bg-muted"
                           } ${
                             !isAvailable

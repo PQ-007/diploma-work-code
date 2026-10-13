@@ -109,7 +109,7 @@ export default function CreateProjectPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background">
+      <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 space-y-6">
           <div className="h-14 w-1/2 bg-muted animate-pulse rounded" />
           <div className="aspect-video bg-muted animate-pulse rounded-md" />
@@ -129,7 +129,7 @@ export default function CreateProjectPage() {
         : "Create Project";
 
   return (
-    <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background text-foreground">
+    <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6">

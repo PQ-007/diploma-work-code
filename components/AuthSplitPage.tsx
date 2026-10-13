@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { Logo } from "@/components/brand/Logo";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
@@ -349,10 +352,13 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
           }`}
         >
           <div className="w-full max-w-md space-y-6 transform-gpu transition-all duration-[300ms] ease-[cubic-bezier(0.37,0,0.63,1)]">
+            <Link href="/" aria-label="FutureHub home" className="flex">
+              <Logo />
+            </Link>
             <div className="relative inline-flex rounded-full border border-border bg-secondary p-1">
               <span
                 aria-hidden
-                className={`pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-white shadow-[0_6px_20px_rgba(255,255,255,0.15)] transform-gpu transition-transform duration-[900ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
+                className={`pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-sm transform-gpu transition-transform duration-[900ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
                   isSignIn ? "translate-x-0" : "translate-x-full"
                 }`}
               />
@@ -361,7 +367,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signin")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   isFormSignIn
-                    ? "bg-white text-black"
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -373,7 +379,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signup")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   !isFormSignIn
-                    ? "bg-white text-black"
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -494,7 +500,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isForgotScreen
                   ? loading

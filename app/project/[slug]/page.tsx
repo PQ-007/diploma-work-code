@@ -79,7 +79,7 @@ function getYouTubeId(url?: string | null): string | null {
 
 function PageSkeleton() {
   return (
-    <div className="min-h-screen pb-16 -mx-4 lg:-mx-8">
+    <div className="min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8">
       <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
         <div className="hidden lg:block" />
         <div className="space-y-5">
@@ -248,7 +248,7 @@ export default function ProjectDetailPage() {
     youTubeId || galleryStripItems.length > 0 || project.thumbnail_url;
 
   return (
-    <div className="relative min-h-screen pb-16 -mx-4 lg:-mx-8 bg-background text-foreground">
+    <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
