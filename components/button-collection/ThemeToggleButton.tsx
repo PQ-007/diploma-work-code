@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
@@ -68,12 +67,10 @@ export default function ThemeToggleButton() {
         <Button
           variant="ghost"
           size="icon"
-          className={cn(
-            "size-7 hover:bg-accent hover:text-accent-foreground transition-colors",
-          )}
+          className="size-9 rounded-full text-muted-foreground"
           aria-label={ariaLabel}
         >
-          <CurrentIcon className="h-4 w-4" />
+          <CurrentIcon />
         </Button>
       </DropdownMenuTrigger>
 

@@ -50,7 +50,10 @@
     "retry": "再試行",
     "clearSearch": "検索をクリア",
     "loadFailed": "問題が発生しました",
-    "readTime": "{{count}}分で読めます"
+    "readTime": "{{count}}分で読めます",
+    "notFoundTitle": "ページが見つかりません",
+    "notFoundDesc": "お探しのページは存在しないか、移動されました。",
+    "goHome": "ホームへ"
   },
   "sidebar": {
     "home": "ホーム",
@@ -258,7 +261,9 @@
     "roadmap": "ロードマップ",
     "theme": "テーマ",
     "language": "言語",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "signedOut": "サインアウトしました",
+    "signOutFailed": "サインアウトできませんでした。もう一度お試しください。"
   },
   "create_button": {
     "create": "作成",
@@ -556,17 +561,20 @@
       "definitionRequired": "定義は必須です。"
     },
     "moderation": {
-      "title": "審査キュー",
-      "pending": "保留中",
-      "allClear": "すべてクリア！",
-      "allClearDesc": "現在審査が必要なエントリーはありません。",
-      "newEntry": "新規エントリー",
-      "edit": "編集",
+      "title": "モデレーションキュー",
+      "subtitle": "新しい用語と修正提案を公開前に確認します。",
+      "pending": "{{count}} 件が保留中",
+      "newEntry": "新しい用語",
+      "edit": "修正 · 第{{number}}版",
+      "change": "変更内容",
+      "allClear": "すべて確認済み",
+      "allClearDesc": "確認待ちの項目はありません。",
       "approve": "承認",
       "reject": "却下",
-      "confirmReject": "却下を確認",
-      "rejectionReason": "却下理由（必須）...",
-      "noPermission": "審査キューにアクセスする権限がありません。"
+      "rejectReason": "却下の理由（投稿者に表示されます）",
+      "confirmReject": "却下する",
+      "cancel": "キャンセル",
+      "open": "モデレーションキュー"
     },
     "status": {
       "approved": "承認済み",

@@ -1,86 +1,50 @@
 "use client";
 
+import { Check, Languages } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { cn } from "@/lib/utils";
-import {
-  Check,
-  Omega,
-  Pi,
-  Sigma,
-} from "lucide-react";
-import { Button } from "@/components/ui/button"; 
-import { toast } from "sonner"; // Assuming toast is available for feedback
 
-// Define languages structure
 const languages = [
-  { code: "en", name: "English", icon: Omega },
-  { code: "mn", name: "Монгол", icon: Sigma },
-  { code: "ja", name: "日本語", icon: Pi },
+  { code: "mn", name: "Монгол" },
+  { code: "ja", name: "日本語" },
+  { code: "en", name: "English" },
 ] as const;
 
+/** Interface language: icon + current code in the header, native names in the menu. */
 export function LanguageToggleButton() {
   const { language, setLanguage } = useLanguage();
-  const currentLanguage = languages.find((lang) => lang.code === language);
-  const CurrentIcon = currentLanguage?.icon || Omega; // Default to Omega (English)
-
-  const handleLanguageChange = (code: "en" | "mn" | "ja") => {
-    setLanguage(code);
-    const selectedLang =
-      languages.find((lang) => lang.code === code)?.name || code;
-    toast.success("Language Changed", {
-      description: `Language set to ${selectedLang}.`,
-    });
-  };
+  const current = languages.find((l) => l.code === language) ?? languages[2];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className={cn(
-            "size-8 hover:bg-accent hover:text-accent-foreground transition-colors"
-          )}
-          aria-label={`Current language: ${currentLanguage?.name || 'English'}`}
+          size="sm"
+          className="h-9 gap-1.5 rounded-full px-2.5 text-muted-foreground"
+          aria-label={`Language: ${current.name}`}
         >
-          <CurrentIcon className="h-4 w-4" />
+          <Languages />
+          <span className="font-mono text-xs font-semibold uppercase">{current.code}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-48"
-        side="bottom"
-        align="end"
-        sideOffset={8}
-      >
-        <DropdownMenuGroup>
-          {languages.map((langOption) => {
-            const Icon = langOption.icon;
-            const isSelected = language === langOption.code;
-
-            return (
-              <DropdownMenuItem
-                key={langOption.code}
-                onClick={() => handleLanguageChange(langOption.code)}
-                className="cursor-pointer flex items-center justify-between px-2 py-2"
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    {langOption.name}
-                  </span>
-                </div>
-                {isSelected && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-            );
-          })}
-        </DropdownMenuGroup>
+      <DropdownMenuContent align="end" sideOffset={8} className="w-40">
+        {languages.map((lang) => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => setLanguage(lang.code)}
+            className="cursor-pointer justify-between"
+          >
+            {lang.name}
+            {language === lang.code && <Check className="size-4 text-primary" />}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

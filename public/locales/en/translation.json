@@ -50,7 +50,10 @@
     "retry": "Try again",
     "clearSearch": "Clear search",
     "loadFailed": "Something went wrong",
-    "readTime": "{{count}} min read"
+    "readTime": "{{count}} min read",
+    "notFoundTitle": "Page not found",
+    "notFoundDesc": "The page you're looking for doesn't exist or was moved.",
+    "goHome": "Go home"
   },
   "sidebar": {
     "home": "Home",
@@ -259,7 +262,9 @@
     "roadmap": "Roadmap",
     "theme": "Theme",
     "language": "Language",
-    "logout": "Log out"
+    "logout": "Log out",
+    "signedOut": "Signed out",
+    "signOutFailed": "Could not sign out. Please try again."
   },
   "create_button": {
     "create": "Create",
@@ -558,17 +563,20 @@
       "definitionRequired": "Definition is required."
     },
     "moderation": {
-      "title": "Moderation Queue",
-      "pending": "pending",
-      "allClear": "All clear!",
-      "allClearDesc": "No pending entries need review right now.",
-      "newEntry": "New Entry",
-      "edit": "Edit",
+      "title": "Moderation queue",
+      "subtitle": "Review new terms and suggested edits before they go public.",
+      "pending": "{{count}} pending",
+      "newEntry": "New term",
+      "edit": "Edit · revision {{number}}",
+      "change": "Change",
+      "allClear": "All clear",
+      "allClearDesc": "Nothing is waiting for review.",
       "approve": "Approve",
       "reject": "Reject",
-      "confirmReject": "Confirm Reject",
-      "rejectionReason": "Rejection reason (required)...",
-      "noPermission": "You don't have permission to access the moderation queue."
+      "rejectReason": "Why is it rejected? The author will see this.",
+      "confirmReject": "Reject",
+      "cancel": "Cancel",
+      "open": "Moderation queue"
     },
     "status": {
       "approved": "Verified",
