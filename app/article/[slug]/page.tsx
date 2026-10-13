@@ -345,6 +345,7 @@ export default function ModernArticlePage() {
           base_lang_code: data?.base_lang_code || null,
           available_translations: nextAvailable,
           published_at: data?.published_at || null,
+          created_at: data?.created_at || null,
           edited_at: data?.edited_at || null,
           author: data?.author || null,
           views: typeof data?.views === "number" ? data.views : 0,
