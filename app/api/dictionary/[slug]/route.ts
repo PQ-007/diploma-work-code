@@ -51,11 +51,9 @@ export async function GET(
       }
     }
 
-    // Increment views (fire-and-forget)
+    // Increment views (fire-and-forget; SECURITY DEFINER RPC bypasses RLS)
     supabase
-      .from("dictionary_entries")
-      .update({ views: (entry.views || 0) + 1 })
-      .eq("id", entry.id)
+      .rpc("increment_dictionary_view", { p_entry_id: entry.id })
       .then(() => {});
 
     // 2. Fetch author profile

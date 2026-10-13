@@ -98,16 +98,16 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
 
     let nextViews = selectedTranslation?.views ?? 0;
     if (!isEditMode) {
-      const incrementedViews = (selectedTranslation?.views || 0) + 1;
-      const { error: incrementError } = await supabase
-        .from("article_translations")
-        .update({ views: incrementedViews })
-        .eq("article_id", articleId)
-        .eq("language_code", selectedTranslation.language_code);
+      // SECURITY DEFINER RPC: readers can't UPDATE the row under RLS.
+      const { data: incrementedViews, error: incrementError } =
+        await supabase.rpc("increment_article_view", {
+          p_article_id: articleId,
+          p_language_code: selectedTranslation.language_code,
+        });
 
       if (incrementError) {
         console.warn("Article view increment failed", incrementError.message);
-      } else {
+      } else if (typeof incrementedViews === "number") {
         nextViews = incrementedViews;
       }
     }

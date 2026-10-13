@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import type { Enums } from "@/lib/types";
+
+// Values of the project_type enum; anything else would make Postgres reject the query.
+const PROJECT_TYPES: readonly string[] = [
+  "diploma",
+  "contest",
+  "intership",
+  "private",
+] satisfies Enums<"project_type">[];
 
 function generateSlug(title: string): string {
   return (
@@ -57,7 +66,7 @@ export async function GET(req: NextRequest) {
       if (category) query = query.eq("category", category);
       if (difficulty) query = query.eq("difficulty", difficulty);
       if (status) query = query.eq("status", status);
-      // NOTE: project type filtering is handled client-side for schema-compatibility across environments.
+      if (PROJECT_TYPES.includes(projectType)) query = query.eq("type", projectType);
       if (search)
         query = query.or(
           `title.ilike.%${search}%,description.ilike.%${search}%`,

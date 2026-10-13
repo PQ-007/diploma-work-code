@@ -51,15 +51,15 @@ export async function GET(
 
     let nextViews = project.views || 0;
     if (!isEditMode) {
-      const incrementedViews = (project.views || 0) + 1;
-      const { error: incrementError } = await supabase
-        .from("projects")
-        .update({ views: incrementedViews })
-        .eq("id", project.id);
+      // SECURITY DEFINER RPC: viewers can't UPDATE the row under RLS.
+      const { data: incrementedViews, error: incrementError } =
+        await supabase.rpc("increment_project_view", {
+          p_project_id: project.id,
+        });
 
       if (incrementError) {
         console.warn("Project view increment failed", incrementError.message);
-      } else {
+      } else if (typeof incrementedViews === "number") {
         nextViews = incrementedViews;
       }
     }

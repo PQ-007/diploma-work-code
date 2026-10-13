@@ -58,7 +58,7 @@ export async function GET(
       .from("article_reactions")
       .select("*", { count: "exact" })
       .eq("article_id", articleId)
-      .eq("reaction_type", "like");
+      .eq("reaction", "like");
 
     // Fetch comments count
     const { count: commentsCount } = await supabase
@@ -68,7 +68,7 @@ export async function GET(
 
     // Fetch bookmarks count
     const { count: bookmarksCount } = await supabase
-      .from("article_bookmarks")
+      .from("bookmarked_articles")
       .select("*", { count: "exact" })
       .eq("article_id", articleId);
 

@@ -26,8 +26,8 @@ import {
   Anvil,
   Bird,
   Blocks,
+  Briefcase,
   ChevronRight,
-  Flame,
   GraduationCap,
   Hammer,
   MessagesSquare,
@@ -47,33 +47,29 @@ const navData: SidebarData = {
       titleKey: "sidebar.articles",
       icon: Telescope,
       href: "/article",
-      items: [{
-        titleKey: "sidebar.internship",
-        href: "/article/internship",
-        icon: Flame,
-      },
-      {
-        titleKey: "sidebar.post-grad",
-        href: "/article/post-grad",
-        icon: Flame,
-      },],
+      items: [],
     },
 
     {
       titleKey: "sidebar.projects",
       icon: Anvil,
       href: "/project",
+      // Filters on the project_type enum (note: the DB spells it "intership").
       items: [
         {
           titleKey: "sidebar.graduation",
-          href: "/project/graduation",
+          href: "/project?type=diploma",
           icon: GraduationCap,
         },
-        
         {
           titleKey: "sidebar.contest",
-          href: "/project/contest",
+          href: "/project?type=contest",
           icon: Hammer,
+        },
+        {
+          titleKey: "sidebar.internship",
+          href: "/project?type=intership",
+          icon: Briefcase,
         },
       ],
     },

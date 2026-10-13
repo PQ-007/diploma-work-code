@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,7 +65,17 @@ function CardSkeleton() {
 }
 
 export default function ProjectPage() {
+  return (
+    <Suspense>
+      <ProjectPageContent />
+    </Suspense>
+  );
+}
+
+function ProjectPageContent() {
   const router = useRouter();
+  // Sidebar sub-links deep-link a type filter: /project?type=diploma
+  const typeParam = useSearchParams().get("type") ?? "";
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -79,7 +89,11 @@ export default function ProjectPage() {
   const [yearFilter, setYearFilter] = useState("all");
   const [courseFilter, setCourseFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState(typeParam);
+
+  useEffect(() => {
+    setTypeFilter(typeParam);
+  }, [typeParam]);
 
   const fetchProjects = useCallback(
     async (background = false) => {

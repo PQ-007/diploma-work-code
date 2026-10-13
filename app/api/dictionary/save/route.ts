@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/server";
    POST /api/dictionary/save
    Toggle save/bookmark on a dictionary entry
    Body: { entryId }
+   dictionary_entries.saves is kept in sync by the
+   trg_dictionary_saves_count trigger (migration 002).
    ═══════════════════════════════════════════ */
 export async function POST(req: NextRequest) {
   try {
@@ -40,39 +42,11 @@ export async function POST(req: NextRequest) {
         .eq("entry_id", entryId)
         .eq("user_id", user.id);
 
-      // Decrement saves count
-      const { data: entry } = await supabase
-        .from("dictionary_entries")
-        .select("saves")
-        .eq("id", entryId)
-        .single();
-
-      if (entry) {
-        await supabase
-          .from("dictionary_entries")
-          .update({ saves: Math.max(0, (entry.saves || 0) - 1) })
-          .eq("id", entryId);
-      }
-
       return NextResponse.json({ saved: false });
     } else {
       await supabase
         .from("dictionary_saves")
         .insert({ entry_id: entryId, user_id: user.id });
-
-      // Increment saves count
-      const { data: entry } = await supabase
-        .from("dictionary_entries")
-        .select("saves")
-        .eq("id", entryId)
-        .single();
-
-      if (entry) {
-        await supabase
-          .from("dictionary_entries")
-          .update({ saves: (entry.saves || 0) + 1 })
-          .eq("id", entryId);
-      }
 
       return NextResponse.json({ saved: true });
     }
