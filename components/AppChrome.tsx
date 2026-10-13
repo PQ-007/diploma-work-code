@@ -1,13 +1,10 @@
 "use client";
 
-import { LeftSidebar } from "@/components/sidebar-collection/Left/LeftSidebar";
-import { ResolvedHeader } from "@/components/header-collection/SiteHeader";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-
-interface AppChromeProps {
-  children: ReactNode;
-}
+import { ResolvedHeader } from "@/components/header-collection/SiteHeader";
+import { BottomNav } from "@/components/navigation/BottomNav";
+import { LeftSidebar } from "@/components/sidebar-collection/Left/LeftSidebar";
 
 const AUTH_FULLSCREEN_PREFIXES = [
   "/signin",
@@ -16,34 +13,36 @@ const AUTH_FULLSCREEN_PREFIXES = [
   "/auth/reset-password",
 ];
 
-export function AppChrome({ children }: AppChromeProps) {
-  const pathname = usePathname();
-  const isAuthFullscreen = AUTH_FULLSCREEN_PREFIXES.some((prefix) =>
-    pathname?.startsWith(prefix),
-  );
+export function AppChrome({ children }: { children: ReactNode }) {
+  const pathname = usePathname() || "/";
 
-  if (isAuthFullscreen) {
+  if (AUTH_FULLSCREEN_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return <div className="h-full w-full overflow-auto">{children}</div>;
   }
 
+  // The editor is a full-height workspace with its own header.
+  const isEditor = pathname.startsWith("/article/create");
+
   return (
     <div className="flex h-full w-full">
-      <div className="hidden md:block">
-        <LeftSidebar />
-      </div>
+      <LeftSidebar />
 
-      <div className="md:hidden">
-        <LeftSidebar />
-      </div>
-
-      <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex h-dvh min-w-0 flex-1 flex-col overflow-hidden">
         <ResolvedHeader />
-        <main className="flex-1 overflow-y-auto relative">
-          <div className="h-full py-4 md:py-6 lg:py-8 px-[clamp(10px,1.8vw,28px)]">
+        <main className="relative flex-1 overflow-y-auto overflow-x-hidden">
+          <div
+            className={
+              isEditor
+                ? "h-full"
+                : "px-4 pt-5 pb-bottom-nav sm:px-6 md:pt-8 lg:px-8"
+            }
+          >
             {children}
           </div>
         </main>
       </div>
+
+      {!isEditor && <BottomNav />}
     </div>
   );
 }

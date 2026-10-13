@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,16 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const description =
   "A multilingual (mn / ja / en) community for technical articles, student projects, a shared dictionary of terms, and discussions.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f8fc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1e" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://futurehub.works"),
@@ -36,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("dark h-full")} suppressHydrationWarning>
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <body className={cn(inter.className, "h-full overflow-hidden")}>
         <Providers>
           <AppChrome>{children}</AppChrome>

@@ -49,6 +49,7 @@
     "refresh": "Refresh"
   },
   "sidebar": {
+    "home": "Home",
     "internship": "Internship",
     "post-grad": "Post-Grad-Life",
     "contest": "Contest",
@@ -784,5 +785,20 @@
     "darkDescription": "Dark background",
     "system": "System",
     "systemDescription": "Follow your device setting"
+  },
+  "home": {
+    "latest": "Latest",
+    "empty": "Nothing here yet.",
+    "introTitle": "A trilingual knowledge hub for KOSEN students",
+    "introText": "Read and write articles, show your projects, define technical terms in mn / ja / en, and ask questions.",
+    "filter": {
+      "all": "All"
+    },
+    "kind": {
+      "article": "Article",
+      "project": "Project",
+      "discussion": "Discussion",
+      "term": "Term"
+    }
   }
 }

@@ -1,134 +1,49 @@
 "use client";
 
+import Link from "next/link";
+import { Blocks, FileText, FolderGit2, MessageSquare, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import {
-  Blocks,
-  Code,
-  FileText,
-  MessageSquare,
-  MousePointerClick,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
-import { useTranslation } from "react-i18next";
 
-const CreateButton = () => {
-  const router = useRouter();
+const options = [
+  { href: "/article/create", icon: FileText, label: "create_button.article", desc: "create_button.article_disc" },
+  { href: "/project/create", icon: FolderGit2, label: "create_button.project", desc: "create_button.project_disc" },
+  { href: "/dictionary/create", icon: Blocks, label: "create_button.dictionary", desc: "create_button.dictionary_disc" },
+  { href: "/discussions?create=1", icon: MessageSquare, label: "create_button.discussions", desc: "create_button.discussions_disc" },
+];
+
+export default function CreateButton() {
   const { t } = useTranslation();
-
-  const handleAction = (path?: string) => {
-    if (path) {
-      router.push(path);
-    }
-  };
-
-  const createOptions = [
-    {
-      category: "Content",
-      items: [
-        {
-          icon: FileText,
-          label: t("create_button.article"),
-          description: t("create_button.article_disc"),
-          action: () => handleAction("/article/create"),
-        },
-        {
-          icon: Blocks,
-          label: t("create_button.dictionary"),
-          description: t("create_button.dictionary_disc"),
-          action: () => handleAction("/dictionary/create"),
-        },
-      ],
-    },
-    {
-      category: "Community",
-      items: [
-        {
-          icon: Code,
-          label: t("create_button.project"),
-          description: t("create_button.project_disc"),
-          action: () => handleAction("/project/create"),
-        },
-        {
-          icon: MessageSquare,
-          label: t("create_button.discussions"),
-          description: t("create_button.discussions_disc"),
-          action: () => handleAction("/discussions?create=1"),
-        },
-      ],
-    },
-  ];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="default"
-          size="default"
-          className={cn(
-            "h-9 px-3 rounded-md transition-colors",
-            "flex items-center gap-1.5",
-          )}
-          aria-label="Create new content or activity"
-        >
-          {/* Main Icon */}
-
-          <span className="font-medium">{t("create_button.create")}</span>
-          <MousePointerClick />
+        <Button size="sm" className="h-9 gap-1.5 rounded-full px-3 sm:px-4" aria-label={t("create_button.create")}>
+          <Plus className="size-4" />
+          <span className="hidden sm:inline">{t("create_button.create")}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-72"
-        side="bottom"
-        align="end"
-        sideOffset={8} // Increased offset slightly for better visual separation
-      >
-        {/* Categorized Options */}
-        {createOptions.map((category, categoryIndex) => (
-          <div key={categoryIndex}>
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-xs text-muted-foreground px-3 py-1 mt-1">
-                {category.category}
-              </DropdownMenuLabel>
-              {category.items.map((item, itemIndex) => (
-                <DropdownMenuItem
-                  key={itemIndex}
-                  onClick={item.action}
-                  className="cursor-pointer px-3 py-2 flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    {/* FIX: Using a distinct accent background for the icon container */}
-                    <div className="w-8 h-8 rounded-md bg-accent/30 flex items-center justify-center group-hover:bg-accent transition-colors text-foreground">
-                      <item.icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{item.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {item.description}
-                      </span>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-            {/* Separator between categories */}
-            {categoryIndex < createOptions.length - 1 && (
-              <DropdownMenuSeparator />
-            )}
-          </div>
+      <DropdownMenuContent align="end" sideOffset={8} className="w-64 p-1.5">
+        {options.map((o) => (
+          <DropdownMenuItem key={o.href} asChild className="cursor-pointer gap-3 rounded-md px-2.5 py-2">
+            <Link href={o.href}>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+                <o.icon className="size-4" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-sm font-medium">{t(o.label)}</span>
+                <span className="truncate text-xs text-muted-foreground">{t(o.desc)}</span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
-
-export default CreateButton;
+}

@@ -49,6 +49,7 @@
     "refresh": "更新"
   },
   "sidebar": {
+    "home": "ホーム",
     "internship": "インターンシップ",
     "post-grad": "卒業後の生活",
     "contest": "コンテスト",
@@ -783,5 +784,20 @@
     "darkDescription": "暗い背景",
     "system": "システム",
     "systemDescription": "デバイスの設定に合わせる"
+  },
+  "home": {
+    "latest": "新着",
+    "empty": "まだ何もありません。",
+    "introTitle": "高専生のための3言語ナレッジハブ",
+    "introText": "記事を読んで書く、プロジェクトを紹介する、技術用語を mn / ja / en で説明する、質問する。",
+    "filter": {
+      "all": "すべて"
+    },
+    "kind": {
+      "article": "記事",
+      "project": "プロジェクト",
+      "discussion": "ディスカッション",
+      "term": "用語"
+    }
   }
 }

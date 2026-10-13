@@ -57,11 +57,19 @@ function DiscussionsPageContent() {
   // New discussion dialog
   const [createOpen, setCreateOpen] = useState(false);
 
-  // The global "Create → Discussion" menu links to /discussions?create=1
-  const wantsCreate = useSearchParams().get("create") === "1";
+  // Deep links: "Create → Discussion" uses ?create=1, the home feed uses ?open=<id>
+  const searchParams = useSearchParams();
+  const wantsCreate = searchParams.get("create") === "1";
+  const openId = searchParams.get("open");
   useEffect(() => {
     if (wantsCreate && user) setCreateOpen(true);
   }, [wantsCreate, user]);
+  useEffect(() => {
+    if (openId) {
+      setSelectedId(openId);
+      setModalOpen(true);
+    }
+  }, [openId]);
 
   // Use React Query hook - automatic caching and state management!
   const { data: discussions, isLoading, error, refetch } = useDiscussions();

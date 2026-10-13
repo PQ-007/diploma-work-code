@@ -11,11 +11,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryProvider>
       <LanguageProvider>
         <AuthProvider>
-          <SidebarProvider>
+          <SidebarProvider defaultOpen>
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
+              defaultTheme="system"
+              enableSystem
               disableTransitionOnChange
               storageKey="theme-preference"
             >
