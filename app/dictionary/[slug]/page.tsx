@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StatusBadge } from "@/components/common/StatusBadge";
+import { LanguageBadge } from "@/components/common/LanguageBadge";
+import { Tag } from "@/components/common/Tag";
+import { UserChip } from "@/components/common/UserChip";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,18 +72,6 @@ const LANG_LABELS: Record<string, string> = {
   ja: "日本語",
   en: "English",
 };
-
-function StatusBadge({ status }: { status: string }) {
-  const { t } = useTranslation();
-  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
-  const Icon = cfg.icon;
-  return (
-    <Badge className={`${cfg.color} hover:${cfg.color}`}>
-      <Icon className="h-3.5 w-3.5 mr-1" />
-      {t(`dictionary.status.${status}`, { defaultValue: cfg.label })}
-    </Badge>
-  );
-}
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -272,9 +262,9 @@ export default function DictionaryTermPage() {
       : (translationsByLang["mn"]?.[0]?.translated_term ?? null);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-7xl px-4">
-        <div className="flex gap-4 xl:gap-8 justify-center">
+    <div className="mx-auto w-full max-w-6xl">
+      <div>
+        <div className="flex justify-center gap-4 xl:gap-8">
           {/* MN vertical script accent — shown when a Mongolian term is available */}
           {mnTerm && (
             <div className="hidden xl:flex items-start pt-3 w-7 flex-shrink-0 select-none">
@@ -292,11 +282,11 @@ export default function DictionaryTermPage() {
           )}
 
           {/* Main Content */}
-          <div className="flex-1 max-w-3xl space-y-6">
+          <div className="min-w-0 max-w-3xl flex-1 space-y-6">
             {/* Title + Meta */}
             <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-3xl font-bold text-foreground">
+                <h1 className="text-3xl font-semibold tracking-tight text-foreground">
                   {displayTranslation
                     ? displayTranslation.translated_term
                     : entry.term}
@@ -306,26 +296,19 @@ export default function DictionaryTermPage() {
                     {entry.term}
                   </span>
                 )}
-                <StatusBadge status={entry.status} />
+                <StatusBadge kind="term" value={entry.status} />
               </div>
               {entry.reading && (
                 <p className="text-lg text-muted-foreground mt-1">
                   {entry.reading}
                 </p>
               )}
-              <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
-                <Link
-                  href={`/profile/${entry.author.user_name}`}
-                  className="flex items-center gap-2 hover:text-foreground transition-colors"
-                >
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={entry.author.avatar_url} />
-                    <AvatarFallback className="text-[10px]">
-                      {entry.author.display_name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{entry.author.display_name}</span>
-                </Link>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                <UserChip
+                  name={entry.author.display_name}
+                  avatarUrl={entry.author.avatar_url}
+                  username={entry.author.user_name}
+                />
                 <span>·</span>
                 <span>
                   {t("dictionary.updatedAt", {
@@ -339,12 +322,12 @@ export default function DictionaryTermPage() {
 
             {/* Rejection notice */}
             {entry.status === "rejected" && latestRejection && (
-              <Card className="border-red-500/30 bg-red-500/5">
-                <CardContent className="p-4">
+              <Card className="border-destructive/30 bg-destructive/5 py-4">
+                <CardContent>
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
                     <div>
-                      <p className="text-sm font-medium text-red-400">
+                      <p className="text-sm font-medium text-destructive">
                         {t("dictionary.entryRejected")}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -364,17 +347,16 @@ export default function DictionaryTermPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               {entry.status === "approved" && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs"
                   onClick={() =>
-                    router.push(`/dictionary/${entry.slug}/suggest-edit`)
+                    router.push(`/dictionary/create?suggest=${entry.slug}`)
                   }
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                  <Pencil />
                   {t("dictionary.suggestEdit")}
                 </Button>
               )}
@@ -382,48 +364,38 @@ export default function DictionaryTermPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs"
                   onClick={() =>
                     router.push(`/dictionary/create?edit=${entry.slug}`)
                   }
                 >
-                  <FileEdit className="h-3.5 w-3.5 mr-1.5" />
+                  <FileEdit />
                   {t("dictionary.editDraft")}
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs"
                 onClick={handleShare}
               >
-                <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                <Share2 />
                 {t("dictionary.share")}
               </Button>
               <Button
-                variant={isSaved ? "default" : "outline"}
+                variant={isSaved ? "secondary" : "outline"}
                 size="sm"
-                className="text-xs"
+                aria-pressed={isSaved}
                 onClick={handleSave}
               >
-                <Bookmark
-                  className={`h-3.5 w-3.5 mr-1.5 ${isSaved ? "fill-current" : ""}`}
-                />
+                <Bookmark fill={isSaved ? "currentColor" : "none"} />
                 {isSaved ? t("dictionary.saved") : t("dictionary.save")}
               </Button>
             </div>
 
             {/* Tags */}
             {entry.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {entry.tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="text-xs font-normal cursor-pointer hover:bg-secondary/80 transition-colors"
-                  >
-                    #{tag}
-                  </Badge>
+                  <Tag key={tag} name={tag} />
                 ))}
               </div>
             )}
@@ -432,17 +404,17 @@ export default function DictionaryTermPage() {
 
             {/* Tabbed Content */}
             <Tabs defaultValue="definition" className="w-full">
-              <TabsList className="bg-muted/50 mb-4">
-                <TabsTrigger value="definition" className="text-xs gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5" />
+              <TabsList variant="underline" className="mb-2">
+                <TabsTrigger value="definition">
+                  <BookOpen />
                   {t("dictionary.definition")}
                 </TabsTrigger>
-                <TabsTrigger value="examples" className="text-xs gap-1.5">
-                  <MessageSquareQuote className="h-3.5 w-3.5" />
+                <TabsTrigger value="examples">
+                  <MessageSquareQuote />
                   {t("dictionary.examples")} ({examples.length})
                 </TabsTrigger>
-                <TabsTrigger value="history" className="text-xs gap-1.5">
-                  <History className="h-3.5 w-3.5" />
+                <TabsTrigger value="history">
+                  <History />
                   {t("dictionary.history")} ({revisions.length})
                 </TabsTrigger>
               </TabsList>
@@ -527,11 +499,11 @@ export default function DictionaryTermPage() {
                   </p>
                 ) : (
                   examples.map((ex) => (
-                    <Card key={ex.id} className="border-border/40">
-                      <CardContent className="p-4">
-                        <p className="text-[15px] text-foreground leading-relaxed">
+                    <figure key={ex.id} className="rounded-r-lg border-l-4 border-brand-sky bg-card py-3 pl-4 pr-4 shadow-xs">
+                      <div>
+                        <blockquote className="text-[15px] leading-relaxed text-foreground">
                           {ex.example_text}
-                        </p>
+                        </blockquote>
                         {ex.context && (
                           <p className="text-sm text-muted-foreground mt-2 italic">
                             {ex.context}
@@ -543,12 +515,10 @@ export default function DictionaryTermPage() {
                               {t("dictionary.source", { source: ex.source })}
                             </span>
                           )}
-                          <Badge variant="outline" className="text-[10px]">
-                            {LANG_LABELS[ex.language_code] || ex.language_code}
-                          </Badge>
+                          <LanguageBadge code={ex.language_code} />
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </figure>
                   ))
                 )}
               </TabsContent>
@@ -576,9 +546,7 @@ export default function DictionaryTermPage() {
                                   number: rev.revision_number,
                                 })}
                               </span>
-                              <Badge variant="outline" className="text-[10px]">
-                                {rev.status.replace("_", " ")}
-                              </Badge>
+                              <StatusBadge kind="term" value={rev.status} />
                             </div>
                             {rev.change_summary && (
                               <p className="text-sm text-muted-foreground mt-0.5">
@@ -599,18 +567,35 @@ export default function DictionaryTermPage() {
                 )}
               </TabsContent>
             </Tabs>
+
+            {relatedEntries.length > 0 && (
+              <section className="space-y-2 xl:hidden">
+                <h2 className="text-sm font-semibold">{t("dictionary.relatedTerms")}</h2>
+                <div className="flex flex-wrap gap-1.5">
+                  {relatedEntries.map((related) => (
+                    <Link
+                      key={related.id}
+                      href={`/dictionary/${related.slug}`}
+                      className="inline-flex h-8 items-center rounded-full border bg-card px-3 text-[13px] font-medium hover:border-primary/40"
+                    >
+                      {related.term}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Right Sidebar */}
-          <aside className="hidden xl:block w-[320px] space-y-6 sticky top-8 h-fit">
+          <aside className="sticky top-6 hidden h-fit w-72 shrink-0 space-y-6 xl:block">
             {/* Related Content */}
             {relatedArticles.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <Newspaper className="h-4 w-4" />
                   {t("dictionary.relatedContent")}
                 </h3>
-                <Card className="border-border/40">
+                <Card className="py-0">
                   <CardContent className="p-0">
                     {relatedArticles.map((article) => (
                       <Link
@@ -632,13 +617,7 @@ export default function DictionaryTermPage() {
                               )
                               .slice(0, 2)
                               .map((t) => (
-                                <Badge
-                                  key={t}
-                                  variant="secondary"
-                                  className="text-[10px] font-normal px-1.5 py-0"
-                                >
-                                  #{t}
-                                </Badge>
+                                <Tag key={t} name={t} />
                               ))}
                           </div>
                         </div>
@@ -652,11 +631,11 @@ export default function DictionaryTermPage() {
             {/* Related Terms */}
             {relatedEntries.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <LinkIcon className="h-4 w-4" />
                   {t("dictionary.relatedTerms")}
                 </h3>
-                <Card className="border-border/40">
+                <Card className="py-0">
                   <CardContent className="p-0">
                     {relatedEntries.map((related) => (
                       <Link
@@ -679,11 +658,11 @@ export default function DictionaryTermPage() {
 
             {/* Entry Info */}
             <div>
-              <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
+              <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
                 <FileText className="h-4 w-4" />
                 {t("dictionary.entryInfoLabel")}
               </h3>
-              <Card className="border-border/40">
+              <Card className="py-0">
                 <CardContent className="p-4 space-y-3">
                   
                   
@@ -730,11 +709,11 @@ export default function DictionaryTermPage() {
             {/* Moderation History */}
             {moderationActions.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold tracking-tight flex items-center gap-2 mb-3 uppercase text-muted-foreground">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
                   <Flag className="h-4 w-4" />
                   {t("dictionary.moderationHistory")}
                 </h3>
-                <Card className="border-border/40">
+                <Card className="py-0">
                   <CardContent className="p-0">
                     {moderationActions.map((action, i) => (
                       <div
@@ -743,9 +722,9 @@ export default function DictionaryTermPage() {
                       >
                         <div className="flex items-center gap-2">
                           {action.action === "approve" ? (
-                            <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                            <CheckCircle className="size-3.5 text-success" />
                           ) : (
-                            <AlertCircle className="h-3.5 w-3.5 text-red-400" />
+                            <AlertCircle className="size-3.5 text-destructive" />
                           )}
                           <span className="text-sm font-medium capitalize">
                             {action.action === "approve"

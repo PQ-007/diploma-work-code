@@ -3,38 +3,21 @@
 // Force dynamic rendering for pages using search params
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Languages, Loader2, MessageSquareQuote, Plus, Save, Send, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { Field, FormActions, FormAlert, FormSection } from "@/components/common/Form";
+import { LanguageBadge } from "@/components/common/LanguageBadge";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  BookOpen,
-  Plus,
-  Trash2,
-  Loader2,
-  AlertTriangle,
-  ArrowLeft,
-  Send,
-  Save,
-  Languages,
-  MessageSquareQuote,
-  X,
-} from "lucide-react";
-
 import {
   LANG_OPTIONS,
   type DuplicateMatch,
@@ -42,15 +25,24 @@ import {
   type TranslationInput,
 } from "./dictionaryCreate.shared";
 
+type Mode = "create" | "edit" | "suggest";
+
 export default function DictionaryCreatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
+  const f = (key: string) => t(`dictionary.form.${key}`);
 
+  // ?edit=<slug> edits your own draft, ?suggest=<slug> proposes a change to a published entry.
   const editSlug = searchParams.get("edit");
-  const isEditMode = !!editSlug;
+  const suggestSlug = searchParams.get("suggest");
+  const mode: Mode = suggestSlug ? "suggest" : editSlug ? "edit" : "create";
+  const sourceSlug = suggestSlug || editSlug;
+  const isEditMode = mode === "edit";
 
   // Form state
+  const [entryId, setEntryId] = useState<number | null>(null);
   const [term, setTerm] = useState("");
   const [reading, setReading] = useState("");
   const languageCode = "en";
@@ -59,6 +51,7 @@ export default function DictionaryCreatePage() {
   const [tags, setTags] = useState<string[]>([]);
   const [translations, setTranslations] = useState<TranslationInput[]>([]);
   const [examples, setExamples] = useState<ExampleInput[]>([]);
+  const [changeSummary, setChangeSummary] = useState("");
 
   // UI state
   const [saving, setSaving] = useState(false);
@@ -67,78 +60,67 @@ export default function DictionaryCreatePage() {
   const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
   const [checkingDuplicates, setCheckingDuplicates] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Redirect if not logged in
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/signin");
-    }
+    if (!authLoading && !user) router.push("/signin");
   }, [authLoading, user, router]);
 
-  // Load entry data when in edit mode
+  // Load the entry for edit / suggest mode
   const loadEntry = useCallback(async () => {
-    if (!editSlug) return;
+    if (!sourceSlug) return;
     setLoadingEntry(true);
     try {
-      const res = await fetch(
-        `/api/dictionary/${encodeURIComponent(editSlug)}`,
-      );
+      const res = await fetch(`/api/dictionary/${encodeURIComponent(sourceSlug)}`);
       if (!res.ok) {
-        setError("Entry not found or you don't have permission to edit it.");
+        setError(f("notFound"));
         return;
       }
       const data = await res.json();
       const entry = data.entry;
-      if (entry.status !== "draft") {
-        setError("Only draft entries can be edited.");
+      if (mode === "edit" && entry.status !== "draft") {
+        setError(f("onlyDraft"));
         return;
       }
+      if (mode === "suggest" && entry.status !== "approved") {
+        setError(f("onlyApproved"));
+        return;
+      }
+      setEntryId(entry.id);
       setTerm(entry.term);
       setReading(entry.reading || "");
       setDefinition(entry.definition);
       setTags(entry.tags || []);
       setTranslations(
-        (data.translations || []).map(
-          (t: {
-            language_code: string;
-            translated_term: string;
-            explanation: string | null;
-          }) => ({
-            language_code: t.language_code,
-            translated_term: t.translated_term,
-            explanation: t.explanation || "",
-          }),
-        ),
+        (data.translations || []).map((tr: { language_code: string; translated_term: string; explanation: string | null }) => ({
+          language_code: tr.language_code,
+          translated_term: tr.translated_term,
+          explanation: tr.explanation || "",
+        })),
       );
       setExamples(
-        (data.examples || []).map(
-          (e: {
-            example_text: string;
-            source: string | null;
-            context: string | null;
-            language_code: string;
-          }) => ({
-            example_text: e.example_text,
-            source: e.source || "",
-            context: e.context || "",
-            language_code: e.language_code,
-          }),
-        ),
+        (data.examples || []).map((e: { example_text: string; source: string | null; context: string | null; language_code: string }) => ({
+          example_text: e.example_text,
+          source: e.source || "",
+          context: e.context || "",
+          language_code: e.language_code,
+        })),
       );
     } catch {
-      setError("Failed to load entry.");
+      setError(f("saveFailed"));
     } finally {
       setLoadingEntry(false);
     }
-  }, [editSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceSlug, mode]);
 
   useEffect(() => {
-    if (isEditMode) loadEntry();
-  }, [isEditMode, loadEntry]);
+    if (sourceSlug) loadEntry();
+  }, [sourceSlug, loadEntry]);
 
   // Duplicate check (debounced on term change)
   useEffect(() => {
-    if (!term.trim() || term.length < 2) {
+    if (mode !== "create" || !term.trim() || term.length < 2) {
       setDuplicates([]);
       return;
     }
@@ -164,7 +146,7 @@ export default function DictionaryCreatePage() {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [term, languageCode]);
+  }, [term, languageCode, mode]);
 
   // Tag handling
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -231,54 +213,52 @@ export default function DictionaryCreatePage() {
     setExamples(examples.filter((_, i) => i !== idx));
   };
 
-  // Save / Submit
+  // Save / Submit / Suggest
   const handleSave = async (submitForReview: boolean) => {
     setError(null);
-
-    if (!term.trim()) {
-      setError("Term is required.");
-      return;
-    }
-    if (!definition.trim()) {
-      setError("Definition is required.");
-      return;
-    }
+    const errs: Record<string, string> = {};
+    if (!term.trim()) errs.term = f("termRequired");
+    if (!definition.trim()) errs.definition = f("definitionRequired");
+    if (mode === "suggest" && !changeSummary.trim()) errs.changeSummary = f("changeRequired");
+    setFieldErrors(errs);
+    if (Object.keys(errs).length) return;
 
     const setter = submitForReview ? setSubmitting : setSaving;
     setter(true);
 
-    const payload = {
+    const content = {
       term: term.trim(),
       reading: reading.trim() || null,
       language_code: languageCode,
       definition: definition.trim(),
-      translations: translations.filter((t) => t.translated_term.trim()),
+      translations: translations.filter((tr) => tr.translated_term.trim()),
       examples: examples.filter((e) => e.example_text.trim()),
       tags,
-      submit: submitForReview,
     };
 
     try {
-      const url = isEditMode
-        ? `/api/dictionary/${encodeURIComponent(editSlug!)}`
-        : "/api/dictionary";
-      const method = isEditMode ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res =
+        mode === "suggest"
+          ? await fetch("/api/dictionary/propose-edit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ entry_id: entryId, ...content, change_summary: changeSummary.trim() }),
+            })
+          : await fetch(isEditMode ? `/api/dictionary/${encodeURIComponent(editSlug!)}` : "/api/dictionary", {
+              method: isEditMode ? "PUT" : "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...content, submit: submitForReview }),
+            });
 
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Failed to save entry.");
+        setError(data.error || f("saveFailed"));
         return;
       }
-
-      const data = await res.json();
-      router.push(`/dictionary/${data.slug || editSlug}`);
+      if (mode === "suggest") toast.success(f("suggestionSent"));
+      router.push(`/dictionary/${data.slug || sourceSlug}`);
     } catch {
-      setError("Failed to save entry. Please try again.");
+      setError(f("saveFailed"));
     } finally {
       setter(false);
     }
@@ -286,401 +266,198 @@ export default function DictionaryCreatePage() {
 
   if (authLoading || loadingEntry) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="mx-auto w-full max-w-3xl space-y-4">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-72 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
       </div>
     );
   }
 
+  const busy = saving || submitting;
+  const langSelect = (value: string, onChange: (v: string) => void) => (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger size="sm" className="w-36">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {LANG_OPTIONS.map((lang) => (
+          <SelectItem key={lang.value} value={lang.value}>
+            {lang.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto py-6 lg:py-3 max-w-3xl px-4">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <BookOpen className="h-4 w-4" />
-          <Link
-            href="/dictionary"
-            className="hover:text-foreground transition-colors"
-          >
-            Dictionary
-          </Link>
-          <span>/</span>
-          <span className="text-foreground">
-            {isEditMode ? "Edit Draft" : "Create Entry"}
-          </span>
-        </div>
+    <div className="mx-auto w-full max-w-3xl space-y-5">
+      <PageHeader
+        className="!mb-1"
+        title={f(mode === "suggest" ? "suggestTitle" : mode === "edit" ? "editTitle" : "createTitle")}
+        subtitle={f(mode === "suggest" ? "suggestSubtitle" : "createSubtitle")}
+      />
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-2xl font-bold">
-              {isEditMode ? "Edit Draft Entry" : "Create Dictionary Entry"}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleSave(false)}
-              disabled={saving || submitting}
-            >
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-1.5" />
-              )}
-              Save Draft
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => handleSave(true)}
-              disabled={saving || submitting}
-            >
-              {submitting ? (
-                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 mr-1.5" />
-              )}
-              Submit for Review
-            </Button>
-          </div>
-        </div>
+      {error && <FormAlert>{error}</FormAlert>}
 
-        {/* Error */}
-        {error && (
-          <Card className="border-red-500/30 bg-red-500/5 mb-6">
-            <CardContent className="p-4 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-400">{error}</p>
-            </CardContent>
-          </Card>
-        )}
+      <FormSection title={f("basics")} description={f("language")}>
+        <Field label={f("term")} htmlFor="term" required error={fieldErrors.term}>
+          <Input id="term" placeholder={f("termPlaceholder")} value={term} onChange={(e) => setTerm(e.target.value)} />
+          {checkingDuplicates && (
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              {f("checking")}
+            </p>
+          )}
+          {duplicates.length > 0 && (
+            <FormAlert tone="warning">
+              <p className="mb-1.5 font-medium">{f("similar")}</p>
+              <ul className="space-y-1">
+                {duplicates.map((d) => (
+                  <li key={d.id} className="flex items-center gap-2">
+                    <Link href={`/dictionary/${d.slug}`} className="font-medium text-foreground underline-offset-2 hover:underline">
+                      {d.term}
+                    </Link>
+                    <LanguageBadge code={d.language_code} />
+                  </li>
+                ))}
+              </ul>
+            </FormAlert>
+          )}
+        </Field>
 
-        <div className="space-y-8">
-          {/* === Basic Info === */}
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-primary rounded-full" />
-              Basic Information
-            </h2>
+        <Field label={f("reading")} htmlFor="reading" hint={f("readingHint")}>
+          <Input id="reading" placeholder="/ˌæplɪˈkeɪʃən/" value={reading} onChange={(e) => setReading(e.target.value)} />
+        </Field>
 
-            {/* Term */}
-            <div className="space-y-2">
-              <Label htmlFor="term">Term *</Label>
-              <Input
-                id="term"
-                placeholder="e.g. Machine Learning, Application Programming Interface"
-                value={term}
-                onChange={(e) => setTerm(e.target.value)}
-              />
-              {/* Duplicate warnings */}
-              {checkingDuplicates && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Checking for duplicates...
-                </p>
-              )}
-              {duplicates.length > 0 && (
-                <Card className="border-yellow-500/30 bg-yellow-500/5">
-                  <CardContent className="p-3">
-                    <p className="text-xs font-medium text-yellow-400 mb-2 flex items-center gap-1">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      Similar terms already exist:
-                    </p>
-                    <div className="space-y-1">
-                      {duplicates.map((d) => (
-                        <Link
-                          key={d.id}
-                          href={`/dictionary/${d.slug}`}
-                          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <span className="font-medium">{d.term}</span>
-                          <Badge variant="outline" className="text-[10px]">
-                            {d.language_code}
-                          </Badge>
-                          <Badge variant="outline" className="text-[10px]">
-                            {d.status}
-                          </Badge>
-                        </Link>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+        <Field label={f("definition")} htmlFor="definition" required error={fieldErrors.definition}>
+          <Textarea
+            id="definition"
+            placeholder={f("definitionPlaceholder")}
+            value={definition}
+            onChange={(e) => setDefinition(e.target.value)}
+            className="min-h-32"
+          />
+        </Field>
 
-            {/* Reading */}
-            <div className="space-y-2">
-              <Label htmlFor="reading">
-                Reading / Pronunciation (optional)
-              </Label>
-              <Input
-                id="reading"
-                placeholder="e.g. /ˌæplɪˈkeɪʃən/"
-                value={reading}
-                onChange={(e) => setReading(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Phonetic or IPA pronunciation of the English term.
-              </p>
-            </div>
-
-            {/* Language — always English, shown as read-only info */}
-            <div className="space-y-2">
-              <Label>Primary Language</Label>
-              <div className="flex items-center gap-2 h-9 px-3 rounded-md border border-border/50 bg-muted/30 w-[200px]">
-                <span className="text-sm text-muted-foreground">
-                  English (default)
+        <Field label={f("tags")} htmlFor="tags" hint={f("tagsHint")}>
+          <Input
+            id="tags"
+            placeholder={f("tagsPlaceholder")}
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            disabled={tags.length >= 10}
+          />
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {tags.map((tag) => (
+                <span key={tag} className="inline-flex h-7 items-center gap-1 rounded-md bg-secondary pl-2 pr-1 text-xs text-secondary-foreground">
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    aria-label={`${f("remove")} ${tag}`}
+                    className="flex size-5 items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="size-3" />
+                  </button>
                 </span>
+              ))}
+            </div>
+          )}
+        </Field>
+      </FormSection>
+
+      <FormSection
+        title={<span className="inline-flex items-center gap-2"><Languages className="size-4 text-primary" />{f("translations")}</span>}
+        description={f("translationsHint")}
+        action={
+          <Button variant="secondary" size="sm" onClick={addTranslation}>
+            <Plus />
+            <span className="hidden sm:inline">{f("addTranslation")}</span>
+          </Button>
+        }
+      >
+        {translations.length === 0 ? (
+          <p className="rounded-lg border border-dashed py-6 text-center text-sm text-muted-foreground">{f("noTranslations")}</p>
+        ) : (
+          translations.map((tr, idx) => (
+            <div key={idx} className="space-y-3 rounded-lg border bg-background/50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                {langSelect(tr.language_code, (v) => updateTranslation(idx, "language_code", v))}
+                <Button variant="ghost" size="icon-sm" aria-label={f("remove")} className="text-muted-foreground hover:text-destructive" onClick={() => removeTranslation(idx)}>
+                  <Trash2 />
+                </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                All entries are recorded in English. Add translations below.
-              </p>
+              <Input placeholder={f("translatedTerm")} value={tr.translated_term} onChange={(e) => updateTranslation(idx, "translated_term", e.target.value)} />
+              <Textarea placeholder={f("explanation")} value={tr.explanation} onChange={(e) => updateTranslation(idx, "explanation", e.target.value)} className="min-h-16" />
             </div>
+          ))
+        )}
+      </FormSection>
 
-            {/* Definition */}
-            <div className="space-y-2">
-              <Label htmlFor="definition">Definition *</Label>
-              <Textarea
-                id="definition"
-                placeholder="Write a clear, concise definition..."
-                value={definition}
-                onChange={(e) => setDefinition(e.target.value)}
-                className="min-h-[120px]"
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (max 10)</Label>
-              <Input
-                id="tags"
-                placeholder="Type a tag and press Enter"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-                disabled={tags.length >= 10}
-              />
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="text-xs gap-1"
-                    >
-                      #{tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="ml-0.5 hover:text-destructive transition-colors"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-
-          <Separator />
-
-          {/* === Translations === */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Languages className="h-5 w-5" />
-                Translations
-              </h2>
-              <Button variant="outline" size="sm" onClick={addTranslation}>
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Add Translation
-              </Button>
-            </div>
-
-            {translations.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No translations added yet. Add translations in other languages.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {translations.map((tr, idx) => (
-                  <Card key={idx} className="border-border/40">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Select
-                          value={tr.language_code}
-                          onValueChange={(v) =>
-                            updateTranslation(idx, "language_code", v)
-                          }
-                        >
-                          <SelectTrigger className="w-[160px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {LANG_OPTIONS.map((lang) => (
-                              <SelectItem key={lang.value} value={lang.value}>
-                                {lang.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => removeTranslation(idx)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <Input
-                        placeholder="Translated term"
-                        value={tr.translated_term}
-                        onChange={(e) =>
-                          updateTranslation(
-                            idx,
-                            "translated_term",
-                            e.target.value,
-                          )
-                        }
-                      />
-                      <Textarea
-                        placeholder="Explanation (optional)"
-                        value={tr.explanation}
-                        onChange={(e) =>
-                          updateTranslation(idx, "explanation", e.target.value)
-                        }
-                        className="min-h-[60px]"
-                      />
-                    </CardContent>
-                  </Card>
-                ))}
+      <FormSection
+        title={<span className="inline-flex items-center gap-2"><MessageSquareQuote className="size-4 text-primary" />{f("examples")}</span>}
+        description={f("examplesHint")}
+        action={
+          <Button variant="secondary" size="sm" onClick={addExample}>
+            <Plus />
+            <span className="hidden sm:inline">{f("addExample")}</span>
+          </Button>
+        }
+      >
+        {examples.length === 0 ? (
+          <p className="rounded-lg border border-dashed py-6 text-center text-sm text-muted-foreground">{f("noExamples")}</p>
+        ) : (
+          examples.map((ex, idx) => (
+            <div key={idx} className="space-y-3 rounded-lg border bg-background/50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                {langSelect(ex.language_code, (v) => updateExample(idx, "language_code", v))}
+                <Button variant="ghost" size="icon-sm" aria-label={f("remove")} className="text-muted-foreground hover:text-destructive" onClick={() => removeExample(idx)}>
+                  <Trash2 />
+                </Button>
               </div>
-            )}
-          </section>
-
-          <Separator />
-
-          {/* === Examples === */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <MessageSquareQuote className="h-5 w-5" />
-                Examples
-              </h2>
-              <Button variant="outline" size="sm" onClick={addExample}>
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Add Example
-              </Button>
-            </div>
-
-            {examples.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No examples added yet. Add usage examples to help learners.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {examples.map((ex, idx) => (
-                  <Card key={idx} className="border-border/40">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Select
-                          value={ex.language_code}
-                          onValueChange={(v) =>
-                            updateExample(idx, "language_code", v)
-                          }
-                        >
-                          <SelectTrigger className="w-[160px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {LANG_OPTIONS.map((lang) => (
-                              <SelectItem key={lang.value} value={lang.value}>
-                                {lang.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => removeExample(idx)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <Textarea
-                        placeholder="Example text / sentence"
-                        value={ex.example_text}
-                        onChange={(e) =>
-                          updateExample(idx, "example_text", e.target.value)
-                        }
-                        className="min-h-[80px]"
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input
-                          placeholder="Source (optional)"
-                          value={ex.source}
-                          onChange={(e) =>
-                            updateExample(idx, "source", e.target.value)
-                          }
-                        />
-                        <Input
-                          placeholder="Context (optional)"
-                          value={ex.context}
-                          onChange={(e) =>
-                            updateExample(idx, "context", e.target.value)
-                          }
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <Textarea placeholder={f("exampleText")} value={ex.example_text} onChange={(e) => updateExample(idx, "example_text", e.target.value)} className="min-h-20" />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Input placeholder={f("source")} value={ex.source} onChange={(e) => updateExample(idx, "source", e.target.value)} />
+                <Input placeholder={f("context")} value={ex.context} onChange={(e) => updateExample(idx, "context", e.target.value)} />
               </div>
-            )}
-          </section>
+            </div>
+          ))
+        )}
+      </FormSection>
 
-          <Separator />
+      {mode === "suggest" && (
+        <FormSection title={f("changeSummary")}>
+          <Field label={f("changeSummary")} htmlFor="change" required error={fieldErrors.changeSummary} className="[&>label]:sr-only">
+            <Input id="change" placeholder={f("changeSummaryPlaceholder")} value={changeSummary} onChange={(e) => setChangeSummary(e.target.value)} />
+          </Field>
+        </FormSection>
+      )}
 
-          {/* Bottom action bar */}
-          <div className="flex items-center justify-between pb-8">
-            <Button variant="ghost" onClick={() => router.back()}>
-              <ArrowLeft className="h-4 w-4 mr-1.5" />
-              Cancel
+      <FormActions>
+        <Button variant="ghost" onClick={() => router.back()} disabled={busy} className="mr-auto">
+          {f("cancel")}
+        </Button>
+        {mode === "suggest" ? (
+          <Button onClick={() => handleSave(true)} disabled={busy}>
+            {submitting ? <Loader2 className="animate-spin" /> : <Send />}
+            {f("sendSuggestion")}
+          </Button>
+        ) : (
+          <>
+            <Button variant="secondary" onClick={() => handleSave(false)} disabled={busy}>
+              {saving ? <Loader2 className="animate-spin" /> : <Save />}
+              {f("saveDraft")}
             </Button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => handleSave(false)}
-                disabled={saving || submitting}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-1.5" />
-                )}
-                Save Draft
-              </Button>
-              <Button
-                onClick={() => handleSave(true)}
-                disabled={saving || submitting}
-              >
-                {submitting ? (
-                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4 mr-1.5" />
-                )}
-                Submit for Review
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+            <Button onClick={() => handleSave(true)} disabled={busy}>
+              {submitting ? <Loader2 className="animate-spin" /> : <Send />}
+              {f("submit")}
+            </Button>
+          </>
+        )}
+      </FormActions>
     </div>
   );
 }
