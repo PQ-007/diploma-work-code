@@ -253,7 +253,8 @@
     "viewAll": "View All",
     "posts": "posts",
     "thisWeek": "this week",
-    "rank": "Rank"
+    "rank": "Rank",
+    "noData": "No one here yet"
   },
   "nav_user": {
     "profile": "Profile",

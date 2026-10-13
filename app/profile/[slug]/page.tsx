@@ -11,7 +11,6 @@ import {
   Bookmark,
   Calendar,
   CheckCircle2,
-  ChevronRight,
   Eye,
   FileText,
   FolderGit2,
@@ -19,9 +18,6 @@ import {
   Heart,
   Loader2,
   MessageSquare,
-  MoreHorizontal,
-  Pin,
-  ThumbsUp,
   UserMinus,
   UserPlus,
 } from "lucide-react";
@@ -130,22 +126,9 @@ interface ProfileApiResponse {
 
 
 
-function relativeTime(dateStr: string | null): string {
-  if (!dateStr) return "";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const d = Math.floor(diff / 86400000);
-  if (d === 0) return "today";
-  if (d === 1) return "1 day ago";
-  if (d < 30) return `${d} days ago`;
-  const mo = Math.floor(d / 30);
-  if (mo === 1) return "1 mo ago";
-  if (mo < 12) return `${mo} mo ago`;
-  return `${Math.floor(mo / 12)}y ago`;
-}
-
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, language: i18nLang } = useLanguage();
   const params = useParams();
   const slug = params?.slug as string;
 
@@ -274,7 +257,7 @@ export default function ProfilePage() {
             {/* Avatar */}
             <div className="-mt-8 relative shrink-0">
               <div
-                className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor} shadow-[0_0_18px_rgba(251,191,36,0.5)]` : "bg-border"}`}
+                className={`rounded-full p-[3px] ${avatarRingColor ? `bg-gradient-to-br ${avatarRingColor}` : "bg-border"}`}
               >
                 <Avatar className="h-24 w-24 border-4 border-card">
                   <AvatarImage src={profile.avatar_url || ""} />
@@ -284,8 +267,8 @@ export default function ProfilePage() {
                   </AvatarFallback>
                 </Avatar>
               </div>
-              {profile.role && (
-                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+              {(profile.role === "admin" || profile.role === "teacher") && (
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center" title={profile.role}>
                   <CheckCircle2 className="h-3.5 w-3.5 text-primary-foreground" />
                 </div>
               )}
@@ -295,7 +278,7 @@ export default function ProfilePage() {
             <div className="flex-1 min-w-0 pt-3 sm:pt-4">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight flex items-center gap-1 ">
+                  <h1 className="flex items-center gap-1.5 text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-2xl">
                     {profile.display_name || profile.user_name}
                     {getRankIcon(stats.rankingPoint, 5.5)}
                   </h1>
@@ -306,19 +289,18 @@ export default function ProfilePage() {
                 {/* Actions */}
                 <div className="flex gap-2 shrink-0">
                   {isOwner ? (
-                    <Button size="sm" asChild className="gap-1.5">
+                    <Button size="sm" variant="outline" asChild>
                       <Link href={`/profile/${slug}/edit`}>
                         {tr("profile.editProfile", "Edit Profile")}
-                        <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
                   ) : user ? (
                     <Button
-                      variant={following ? "outline" : "default"}
+                      variant={following ? "secondary" : "default"}
                       size="sm"
                       onClick={handleFollow}
                       disabled={followLoading}
-                      className="gap-1.5"
+                      aria-pressed={following}
                     >
                       {followLoading ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -336,22 +318,22 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 
-                <Badge className="gap-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 border-0">
-                  <GraduationCap className="h-3 w-3" />
-                  {(() => {
-                    const enrollYear = parseInt(
-                      profile.email?.substring(1, 3) ?? "0",
-                    );
-                    const n = new Date().getFullYear() - enrollYear - 2000;
-                    if (isNaN(n)) return null;
-                    if (n > 5) return tr("profile.alumni", "Alumni");
-                    return `${n} ${tr("profile.yearStudent", "year student")}`;
-                  })()}
-                </Badge>
+                {(() => {
+                  // Student codes look like s21c010b@nmct.edu.mn → enrolled 2021.
+                  const m = profile.email?.match(/^[a-z](\d{2})/i);
+                  if (!m) return null;
+                  const n = new Date().getFullYear() - 2000 - parseInt(m[1], 10);
+                  return (
+                    <Badge variant="brand">
+                      <GraduationCap />
+                      {n > 5 ? tr("profile.alumni", "Alumni") : `${n} ${tr("profile.yearStudent", "year student")}`}
+                    </Badge>
+                  );
+                })()}
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {profile.created_at
-                    ? `${tr("profile.joinedDate", "Joined")} ${new Date(profile.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
+                    ? `${tr("profile.joinedDate", "Joined")} ${new Date(profile.created_at).toLocaleDateString(i18nLang, { month: "short", year: "numeric" })}`
                     : tr("profile.joinedRecently", "Joined recently")}
                 </span>
 
@@ -367,12 +349,12 @@ export default function ProfilePage() {
       </div>
 
       {/* ════════ Two-Column Layout ════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
-        {/* ─── Left: Pinned + Tabs ─── */}
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[300px_1fr]">
+        {/* ─── About: skills, languages, engagement (after content on phones) ─── */}
+        <div className="order-2 space-y-4 lg:order-1">
           {/* Skills */}
           {skills.length > 0 && (
-            <Card className="border-border/60">
+            <Card className="gap-3">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">
                   {tr("profile.skills", "Skills")}
@@ -381,11 +363,7 @@ export default function ProfilePage() {
               <CardContent className="pt-0">
                 <div className="flex flex-wrap gap-1.5">
                   {skills.map((skill: string) => (
-                    <Badge
-                      key={skill}
-                      variant="outline"
-                      className="rounded-full px-2.5 py-0.5 text-[11px]"
-                    >
+                    <Badge key={skill} variant="neutral" className="h-6 px-2.5 text-xs">
                       {skill}
                     </Badge>
                   ))}
@@ -395,7 +373,7 @@ export default function ProfilePage() {
           )}
 
           {/* Language Skills */}
-          <Card className="border-border/60">
+          <Card className="gap-3">
             <CardHeader>
               <CardTitle className="text-sm font-semibold">
                 {tr("profile.languageSkills", "Language Skills")}
@@ -413,12 +391,7 @@ export default function ProfilePage() {
                         {item.language_name}
                       </span>
                       {item.proficiency_level && (
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] px-2 py-0.5 shrink-0"
-                        >
-                          {item.proficiency_level}
-                        </Badge>
+                        <Badge variant="outline">{item.proficiency_level}</Badge>
                       )}
                     </div>
                   ))}
@@ -432,7 +405,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Engagement */}
-          <Card className="border-border/60">
+          <Card className="gap-3">
             <CardHeader>
               <CardTitle className="text-sm font-semibold">
                 {tr("profile.engagement", "Engagement")}
@@ -441,22 +414,22 @@ export default function ProfilePage() {
             <CardContent className="pt-0 space-y-2.5">
               {[
                 {
-                  icon: <MessageSquare className="h-3.5 w-3.5 text-blue-500" />,
+                  icon: <MessageSquare className="size-4 text-muted-foreground" />,
                   label: tr("profile.commentsReceived", "Comments received"),
                   value: stats.totalComments,
                 },
                 {
-                  icon: <Heart className="h-3.5 w-3.5 text-rose-500" />,
+                  icon: <Heart className="size-4 text-muted-foreground" />,
                   label: tr("profile.reactionsReceived", "Reactions received"),
                   value: stats.totalReactions,
                 },
                 {
-                  icon: <Bookmark className="h-3.5 w-3.5 text-amber-500" />,
+                  icon: <Bookmark className="size-4 text-muted-foreground" />,
                   label: tr("profile.bookmarksReceived", "Bookmarks received"),
                   value: stats.totalBookmarks,
                 },
                 {
-                  icon: <Eye className="h-3.5 w-3.5 text-emerald-500" />,
+                  icon: <Eye className="size-4 text-muted-foreground" />,
                   label: tr("profile.totalViews", "Total views"),
                   value: stats.totalViews,
                 },
@@ -467,11 +440,11 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center gap-2">
                     {item.icon}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-sm text-muted-foreground">
                       {item.label}
                     </span>
                   </div>
-                  <span className="text-xs font-semibold text-foreground">
+                  <span className="text-sm font-semibold tabular-nums text-foreground">
                     {item.value.toLocaleString()}
                   </span>
                 </div>
@@ -480,8 +453,8 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* ─── Right Sidebar ─── */}
-        <div className="space-y-4">
+        {/* ─── Content: pinned + tabs ─── */}
+        <div className="order-1 min-w-0 space-y-4 lg:order-2">
           {/* ── Pinned Section ── */}
           {(pinnedArticles.length > 0 || pinnedProjects.length > 0) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -527,13 +500,13 @@ export default function ProfilePage() {
           )}
 
           <Tabs defaultValue="articles" className="w-full">
-            <TabsList className="bg-transparent  border-border w-full rounded-none p-0 h-auto justify-start gap-0 mb-0">
+            <TabsList variant="underline">
               <TabsTrigger value="articles">
-                <FileText className="h-3.5 w-3.5" />
+                <FileText />
                 {tr("sidebar.articles", "Articles")}
               </TabsTrigger>
               <TabsTrigger value="projects">
-                <FolderGit2 className="h-3.5 w-3.5" />
+                <FolderGit2 />
                 {tr("sidebar.projects", "Projects")}
               </TabsTrigger>
             </TabsList>
@@ -597,7 +570,7 @@ export default function ProfilePage() {
                   })}
                 </div>
               ) : (
-                <Card className="border-border/60">
+                <Card className="gap-3">
                   <CardContent className="p-8 text-center text-muted-foreground">
                     <FolderGit2 className="h-10 w-10 mx-auto mb-2 opacity-40" />
                     <p className="text-sm">

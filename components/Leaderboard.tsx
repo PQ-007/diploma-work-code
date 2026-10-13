@@ -4,7 +4,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy } from "lucide-react";
@@ -44,68 +43,56 @@ export default function Leaderboard({
       .finally(() => setLoading(false));
   }, [isStudent, limit]);
 
+  const medal = ["text-[#c99a06]", "text-[#8a94a6]", "text-[#b06a3b]"];
+
   return (
-    <div>
-      <h3 className="text-lg font-semibold tracking-tight flex items-center gap-2 mb-3">
-        <Trophy className="h-4 w-4" />
+    <section className="rounded-xl border bg-card shadow-xs">
+      <h2 className="flex items-center gap-2 border-b px-4 py-3 text-sm font-semibold">
+        <Trophy className="size-4 text-primary" />
         {isStudent ? t("ranking.topRated") : t("ranking.topContributors")}
-      </h3>
-      <Card className="border-border/40 py-3">
-        <CardContent className="p-0">
-          {loading ? (
-            Array.from({ length: limit }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 last:border-b-0"
-              >
-                <Skeleton className="h-4 w-4 rounded-full" />
-                <Skeleton className="h-7 w-7 rounded-full" />
-                <Skeleton className="h-3 flex-1 rounded" />
-              </div>
-            ))
-          ) : users.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">
-              No data yet
-            </p>
-          ) : (
-            users.map((user) => (
+      </h2>
+      {loading ? (
+        <div className="space-y-1 p-2">
+          {Array.from({ length: limit }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-2 py-2">
+              <Skeleton className="size-8 rounded-full" />
+              <Skeleton className="h-3 flex-1 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : users.length === 0 ? (
+        <p className="px-4 py-6 text-center text-sm text-muted-foreground">{t("ranking.noData")}</p>
+      ) : (
+        <ol className="p-1.5">
+          {users.map((user, i) => (
+            <li key={user.rank}>
               <Link
-                key={user.rank}
                 href={`/profile/${user.username}`}
-                className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 last:border-b-0 hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-accent/60"
               >
-                {/* Rank number */}
-                <span className="w-4 text-[11px] font-bold text-muted-foreground/50 shrink-0 text-center">
+                <span className={`w-4 shrink-0 text-center text-xs font-bold tabular-nums ${medal[i] ?? "text-muted-foreground"}`}>
                   {user.rank}
                 </span>
-
-                {/* Avatar with rank-colored ring for top 3 */}
-                <div className="shrink-0">
-                  <Avatar className="h-7 w-7 block">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="text-xs">
-                      {user.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-
-                {/* Name + inline rank icon + score */}
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium truncate flex items-center gap-1">
+                <Avatar className="size-8 shrink-0">
+                  <AvatarImage src={user.avatar} alt="" />
+                  <AvatarFallback className="text-xs">{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1 text-sm font-medium">
                     <span className="truncate">{user.name}</span>
                     {getRankIcon(user.points, 3.5)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
+                  </span>
+                  <span className="block text-xs tabular-nums text-muted-foreground">
                     {isStudent
                       ? `${user.points.toLocaleString()} ${t("common.points")}`
                       : `${user.points} ${t("common.contributions")}`}
-                  </p>
-                </div>
+                  </span>
+                </span>
               </Link>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }

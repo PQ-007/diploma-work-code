@@ -1,46 +1,17 @@
-import {
-  ChessBishop,
-  ChessKing,
-  ChessKnight,
-  ChessQueen,
-  ChessPawn,
-  ChessRook,
-} from "lucide-react";
+import { ChessBishop, ChessKing, ChessKnight, ChessPawn, ChessQueen, ChessRook } from "lucide-react";
 
 /**
- * Returns the appropriate rank icon based on ranking points.
- * Rule:
- * - King:    10000+
- * - Queen:   8000-9999
- * - Rook:    6000-7999
- * - Knight:  3500-5999
- * - Bishop:  1500-3499
- * - Pawn:    0-1499
+ * Rank icon from ranking points (King 10000+, Queen 8000+, Rook 6000+,
+ * Knight 3500+, Bishop 1500+, Pawn below). `size` is in Tailwind units
+ * (4 = 16px); applied inline because Tailwind can't see dynamic class names.
  */
 export const getRankIcon = (rankingPoints: number, size: number = 4) => {
-  if (rankingPoints >= 10000)
-    return (
-      <ChessKing className={`h-${size} w-${size} shrink-0 text-red-500`} />
-    );
-  if (rankingPoints >= 8000)
-    return (
-      <ChessQueen className={`h-${size} w-${size} shrink-0 text-orange-500`} />
-    );
-  if (rankingPoints >= 6000)
-    return (
-      <ChessRook className={`h-${size} w-${size} shrink-0 text-purple-500`} />
-    );
-  if (rankingPoints >= 3500)
-    return (
-      <ChessKnight className={`h-${size} w-${size} shrink-0 text-green-500`} />
-    );
-  if (rankingPoints >= 1500)
-    return (
-      <ChessBishop className={`h-${size} w-${size} shrink-0 text-blue-500`} />
-    );
-  return (
-    <ChessPawn
-      className={`h-${size} w-${size} shrink-0 text-muted-foreground`}
-    />
-  );
+  const style = { width: size * 4, height: size * 4 };
+  const props = { style, className: "shrink-0", "aria-hidden": true } as const;
+  if (rankingPoints >= 10000) return <ChessKing {...props} className="shrink-0 text-brand-red" />;
+  if (rankingPoints >= 8000) return <ChessQueen {...props} className="shrink-0 text-warning" />;
+  if (rankingPoints >= 6000) return <ChessRook {...props} className="shrink-0 text-primary" />;
+  if (rankingPoints >= 3500) return <ChessKnight {...props} className="shrink-0 text-success" />;
+  if (rankingPoints >= 1500) return <ChessBishop {...props} className="shrink-0 text-brand-sky" />;
+  return <ChessPawn {...props} className="shrink-0 text-muted-foreground" />;
 };

@@ -253,7 +253,8 @@
     "viewAll": "すべて見る",
     "posts": "投稿",
     "thisWeek": "今週",
-    "rank": "Rank"
+    "rank": "Rank",
+    "noData": "まだ誰もいません"
   },
   "nav_user": {
     "profile": "プロフィール",
