@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -16,14 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-
-type ProfileData = {
-  user_name: string | null;
-  display_name: string | null;
-  avatar_url: string | null;
-  role: string | null;
-};
+import { useMyProfile } from "@/lib/hooks/queries/useMyProfile";
 
 /** Roles allowed by the dictionary moderation RLS policies. */
 const MODERATOR_ROLES = ["admin", "teacher"];
@@ -31,27 +24,14 @@ const MODERATOR_ROLES = ["admin", "teacher"];
 export function NavUser() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const profile = useMyProfile();
   const supabase = useMemo(
     () => createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
     [],
   );
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("profiles")
-      .select("user_name, display_name, avatar_url, role")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => setProfile(data ?? null));
-  }, [supabase, user]);
-
-  // Ignore a profile fetched for a previous session once signed out.
-  const profile_ = user ? profile : null;
-  const name = profile_?.display_name || profile_?.user_name || "User";
-  const isModerator = MODERATOR_ROLES.includes(profile_?.role ?? "");
+  const name = profile?.display_name || profile?.user_name || "User";
+  const isModerator = MODERATOR_ROLES.includes(profile?.role ?? "");
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();

@@ -53,7 +53,8 @@
     "readTime": "{{count}} min read",
     "notFoundTitle": "Page not found",
     "notFoundDesc": "The page you're looking for doesn't exist or was moved.",
-    "goHome": "Go home"
+    "goHome": "Go home",
+    "soon": "Soon"
   },
   "sidebar": {
     "home": "Home",
@@ -99,7 +100,13 @@
     "settings": "Settings",
     "notifications": "Notifications",
     "upgrade": "Upgrade Plan",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "joinTitle": "Join FutureHub",
+    "joinText": "Write articles, share projects and help build the dictionary.",
+    "shareTitle": "Share what you know",
+    "shareText": "Write an article for the students who come after you.",
+    "menu": "Menu",
+    "you": "You"
   },
   "profile": {
     "title": "Profile",

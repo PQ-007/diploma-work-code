@@ -27,7 +27,7 @@ export function LanguageToggleButton() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 gap-1.5 rounded-full px-2.5 text-muted-foreground"
+          className="h-8 gap-1.5 rounded-full px-2.5 text-muted-foreground"
           aria-label={`Language: ${current.name}`}
         >
           <Languages />

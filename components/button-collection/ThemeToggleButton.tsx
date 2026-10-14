@@ -67,7 +67,7 @@ export default function ThemeToggleButton() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-full text-muted-foreground"
+          className="size-8 rounded-full text-muted-foreground"
           aria-label={ariaLabel}
         >
           <CurrentIcon />

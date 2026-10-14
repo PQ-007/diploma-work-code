@@ -10,7 +10,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "glass-solid text-primary-foreground",
+        default: "glass-solid text-primary-fill-foreground",
         secondary: "glass glass-tint text-accent-foreground",
         outline: "glass text-foreground",
         ghost: "text-foreground hover:bg-accent/70",

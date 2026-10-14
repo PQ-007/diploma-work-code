@@ -53,7 +53,8 @@
     "readTime": "{{count}}分で読めます",
     "notFoundTitle": "ページが見つかりません",
     "notFoundDesc": "お探しのページは存在しないか、移動されました。",
-    "goHome": "ホームへ"
+    "goHome": "ホームへ",
+    "soon": "近日"
   },
   "sidebar": {
     "home": "ホーム",
@@ -99,7 +100,13 @@
     "settings": "設定",
     "notifications": "通知",
     "upgrade": "プランをアップグレード",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "joinTitle": "FutureHubに参加",
+    "joinText": "記事を書き、プロジェクトを共有し、みんなで辞書を育てよう。",
+    "shareTitle": "知識をシェアしよう",
+    "shareText": "後輩のために記事を書いてみませんか。",
+    "menu": "メニュー",
+    "you": "マイページ"
   },
   "profile": {
     "title": "プロフィール",

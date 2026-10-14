@@ -349,7 +349,7 @@ export default function DictionaryPage() {
                 className={cn(
                   "h-8 min-w-8 shrink-0 rounded-full px-2 text-xs font-semibold transition-colors",
                   activeLetter === letter
-                    ? "glass-solid text-primary-foreground"
+                    ? "glass-solid text-primary-fill-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >

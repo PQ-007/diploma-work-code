@@ -50,3 +50,8 @@ export function isActivePath(pathname: string | null, href: string) {
   const base = href.split("?")[0];
   return base === "/" ? pathname === "/" : pathname === base || pathname.startsWith(`${base}/`);
 }
+
+/** The nav entry the current page belongs to (used for the header's section label). */
+export function findSection(pathname: string | null): NavLink | undefined {
+  return [...primaryNav, ...comingSoonNav].find((item) => isActivePath(pathname, item.href));
+}

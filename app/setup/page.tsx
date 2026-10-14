@@ -498,7 +498,7 @@ export default function SetupPage() {
                       onClick={() => toggleSkill(skill)}
                       className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-[color,filter,scale] duration-200 active:scale-[0.97] ${
                         isSelected
-                          ? "glass-solid text-primary-foreground"
+                          ? "glass-solid text-primary-fill-foreground"
                           : "glass text-muted-foreground hover:text-foreground"
                       }`}
                     >

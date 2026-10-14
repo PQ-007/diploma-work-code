@@ -368,7 +368,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signin")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   isFormSignIn
-                    ? "text-primary-foreground"
+                    ? "text-primary-fill-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -380,7 +380,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signup")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   !isFormSignIn
-                    ? "text-primary-foreground"
+                    ? "text-primary-fill-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -501,7 +501,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="glass-solid h-11 w-full rounded-full px-4 text-sm font-semibold text-primary-foreground transition-[filter,scale] duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                className="glass-solid h-11 w-full rounded-full px-4 text-sm font-semibold text-primary-fill-foreground transition-[filter,scale] duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isForgotScreen
                   ? loading

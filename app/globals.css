@@ -35,6 +35,8 @@
   --popover-foreground: #111a2e;
   --primary: #1d3fb3;
   --primary-foreground: #ffffff;
+  --primary-fill: #2846a8;
+  --primary-fill-foreground: #ffffff;
   --secondary: #edf1f9;
   --secondary-foreground: #1b2a4a;
   --muted: #eff2f8;
@@ -118,79 +120,83 @@
 }
 
 .dark {
-  --brand-blue: #6f97f2;
-  --brand-red: #f0505b;
-  --brand-sky: #8ab8e3;
+  /* Graphite, not navy: near-neutral surfaces with a faint cool cast. Depth comes
+     from lightness steps (page → card → popover), colour only marks meaning. */
+  --brand-blue: #86a2ee;
+  --brand-red: #e8656a;
+  --brand-sky: #98b7d8;
 
-  --background: #0a0f1e;
-  --foreground: #e6ebf5;
-  --card: #10172a;
-  --card-foreground: #e6ebf5;
-  --popover: #121a2f;
-  --popover-foreground: #e6ebf5;
-  /* Lighter blue with dark text keeps buttons readable on navy. */
-  --primary: #6f97f2;
-  --primary-foreground: #071027;
-  --secondary: #18213a;
-  --secondary-foreground: #dbe3f2;
-  --muted: #141c32;
-  --muted-foreground: #8e9bb7;
-  --accent: #1a2442;
-  --accent-foreground: #e6ebf5;
-  --destructive: #f0505b;
+  --background: #15171b;
+  --foreground: #ebecef;
+  --card: #1b1d22;
+  --card-foreground: #ebecef;
+  --popover: #212328;
+  --popover-foreground: #ebecef;
+  /* Text/icon blue; filled buttons use --primary-fill below. */
+  --primary: #86a2ee;
+  --primary-foreground: #10131c;
+  --primary-fill: #3b5cc4;
+  --primary-fill-foreground: #ffffff;
+  --secondary: #23252b;
+  --secondary-foreground: #d9dbe1;
+  --muted: #1f2126;
+  --muted-foreground: #9a9da7;
+  --accent: #26292f;
+  --accent-foreground: #ebecef;
+  --destructive: #d9464c;
   --destructive-foreground: #ffffff;
-  --success: #3ccf8e;
-  --warning: #f2b35a;
-  --border: #1f2944;
-  --input: #263254;
-  --ring: #8ab8e3;
+  --success: #4bb685;
+  --warning: #dca54e;
+  --border: #2a2c32;
+  --input: #33363d;
+  --ring: #6f88cc;
 
-  --chart-1: #6f97f2;
-  --chart-2: #8ab8e3;
-  --chart-3: #f0505b;
-  --chart-4: #9db8f7;
-  --chart-5: #f2b35a;
+  --chart-1: #86a2ee;
+  --chart-2: #98b7d8;
+  --chart-3: #e8656a;
+  --chart-4: #b9c8f2;
+  --chart-5: #dca54e;
 
-  --sidebar: #0c1224;
-  --sidebar-foreground: #dfe5f1;
-  --sidebar-primary: #6f97f2;
-  --sidebar-primary-foreground: #071027;
-  --sidebar-accent: #161f38;
-  --sidebar-accent-foreground: #e6ebf5;
-  --sidebar-border: #1a2440;
-  --sidebar-ring: #8ab8e3;
+  --sidebar: #131519;
+  --sidebar-foreground: #e2e3e8;
+  --sidebar-primary: #86a2ee;
+  --sidebar-primary-foreground: #10131c;
+  --sidebar-accent: #23252b;
+  --sidebar-accent-foreground: #ebecef;
+  --sidebar-border: #25272d;
+  --sidebar-ring: #6f88cc;
 
-  --shadow-2xs: 0 1px 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.25);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
-  --shadow: 0 2px 8px -2px rgb(0 0 0 / 0.35);
-  --shadow-md: 0 6px 16px -4px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.45);
-  --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.5);
-  --shadow-2xl: 0 32px 64px -16px rgb(0 0 0 / 0.55);
+  --shadow-2xs: 0 1px 1px 0 rgb(0 0 0 / 0.25);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.32);
+  --shadow: 0 2px 8px -2px rgb(0 0 0 / 0.38);
+  --shadow-md: 0 6px 16px -4px rgb(0 0 0 / 0.42);
+  --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.48);
+  --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.52);
+  --shadow-2xl: 0 32px 64px -16px rgb(0 0 0 / 0.56);
 
+  /* Only a hint of the brand light at the top corners. */
   --app-glow:
-    radial-gradient(ellipse 62% 70% at 0% 0%, rgba(64, 104, 230, 0.24), transparent 72%),
-    radial-gradient(ellipse 62% 70% at 100% 0%, rgba(240, 80, 91, 0.16), transparent 72%),
-    radial-gradient(ellipse 50% 55% at 100% 100%, rgba(111, 151, 242, 0.1), transparent 72%);
+    radial-gradient(ellipse 60% 60% at 0% 0%, rgba(80, 108, 200, 0.09), transparent 70%),
+    radial-gradient(ellipse 60% 60% at 100% 0%, rgba(214, 80, 86, 0.055), transparent 70%);
 
-  --glass-fill: rgba(255, 255, 255, 0.06);
-  --glass-fill-hover: rgba(255, 255, 255, 0.11);
-  --glass-rim: rgba(255, 255, 255, 0.06);
-  --glass-sheen: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 6px 18px -8px rgb(0 0 0 / 0.45);
-  --glass-chrome: rgba(10, 15, 30, 0.62);
+  --glass-fill: rgba(255, 255, 255, 0.035);
+  --glass-fill-hover: rgba(255, 255, 255, 0.07);
+  --glass-rim: rgba(255, 255, 255, 0.07);
+  --glass-sheen: rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --glass-chrome: rgba(21, 23, 27, 0.8);
 
   --auth-right-bg:
-    radial-gradient(circle at 20% 20%, #142659, transparent 40%),
-    radial-gradient(circle at 80% 10%, #3a1422, transparent 35%),
-    linear-gradient(135deg, #060a16, #0e1730);
+    radial-gradient(circle at 20% 20%, rgba(70, 100, 190, 0.28), transparent 42%),
+    radial-gradient(circle at 80% 10%, rgba(200, 70, 80, 0.16), transparent 36%),
+    linear-gradient(135deg, #111317, #1a1c21);
   --auth-right-overlay: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.04) 35%, transparent 60%);
   --auth-right-orb-1: rgba(111, 151, 242, 0.2);
   --auth-right-orb-2: rgba(240, 80, 91, 0.14);
-  --auth-right-grid: rgba(138, 184, 227, 0.12);
+  --auth-right-grid: rgba(170, 185, 215, 0.08);
   --auth-panel-border: rgba(255, 255, 255, 0.1);
-  --auth-panel-bg: rgba(6, 10, 22, 0.5);
+  --auth-panel-bg: rgba(17, 19, 23, 0.55);
   --auth-panel-accent: rgba(111, 151, 242, 0.24);
   --auth-panel-text: rgba(214, 228, 255, 0.9);
   --auth-panel-text-soft: rgba(214, 228, 255, 0.38);
@@ -205,6 +211,8 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-fill: var(--primary-fill);
+  --color-primary-fill-foreground: var(--primary-fill-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -238,6 +246,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+  --font-display: var(--font-space-grotesk), var(--font-sans);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -374,32 +383,26 @@
     --glass-fill-hover: color-mix(in oklab, var(--primary) 18%, rgba(255, 255, 255, 0.62));
   }
   .dark .glass-tint {
-    --glass-fill: color-mix(in oklab, var(--primary) 16%, rgba(255, 255, 255, 0.04));
-    --glass-fill-hover: color-mix(in oklab, var(--primary) 24%, rgba(255, 255, 255, 0.06));
+    --glass-fill: color-mix(in oklab, var(--primary) 11%, rgba(255, 255, 255, 0.03));
+    --glass-fill-hover: color-mix(in oklab, var(--primary) 17%, rgba(255, 255, 255, 0.05));
   }
 
-  /* Filled glass: solid brand colour with a faint light falling from the top.
-     No hard shine line or inner bevel, so it reads soft rather than domed. */
+  /* Filled buttons: matte brand colour, a hairline of light on the top edge and a
+     neutral shadow. No gloss and no coloured glow. */
   .glass-solid,
   .glass-danger {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 80%),
-      var(--glass-solid-fill, var(--primary));
+    background: var(--glass-solid-fill, var(--primary-fill));
     border: 1px solid transparent;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      0 2px 10px -4px color-mix(in oklab, var(--glass-solid-glow, var(--primary)) 45%, transparent);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 1px 2px rgb(0 0 0 / 0.12);
   }
   .glass-solid:hover,
   .glass-danger:hover {
-    filter: brightness(1.06);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.16),
-      0 6px 18px -6px color-mix(in oklab, var(--glass-solid-glow, var(--primary)) 50%, transparent);
+    filter: brightness(1.08);
   }
   .glass-danger {
     --glass-solid-fill: var(--destructive);
-    --glass-solid-glow: var(--brand-red);
   }
 
   /* App chrome: header, sidebar, bottom nav. */
@@ -415,6 +418,12 @@
     background:
       radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, var(--brand-blue) 16%, transparent), transparent 55%),
       radial-gradient(100% 140% at 100% 100%, color-mix(in oklab, var(--brand-red) 12%, transparent), transparent 55%),
+      var(--card);
+  }
+  .dark .surface-brand {
+    background:
+      radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, var(--brand-blue) 7%, transparent), transparent 55%),
+      radial-gradient(100% 140% at 100% 100%, color-mix(in oklab, var(--brand-red) 5%, transparent), transparent 55%),
       var(--card);
   }
 }

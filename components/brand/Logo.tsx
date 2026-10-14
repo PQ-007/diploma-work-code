@@ -45,19 +45,40 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-/** Mark + wordmark, used in the sidebar and the mobile header. */
+/**
+ * Mark + wordmark. "md" for the mobile header and forms; "lg" for the sidebar,
+ * where the mark sits on a soft glass tile so the brand reads first.
+ */
 export function Logo({
   className,
   showWordmark = true,
+  size = "md",
 }: {
   className?: string;
   showWordmark?: boolean;
+  size?: "md" | "lg";
 }) {
+  const lg = size === "lg";
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark />
+    <span className={cn("inline-flex items-center", lg ? "gap-2.5" : "gap-2", className)}>
+      {lg ? (
+        <span className="glass relative isolate flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <span
+            aria-hidden
+            className="absolute inset-1 -z-10 rounded-lg bg-brand-blue/25 blur-md"
+          />
+          <LogoMark className="size-7" />
+        </span>
+      ) : (
+        <LogoMark />
+      )}
       {showWordmark && (
-        <span className="text-[1.05rem] font-semibold tracking-tight text-foreground">
+        <span
+          className={cn(
+            "tracking-tight text-foreground",
+            lg ? "font-display text-[1.4rem] font-bold tracking-[-0.03em]" : "text-[1.05rem] font-semibold",
+          )}
+        >
           Future<span className="text-brand-blue">Hub</span>
         </span>
       )}

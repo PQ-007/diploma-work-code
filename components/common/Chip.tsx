@@ -23,7 +23,7 @@ export function Chip({
       className={cn(
         "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium outline-none transition-[color,filter,scale] duration-200 active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/40 [&_svg]:size-3.5",
         selected
-          ? "glass-solid text-primary-foreground"
+          ? "glass-solid text-primary-fill-foreground"
           : "glass text-muted-foreground hover:text-foreground",
         className,
       )}

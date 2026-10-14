@@ -16,18 +16,26 @@ Colors are tokens from `app/globals.css`; never hardcode hex or `bg-white`.
 
 | Token | Use |
 |---|---|
-| `primary` (brand blue) | The main action, selected state, links |
+| `primary` (brand blue) | Links, active icons, selected text |
+| `primary-fill` | Fill of main buttons and selected chips: matte deep blue, white text (`#2846a8` light, `#3b5cc4` dark) |
 | `accent` (light blue tint) | Secondary actions, hover/selected backgrounds |
 | `brand-sky` | Focus rings, highlights |
 | `brand-red` / `destructive` | Delete, errors, "contest" type. Use sparingly |
 | `muted` / `muted-foreground` | Metadata, placeholders, disabled |
 | success / warning (green / amber) | Status only (approved, pending) |
 
+## Dark mode
+
+Graphite, not navy: near-neutral surfaces with a faint cool cast. Depth comes from
+lightness steps — page `#15171b` → card `#1b1d22` → popover `#212328` — never from
+saturated colour. The brand glow is only a hint at the top corners. Blue for text and
+icons is a soft `#86a2ee`; button fills stay a deeper blue so white text reads well.
+
 ## Buttons — `components/ui/button.tsx`
 
 | Variant | Looks | Use for | Examples |
 |---|---|---|---|
-| `default` | Solid blue glossy glass | The one main action | Publish, Create project, Sign in, Submit for review |
+| `default` | Matte deep blue (`primary-fill`), white text, neutral shadow — no gloss, no coloured glow | The one main action | Publish, Create project, Sign in, Submit for review |
 | `secondary` | Blue-tinted frosted glass | Supporting actions | Save draft, Follow, Add translation |
 | `outline` | Clear frosted glass | Neutral alternatives | Share, Edit, Load more |
 | `ghost` | No border/fill | Toolbars, icon buttons, Cancel | Refresh, Back, menu triggers |
