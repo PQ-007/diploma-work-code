@@ -4,14 +4,14 @@ import { LANG_COOKIE, resolveLanguage } from "@/lib/language";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Chakra_Petch, Inter } from "next/font/google";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
 import { AppChrome } from "@/components/AppChrome";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 // Display face for the FutureHub wordmark.
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
+const chakra = Chakra_Petch({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-chakra" });
 
 const description =
   "A multilingual (mn / ja / en) community for technical articles, student projects, a shared dictionary of terms, and discussions.";
@@ -54,7 +54,7 @@ export default async function RootLayout({
   const language = resolveLanguage(cookieStore.get(LANG_COOKIE)?.value, headerList.get("accept-language"));
 
   return (
-    <html lang={language} className={cn("h-full", spaceGrotesk.variable)} suppressHydrationWarning>
+    <html lang={language} className={cn("h-full", chakra.variable)} suppressHydrationWarning>
       <body className={cn(inter.className, "h-full overflow-hidden")}>
         <Providers initialLanguage={language}>
           <AppChrome>{children}</AppChrome>

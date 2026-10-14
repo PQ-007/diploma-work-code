@@ -76,7 +76,7 @@ export function Logo({
         <span
           className={cn(
             "tracking-tight text-foreground",
-            lg ? "font-display text-[1.4rem] font-bold tracking-[-0.03em]" : "text-[1.05rem] font-semibold",
+            lg ? "font-display text-[1.35rem] font-semibold tracking-[0.01em]" : "text-[1.05rem] font-semibold",
           )}
         >
           Future<span className="text-brand-blue">Hub</span>
