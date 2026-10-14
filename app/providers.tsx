@@ -5,11 +5,18 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "next-themes";
 import { QueryProvider } from "./providers/QueryProvider";
+import type { Language } from "@/lib/language";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  initialLanguage,
+}: {
+  children: React.ReactNode;
+  initialLanguage: Language;
+}) {
   return (
     <QueryProvider>
-      <LanguageProvider>
+      <LanguageProvider initialLanguage={initialLanguage}>
         <AuthProvider>
           <SidebarProvider defaultOpen>
             <ThemeProvider

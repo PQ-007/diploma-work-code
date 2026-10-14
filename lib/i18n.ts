@@ -1,38 +1,33 @@
 // lib/i18n.ts
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+import i18next, { type i18n as I18n } from "i18next";
 
-// Import translation files
 import enTranslation from "@/public/locales/en/translation.json";
 import mnTranslation from "@/public/locales/mn/translation.json";
 import jaTranslation from "@/public/locales/ja/translation.json";
+import type { Language } from "@/lib/language";
 
 const resources = {
-  en: {
-    translation: enTranslation,
-  },
-  mn: {
-    translation: mnTranslation,
-  },
-  ja: {
-    translation: jaTranslation,
-  },
+  en: { translation: enTranslation },
+  mn: { translation: mnTranslation },
+  ja: { translation: jaTranslation },
 };
 
-i18n
-  .use(initReactI18next) // Passes i18n down to react-i18next
-  .init({
+/**
+ * A fresh i18next instance (one per LanguageProvider, i.e. per request on the
+ * server), already initialised in `lng`. Resources are bundled, so init is
+ * synchronous and the first render is already translated. A shared global
+ * instance must not be used: changing its language on the client before every
+ * streamed segment has hydrated causes hydration mismatches.
+ */
+export function createI18nInstance(lng: Language): I18n {
+  const instance = i18next.createInstance();
+  instance.init({
     resources,
+    lng,
     fallbackLng: "en",
-    lng: "en", // Default language
-
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-
-    react: {
-      useSuspense: false,
-    },
+    initAsync: false,
+    interpolation: { escapeValue: false },
+    react: { useSuspense: false },
   });
-
-export default i18n;
+  return instance;
+}

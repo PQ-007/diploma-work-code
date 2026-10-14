@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { cookies, headers } from "next/headers";
+import { LANG_COOKIE, resolveLanguage } from "@/lib/language";
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
@@ -40,15 +42,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Render in the visitor's language on the server so hydration matches.
+  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
+  const language = resolveLanguage(cookieStore.get(LANG_COOKIE)?.value, headerList.get("accept-language"));
+
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang={language} className="h-full" suppressHydrationWarning>
       <body className={cn(inter.className, "h-full overflow-hidden")}>
-        <Providers>
+        <Providers initialLanguage={language}>
           <AppChrome>{children}</AppChrome>
           <Toaster />
         </Providers>
