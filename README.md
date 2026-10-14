@@ -2,7 +2,7 @@
 
 A multilingual learning and knowledge-sharing community built with Next.js 16, React 19, and Supabase. Users can write articles, build flashcard decks, maintain a collaborative dictionary, discuss topics, showcase projects, and follow a structured learning path — all in English, Mongolian, or Japanese.
 
-> Diploma / capstone project.
+> Diploma / capstone project. hudhud
 
 ## Features
 
