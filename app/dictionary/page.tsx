@@ -263,7 +263,7 @@ export default function DictionaryPage() {
 
         {/* Toolbar: language · sort · drafts · view */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-8 items-center gap-0.5 rounded-lg bg-muted p-0.5" role="group" aria-label="Language">
+          <div className="glass inline-flex h-8 items-center gap-0.5 rounded-full p-0.5 hover:[--glass-bg:var(--glass-fill)]" role="group" aria-label="Language">
             {languageFilters.map((lf) => (
               <button
                 key={lf.value}
@@ -274,7 +274,7 @@ export default function DictionaryPage() {
                   setPage(1);
                 }}
                 className={cn(
-                  "h-7 rounded-md px-2.5 font-mono text-xs font-semibold transition-colors",
+                  "h-7 rounded-full px-2.5 font-mono text-xs font-semibold transition-colors",
                   languageFilter === lf.value ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -315,7 +315,7 @@ export default function DictionaryPage() {
             </Chip>
           )}
 
-          <div className="ml-auto inline-flex h-8 items-center gap-0.5 rounded-lg bg-muted p-0.5" role="group" aria-label="View">
+          <div className="ml-auto glass inline-flex h-8 items-center gap-0.5 rounded-full p-0.5 hover:[--glass-bg:var(--glass-fill)]" role="group" aria-label="View">
             {([["grid", LayoutGrid], ["list", List]] as const).map(([mode, Icon]) => (
               <button
                 key={mode}
@@ -324,7 +324,7 @@ export default function DictionaryPage() {
                 aria-pressed={viewMode === mode}
                 onClick={() => setViewMode(mode)}
                 className={cn(
-                  "flex size-7 items-center justify-center rounded-md transition-colors",
+                  "flex size-7 items-center justify-center rounded-full transition-colors",
                   viewMode === mode ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -347,9 +347,9 @@ export default function DictionaryPage() {
                   setPage(1);
                 }}
                 className={cn(
-                  "h-8 min-w-8 shrink-0 rounded-md px-2 text-xs font-semibold transition-colors",
+                  "h-8 min-w-8 shrink-0 rounded-full px-2 text-xs font-semibold transition-colors",
                   activeLetter === letter
-                    ? "bg-primary text-primary-foreground"
+                    ? "glass-solid text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >

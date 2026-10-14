@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** Toggleable filter pill. Selected = solid primary. */
+/** Toggleable filter pill. Glass when idle, solid blue glass when selected. */
 export function Chip({
   selected = false,
   onClick,
@@ -21,10 +21,10 @@ export function Chip({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/40 [&_svg]:size-3.5",
+        "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium outline-none transition-[color,filter,scale] duration-200 active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/40 [&_svg]:size-3.5",
         selected
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
+          ? "glass-solid text-primary-foreground"
+          : "glass text-muted-foreground hover:text-foreground",
         className,
       )}
     >

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
+import { Logo, LogoMark } from "@/components/brand/Logo";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -344,7 +344,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
   const isFormSignIn = formMode === "signin";
 
   return (
-    <main className="min-h-screen bg-background p-3">
+    <main className="min-h-screen p-3">
       <div className="relative mx-auto min-h-[calc(100vh-1.5rem)] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_90px_rgba(0,0,0,0.7)] lg:h-[calc(100vh-1.5rem)]">
         <section
           className={`relative z-20 flex min-h-[calc(100vh-1.5rem)] items-center justify-center px-6 py-10 sm:px-10 transform-gpu will-change-transform transition-transform duration-[1500ms] ease-[cubic-bezier(0.37,0,0.63,1)] lg:absolute lg:inset-y-0 lg:w-1/2 lg:min-h-0 ${
@@ -352,13 +352,14 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
           }`}
         >
           <div className="w-full max-w-md space-y-6 transform-gpu transition-all duration-[300ms] ease-[cubic-bezier(0.37,0,0.63,1)]">
-            <Link href="/" aria-label="FutureHub home" className="flex">
+            {/* On large screens the logo sits in the art panel instead */}
+            <Link href="/" aria-label="FutureHub home" className="flex lg:hidden">
               <Logo />
             </Link>
-            <div className="relative inline-flex rounded-full border border-border bg-secondary p-1">
+            <div className="glass relative inline-grid grid-cols-2 rounded-full p-1 hover:[--glass-bg:var(--glass-fill)]">
               <span
                 aria-hidden
-                className={`pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-sm transform-gpu transition-transform duration-[900ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
+                className={`pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] glass-solid rounded-full transform-gpu transition-transform duration-[900ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
                   isSignIn ? "translate-x-0" : "translate-x-full"
                 }`}
               />
@@ -367,7 +368,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signin")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   isFormSignIn
-                    ? "bg-primary text-primary-foreground"
+                    ? "text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -379,7 +380,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                 onClick={() => setAuthMode("signup")}
                 className={`relative z-10 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-500 ${
                   !isFormSignIn
-                    ? "bg-primary text-primary-foreground"
+                    ? "text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 disabled={isForgotScreen}
@@ -500,7 +501,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="glass-solid h-11 w-full rounded-full px-4 text-sm font-semibold text-primary-foreground transition-[filter,scale] duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isForgotScreen
                   ? loading
@@ -668,7 +669,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
             </div>
 
             <div
-              className={`absolute right-8 top-1/2 z-50 flex h-[58%] w-[62%] -translate-y-1/2 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm transform-gpu transition-all duration-[1400ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
+              className={`absolute right-8 top-[48%] z-50 flex h-[54%] w-[62%] -translate-y-1/2 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm transform-gpu transition-all duration-[1400ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
                 isSignIn
                   ? "rotate-[1.5deg] opacity-100 scale-100"
                   : "rotate-[0.5deg] opacity-90 scale-[0.985]"
@@ -713,7 +714,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
             </div>
 
             <div
-              className={`absolute bottom-14 left-10 z-40 w-[62%] overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[0_16px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm transform-gpu transition-all duration-[1500ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
+              className={`absolute bottom-8 left-10 z-40 w-[62%] overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[0_16px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm transform-gpu transition-all duration-[1500ms] ease-[cubic-bezier(0.37,0,0.63,1)] ${
                 isSignIn
                   ? "translate-y-0 -rotate-[2deg] opacity-95"
                   : "translate-y-2 -rotate-[0.5deg] opacity-100"
@@ -721,7 +722,7 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
             >
               <div className="aspect-[4/3] p-6">
                 <div
-                  className="relative flex h-full w-full flex-col justify-between rounded-xl border p-5 shadow-[inset_0_0_32px_rgba(148,163,184,0.06)]"
+                  className="relative flex h-full w-full flex-col justify-end gap-3 rounded-xl border p-5 shadow-[inset_0_0_32px_rgba(148,163,184,0.06)]"
                   style={{
                     borderColor: "var(--auth-panel-border)",
                     backgroundColor: "var(--auth-panel-bg)",
@@ -734,37 +735,6 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                         "linear-gradient(to right, transparent, var(--auth-panel-accent), transparent)",
                     }}
                   />
-                  <svg
-                    viewBox="0 0 160 80"
-                    className="h-12 w-24"
-                    style={{ color: "var(--auth-panel-text)" }}
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <circle cx="34" cy="40" r="10" fill="currentColor" />
-                    <circle
-                      cx="80"
-                      cy="40"
-                      r="8"
-                      fill="currentColor"
-                      opacity="0.7"
-                    />
-                    <circle
-                      cx="122"
-                      cy="40"
-                      r="6"
-                      fill="currentColor"
-                      opacity="0.45"
-                    />
-                    <path
-                      d="M16 40C30 14 52 14 66 40C80 66 102 66 116 40C126 22 140 22 148 40"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-
                   <p
                     className="text-base font-medium leading-relaxed drop-shadow-[0_0_12px_rgba(148,163,184,0.25)]"
                     style={{ color: "var(--auth-panel-text)" }}
@@ -773,6 +743,13 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
                       ? "Ad astra per aspera."
                       : "There is no magic—just abstraction layers built on top of one another."}
                   </p>
+                  {/* Last in a bottom-aligned card: the card's top sits under the donut window */}
+                  <div className="flex items-center gap-3">
+                    <LogoMark className="size-12" />
+                    <span className="text-2xl font-semibold tracking-tight text-foreground">
+                      Future<span className="text-brand-blue">Hub</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -199,7 +199,7 @@ export default function DictionaryTermPage() {
   // --- Not found state ---
   if (notFound || !data) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="mx-auto py-6 lg:py-3 max-w-7xl">
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />

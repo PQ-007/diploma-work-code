@@ -25,6 +25,7 @@ import {
 import { LogoLoader } from "@/components/brand/LogoLoader";
 
 const BANNER_COLORS = [
+  "from-brand-blue via-brand-sky to-brand-red",
   "from-violet-600 via-purple-500 to-fuchsia-500",
   "from-blue-600 via-cyan-500 to-teal-400",
   "from-orange-500 via-rose-500 to-pink-500",
@@ -495,10 +496,10 @@ export default function SetupPage() {
                     <button
                       key={skill}
                       onClick={() => toggleSkill(skill)}
-                      className={`rounded-full px-3.5 py-1.5 text-sm font-medium border transition-all duration-200 ${
+                      className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-[color,filter,scale] duration-200 active:scale-[0.97] ${
                         isSelected
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                          : "border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+                          ? "glass-solid text-primary-foreground"
+                          : "glass text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {isSelected && "✓ "}

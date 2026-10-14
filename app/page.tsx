@@ -86,7 +86,7 @@ export default function HomePage() {
   return (
     <div className="container-page !px-0">
       {!authLoading && !user && (
-        <section className="mb-6 flex flex-col gap-4 rounded-2xl border bg-card p-5 sm:flex-row sm:items-center sm:p-6">
+        <section className="mb-6 flex flex-col gap-4 surface-brand rounded-2xl border p-5 sm:flex-row sm:items-center sm:p-6">
           <LogoMark className="size-11" />
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-semibold tracking-tight sm:text-xl">{t("home.introTitle")}</h1>

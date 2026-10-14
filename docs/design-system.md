@@ -27,11 +27,11 @@ Colors are tokens from `app/globals.css`; never hardcode hex or `bg-white`.
 
 | Variant | Looks | Use for | Examples |
 |---|---|---|---|
-| `default` | Solid blue | The one main action | Publish, Create project, Sign in, Submit for review |
-| `secondary` | Light blue tint | Supporting actions | Save draft, Follow, Add translation |
-| `outline` | Border, no fill | Neutral alternatives | Share, Edit, Load more |
+| `default` | Solid blue glossy glass | The one main action | Publish, Create project, Sign in, Submit for review |
+| `secondary` | Blue-tinted frosted glass | Supporting actions | Save draft, Follow, Add translation |
+| `outline` | Clear frosted glass | Neutral alternatives | Share, Edit, Load more |
 | `ghost` | No border/fill | Toolbars, icon buttons, Cancel | Refresh, Back, menu triggers |
-| `destructive` | Solid red | Final confirm of a delete (inside the dialog) | Delete article |
+| `destructive` | Glossy red glass | Final confirm of a delete (inside the dialog) | Delete article |
 | `destructive-soft` | Red tint | Starting a delete (opens the confirm) | Delete… |
 | `link` | Text | Inline actions in text | "View all" |
 
@@ -43,7 +43,22 @@ Colors are tokens from `app/globals.css`; never hardcode hex or `bg-white`.
 | `lg` | 44px | Auth / hero call-to-action, form submit on phones |
 | `icon` / `icon-sm` | 40 / 32px square | Icon-only (always give an `aria-label`) |
 
-Shape: `rounded-lg`. Icon 16px, text 14px (13px for `sm`/`xs`).
+Shape: capsule (`rounded-full`); icon buttons are circles. Pressing squishes to 97%.
+Icon 16px, text 14px (13px for `sm`/`xs`).
+
+## Liquid glass and the brand gradient
+
+Utilities in `app/globals.css`:
+- `glass`: frosted, translucent fill with a bright top rim. Use it for buttons, chips, segmented tracks and floating bars.
+- `glass-tint`: the same glass tinted blue.
+- `glass-solid` / `glass-danger`: solid blue / red under a glossy highlight (main action / delete).
+- `glass-chrome`: header, sidebar and bottom nav.
+- `surface-brand`: blue→red tinted card for large hero areas (home intro banner).
+
+**Gradients are only for big areas**: the page background (`--app-glow`: blue light
+top-left, red top-right, sky bottom-right, same as the sign-in art panel), hero banners
+(`surface-brand`) and the default profile banner (`from-brand-blue via-brand-sky to-brand-red`).
+Buttons, chips, badges and text are never gradients. Cards stay solid so text reads well.
 
 ## Labels
 
@@ -56,7 +71,7 @@ Shape: `rounded-lg`. Icon 16px, text 14px (13px for `sm`/`xs`).
   Project type: diploma → brand, contest → danger, internship → sky, private → neutral.
 - **LanguageBadge** — `MN` / `JA` / `EN`, mono, outline, 20px.
 - **Tag** (`common/Tag`) — content tags, `#name`, rounded-md, secondary tint; links to search.
-- **Chip** (`common/Chip`) — filters you toggle; rounded-full, 32px; selected = solid blue.
+- **Chip** (`common/Chip`) — filters you toggle; rounded-full, 32px; glass, selected = solid blue glass.
 
 ## Inputs
 

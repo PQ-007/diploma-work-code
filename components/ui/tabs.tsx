@@ -38,7 +38,7 @@ function TabsList({
         data-variant={variant}
         className={cn(
           "scrollbar-none inline-flex max-w-full items-center overflow-x-auto text-muted-foreground",
-          variant === "segmented" && "h-10 w-fit gap-0.5 rounded-lg bg-muted p-1",
+          variant === "segmented" && "glass h-10 w-fit gap-0.5 rounded-full p-1 hover:[--glass-bg:var(--glass-fill)]",
           variant === "underline" && "h-11 w-full justify-start gap-4 border-b",
           className
         )}
@@ -59,7 +59,7 @@ function TabsTrigger({
       className={cn(
         "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium outline-none transition-[color,background-color,box-shadow,border-color] focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         variant === "segmented" &&
-          "h-full rounded-md px-3 hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-xs",
+          "h-full rounded-full px-3.5 hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm",
         variant === "underline" &&
           "-mb-px h-full border-b-2 border-transparent px-0.5 hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground",
         className

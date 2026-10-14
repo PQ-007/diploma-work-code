@@ -505,7 +505,7 @@ export default function ModernArticlePage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary">
+    <div className="min-h-screen text-foreground font-sans selection:bg-primary/10 selection:text-primary">
       {/* Main layout: Left rail / Article / Right panels */}
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">

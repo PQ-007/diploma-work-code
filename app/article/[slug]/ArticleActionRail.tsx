@@ -113,7 +113,7 @@ export default function ArticleActionRail(props: ArticleActionRailProps) {
     <>
       {/* Desktop rail */}
       <aside className="hidden lg:block">
-        <div className="sticky top-6 flex flex-col items-center gap-1 rounded-full border bg-card p-1.5 shadow-xs">
+        <div className="glass sticky top-6 flex flex-col items-center gap-1 rounded-full p-1.5">
           {like}
           <span className="pb-1 text-xs font-medium tabular-nums text-muted-foreground">{likesCount}</span>
           {bookmark}
@@ -126,7 +126,7 @@ export default function ArticleActionRail(props: ArticleActionRailProps) {
 
       {/* Phone / tablet bar, above the bottom tabs */}
       <div className="fixed inset-x-0 bottom-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+0.75rem)] z-30 flex justify-center px-4 md:bottom-6 lg:hidden">
-        <div className="flex items-center gap-0.5 rounded-full border bg-card/95 p-1 shadow-lg backdrop-blur-md">
+        <div className="glass flex items-center gap-0.5 rounded-full p-1 shadow-lg">
           {like}
           <span className="pr-1.5 text-xs font-medium tabular-nums text-muted-foreground">{likesCount}</span>
           {bookmark}

@@ -112,7 +112,7 @@ export function ArticleCreateHeader() {
   })();
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b bg-background/85 backdrop-blur-md">
+    <header className="glass-chrome sticky top-0 z-40 shrink-0 border-b">
       {/* One row from md; on phones the title drops to its own full-width row */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 md:h-[var(--header-h)] md:flex-nowrap md:py-0">
         <SidebarTrigger className="size-9 text-muted-foreground" />

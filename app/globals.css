@@ -86,6 +86,21 @@
   --header-h: 3.5rem;
   --bottom-nav-h: 3.75rem;
 
+  /* Page backdrop glow: logo blue top-left, red top-right (mirrored), sky bottom-right.
+     Sized in % so it fits every screen the same way. */
+  --app-glow:
+    radial-gradient(ellipse 62% 70% at 0% 0%, rgba(29, 63, 179, 0.16), transparent 72%),
+    radial-gradient(ellipse 62% 70% at 100% 0%, rgba(212, 32, 44, 0.13), transparent 72%),
+    radial-gradient(ellipse 50% 55% at 100% 100%, rgba(107, 163, 210, 0.12), transparent 72%);
+
+  /* Liquid glass surfaces (buttons, chrome). */
+  --glass-fill: rgba(255, 255, 255, 0.58);
+  --glass-fill-hover: rgba(255, 255, 255, 0.82);
+  --glass-rim: rgba(255, 255, 255, 0.5);
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+  --glass-shadow: 0 1px 2px rgb(17 26 46 / 0.04), 0 4px 14px -6px rgb(29 63 179 / 0.12);
+  --glass-chrome: rgba(255, 255, 255, 0.62);
+
   /* Sign-in page art panel */
   --auth-right-bg:
     radial-gradient(circle at 18% 24%, #e3ebff, transparent 42%),
@@ -153,6 +168,18 @@
   --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.45);
   --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.5);
   --shadow-2xl: 0 32px 64px -16px rgb(0 0 0 / 0.55);
+
+  --app-glow:
+    radial-gradient(ellipse 62% 70% at 0% 0%, rgba(64, 104, 230, 0.24), transparent 72%),
+    radial-gradient(ellipse 62% 70% at 100% 0%, rgba(240, 80, 91, 0.16), transparent 72%),
+    radial-gradient(ellipse 50% 55% at 100% 100%, rgba(111, 151, 242, 0.1), transparent 72%);
+
+  --glass-fill: rgba(255, 255, 255, 0.06);
+  --glass-fill-hover: rgba(255, 255, 255, 0.11);
+  --glass-rim: rgba(255, 255, 255, 0.06);
+  --glass-sheen: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 6px 18px -8px rgb(0 0 0 / 0.45);
+  --glass-chrome: rgba(10, 15, 30, 0.62);
 
   --auth-right-bg:
     radial-gradient(circle at 20% 20%, #142659, transparent 40%),
@@ -240,7 +267,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--app-glow), var(--background);
     font-family: var(--font-sans);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -316,6 +344,89 @@
 @media (min-width: 768px) {
   .pb-bottom-nav {
     padding-bottom: 2rem;
+  }
+}
+
+/* ── Liquid glass ─────────────────────────────────────────────────────────────
+   Translucent, blurred surfaces with a bright rim on top and a soft edge below,
+   so they read as glass over the page glow. Used by Button, Chip, segmented
+   tabs and the app chrome. Kept in the components layer so utilities win.     */
+@layer components {
+  .glass {
+    --glass-bg: var(--glass-fill);
+    background:
+      linear-gradient(180deg, var(--glass-sheen), transparent 85%),
+      var(--glass-bg);
+    border: 1px solid var(--glass-rim);
+    box-shadow:
+      inset 0 1px 0 var(--glass-sheen),
+      var(--glass-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(170%);
+  }
+  .glass:hover {
+    --glass-bg: var(--glass-fill-hover);
+  }
+
+  /* Same glass, tinted with the brand blue. */
+  .glass-tint {
+    --glass-fill: color-mix(in oklab, var(--primary) 12%, rgba(255, 255, 255, 0.5));
+    --glass-fill-hover: color-mix(in oklab, var(--primary) 18%, rgba(255, 255, 255, 0.62));
+  }
+  .dark .glass-tint {
+    --glass-fill: color-mix(in oklab, var(--primary) 16%, rgba(255, 255, 255, 0.04));
+    --glass-fill-hover: color-mix(in oklab, var(--primary) 24%, rgba(255, 255, 255, 0.06));
+  }
+
+  /* Filled glass: solid brand colour with a faint light falling from the top.
+     No hard shine line or inner bevel, so it reads soft rather than domed. */
+  .glass-solid,
+  .glass-danger {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 80%),
+      var(--glass-solid-fill, var(--primary));
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 2px 10px -4px color-mix(in oklab, var(--glass-solid-glow, var(--primary)) 45%, transparent);
+  }
+  .glass-solid:hover,
+  .glass-danger:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 6px 18px -6px color-mix(in oklab, var(--glass-solid-glow, var(--primary)) 50%, transparent);
+  }
+  .glass-danger {
+    --glass-solid-fill: var(--destructive);
+    --glass-solid-glow: var(--brand-red);
+  }
+
+  /* App chrome: header, sidebar, bottom nav. */
+  .glass-chrome {
+    background: var(--glass-chrome);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* Large surfaces (hero banners): card tinted blue on the left, red on the right.
+     Keep the gradient to big areas like this and the page glow, never controls. */
+  .surface-brand {
+    background:
+      radial-gradient(120% 140% at 0% 0%, color-mix(in oklab, var(--brand-blue) 16%, transparent), transparent 55%),
+      radial-gradient(100% 140% at 100% 100%, color-mix(in oklab, var(--brand-red) 12%, transparent), transparent 55%),
+      var(--card);
+  }
+}
+
+/* Glass needs a backdrop to read; fall back to solid fills without it. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    --glass-fill: var(--card);
+    --glass-fill-hover: var(--accent);
+  }
+  .glass-chrome {
+    background: var(--background);
   }
 }
 

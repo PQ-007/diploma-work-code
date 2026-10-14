@@ -271,7 +271,7 @@ export default function ArticleCreatePage() {
   }
 
   return (
-    <div className="bg-background text-foreground flex flex-col">
+    <div className="text-foreground flex flex-col">
       <ArticleCreateHeader />
 
       <div className="flex-1">

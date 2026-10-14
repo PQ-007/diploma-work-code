@@ -98,7 +98,7 @@ export default function ResetPasswordPage() {
 
   return (
     // Rendered outside AppChrome (full-screen auth page), so it owns the <main> landmark.
-    <main className="flex min-h-dvh items-center justify-center bg-background p-4">
+    <main className="flex min-h-dvh items-center justify-center p-4">
       <div className="w-full max-w-md space-y-5">
         {/* Brand on the standalone reset page */}
         <Link href="/" className="inline-flex" aria-label="FutureHub home"><Logo /></Link>

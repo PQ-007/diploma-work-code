@@ -32,6 +32,7 @@ import { LogoLoader } from "@/components/brand/LogoLoader";
 /* ═══════════════════════ constants ═══════════════════════ */
 
 const BANNER_GRADIENTS = [
+  "from-brand-blue via-brand-sky to-brand-red",
   "from-violet-600 via-purple-500 to-fuchsia-500",
   "from-blue-600 via-cyan-500 to-teal-400",
   "from-orange-500 via-rose-500 to-pink-500",
@@ -182,7 +183,7 @@ export default function ProfileEditPage() {
       setBio(p.bio || "");
       setAvatarUrl(p.avatar_url || "");
       setBannerGradient(
-        p.banner_gradient || "from-violet-600 via-purple-500 to-fuchsia-500",
+        p.banner_gradient || "from-brand-blue via-brand-sky to-brand-red",
       );
       setAvatarRingColor(
         p.avatar_ring_color || "from-amber-400 via-yellow-300 to-amber-500",

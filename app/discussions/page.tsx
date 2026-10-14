@@ -145,7 +145,7 @@ function DiscussionsPageContent() {
               onValueChange={setActiveTab}
               className="mb-6"
             >
-              <TabsList className="scrollbar-none flex h-10 w-full justify-start gap-1 overflow-x-auto bg-muted/60 sm:w-auto">
+              <TabsList className="scrollbar-none flex h-10 w-full justify-start gap-1 overflow-x-auto sm:w-auto">
                 {tabKeys.map((tab) => {
                   const Icon = tab.icon;
                   return (

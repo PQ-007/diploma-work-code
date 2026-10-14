@@ -152,7 +152,7 @@ export function TagInputWithSuggestions({
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-2 px-2 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-sm"
+            className="glass-solid inline-flex items-center gap-2 px-2 py-1 text-primary-foreground rounded-full text-sm font-medium"
           >
             {tag}
             <button

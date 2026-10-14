@@ -173,7 +173,7 @@ export default function ProfilePage() {
   // Data derived from API response (stored in DB)
   const bannerGradient =
     data?.profile.banner_gradient ||
-    "from-violet-600 via-purple-500 to-fuchsia-500";
+    "from-brand-blue via-brand-sky to-brand-red";
   const avatarRingColor =
     data?.profile.avatar_ring_color ||
     "from-amber-400 via-yellow-300 to-amber-500";

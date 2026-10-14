@@ -263,7 +263,7 @@ export default function ProjectDetailPage() {
     youTubeId || galleryStripItems.length > 0 || project.thumbnail_url;
 
   return (
-    <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 bg-background text-foreground">
+    <div className="relative min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8 text-foreground">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,hsl(var(--primary)/0.12),transparent_34%),radial-gradient(circle_at_90%_2%,hsl(var(--primary)/0.08),transparent_42%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
@@ -271,9 +271,9 @@ export default function ProjectDetailPage() {
         <aside className="hidden lg:block">
           <div className="sticky top-6 flex flex-col items-center gap-3">
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className={`rounded-full border ${liked ? "text-destructive border-destructive/40 bg-destructive/10" : "border-border hover:bg-muted"}`}
+              className={liked ? "text-destructive" : undefined}
               onClick={handleLike}
               disabled={!user}
             >
@@ -281,9 +281,9 @@ export default function ProjectDetailPage() {
             </Button>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className={`rounded-full border ${bookmarked ? "text-primary border-primary/40 bg-primary/10" : "border-border hover:bg-muted"}`}
+              className={bookmarked ? "glass-tint text-primary" : undefined}
               onClick={handleBookmark}
             >
               <Bookmark
@@ -292,18 +292,16 @@ export default function ProjectDetailPage() {
             </Button>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="rounded-full border border-border hover:bg-muted"
               onClick={scrollToComments}
             >
               <MessageSquare className="h-5 w-5" />
             </Button>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="rounded-full border border-border hover:bg-muted"
               onClick={handleShare}
             >
               <Share2 className="h-5 w-5" />
@@ -311,9 +309,8 @@ export default function ProjectDetailPage() {
 
             {canEdit && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="rounded-full border border-border hover:bg-muted"
                 onClick={() => router.push(`/project/create?edit=${slug}`)}
               >
                 <Pencil className="h-5 w-5" />

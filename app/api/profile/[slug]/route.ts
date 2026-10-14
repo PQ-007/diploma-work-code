@@ -253,7 +253,7 @@ export async function GET(
         language_level: profile.language_level,
         banner_gradient:
           profile.banner_gradient ||
-          "from-violet-600 via-purple-500 to-fuchsia-500",
+          "from-brand-blue via-brand-sky to-brand-red",
         avatar_ring_color:
           profile.avatar_ring_color ||
           "from-amber-400 via-yellow-300 to-amber-500",

@@ -18,7 +18,7 @@ export function SiteHeader() {
   const { t } = useLanguage();
 
   return (
-    <header className="sticky top-0 z-40 flex h-[var(--header-h)] shrink-0 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur-md sm:px-4">
+    <header className="sticky top-0 z-40 flex h-[var(--header-h)] shrink-0 items-center gap-2 glass-chrome border-b px-3 sm:px-4">
       <SidebarTrigger className="size-9 text-muted-foreground" />
 
       {/* The sidebar (with its logo) is a drawer on phones, so show the logo here. */}
