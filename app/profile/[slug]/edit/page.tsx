@@ -27,6 +27,7 @@ import {
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 /* ═══════════════════════ constants ═══════════════════════ */
 
@@ -353,9 +354,7 @@ export default function ProfileEditPage() {
   /* ─── loading / guard ─── */
   if (pageLoading || authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <LogoLoader />
     );
   }
 

@@ -79,7 +79,10 @@ field (14px, medium), help text below (12px muted), errors below in `destructive
 
 ## States
 
-- **Loading**: skeletons shaped like the content, never a lone spinner for a whole page.
+- **Loading (whole page)**: `LogoLoader` — the logo mark centered on screen, spinning with
+  ease-in-out (speeds up, two turns, slows down, settles, repeats). Route transitions use it via
+  `app/loading.tsx`; dialogs use `fullscreen={false}`. Still for users with reduced motion.
+- **Loading (inside a list)**: skeletons shaped like the cards, so the layout doesn't jump.
 - **Empty**: `EmptyState` — icon, one-line title, short hint, optional action.
 - **Error**: `ErrorState` — what failed + Retry button.
 

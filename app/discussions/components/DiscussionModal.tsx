@@ -27,6 +27,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Tag } from "@/components/common/Tag";
 import { relativeTime } from "@/lib/utils/relativeTime";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 interface CommentAuthor {
   id: string;
@@ -188,10 +189,10 @@ export default function DiscussionModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex h-[92dvh] max-h-[92dvh] max-w-[calc(100%-1rem)] flex-col gap-0 p-0 sm:h-auto sm:max-h-[85vh] sm:max-w-2xl">
         {loading || !disc ? (
-          <div className="flex items-center justify-center py-20">
-            <DialogTitle className="sr-only">Loading discussion</DialogTitle>
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <>
+            <DialogTitle className="sr-only">{t("common.loading")}</DialogTitle>
+            <LogoLoader fullscreen={false} className="flex-1" />
+          </>
         ) : (
           <>
             {/* Header */}

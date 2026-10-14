@@ -333,6 +333,24 @@
   animation: fadeIn 0.25s ease-out;
 }
 
+/* Loading mark: speeds up, spins two turns, eases back down, settles, repeats. */
+@keyframes logo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  72% {
+    transform: rotate(720deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+.animate-logo-spin {
+  animation: logo-spin 1.9s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+  transform-origin: 50% 49%;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

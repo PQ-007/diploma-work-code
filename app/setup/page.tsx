@@ -22,6 +22,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 const BANNER_COLORS = [
   "from-violet-600 via-purple-500 to-fuchsia-500",
@@ -203,9 +204,7 @@ export default function SetupPage() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <LogoLoader />
     );
   }
 

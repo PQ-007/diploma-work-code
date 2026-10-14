@@ -14,7 +14,6 @@ import {
   Lightbulb,
   CircleDot,
   Hash,
-  Loader2,
   Plus,
 } from "lucide-react";
 
@@ -25,6 +24,7 @@ import { DiscussionCardWrapper } from "./components/DiscussionCardWrapper";
 // --- Components Import ---
 import DiscussionModal from "./components/DiscussionModal";
 import DiscussionCreateDialog from "@/components/DiscussionCreateDialog";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 const tabKeys = [
   { value: "all", labelKey: "discussions.tabs.all", icon: MessageSquare },
@@ -164,9 +164,7 @@ function DiscussionsPageContent() {
 
             {/* Discussion Feed */}
             {isLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
+              <LogoLoader fullscreen={false} />
             ) : error ? (
               <Card className="border-destructive/30">
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-3">

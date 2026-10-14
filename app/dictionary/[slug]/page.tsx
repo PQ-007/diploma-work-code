@@ -24,7 +24,6 @@ import {
   Clock,
   LinkIcon,
   ArrowLeft,
-  Loader2,
   CheckCircle,
   AlertCircle,
   FileEdit,
@@ -39,6 +38,7 @@ import type {
   RelatedArticle,
   Translation,
 } from "./dictionaryDetail.types";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 // --- Helpers ---
 const STATUS_CONFIG: Record<
@@ -192,11 +192,7 @@ export default function DictionaryTermPage() {
   // --- Loading state ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-7xl flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </div>
+      <LogoLoader />
     );
   }
 

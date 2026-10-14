@@ -39,6 +39,7 @@ import {
   ProfileProjectAPI,
 } from "@/lib/api/transformers/profile";
 import { Author } from "@/lib/types/author";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 /* ═══════════════════════════════════════════
    Types matching the API response
@@ -225,9 +226,7 @@ export default function ProfilePage() {
 
   if (loading || authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <LogoLoader />
     );
   }
 

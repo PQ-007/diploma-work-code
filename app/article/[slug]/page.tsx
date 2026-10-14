@@ -3,7 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { components as mdxComponents } from "@/mdx/mdx-components";
@@ -30,6 +29,7 @@ import type { ArticleCommentSectionHandle } from "../components/ArticleCommentSe
 import ArticleActionRail from "./ArticleActionRail";
 import type { ArticleLangCode } from "./articleLang";
 import { useArticleEngagement } from "@/lib/hooks/mutations/useArticleEngagement";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 type TocNode = { item: TocEntry; children: TocNode[] };
 
@@ -172,109 +172,6 @@ export default function ModernArticlePage() {
     });
   }, [collapsibleNodeIds]);
 
-  const PageSkeleton = () => (
-    <div className="min-h-screen bg-background text-foreground font-sans">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
-          {/* Left rail skeleton */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-6">
-              <div className="flex flex-col items-center gap-3">
-                {Array.from({ length: 4 }).map((_, idx) => (
-                  <Skeleton
-                    key={idx}
-                    className="h-10 w-10 rounded-full bg-muted"
-                  />
-                ))}
-                <div className="h-px w-10 bg-border my-1" />
-                <Skeleton className="h-4 w-12 bg-muted" />
-              </div>
-            </div>
-          </aside>
-
-          {/* Article column skeleton */}
-          <main className="min-w-0 space-y-6">
-            <Card className="bg-card/50 border-border/60 shadow-sm">
-              <div className="px-6 sm:px-8 space-y-6 py-6">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <Skeleton className="h-4 w-20 bg-muted" />
-                  <Skeleton className="h-4 w-16 bg-muted" />
-                  <Skeleton className="h-4 w-20 bg-muted" />
-                </div>
-                <Skeleton className="h-9 w-3/4 bg-muted" />
-                <Skeleton className="h-6 w-2/3 bg-muted" />
-                <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 4 }).map((_, idx) => (
-                    <Skeleton key={idx} className="h-6 w-16 bg-muted" />
-                  ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-12 w-12 rounded-full bg-muted" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32 bg-muted" />
-                    <Skeleton className="h-3 w-24 bg-muted" />
-                  </div>
-                </div>
-              </div>
-              <div className="px-6 sm:px-8 pb-8 space-y-3">
-                {Array.from({ length: 10 }).map((_, idx) => (
-                  <Skeleton key={idx} className="h-4 w-full bg-muted" />
-                ))}
-                {Array.from({ length: 6 }).map((_, idx) => (
-                  <Skeleton
-                    key={`wide-${idx}`}
-                    className="h-4 w-11/12 bg-muted"
-                  />
-                ))}
-              </div>
-            </Card>
-
-            <Card className="bg-card/50 border-border/60 shadow-sm">
-              <div className="p-6 space-y-3">
-                <Skeleton className="h-4 w-40 bg-muted" />
-                {Array.from({ length: 3 }).map((_, idx) => (
-                  <Skeleton key={idx} className="h-4 w-full bg-muted" />
-                ))}
-              </div>
-            </Card>
-          </main>
-
-          {/* Right sidebar skeleton */}
-          <aside className="hidden xl:block">
-            <div className="sticky top-6 space-y-6">
-              <Card className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-12 w-12 rounded-full bg-muted" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32 bg-muted" />
-                    <Skeleton className="h-3 w-20 bg-muted" />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Skeleton className="h-6 w-16 bg-muted" />
-                  <Skeleton className="h-6 w-12 bg-muted" />
-                </div>
-              </Card>
-
-              <Card className="p-4 space-y-2">
-                <Skeleton className="h-4 w-24 bg-muted" />
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <Skeleton key={idx} className="h-3 w-full bg-muted" />
-                ))}
-              </Card>
-
-              <Card className="p-4 space-y-2">
-                <Skeleton className="h-4 w-32 bg-muted" />
-                {Array.from({ length: 4 }).map((_, idx) => (
-                  <Skeleton key={idx} className="h-3 w-full bg-muted" />
-                ))}
-              </Card>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </div>
-  );
 
   // Load and serialize MDX content
   useEffect(() => {
@@ -520,7 +417,7 @@ export default function ModernArticlePage() {
   }, [MdxContent]);
 
   if (loading) {
-    return <PageSkeleton />;
+    return <LogoLoader />;
   }
 
   const toggleTocGroup = (groupId: string) => {

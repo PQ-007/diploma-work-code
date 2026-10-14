@@ -12,7 +12,6 @@ import { Tag } from "@/components/common/Tag";
 import { UserChip } from "@/components/common/UserChip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -31,6 +30,7 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                           */
@@ -118,38 +118,6 @@ function getYouTubeId(url?: string | null): string | null {
     /(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
   );
   return m ? m[1] : null;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Skeleton                                                            */
-/* ------------------------------------------------------------------ */
-
-function PageSkeleton() {
-  return (
-    <div className="min-h-screen pb-16 -mx-4 sm:-mx-6 lg:-mx-8">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-8 grid grid-cols-1 lg:grid-cols-[84px_minmax(0,1fr)] xl:grid-cols-[84px_minmax(0,1fr)_320px] gap-6">
-        <div className="hidden lg:block" />
-        <div className="space-y-5">
-          <Skeleton className="h-12 w-3/4 rounded" />
-          <Skeleton className="aspect-video rounded-md" />
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton
-                key={i}
-                className="w-32 aspect-video rounded-sm flex-shrink-0"
-              />
-            ))}
-          </div>
-          <Skeleton className="h-48 w-full rounded-lg" />
-          <Skeleton className="h-32 w-full rounded-lg" />
-        </div>
-        <div className="hidden xl:block space-y-4">
-          <Skeleton className="h-36 rounded-lg" />
-          <Skeleton className="h-72 rounded-lg" />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -258,7 +226,7 @@ export default function ProjectDetailPage() {
     [project],
   );
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <LogoLoader />;
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
