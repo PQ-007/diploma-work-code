@@ -21,7 +21,7 @@ export function LogoLoader({ fullscreen = true, className }: { fullscreen?: bool
         className,
       )}
     >
-      <LogoMark className={cn("animate-logo-spin", fullscreen ? "size-14" : "size-10")} />
+      <LogoMark className={cn("animate-logo-spin", fullscreen ? "size-24 sm:size-28" : "size-16")} />
       <span className="sr-only">{t("common.loading")}</span>
     </div>
   );
