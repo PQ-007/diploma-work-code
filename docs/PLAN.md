@@ -176,7 +176,7 @@ Code tasks for this phase are in `docs/tasks/` (see its README for order and wha
 - [x] Resolve `bookmarked_articles` vs `article_bookmarks` — done; `tag_similarities` is documented in P0-02
 - [x] Remove Flashcards: code deleted, tables dropped by `003_drop_flashcards.sql` (now in `docs/legacy-schema/`)
 - [ ] Remove the Dictionary: `app/dictionary`, `app/api/dictionary`, nav, Create menu, home feed, translation keys (P0-04)
-- [ ] Export any Dictionary data worth keeping, then drop the 7 `dictionary_*` tables in a migration (P0-05)
+- [x] Drop the 7 `dictionary_*` tables in a migration (P0-05, applied on dev). Back up live data before pushing it there
 - [x] Delete the Learn hub pages and `lib/data/courses.ts`; delete `KanbanBoard`, `ProjectGanttChart` and `SectionEditor`
 - [x] Fix the broken sidebar links — dead links removed, projects use `/project?type=…`. Article and competition filters come with Phase 3 and Phase 1
 - [x] Label `/store` "Coming soon"

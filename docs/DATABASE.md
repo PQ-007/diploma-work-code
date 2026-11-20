@@ -8,9 +8,20 @@ Baseline: `20261120164346_baseline.sql`, a `supabase db dump --remote --schema p
 `001_articles_project_id`, `002_security_and_counters` and `003_drop_flashcards`.
 `20261120164345_extensions.sql` runs first and creates `pg_trgm`, which the baseline needs.
 
-## Tables (35)
+Later migrations:
 
-"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on all 35 tables
+| Migration | What it does |
+|---|---|
+| `20261120165214_enable_rls_unprotected_tables` | P0-10: RLS on `project_updates` and `tag_similarities` |
+| `20261120170002_auth_new_user_trigger` | the `auth.users` sign-up trigger the public-only baseline missed |
+| `20261120173211_drop_dictionary` | P0-05: drops the 7 Dictionary tables, their 6 functions and `dictionary_status` |
+
+Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futurehub-dev" (`stfddhjszoguvyvmgnvv`).
+`npx supabase migration list --remote` shows which migrations the linked project has.
+
+## Tables (28)
+
+"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on all 28 tables
 (`project_updates` and `tag_similarities` since P0-10, with no policies yet — see "Oddities").
 
 ### Users
@@ -61,20 +72,12 @@ Baseline: `20261120164346_baseline.sql`, a `supabase db dump --remote --schema p
 | `tags` | The one tag list used by articles, discussions and projects | tags, articles, discussions, projects, profile |
 | `tag_similarities` | Pairs of related tags with a score | **not used** — candidate for the rebuilt knowledge tree, or drop |
 
-### Dictionary — slated for removal (P0-05)
-The Dictionary code was removed in P0-04. These tables, and everything that only they use, are dropped in P0-05.
+### Removed
+- **Dictionary** (P0-05, `20261120173211_drop_dictionary`): `dictionary_entries`, `_translations`, `_examples`,
+  `_entry_tags`, `_revisions`, `_moderation_actions`, `_saves`. The Dictionary is now a standalone project.
+- **Flashcards** (Oct 2026, `docs/legacy-schema/003_drop_flashcards.sql`): `decks`, `flashcards`, `flashcard_reviews`.
 
-| Table | What it is for |
-|---|---|
-| `dictionary_entries` | A term (uses the `dictionary_status` enum and a `pg_trgm` index) |
-| `dictionary_translations` | A term's definition in another language |
-| `dictionary_examples` | Example sentences for a term |
-| `dictionary_entry_tags` | Term ↔ tag |
-| `dictionary_revisions` | Proposed edits to a term |
-| `dictionary_moderation_actions` | Moderator decisions on terms and revisions |
-| `dictionary_saves` | A user's saved terms |
-
-## Functions (23)
+## Functions (17)
 
 | Function | Used by |
 |---|---|
@@ -84,20 +87,18 @@ The Dictionary code was removed in P0-04. These tables, and everything that only
 | `guard_project_owner` | trigger on `projects`: only the owner can change ownership fields |
 | `sync_project_likes` | trigger on `project_likes` → `projects.likes_count` |
 | `set_updated_at`, `update_translation_request_timestamp` | `updated_at` triggers on projects, project_comments, discussions, translation_requests |
-| `handle_new_user` | creates a `profiles` row for a new auth user — see "Not in the baseline" below |
-| `check_dictionary_duplicates`, `search_dictionary`, `suggest_dictionary_terms`, `increment_dictionary_view`, `sync_dictionary_saves`, `update_dictionary_updated_at` | Dictionary only — dropped in P0-05 |
+| `handle_new_user` | trigger `on_auth_user_created` on `auth.users`: creates a `profiles` row for each new user |
 | `projects_search_vector_update`, `search_projects`, `recalc_project_progress`, `update_project_likes_count`, `update_updated_at_column` | **nothing** — no trigger, policy or code calls them |
 
-Enums: `article_status`, `dictionary_status`, `project_category`, `project_difficulty`, `project_member_role`,
+Enums: `article_status`, `project_category`, `project_difficulty`, `project_member_role`,
 `project_status`, `project_type` (with the `intership` typo and `private`, fixed in P0-09), `user_type`, `vote_type`.
 
 ## Not in the baseline (a public-only dump can't see these)
 
-- **The auth trigger that calls `handle_new_user`.** It sits on `auth.users`, outside `public`. Without it, a
-  fresh project won't create a profile on sign-up. Check its exact name in the dashboard
-  (Database → Triggers, schema `auth`) and add it to the dev project as its own migration. It is usually:
-  `create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();`
-- **Extensions.** Only `pg_trgm` is needed, and `20261120164345_extensions.sql` covers it.
+- **The auth trigger that calls `handle_new_user`.** It sits on `auth.users`, outside `public`. Added as its own
+  migration, `20261120170002_auth_new_user_trigger.sql` (copied from the live auth schema).
+- **Extensions.** Only `pg_trgm` is needed (`idx_projects_title_trgm`, `search_projects`), and
+  `20261120164345_extensions.sql` covers it.
 - **Storage buckets and policies.** None are needed: the app stores images on Cloudinary.
 - **Auth settings** (providers, email templates, redirect URLs) live in the dashboard, not in SQL.
 
@@ -131,7 +132,8 @@ npx supabase link --project-ref <dev project ref>
 npx supabase db push --remote   # applies every migration in order
 ```
 
-Then add the auth trigger (see above) and point `.env.local` at the dev project.
+Then point `.env.local` at the dev project (keep the live values in `.env.live.local`) and, for testing,
+turn off "Confirm email" under Authentication → Sign In / Providers → Email.
 
 **Every later change:** `npx supabase migration new <short_name>`, write the SQL (new tables get RLS + policies in
 the same file), test with `npx supabase db push --remote` while linked to dev, then link the live project and push there.
