@@ -115,7 +115,6 @@ field (14px, medium), help text below (12px muted), errors below in `destructive
 |---|---|---|
 | Article | `ArticleCard`: title, subtitle, author, date, read time, tags, stats | Reading column (≤72ch), TOC on the right (desktop), action rail left (desktop) / bottom bar (phone) |
 | Project | `ProjectCard`: 16:9 cover, type + status badges, title, 2-line description, tags, author, likes | Media gallery, then description; facts sidebar (type, category, difficulty, progress, links, team) |
-| Dictionary term | `TermCard`: term + reading, language badge, translations, 3-line definition | Term header, definition per language, examples as quotes, revision timeline |
 | Discussion | `DiscussionRow`: vote count column, title, excerpt, answered badge, comments, author | Thread dialog with replies |
 | Person | `UserChip` (avatar + name) | Profile header with stats, tabs for content |
 

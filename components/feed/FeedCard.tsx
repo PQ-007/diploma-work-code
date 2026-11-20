@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Blocks, Eye, FileText, FolderGit2, Heart, MessageSquare, ThumbsUp } from "lucide-react";
+import { Eye, FileText, FolderGit2, Heart, MessageSquare, ThumbsUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguageBadge } from "@/components/common/LanguageBadge";
 import { Stat } from "@/components/common/Stat";
@@ -10,7 +10,7 @@ import { UserChip } from "@/components/common/UserChip";
 import { Badge } from "@/components/ui/badge";
 import { relativeTime } from "@/lib/utils/relativeTime";
 
-export type FeedKind = "article" | "project" | "discussion" | "term";
+export type FeedKind = "article" | "project" | "discussion";
 
 export interface FeedItem {
   kind: FeedKind;
@@ -30,7 +30,6 @@ const KIND = {
   article: { icon: FileText, label: "home.kind.article", tone: "brand" },
   project: { icon: FolderGit2, label: "home.kind.project", tone: "sky" },
   discussion: { icon: MessageSquare, label: "home.kind.discussion", tone: "danger" },
-  term: { icon: Blocks, label: "home.kind.term", tone: "neutral" },
 } as const;
 
 /** Strip markdown so excerpts read as plain text. */

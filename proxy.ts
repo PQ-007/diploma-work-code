@@ -8,8 +8,6 @@ import { NextResponse, type NextRequest } from "next/server";
 const protectedPrefixes = [
   "/article/create",
   "/project/create",
-  "/dictionary/create",
-  "/dictionary/moderation",
   "/setup",
 ];
 
@@ -93,8 +91,6 @@ export const config = {
     "/profile/:path*",
     "/article/create",
     "/project/create",
-    "/dictionary/create",
-    "/dictionary/moderation/:path*",
     "/setup",
   ],
 };

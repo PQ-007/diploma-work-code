@@ -1,6 +1,5 @@
 import {
   Anvil,
-  Blocks,
   Briefcase,
   GraduationCap,
   Hammer,
@@ -35,7 +34,6 @@ export const primaryNav: NavLink[] = [
       { titleKey: "sidebar.internship", href: "/project?type=intership", icon: Briefcase },
     ],
   },
-  { titleKey: "sidebar.dictionary", href: "/dictionary", icon: Blocks },
   { titleKey: "sidebar.discussions", href: "/discussions", icon: MessagesSquare },
 ];
 

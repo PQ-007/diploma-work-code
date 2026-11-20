@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { LogOut, Settings, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,9 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMyProfile } from "@/lib/hooks/queries/useMyProfile";
 
-/** Roles allowed by the dictionary moderation RLS policies. */
-const MODERATOR_ROLES = ["admin", "teacher"];
-
 export function NavUser() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -31,7 +28,6 @@ export function NavUser() {
   );
 
   const name = profile?.display_name || profile?.user_name || "User";
-  const isModerator = MODERATOR_ROLES.includes(profile?.role ?? "");
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -83,14 +79,6 @@ export function NavUser() {
             {t("nav_user.settings")}
           </Link>
         </DropdownMenuItem>
-        {isModerator && (
-          <DropdownMenuItem asChild className="cursor-pointer gap-2.5 py-2">
-            <Link href="/dictionary/moderation">
-              <ShieldCheck className="size-4" />
-              {t("dictionary.moderation.open")}
-            </Link>
-          </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="cursor-pointer gap-2.5 py-2 text-destructive focus:text-destructive">
           <LogOut className="size-4" />

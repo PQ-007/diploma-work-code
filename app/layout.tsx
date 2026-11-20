@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const chakra = Chakra_Petch({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-chakra" });
 
 const description =
-  "A multilingual (mn / ja / en) community for technical articles, student projects, a shared dictionary of terms, and discussions.";
+  "A multilingual (mn / ja / en) community for technical articles, student projects and discussions.";
 
 export const viewport: Viewport = {
   width: "device-width",

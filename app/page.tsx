@@ -19,7 +19,6 @@ interface Author { display_name?: string | null; user_name?: string | null; avat
 interface ArticleRow { article_id: string; title: string; sub_title?: string | null; created_at: string; views?: number; reactions?: number; comments?: number; tags?: string[]; author?: Author | null }
 interface ProjectRow { id: number; slug: string; title: string; description?: string | null; thumbnail_url?: string | null; created_at: string; views?: number; likes_count?: number; tags?: string[]; author?: Author | null }
 interface DiscussionRow { id: string; title: string; body?: string; created_at: string; votes?: number; commentCount?: number; tags?: string[]; author?: Author | null }
-interface TermRow { id: number; slug: string; term: string; reading?: string | null; definition: string; language_code: string; created_at: string }
 
 async function getItems<T>(url: string): Promise<T[]> {
   const res = await fetch(url);
@@ -36,11 +35,7 @@ const FILTERS: { key: "all" | FeedKind; label: string }[] = [
   { key: "article", label: "sidebar.articles" },
   { key: "project", label: "sidebar.projects" },
   { key: "discussion", label: "sidebar.discussions" },
-  { key: "term", label: "sidebar.dictionary" },
 ];
-
-/** How many dictionary terms join the mixed "All" feed (the dictionary is large). */
-const TERMS_IN_ALL = 4;
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -50,9 +45,8 @@ export default function HomePage() {
   const articles = useQuery({ queryKey: ["feed", "articles"], queryFn: () => getItems<ArticleRow>("/api/articles") });
   const projects = useQuery({ queryKey: ["feed", "projects"], queryFn: () => getItems<ProjectRow>("/api/projects?scope=public&sort=newest") });
   const discussions = useQuery({ queryKey: ["feed", "discussions"], queryFn: () => getItems<DiscussionRow>("/api/discussions") });
-  const terms = useQuery({ queryKey: ["feed", "terms"], queryFn: () => getItems<TermRow>("/api/dictionary?sort=newest&limit=12") });
 
-  const loading = articles.isLoading || projects.isLoading || discussions.isLoading || terms.isLoading;
+  const loading = articles.isLoading || projects.isLoading || discussions.isLoading;
 
   const feed = useMemo(() => {
     const items: FeedItem[] = [
@@ -72,16 +66,10 @@ export default function HomePage() {
         stats: { votes: d.votes ?? 0, comments: d.commentCount ?? 0 },
       })),
     ];
-    const termItems = (terms.data ?? []).map((e): FeedItem => ({
-      kind: "term", id: `t${e.id}`, href: `/dictionary/${e.slug}`,
-      title: e.reading ? `${e.term} (${e.reading})` : e.term, excerpt: e.definition,
-      createdAt: e.created_at, meta: e.language_code.toUpperCase(),
-    }));
 
-    if (filter === "term") return termItems;
-    const mixed = filter === "all" ? [...items, ...termItems.slice(0, TERMS_IN_ALL)] : items.filter((i) => i.kind === filter);
+    const mixed = filter === "all" ? items : items.filter((i) => i.kind === filter);
     return mixed.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-  }, [articles.data, projects.data, discussions.data, terms.data, filter]);
+  }, [articles.data, projects.data, discussions.data, filter]);
 
   return (
     <div className="container-page !px-0">

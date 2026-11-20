@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Blocks, FileText, FolderGit2, MessageSquare, Plus } from "lucide-react";
+import { FileText, FolderGit2, MessageSquare, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import {
 const options = [
   { href: "/article/create", icon: FileText, label: "create_button.article", desc: "create_button.article_disc" },
   { href: "/project/create", icon: FolderGit2, label: "create_button.project", desc: "create_button.project_disc" },
-  { href: "/dictionary/create", icon: Blocks, label: "create_button.dictionary", desc: "create_button.dictionary_disc" },
   { href: "/discussions?create=1", icon: MessageSquare, label: "create_button.discussions", desc: "create_button.discussions_disc" },
 ];
 

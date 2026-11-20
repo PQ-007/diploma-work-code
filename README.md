@@ -1,14 +1,12 @@
 # Knowledge Platform
 
-A multilingual learning and knowledge-sharing community built with Next.js 16, React 19, and Supabase. Users can write articles, build flashcard decks, maintain a collaborative dictionary, discuss topics, showcase projects, and follow a structured learning path — all in English, Mongolian, or Japanese.
+A multilingual learning and knowledge-sharing community built with Next.js 16, React 19, and Supabase. Users can write articles, discuss topics, and showcase projects — all in English, Mongolian, or Japanese.
 
 > Diploma / capstone project. hudhud
 
 ## Features
 
 - **Articles** — MDX-based writing with KaTeX math, syntax highlighting, comments, reactions, bookmarks, tags, and crowd-sourced translations.
-- **Flashcards** — Create and edit decks, browse cards, study, and track stats. Supports TOML import.
-- **Dictionary** — Collaborative entries with examples, translations, revision history, saves, and a moderation workflow.
 - **Discussions** — Threaded discussions with voting, comments, bookmarks, tags, and polls.
 - **Projects** — Showcase projects with files, members, updates, likes, and comments.
 - **Learn** — Structured paths for algorithms, data structures, and programming languages, plus a knowledge tree and curated resources.
@@ -93,10 +91,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```
 app/            # Next.js App Router — pages and API routes
-  api/          #   Route handlers (articles, decks, dictionary, discussions, …)
+  api/          #   Route handlers (articles, discussions, projects, …)
   article/      #   Article reading, creation, and components
-  flashcards/   #   Decks, browse, study, stats
-  dictionary/   #   Entries, creation, moderation
   discussions/  #   Threads and polls
   project/      #   Project showcase
   learn/        #   Structured learning paths

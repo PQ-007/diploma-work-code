@@ -12,12 +12,6 @@ const MAP: Record<string, Record<string, { tone: Tone; key: string }>> = {
     published: { tone: "success", key: "articles.status.published" },
     archieved: { tone: "neutral", key: "articles.status.archieved" },
   },
-  term: {
-    draft: { tone: "neutral", key: "dictionary.status.draft" },
-    pending_review: { tone: "warning", key: "dictionary.status.pending_review" },
-    approved: { tone: "success", key: "dictionary.status.approved" },
-    rejected: { tone: "danger", key: "dictionary.status.rejected" },
-  },
   project: {
     draft: { tone: "neutral", key: "project.status.draft" },
     in_progress: { tone: "brand", key: "project.status.in_progress" },
