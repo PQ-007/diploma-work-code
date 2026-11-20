@@ -16,13 +16,14 @@ Later migrations:
 | `20261120170002_auth_new_user_trigger` | the `auth.users` sign-up trigger the public-only baseline missed |
 | `20261120173211_drop_dictionary` | P0-05: drops the 7 Dictionary tables, their 6 functions and `dictionary_status` |
 | `20261120175759_project_type_cleanup` | P0-09: `project_type` values `intership` → `internship`, `private` → `personal` |
+| `20261120184549_competitions` | P1-01: `competitions`, `competition_entries`, the `competition_results_public` view, staff helper |
 
 Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futurehub-dev" (`stfddhjszoguvyvmgnvv`).
 `npx supabase migration list --remote` shows which migrations the linked project has.
 
-## Tables (28)
+## Tables (30)
 
-"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on all 28 tables
+"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on all 30 tables
 (`project_updates` and `tag_similarities` since P0-10, with no policies yet — see "Oddities").
 
 ### Users
@@ -73,12 +74,33 @@ Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futureh
 | `tags` | The one tag list used by articles, discussions and projects | tags, articles, discussions, projects, profile |
 | `tag_similarities` | Pairs of related tags with a score | **not used** — candidate for the rebuilt knowledge tree, or drop |
 
+### Competitions (P1-01)
+| Table | What it is for | Code |
+|---|---|---|
+| `competitions` | A competition: `slug`, `kind`, `status`, `title`/`summary`/`rules` as jsonb `{mn,en,ja}` (mn required), `categories`, `max_team_size`, sign-up and event dates, `results_published` | P1-02 (not yet) |
+| `competition_entries` | A contest project entered in one category: `status` (`registered`/`withdrawn`/`disqualified`), `score`, `tiebreak`, `judge_score`, `public_score`, `rank`, `note` | P1-02 (not yet) |
+
+View `competition_results_public`: the entries with their six result columns, returned only when the competition's
+`results_published` is true or the caller is staff (otherwise NULL).
+
+Rules:
+- **Staff** = `profiles.role` `teacher`, `admin` or `super_admin` (`rls_is_staff`). Staff can do everything, including on `draft` competitions.
+- **Anyone** reads non-`draft` competitions and their entries.
+- **A project's owner** can enter it, withdraw (`status` → `withdrawn`), re-register and delete the entry, but only while
+  the competition is `open` and inside the sign-up window (`rls_competition_signup_open`). The project must be `type = 'contest'`,
+  and the category one of the competition's `categories` (trigger `validate_competition_entry`).
+- **Results can't be written by students:** the trigger `guard_competition_entry` clears the result columns on their inserts
+  and, on their updates, keeps everything except a `registered` ↔ `withdrawn` status change.
+- **Results can't be read before publishing:** RLS can't hide columns, and the anon key is public, so `anon` and
+  `authenticated` have no SELECT on the six result columns of `competition_entries` itself (column privileges). Read
+  results through the view. In API code, select entry columns explicitly (no `*`) and don't `.update().select()` result columns.
+
 ### Removed
 - **Dictionary** (P0-05, `20261120173211_drop_dictionary`): `dictionary_entries`, `_translations`, `_examples`,
   `_entry_tags`, `_revisions`, `_moderation_actions`, `_saves`. The Dictionary is now a standalone project.
 - **Flashcards** (Oct 2026, `docs/legacy-schema/003_drop_flashcards.sql`): `decks`, `flashcards`, `flashcard_reviews`.
 
-## Functions (17)
+## Functions (22)
 
 | Function | Used by |
 |---|---|
@@ -89,10 +111,14 @@ Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futureh
 | `sync_project_likes` | trigger on `project_likes` → `projects.likes_count` |
 | `set_updated_at`, `update_translation_request_timestamp` | `updated_at` triggers on projects, project_comments, discussions, translation_requests |
 | `handle_new_user` | trigger `on_auth_user_created` on `auth.users`: creates a `profiles` row for each new user |
+| `rls_is_staff`, `rls_competition_visible`, `rls_competition_signup_open` | RLS on the competition tables and the results view |
+| `guard_competition_entry`, `validate_competition_entry` | triggers on `competition_entries` (see Competitions) |
 | `projects_search_vector_update`, `search_projects`, `recalc_project_progress`, `update_project_likes_count`, `update_updated_at_column` | **nothing** — no trigger, policy or code calls them |
 
 Enums: `article_status`, `project_category`, `project_difficulty`, `project_member_role`,
-`project_status`, `project_type` (`diploma`, `contest`, `internship`, `personal`), `user_type`, `vote_type`.
+`project_status`, `project_type` (`diploma`, `contest`, `internship`, `personal`), `user_type` (`admin`, `user`, `teacher`,
+`super_admin`), `vote_type`, `competition_kind` (`bot`, `jam`, `other`), `competition_status` (`draft`, `upcoming`, `open`,
+`running`, `judging`, `finished`), `competition_entry_status` (`registered`, `withdrawn`, `disqualified`).
 
 Projects: `type` is only the *kind* of project. Who can see a project is decided by `is_public` alone: the API
 routes and RLS (`rls_project_is_public`) never look at `type`. The default type is `personal`.

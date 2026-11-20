@@ -1557,7 +1557,7 @@ export type Database = {
       project_member_role: "owner" | "contributor" | "viewer";
       project_status: "draft" | "in_progress" | "completed" | "archived";
       project_type: "diploma" | "contest" | "internship" | "personal";
-      user_type: "user" | "admin" | "moderator";
+      user_type: "admin" | "user" | "teacher" | "super_admin";
       vote_type: "up" | "down";
     };
     CompositeTypes: Record<never, never>;
