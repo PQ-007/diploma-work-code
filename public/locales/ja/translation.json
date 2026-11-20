@@ -59,7 +59,7 @@
   "sidebar": {
     "home": "ホーム",
     "internship": "インターンシップ",
-    "post-grad": "卒業後の生活",
+    "alumni": "卒業生の話",
     "contest": "コンテスト",
     "competitions": "コンペティション",
     "learn": "学習",
@@ -75,7 +75,7 @@
     "dataStructures": "データ構造",
     "languages": "言語",
     "resources": "リソース",
-    "graduation": "卒業",
+    "graduation": "卒業研究",
     "tutorial": "チュートリアル",
     "myProjects": "マイプロジェクト",
     "myArticles": "マイ記事",

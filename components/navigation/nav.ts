@@ -5,7 +5,6 @@ import {
   Hammer,
   House,
   MessagesSquare,
-  Scroll,
   Store,
   Telescope,
   type LucideIcon,
@@ -39,7 +38,6 @@ export const primaryNav: NavLink[] = [
 
 /** Announced but not built yet; shown muted in the sidebar only. */
 export const comingSoonNav: NavLink[] = [
-  { titleKey: "sidebar.knowledgeTree", href: "/knowledge-tree", icon: Scroll },
   { titleKey: "sidebar.store", href: "/store", icon: Store },
 ];
 

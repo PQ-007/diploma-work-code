@@ -75,7 +75,8 @@ export default function ProjectPage() {
 function ProjectPageContent() {
   const router = useRouter();
   // Sidebar sub-links deep-link a type filter: /project?type=diploma
-  const typeParam = useSearchParams().get("type") ?? "";
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type") ?? "";
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -94,6 +95,20 @@ function ProjectPageContent() {
   useEffect(() => {
     setTypeFilter(typeParam);
   }, [typeParam]);
+
+  // Write the type filter back to the URL so links can be shared and the sidebar highlight follows it.
+  const changeType = useCallback(
+    (value: string) => {
+      const next = value === "all" ? "" : value;
+      setTypeFilter(next);
+      const params = new URLSearchParams(searchParams.toString());
+      if (next) params.set("type", next);
+      else params.delete("type");
+      const qs = params.toString();
+      router.replace(qs ? `/project?${qs}` : "/project", { scroll: false });
+    },
+    [router, searchParams],
+  );
 
   const fetchProjects = useCallback(
     async (background = false) => {
@@ -303,7 +318,7 @@ function ProjectPageContent() {
           </SelectContent>
         </Select>
 
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
+        <Select value={typeFilter} onValueChange={changeType}>
           <SelectTrigger className="h-9 w-[140px] rounded-full bg-card">
             <SelectValue placeholder={t("project.type") || "Type"} />
           </SelectTrigger>
@@ -336,7 +351,7 @@ function ProjectPageContent() {
               setYearFilter("all");
               setCourseFilter("all");
               setDifficultyFilter("");
-              setTypeFilter("");
+              changeType("");
             }}
           >
             {t("common.clearFilters") || "Clear filters"}
