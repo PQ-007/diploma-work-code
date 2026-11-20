@@ -18,7 +18,7 @@ Staff can create and run a competition from the site, and turn the bot runner's 
     15,bot,18340.5,9050,timeout on seq 4
     ```
     Show a preview with matched teams and errors (unknown id, wrong category, not a number) before saving.
-    Also "Export entries CSV" (entry_id, category, team, members, repo_url) so the runner knows which bot is which.
+    Also "Export entries CSV" (entry_id, category, team, members, repository_url — the column on `projects` is `repository_url`) so the runner knows which bot is which.
   - Buttons: "Recompute ranks" and "Publish results" (confirm dialog; unpublish allowed).
 - Add a "Manage" link on `/competition/[slug]` for staff.
 

@@ -4,7 +4,7 @@
 P1-03 and P1-04 merged and tested on dev. **Deadline: Dec 23** (aim for Dec 20).
 
 ## You do
-1. Follow `docs/DEPLOY.md`: deploy, then `supabase db push` the competitions migration to live, relink to dev.
+1. Follow `docs/DEPLOY.md`: deploy, then `npx supabase db push --remote` (CLI v3 targets a local database without `--remote`) the competitions migration to live, relink to dev.
 2. Make sure your account (and any co-organizer) has `profiles.role = 'teacher'` or `admin` on live (SQL editor; the role column is protected from the API).
 3. On live, `/competition/new`:
    - kind Bot, categories `bot` and `human_vs_bot`, max team size 3
