@@ -23,6 +23,9 @@
 
 #docs
 /futurehub-docs
+
+# supabase: one-off schema dump (its content is in supabase/migrations/*_baseline.sql)
+supabase/schema_dump.sql
 # misc
 .DS_Store
 *.pem
