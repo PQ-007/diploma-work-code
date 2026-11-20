@@ -31,6 +31,7 @@ Nothing goes into `main` until the site is declared usable.
 | P0-05 | Drop Dictionary tables | **Yes** | after P0-02 and P0-04 |
 | P0-08 | Navigation cleanup | No | after P0-04 (both edit `components/navigation/nav.ts`) |
 | P0-09 | Project type + visibility cleanup | **Yes** | last — after P0-02 and P0-08 (also edits `nav.ts`) |
+| P0-10 | Enable RLS on unprotected tables (security fix) | **Yes — pushed to live** | right after P0-02, before linking to dev |
 
 DB tasks run one at a time, against the **dev** Supabase project, never production.
 Parallel tasks: use separate git worktrees (`git worktree add ../fh-p0-04 -b p0-04 relaunch`).

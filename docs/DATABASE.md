@@ -10,8 +10,8 @@ Baseline: `20261120164346_baseline.sql`, a `supabase db dump --remote --schema p
 
 ## Tables (35)
 
-"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on 33 of the 35 tables;
-**`project_updates` and `tag_similarities` have no RLS** (see "Oddities").
+"Code" = which part of the app reads or writes it (`.from("…")`). RLS is enabled on all 35 tables
+(`project_updates` and `tag_similarities` since P0-10, with no policies yet — see "Oddities").
 
 ### Users
 | Table | What it is for | Code |
@@ -103,9 +103,9 @@ Enums: `article_status`, `dictionary_status`, `project_category`, `project_diffi
 
 ## Oddities noticed (not fixed)
 
-- **`project_updates` and `tag_similarities` have RLS disabled and `GRANT ALL … TO anon`.** No app code uses them,
-  but anyone holding the public anon key (it ships in the site's JavaScript) can read, insert, update and delete
-  their rows through the Supabase REST API. Fix soon with a migration that enables RLS (or drops the tables).
+- **`project_updates` and `tag_similarities` had RLS disabled and `GRANT ALL … TO anon`**, so anyone holding the
+  public anon key could read and change them. Fixed by `20261120165214_enable_rls_unprotected_tables.sql` (P0-10):
+  RLS on, no policies (deny-all), because nothing uses them. Add policies when the project devlog is built.
 
 - `translation_requests` has two `updated_at` triggers doing the same job
   (`trg_translation_request_updated` and `trg_translation_requests_updated_at`).
