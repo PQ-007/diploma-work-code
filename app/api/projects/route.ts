@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import type { Enums } from "@/lib/types";
+import { createProject } from "@/lib/api/projects/createProject";
 
 // Values of the project_type enum; anything else would make Postgres reject the query.
 const PROJECT_TYPES: readonly string[] = [
@@ -9,19 +10,6 @@ const PROJECT_TYPES: readonly string[] = [
   "internship",
   "personal",
 ] satisfies Enums<"project_type">[];
-
-function generateSlug(title: string): string {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .slice(0, 80) +
-    "-" +
-    Date.now().toString(36)
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  GET /api/projects — List projects                                  */
@@ -244,74 +232,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const slug = generateSlug(title);
-
-    // Create project
-    const { data: project, error: projectError } = await supabase
-      .from("projects")
-      .insert({
-        title: title.trim(),
-        slug,
+    // Insert, owner membership and tags live in the shared helper (also used by competition sign-up).
+    let project: { id: number; slug: string };
+    try {
+      project = await createProject(supabase, user.id, {
+        title,
         description: normalizedDescription,
-        category: category?.trim() || null,
+        category,
         type: projectType,
         difficulty,
-        repository_url: repository_url?.trim() || null,
-        demo_url: demo_url?.trim() || null,
-        thumbnail_url: thumbnail_url?.trim() || null,
-        created_by: user.id,
+        repository_url,
+        demo_url,
+        thumbnail_url,
         is_public,
         status: initialStatus,
-        ...(is_public ? { published_at: new Date().toISOString() } : {}),
-      })
-      .select("id, slug")
-      .single();
-
-    if (projectError) {
+        tags: normalizedTags,
+      });
+    } catch (projectError) {
       return NextResponse.json(
-        { error: projectError.message },
+        { error: (projectError as { message?: string }).message ?? "Could not create project" },
         { status: 500 },
       );
-    }
-
-    // Add owner as member
-    await supabase.from("project_members").insert({
-      project_id: project.id,
-      user_id: user.id,
-      role: "owner",
-    });
-
-    // Handle tags
-    if (normalizedTags.length > 0) {
-      for (const tagName of normalizedTags) {
-        const trimmed = tagName;
-        if (!trimmed) continue;
-
-        // Get or create tag
-        let { data: existingTag } = await supabase
-          .from("tags")
-          .select("id")
-          .eq("name", trimmed)
-          .maybeSingle();
-
-        let tagId: number;
-        if (existingTag) {
-          tagId = existingTag.id;
-        } else {
-          const { data: newTag } = await supabase
-            .from("tags")
-            .insert({ name: trimmed })
-            .select("id")
-            .single();
-          if (!newTag) continue;
-          tagId = newTag.id;
-        }
-
-        await supabase.from("project_tags").insert({
-          project_id: project.id,
-          tag_id: tagId,
-        });
-      }
     }
 
     return NextResponse.json(

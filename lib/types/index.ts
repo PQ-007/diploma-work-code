@@ -22,6 +22,19 @@ export type {
 } from "./author";
 
 export type {
+  CompetitionKind,
+  CompetitionStatus,
+  CompetitionEntryStatus,
+  LocalizedText,
+  TeamMember,
+  CompetitionEntry,
+  CompetitionSummary,
+  CompetitionDetail,
+  CompetitionSignUpBody,
+  CompetitionResultUpdate,
+} from "./competition";
+
+export type {
   ContentType,
   ContentStatus,
   BaseContent,
