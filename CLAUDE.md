@@ -8,6 +8,7 @@ Stack: Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Supabase 
 TanStack Query · Tailwind CSS v4 · shadcn/Radix (`components/ui`) · i18next (mn / en / ja) · Cloudinary · Resend.
 
 The build plan is in `docs/PLAN.md`. Tasks are in `docs/tasks/`. **Only do the task you are given.**
+Branches: cut from `relaunch` and merge back into `relaunch` — never into `main`.
 
 ## Commands
 - `npm run dev` — dev server
@@ -18,8 +19,13 @@ The build plan is in `docs/PLAN.md`. Tasks are in `docs/tasks/`. **Only do the t
 - API: route handlers in `app/api/**/route.ts`; Supabase clients in `utils/supabase/{server,client,admin}.ts`
 - Data fetching: hooks in `lib/hooks/queries` and `lib/hooks/mutations`; query helpers in `lib/api/queries`
 - Types: `lib/types`, `app/project/types.ts`
-- UI primitives: `components/ui` (shadcn). Navigation: `components/sidebar-collection/Left/LeftSidebar.tsx`
-- Translations: `public/locales/{mn,en,ja}/translation.json`
+- UI primitives: `components/ui` (shadcn). Shared components: `components/common`, `components/cards`.
+  Design rules: `docs/design-system.md`.
+- Navigation: links are defined in `components/navigation/nav.ts`; rendered by
+  `components/sidebar-collection/Left/LeftSidebar.tsx` (desktop) and `components/navigation/BottomNav.tsx` (phones)
+- Translations: `public/locales/{mn,en,ja}/translation.json`. The UI language comes from the `lang` cookie
+  (`lib/language.ts`, `lib/i18n.ts`); never switch a shared global i18n instance on the client (hydration mismatch).
+- Migrations: `supabase/migrations/` (created by task P0-02). Until then, the old hand-applied files are in `migrations/` — never re-run them.
 
 ## Rules
 - Every user-facing string goes into all three locale files (mn, en, ja). No hard-coded UI text.

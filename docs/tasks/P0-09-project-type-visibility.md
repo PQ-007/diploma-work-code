@@ -1,7 +1,7 @@
 # P0-09 Project type and visibility cleanup
 
 ## Requires
-P0-02 merged. Run alone, on the dev project.
+P0-02 and P0-08 merged. Run alone, on the dev project.
 
 ## Goal
 Three overlapping fields decide visibility today (`is_public`, `status = draft`, `type = private`),
@@ -10,18 +10,25 @@ and the enum has a typo (`intership`). Make each field mean one thing:
 - `type` → what kind of project it is: `diploma | contest | internship | personal`
 
 ## Do
-- Migration `<timestamp>_project_type_cleanup.sql`:
-  - rename enum value `intership` → `internship` (`ALTER TYPE … RENAME VALUE`)
-  - rename enum value `private` → `personal`
-  - for rows that had `type = 'private'`, set `is_public = false` before the rename, so nothing private becomes visible
+- Migration `supabase/migrations/<YYYYMMDDHHMMSS>_project_type_cleanup.sql`:
+  - for rows with `type = 'private'`, set `is_public = false` first, so nothing private becomes visible
+  - rename enum value `intership` → `internship` and `private` → `personal` (`ALTER TYPE … RENAME VALUE`)
   - keep the column default valid (`'personal'`)
-- Code: update `app/project/types.ts`, the type options in `app/project/page.tsx` and `app/project/create/page.tsx`,
-  the label map in `app/project/[slug]/page.tsx`, and any API filter that checks `type = 'private'` for visibility —
-  visibility checks must use `is_public`/`status` only.
-- Locale keys: `project.typeValue.intership` → `internship`, `private` → `personal` (all three locales).
-- Check RLS policies in the baseline for any reference to `type = 'private'` and update them in the same migration.
+  - check the baseline's RLS policies and functions (`rls_project_is_public` etc.) for any reference to
+    `'private'` or `'intership'` and update them in the same migration
+- Code (known on 2026-11-20 — verify with grep):
+  - `app/api/projects/route.ts` — the type list (lines 9–10) and the `"private"` defaults (~lines 170, 203)
+  - `app/project/page.tsx:25-26` — the filter options
+  - `app/project/create/useProjectForm.ts` — the default type (~lines 73, 143)
+  - `app/project/create/sections/ProjectInfoSidebar.tsx:20` — the type options
+  - `components/common/StatusBadge.tsx` — the `projectType` map (~lines 32–37)
+  - `components/navigation/nav.ts:31,35` — the comment and the `/project?type=intership` link
+  - `lib/types/database.ts:1559` — the `project_type` enum (edit by hand; don't regenerate the whole file)
+  - any API filter that checks `type = 'private'` for visibility — visibility checks must use `is_public` / `status` only
+- Locale keys (flat keys inside `project`, all three locales):
+  `typeValue.intership` → `typeValue.internship`, `typeValue.private` → `typeValue.personal`.
 
 ## Done when
-- `grep -rn "intership\|'private'\|\"private\"" app lib` returns nothing project-related.
+- `grep -rn "intership\|'private'\|\"private\"" app lib components` returns nothing project-related.
 - A non-public project is invisible when logged out; a public one is visible; creating each type works.
-- Migration applies cleanly on dev; lint + build pass.
+- The migration applies cleanly on dev; lint + build pass.
