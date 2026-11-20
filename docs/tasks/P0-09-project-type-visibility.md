@@ -11,7 +11,9 @@ and the enum has a typo (`intership`). Make each field mean one thing:
 
 ## Do
 - Migration `supabase/migrations/<YYYYMMDDHHMMSS>_project_type_cleanup.sql`:
-  - for rows with `type = 'private'`, set `is_public = false` first, so nothing private becomes visible
+  - ~~for rows with `type = 'private'`, set `is_public = false` first~~ — **dropped (2026-11-20, user decision).**
+    `type` never controlled visibility (code and RLS check only `is_public`), and `private` was the default type:
+    on live, 4 of the 5 public projects were `private`, so this step would have hidden them.
   - rename enum value `intership` → `internship` and `private` → `personal` (`ALTER TYPE … RENAME VALUE`)
   - keep the column default valid (`'personal'`)
   - check the baseline's RLS policies and functions (`rls_project_is_public` etc.) for any reference to

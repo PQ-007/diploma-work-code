@@ -22,8 +22,8 @@ import type { ProjectPayload } from "@/app/project/types";
 const PROJECT_TYPE_OPTIONS = [
   { value: "diploma", labelKey: "project.typeValue.diploma" },
   { value: "contest", labelKey: "project.typeValue.contest" },
-  { value: "intership", labelKey: "project.typeValue.intership" },
-  { value: "private", labelKey: "project.typeValue.private" },
+  { value: "internship", labelKey: "project.typeValue.internship" },
+  { value: "personal", labelKey: "project.typeValue.personal" },
 ];
 
 const PROJECT_CATEGORY_OPTIONS = [

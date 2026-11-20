@@ -26,11 +26,10 @@ export const primaryNav: NavLink[] = [
     titleKey: "sidebar.projects",
     href: "/project",
     icon: Anvil,
-    // Filters on the project_type enum (the DB spells it "intership").
     items: [
       { titleKey: "sidebar.graduation", href: "/project?type=diploma", icon: GraduationCap },
       { titleKey: "sidebar.contest", href: "/project?type=contest", icon: Hammer },
-      { titleKey: "sidebar.internship", href: "/project?type=intership", icon: Briefcase },
+      { titleKey: "sidebar.internship", href: "/project?type=internship", icon: Briefcase },
     ],
   },
   { titleKey: "sidebar.discussions", href: "/discussions", icon: MessagesSquare },

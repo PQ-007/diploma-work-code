@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import type { ProjectCategory, ProjectDifficulty, ProjectType } from "@/app/project/types";
 
 const CATEGORIES: ProjectCategory[] = ["web_dev", "mobile_dev", "ai", "game_dev", "hardware_iot", "creative_design", "other"];
-const TYPES: ProjectType[] = ["private", "diploma", "contest", "intership"];
+const TYPES: ProjectType[] = ["personal", "diploma", "contest", "internship"];
 const DIFFICULTIES: ProjectDifficulty[] = ["beginner", "intermediate", "advanced"];
 
 interface ProjectInfoSidebarProps {

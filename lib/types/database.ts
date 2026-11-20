@@ -1556,7 +1556,7 @@ export type Database = {
       project_difficulty: "beginner" | "intermediate" | "advanced";
       project_member_role: "owner" | "contributor" | "viewer";
       project_status: "draft" | "in_progress" | "completed" | "archived";
-      project_type: "diploma" | "contest" | "intership" | "private";
+      project_type: "diploma" | "contest" | "internship" | "personal";
       user_type: "user" | "admin" | "moderator";
       vote_type: "up" | "down";
     };

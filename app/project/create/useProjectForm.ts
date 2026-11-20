@@ -70,7 +70,7 @@ export function useProjectForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ProjectCategory | "">("");
-  const [projectType, setProjectType] = useState<ProjectType>("private");
+  const [projectType, setProjectType] = useState<ProjectType>("personal");
   const [difficulty, setDifficulty] = useState<ProjectDifficulty>("beginner");
   const [tags, setTags] = useState<string[]>([]);
   const [repositoryUrl, setRepositoryUrl] = useState("");
@@ -140,7 +140,7 @@ export function useProjectForm() {
         setTitle(data.title ?? "");
         setDescription(data.description ?? "");
         setCategory((data.category as ProjectCategory) ?? "");
-        setProjectType((data.type as ProjectType) ?? "private");
+        setProjectType((data.type as ProjectType) ?? "personal");
         setDifficulty(data.difficulty ?? "beginner");
         setTags(data.tags ?? []);
         setRepositoryUrl(data.repository_url ?? "");

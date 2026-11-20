@@ -6,8 +6,8 @@ import type { Enums } from "@/lib/types";
 const PROJECT_TYPES: readonly string[] = [
   "diploma",
   "contest",
-  "intership",
-  "private",
+  "internship",
+  "personal",
 ] satisfies Enums<"project_type">[];
 
 function generateSlug(title: string): string {
@@ -167,7 +167,7 @@ export async function GET(req: NextRequest) {
 
     const items = projects.map((p) => ({
       ...p,
-      type: (p as { type?: string }).type || "private",
+      type: (p as { type?: string }).type || "personal",
       technologies: (p as { technologies?: string[] }).technologies || [],
       tags: tagsByProject.get(p.id) || [],
       author: profilesById.get(p.created_by) || null,
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
       title,
       description,
       category,
-      type: projectType = "private",
+      type: projectType = "personal",
       difficulty = "beginner",
       technologies = [],
       repository_url,

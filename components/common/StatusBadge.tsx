@@ -26,8 +26,8 @@ const MAP: Record<string, Record<string, { tone: Tone; key: string }>> = {
   projectType: {
     diploma: { tone: "brand", key: "project.typeValue.diploma" },
     contest: { tone: "danger", key: "project.typeValue.contest" },
-    intership: { tone: "sky", key: "project.typeValue.intership" },
-    private: { tone: "neutral", key: "project.typeValue.private" },
+    internship: { tone: "sky", key: "project.typeValue.internship" },
+    personal: { tone: "neutral", key: "project.typeValue.personal" },
   },
 };
 

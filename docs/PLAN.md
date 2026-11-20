@@ -170,18 +170,20 @@ Six phases, Nov 2026 to April 2027. Two club events set the hard deadlines: the 
 - [ ] Collect content: About text, staff list, past diploma works, 2–3 alumni willing to write
 Code tasks for this phase are in `docs/tasks/` (see its README for order and what you do first).
 
-- [ ] Wake the paused Supabase project; after P0-02, create a separate dev project from the baseline
-- [ ] Untrack `.claude/settings.local.json` and the stray `.claude/worktrees/` entry (P0-01)
+- [x] Wake the paused Supabase project; create the dev project `futurehub-dev` from the migrations
+- [x] Untrack `.claude/settings.local.json` and the stray `.claude/worktrees/` entry (P0-01)
 - [x] Dump the live Supabase schema into `supabase/migrations/`; archive `db.sql`, `profile_schema.sql` and the old `migrations/` files (P0-02; table guide in `docs/DATABASE.md`)
 - [x] Resolve `bookmarked_articles` vs `article_bookmarks` — done; `tag_similarities` is documented in P0-02
 - [x] Remove Flashcards: code deleted, tables dropped by `003_drop_flashcards.sql` (now in `docs/legacy-schema/`)
-- [ ] Remove the Dictionary: `app/dictionary`, `app/api/dictionary`, nav, Create menu, home feed, translation keys (P0-04)
+- [x] Remove the Dictionary: `app/dictionary`, `app/api/dictionary`, nav, Create menu, home feed, translation keys (P0-04)
 - [x] Drop the 7 `dictionary_*` tables in a migration (P0-05, applied on dev). Back up live data before pushing it there
 - [x] Delete the Learn hub pages and `lib/data/courses.ts`; delete `KanbanBoard`, `ProjectGanttChart` and `SectionEditor`
 - [x] Fix the broken sidebar links — dead links removed, projects use `/project?type=…`. Article and competition filters come with Phase 3 and Phase 1
 - [x] Label `/store` "Coming soon"
-- [ ] Take `/knowledge-tree` out of the sidebar; sync the project filter with the URL; rename `post-grad` → `alumni` (P0-08)
-- [ ] Fix the enum typo `intership` → `internship`; simplify project visibility (`is_public` + `status`, `type` only for kind) (P0-09)
+- [x] Take `/knowledge-tree` out of the sidebar; sync the project filter with the URL; rename `post-grad` → `alumni` (P0-08)
+- [x] Fix the enum typo `intership` → `internship` and rename `private` → `personal`, so `type` is only the kind of project; visibility already used only `is_public` (P0-09)
+- [x] Close two tables open to the public API: RLS on `project_updates`, `tag_similarities` (P0-10)
+- [ ] Apply the pending migrations to live together with the relaunch deploy (back up first: the Dictionary drop deletes data)
 
 ### Phase 1 — Bot competition ready (December)
 

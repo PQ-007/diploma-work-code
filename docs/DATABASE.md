@@ -15,6 +15,7 @@ Later migrations:
 | `20261120165214_enable_rls_unprotected_tables` | P0-10: RLS on `project_updates` and `tag_similarities` |
 | `20261120170002_auth_new_user_trigger` | the `auth.users` sign-up trigger the public-only baseline missed |
 | `20261120173211_drop_dictionary` | P0-05: drops the 7 Dictionary tables, their 6 functions and `dictionary_status` |
+| `20261120175759_project_type_cleanup` | P0-09: `project_type` values `intership` → `internship`, `private` → `personal` |
 
 Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futurehub-dev" (`stfddhjszoguvyvmgnvv`).
 `npx supabase migration list --remote` shows which migrations the linked project has.
@@ -91,7 +92,10 @@ Projects: **live** = "Diploma work" (`jzmuodzerajihkrsxpol`), **dev** = "futureh
 | `projects_search_vector_update`, `search_projects`, `recalc_project_progress`, `update_project_likes_count`, `update_updated_at_column` | **nothing** — no trigger, policy or code calls them |
 
 Enums: `article_status`, `project_category`, `project_difficulty`, `project_member_role`,
-`project_status`, `project_type` (with the `intership` typo and `private`, fixed in P0-09), `user_type`, `vote_type`.
+`project_status`, `project_type` (`diploma`, `contest`, `internship`, `personal`), `user_type`, `vote_type`.
+
+Projects: `type` is only the *kind* of project. Who can see a project is decided by `is_public` alone: the API
+routes and RLS (`rls_project_is_public`) never look at `type`. The default type is `personal`.
 
 ## Not in the baseline (a public-only dump can't see these)
 
