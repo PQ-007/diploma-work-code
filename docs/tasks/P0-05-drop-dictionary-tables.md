@@ -4,8 +4,9 @@
 P0-02 (migrations baseline) and P0-04 (code removed) merged. A **dev** Supabase project with the baseline applied.
 
 ## Before Claude starts — you do this
-Export anything worth keeping for the standalone Dictionary project, e.g.:
-`supabase db dump --data-only -t 'public.dictionary_*' -f backup_dictionary.sql`
+Export anything worth keeping for the standalone Dictionary project. CLI v3 can't pick single tables, so take a
+data-only dump of the whole `public` schema (it is also a full backup):
+`npx supabase db dump --remote --data-only --schema public -f ~/futurehub-backup-data.sql`
 (on 2026-10-13 there were 681 approved entries). Store the backup outside the repo.
 
 ## Do
@@ -23,5 +24,5 @@ Export anything worth keeping for the standalone Dictionary project, e.g.:
 - Don't apply the migration. You apply it to dev, test the site, then production later.
 
 ## Done when
-- The migration applies cleanly to the dev project (`supabase db push` on dev).
+- The migration applies cleanly to the dev project (`npx supabase db push --remote` while linked to dev).
 - The site still builds and runs against dev.

@@ -68,7 +68,18 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ### 3. Set up the database
 
-Apply the schema in [db.sql](db.sql) to your Supabase Postgres instance (via the Supabase SQL editor or `psql`).
+The schema is a series of migrations in [supabase/migrations/](supabase/migrations/), applied with the Supabase CLI
+(a dev dependency, so run it through `npx`):
+
+```bash
+npx supabase login
+npx supabase link --project-ref <your project ref>
+npx supabase db push --remote   # applies every migration in order to the linked project
+```
+
+On the existing live project the baseline is already in place, so mark it as applied instead of pushing it.
+That step, the one auth trigger to add on a new project, and what every table is for are all in
+[docs/DATABASE.md](docs/DATABASE.md).
 
 ### 4. Run the dev server
 

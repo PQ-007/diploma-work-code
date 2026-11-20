@@ -44,7 +44,7 @@ These were done during the October relaunch, so they have no task file:
 - **P0-07 Project-management tools** — Kanban, Gantt, Section editor and Milestones are deleted; no code reads
   `project_sections` or `project_milestones`.
 - **Flashcards** (the first half of the old P0-04 and P0-05) — all flashcard code is deleted, and
-  `migrations/003_drop_flashcards.sql` has dropped `decks`, `flashcards` and `flashcard_reviews`.
+  `003_drop_flashcards.sql` (now in `docs/legacy-schema/`) has dropped `decks`, `flashcards` and `flashcard_reviews`.
 - **Placeholder-project fallback** (listed in Phase 1 of the plan) — `/project/[slug]` now shows "not found".
 - **Store** shows a "Coming soon" page; **Knowledge tree** is a "Coming soon" page too (the hand-made graph is gone).
 

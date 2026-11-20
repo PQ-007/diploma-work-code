@@ -172,9 +172,9 @@ Code tasks for this phase are in `docs/tasks/` (see its README for order and wha
 
 - [ ] Wake the paused Supabase project; after P0-02, create a separate dev project from the baseline
 - [ ] Untrack `.claude/settings.local.json` and the stray `.claude/worktrees/` entry (P0-01)
-- [ ] Dump the live Supabase schema into `supabase/migrations/`; archive `db.sql`, `profile_schema.sql` and the old `migrations/` files (P0-02)
+- [x] Dump the live Supabase schema into `supabase/migrations/`; archive `db.sql`, `profile_schema.sql` and the old `migrations/` files (P0-02; table guide in `docs/DATABASE.md`)
 - [x] Resolve `bookmarked_articles` vs `article_bookmarks` — done; `tag_similarities` is documented in P0-02
-- [x] Remove Flashcards: code deleted, tables dropped by `migrations/003_drop_flashcards.sql`
+- [x] Remove Flashcards: code deleted, tables dropped by `003_drop_flashcards.sql` (now in `docs/legacy-schema/`)
 - [ ] Remove the Dictionary: `app/dictionary`, `app/api/dictionary`, nav, Create menu, home feed, translation keys (P0-04)
 - [ ] Export any Dictionary data worth keeping, then drop the 7 `dictionary_*` tables in a migration (P0-05)
 - [x] Delete the Learn hub pages and `lib/data/courses.ts`; delete `KanbanBoard`, `ProjectGanttChart` and `SectionEditor`

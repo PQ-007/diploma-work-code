@@ -25,7 +25,9 @@ Branches: cut from `relaunch` and merge back into `relaunch` — never into `mai
   `components/sidebar-collection/Left/LeftSidebar.tsx` (desktop) and `components/navigation/BottomNav.tsx` (phones)
 - Translations: `public/locales/{mn,en,ja}/translation.json`. The UI language comes from the `lang` cookie
   (`lib/language.ts`, `lib/i18n.ts`); never switch a shared global i18n instance on the client (hydration mismatch).
-- Migrations: `supabase/migrations/` (created by task P0-02). Until then, the old hand-applied files are in `migrations/` — never re-run them.
+- Database: migrations in `supabase/migrations/`; what each table is for in `docs/DATABASE.md`.
+  Supabase CLI = `npx supabase …`. CLI v3 targets a *local* database by default: `db dump`, `db push` and `migration repair` need `--remote` to reach the linked project. Old schema files in
+  `docs/legacy-schema/` are history only — never run them.
 
 ## Rules
 - Every user-facing string goes into all three locale files (mn, en, ja). No hard-coded UI text.

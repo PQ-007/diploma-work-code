@@ -6,9 +6,11 @@ Make `supabase/migrations/` the single source of truth for the schema.
 
 ## Before Claude starts — you do this
 1. The Supabase project is awake (see `docs/tasks/README.md` → Before you start).
-2. Install the Supabase CLI, `supabase login`, `supabase link --project-ref <project ref>`.
+2. Install the Supabase CLI (`npm i -D supabase`), `npx supabase login`, `npx supabase init`,
+   `npx supabase link --project-ref <project ref>`. `db dump` runs in a container: Docker, or Podman with
+   `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock`.
 3. Dump the live schema (read-only, safe on the live project):
-   `supabase db dump --schema public -f supabase/schema_dump.sql`
+   `npx supabase db dump --remote --schema public -f supabase/schema_dump.sql`
 4. Give Claude the task.
 
 ## Context
@@ -34,5 +36,6 @@ Make `supabase/migrations/` the single source of truth for the schema.
 
 ## Done when
 - Every table the code reads with `.from("…")` exists in the baseline migration, or is listed in DATABASE.md as missing.
-- `migrations/` no longer exists; `supabase/migrations/` holds only the baseline.
+- `migrations/` no longer exists; `supabase/migrations/` holds the baseline (plus, if needed, an extensions
+  migration that runs before it).
 - lint + build pass.
