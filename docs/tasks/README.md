@@ -64,6 +64,7 @@ and after Jan 6 organizers paste the runner's results and publish them. Details:
 | P1-04 | Organizer tools + results import | site | No | P1-02 (parallel with P1-03) |
 | P1-05 | Bot competition launch on live | site | **Yes (data)** | P1-03, P1-04 |
 | P1-06 | Bot runner | **club repo** | — | — (start now, parallel) |
+| P1-07 | Email delivery (Resend domain, Vercel env, Supabase SMTP) | dashboards | No | — (before students sign up) |
 
 The runner (P1-06) writes a `results.csv` in the exact format P1-04 imports. Agree on it once, don't change it.
 
