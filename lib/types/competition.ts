@@ -43,6 +43,8 @@ export interface CompetitionEntry {
     slug: string;
     thumbnail_url: string | null;
     is_public: boolean;
+    /** For the organizers' entries export (the runner needs each team's repo). */
+    repository_url: string | null;
   } | null;
   members: TeamMember[];
 }

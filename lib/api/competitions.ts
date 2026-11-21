@@ -59,6 +59,16 @@ export async function isStaff(supabase: SupabaseClient, userId: string | undefin
   return !error && data === true;
 }
 
+/** For server components: is the signed-in visitor staff? (Organizer pages 404 otherwise.) */
+export async function currentUserIsStaff(): Promise<boolean> {
+  const { createClient } = await import("@/utils/supabase/server");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return isStaff(supabase, user?.id);
+}
+
 export async function isSignupOpen(supabase: SupabaseClient, competitionId: number): Promise<boolean> {
   const { data, error } = await supabase.rpc("rls_competition_signup_open", { p_competition_id: competitionId });
   return !error && data === true;
@@ -204,7 +214,7 @@ export async function loadEntries(supabase: SupabaseClient, competitionId: numbe
   const members = new Map<number, TeamMember[]>();
   if (projectIds.length) {
     const [{ data: projectRows }, { data: memberRows }] = await Promise.all([
-      supabase.from("projects").select("id, title, slug, thumbnail_url, is_public").in("id", projectIds),
+      supabase.from("projects").select("id, title, slug, thumbnail_url, is_public, repository_url").in("id", projectIds),
       supabase
         .from("project_members")
         .select("project_id, user_id, role, profiles(user_name, display_name, avatar_url)")
@@ -245,6 +255,7 @@ export async function loadEntries(supabase: SupabaseClient, competitionId: numbe
             slug: p.slug as string,
             thumbnail_url: (p.thumbnail_url as string | null) ?? null,
             is_public: Boolean(p.is_public),
+            repository_url: (p.repository_url as string | null) ?? null,
           }
         : null,
       members: members.get(e.project_id as number) ?? [],

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Trophy, Users } from "lucide-react";
+import { Settings2, Trophy, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,7 +92,18 @@ export default function CompetitionPage() {
             {t("competition.teams", { count: c.entry_count })} · {t("competition.maxTeam", { count: c.max_team_size })}
           </p>
         </div>
-        {signUpAction && <div className="shrink-0">{signUpAction}</div>}
+        {(signUpAction || c.is_staff) && (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {c.is_staff && (
+              <Button variant="outline" asChild>
+                <Link href={`/competition/${c.slug}/manage`}>
+                  <Settings2 /> {t("competition.manage.manage")}
+                </Link>
+              </Button>
+            )}
+            {signUpAction}
+          </div>
+        )}
       </header>
 
       {myEntries.length > 0 && <MyEntries competition={c} entries={myEntries} />}

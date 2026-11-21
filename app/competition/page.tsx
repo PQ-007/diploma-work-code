@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Trophy } from "lucide-react";
+import { Plus, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useMyProfile } from "@/lib/hooks/queries/useMyProfile";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState, ErrorState } from "@/components/common/States";
@@ -20,6 +23,8 @@ const TABS: { key: string; statuses: CompetitionStatus[] }[] = [
   { key: "finished", statuses: ["finished"] },
 ];
 const DEFAULT_TAB = "open";
+/** Same roles as the database's rls_is_staff. */
+const STAFF_ROLES = ["teacher", "admin", "super_admin"];
 
 export default function CompetitionsPage() {
   return (
@@ -34,6 +39,10 @@ function CompetitionsPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Shortcut only; /competition/new itself is protected on the server.
+  const profile = useMyProfile();
+  const isStaff = STAFF_ROLES.includes(profile?.role ?? "");
 
   const requested = searchParams.get("status");
   const tab = TABS.find((x) => x.key === requested) ?? TABS.find((x) => x.key === DEFAULT_TAB)!;
@@ -53,7 +62,20 @@ function CompetitionsPageContent() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5">
-      <PageHeader className="!mb-0" title={t("competition.title")} subtitle={t("competition.subtitle")} />
+      <PageHeader
+        className="!mb-0"
+        title={t("competition.title")}
+        subtitle={t("competition.subtitle")}
+        actions={
+          isStaff ? (
+            <Button asChild>
+              <Link href="/competition/new">
+                <Plus /> {t("competition.manage.newCompetition")}
+              </Link>
+            </Button>
+          ) : undefined
+        }
+      />
 
       <Tabs value={tab.key} onValueChange={changeTab}>
         <TabsList className="scrollbar-none flex h-10 w-full justify-start gap-1 overflow-x-auto sm:w-auto">
