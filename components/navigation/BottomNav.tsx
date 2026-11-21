@@ -23,6 +23,7 @@ export function BottomNav() {
             <li key={item.href}>
               <Link
                 href={item.href}
+                title={t(item.titleKey)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors",
@@ -37,7 +38,7 @@ export function BottomNav() {
                 >
                   <item.icon className="size-[1.15rem]" />
                 </span>
-                <span className="max-w-full truncate px-1">{t(item.titleKey)}</span>
+                <span className="max-w-full truncate px-1">{t(item.shortTitleKey ?? item.titleKey)}</span>
               </Link>
             </li>
           );

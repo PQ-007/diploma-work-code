@@ -104,7 +104,12 @@
     "shareTitle": "Share what you know",
     "shareText": "Write an article for the students who come after you.",
     "menu": "Menu",
-    "you": "You"
+    "you": "You",
+    "short": {
+      "projects": "Projects",
+      "competitions": "Contests",
+      "discussions": "Discussions"
+    }
   },
   "profile": {
     "title": "Profile",
@@ -805,5 +810,91 @@
     "finish": "Finish setup",
     "networkError": "Network error — please try again.",
     "genericError": "Something went wrong."
+  },
+  "competition": {
+    "title": "Competitions",
+    "subtitle": "Bot battles, game jams and other contests. Sign up your team.",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "open": "Open",
+      "in_progress": "In progress",
+      "finished": "Finished"
+    },
+    "empty": {
+      "upcoming": "No upcoming competitions yet.",
+      "open": "No competition is open for sign-up right now.",
+      "in_progress": "Nothing is running right now.",
+      "finished": "No finished competitions yet."
+    },
+    "status": {
+      "draft": "Draft",
+      "upcoming": "Upcoming",
+      "open": "Sign-up open",
+      "running": "Running",
+      "judging": "Judging",
+      "finished": "Finished"
+    },
+    "kind": {
+      "bot": "Bot",
+      "jam": "Game jam",
+      "other": "Other"
+    },
+    "entryStatus": {
+      "registered": "Registered",
+      "withdrawn": "Withdrawn",
+      "disqualified": "Disqualified"
+    },
+    "signupOpens": "Sign-up opens {{when}}",
+    "signupCloses": "Sign-up closes {{when}}",
+    "startsAt": "Competition {{when}}",
+    "endedAt": "Ended {{when}}",
+    "teams_one": "{{count}} team",
+    "teams_other": "{{count}} teams",
+    "maxTeam": "Teams of up to {{count}}",
+    "detailTabs": {
+      "rules": "Rules",
+      "teams": "Teams",
+      "results": "Results"
+    },
+    "noRules": "The rules will be posted soon.",
+    "noTeams": "No teams yet. Be the first to sign up.",
+    "privateTeam": "Private team",
+    "category": "Category",
+    "signUp": "Sign up",
+    "signInToSignUp": "Sign in to sign up",
+    "dialog": {
+      "title": "Sign up your team",
+      "description": "Pick a category and the project that is your team.",
+      "existing": "My project",
+      "newTeam": "New team",
+      "project": "Project",
+      "chooseProject": "Choose a project",
+      "noProjects": "You have no contest projects yet. Create a new team instead.",
+      "teamName": "Team name",
+      "teamNameHint": "This creates a contest project. You add teammates on its edit page.",
+      "teamDescription": "Short description",
+      "submit": "Sign up",
+      "submitting": "Signing up…",
+      "successTitle": "You're in!",
+      "successText": "Your team is signed up. Add your teammates on the project's edit page.",
+      "addTeammates": "Add teammates",
+      "done": "Done"
+    },
+    "myEntry": {
+      "title": "Your entry",
+      "withdraw": "Withdraw",
+      "withdrawing": "Withdrawing…",
+      "withdrawTitle": "Withdraw from this competition?",
+      "withdrawText": "You can sign up again while sign-up is open.",
+      "withdrawnHint": "You withdrew. Sign up again to re-register."
+    },
+    "results": {
+      "rank": "Rank",
+      "team": "Team",
+      "score": "Score",
+      "tiebreak": "Tiebreak",
+      "note": "Note",
+      "notPublished": "Results will appear here once the organizers publish them."
+    }
   }
 }

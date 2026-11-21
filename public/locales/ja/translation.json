@@ -104,7 +104,12 @@
     "shareTitle": "知識をシェアしよう",
     "shareText": "後輩のために記事を書いてみませんか。",
     "menu": "メニュー",
-    "you": "マイページ"
+    "you": "マイページ",
+    "short": {
+      "projects": "作品",
+      "competitions": "コンペ",
+      "discussions": "議論"
+    }
   },
   "profile": {
     "title": "プロフィール",
@@ -804,5 +809,91 @@
     "finish": "設定を完了",
     "networkError": "ネットワークエラー。もう一度お試しください。",
     "genericError": "問題が発生しました。"
+  },
+  "competition": {
+    "title": "コンペティション",
+    "subtitle": "ボット対戦、ゲームジャムなどのコンテスト。チームでエントリーしよう。",
+    "tabs": {
+      "upcoming": "開催予定",
+      "open": "受付中",
+      "in_progress": "開催中",
+      "finished": "終了"
+    },
+    "empty": {
+      "upcoming": "開催予定のコンペティションはまだありません。",
+      "open": "現在エントリー受付中のコンペティションはありません。",
+      "in_progress": "現在開催中のコンペティションはありません。",
+      "finished": "終了したコンペティションはまだありません。"
+    },
+    "status": {
+      "draft": "下書き",
+      "upcoming": "開催予定",
+      "open": "受付中",
+      "running": "開催中",
+      "judging": "審査中",
+      "finished": "終了"
+    },
+    "kind": {
+      "bot": "ボット",
+      "jam": "ゲームジャム",
+      "other": "その他"
+    },
+    "entryStatus": {
+      "registered": "エントリー済み",
+      "withdrawn": "辞退",
+      "disqualified": "失格"
+    },
+    "signupOpens": "受付開始 {{when}}",
+    "signupCloses": "受付締切 {{when}}",
+    "startsAt": "開催 {{when}}",
+    "endedAt": "{{when}}に終了",
+    "teams_one": "{{count}} チーム",
+    "teams_other": "{{count}} チーム",
+    "maxTeam": "1チーム最大{{count}}人",
+    "detailTabs": {
+      "rules": "ルール",
+      "teams": "チーム",
+      "results": "結果"
+    },
+    "noRules": "ルールは近日公開します。",
+    "noTeams": "まだチームがいません。最初にエントリーしよう。",
+    "privateTeam": "非公開チーム",
+    "category": "部門",
+    "signUp": "エントリー",
+    "signInToSignUp": "ログインしてエントリー",
+    "dialog": {
+      "title": "チームをエントリー",
+      "description": "部門と、チームとなるプロジェクトを選んでください。",
+      "existing": "自分のプロジェクト",
+      "newTeam": "新しいチーム",
+      "project": "プロジェクト",
+      "chooseProject": "プロジェクトを選択",
+      "noProjects": "コンテストプロジェクトがまだありません。新しいチームを作成してください。",
+      "teamName": "チーム名",
+      "teamNameHint": "コンテストプロジェクトが作成されます。メンバーはその編集ページで追加します。",
+      "teamDescription": "短い説明",
+      "submit": "エントリー",
+      "submitting": "エントリー中…",
+      "successTitle": "エントリー完了！",
+      "successText": "チームがエントリーされました。プロジェクトの編集ページでメンバーを追加してください。",
+      "addTeammates": "メンバーを追加",
+      "done": "閉じる"
+    },
+    "myEntry": {
+      "title": "あなたのエントリー",
+      "withdraw": "辞退する",
+      "withdrawing": "辞退中…",
+      "withdrawTitle": "このコンペティションを辞退しますか？",
+      "withdrawText": "受付期間中は再びエントリーできます。",
+      "withdrawnHint": "辞退しました。再エントリーするには「エントリー」を押してください。"
+    },
+    "results": {
+      "rank": "順位",
+      "team": "チーム",
+      "score": "スコア",
+      "tiebreak": "タイブレーク",
+      "note": "メモ",
+      "notPublished": "主催者が公開すると、ここに結果が表示されます。"
+    }
   }
 }

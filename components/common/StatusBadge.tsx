@@ -29,6 +29,24 @@ const MAP: Record<string, Record<string, { tone: Tone; key: string }>> = {
     internship: { tone: "sky", key: "project.typeValue.internship" },
     personal: { tone: "neutral", key: "project.typeValue.personal" },
   },
+  competition: {
+    draft: { tone: "neutral", key: "competition.status.draft" },
+    upcoming: { tone: "sky", key: "competition.status.upcoming" },
+    open: { tone: "success", key: "competition.status.open" },
+    running: { tone: "brand", key: "competition.status.running" },
+    judging: { tone: "warning", key: "competition.status.judging" },
+    finished: { tone: "neutral", key: "competition.status.finished" },
+  },
+  competitionKind: {
+    bot: { tone: "brand", key: "competition.kind.bot" },
+    jam: { tone: "danger", key: "competition.kind.jam" },
+    other: { tone: "neutral", key: "competition.kind.other" },
+  },
+  entry: {
+    registered: { tone: "success", key: "competition.entryStatus.registered" },
+    withdrawn: { tone: "neutral", key: "competition.entryStatus.withdrawn" },
+    disqualified: { tone: "danger", key: "competition.entryStatus.disqualified" },
+  },
 };
 
 export type StatusKind = keyof typeof MAP;

@@ -76,7 +76,10 @@ Buttons, chips, badges and text are never gradients. Cards stay solid so text re
   draft → neutral · pending review → warning · published/approved/completed → success ·
   rejected → danger · in progress → brand · archived → neutral.
   Difficulty: beginner → success, intermediate → warning, advanced → danger.
-  Project type: diploma → brand, contest → danger, internship → sky, private → neutral.
+  Project type: diploma → brand, contest → danger, internship → sky, personal → neutral.
+  Competition: draft → neutral, upcoming → sky, open → success, running → brand, judging → warning, finished → neutral.
+  Competition kind: bot → brand, jam → danger, other → neutral. Entry: registered → success, withdrawn → neutral,
+  disqualified → danger.
 - **LanguageBadge** — `MN` / `JA` / `EN`, mono, outline, 20px.
 - **Tag** (`common/Tag`) — content tags, `#name`, rounded-md, secondary tint; links to search.
 - **Chip** (`common/Chip`) — filters you toggle; rounded-full, 32px; glass, selected = solid blue glass.

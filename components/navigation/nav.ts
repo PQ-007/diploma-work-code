@@ -7,11 +7,14 @@ import {
   MessagesSquare,
   Store,
   Telescope,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 
 export interface NavLink {
   titleKey: string;
+  /** Shorter label for the phone bottom nav (5 items share 360px), when the full one doesn't fit. */
+  shortTitleKey?: string;
   href: string;
   icon: LucideIcon;
   /** Sub-links shown under the item in the sidebar. */
@@ -24,6 +27,7 @@ export const primaryNav: NavLink[] = [
   { titleKey: "sidebar.articles", href: "/article", icon: Telescope },
   {
     titleKey: "sidebar.projects",
+    shortTitleKey: "sidebar.short.projects",
     href: "/project",
     icon: Anvil,
     items: [
@@ -32,7 +36,8 @@ export const primaryNav: NavLink[] = [
       { titleKey: "sidebar.internship", href: "/project?type=internship", icon: Briefcase },
     ],
   },
-  { titleKey: "sidebar.discussions", href: "/discussions", icon: MessagesSquare },
+  { titleKey: "sidebar.competitions", shortTitleKey: "sidebar.short.competitions", href: "/competition", icon: Trophy },
+  { titleKey: "sidebar.discussions", shortTitleKey: "sidebar.short.discussions", href: "/discussions", icon: MessagesSquare },
 ];
 
 /** Announced but not built yet; shown muted in the sidebar only. */

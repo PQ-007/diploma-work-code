@@ -14,20 +14,27 @@ async function getJson<T>(url: string): Promise<T> {
  * @example
  * const { data } = useCompetitions(["running", "judging"]); // "In progress" tab
  */
-export function useCompetitions(statuses?: CompetitionStatus[]) {
+export function useCompetitions(statuses?: CompetitionStatus[], lang?: string) {
   const status = statuses?.length ? statuses.join(",") : "";
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (lang) params.set("lang", lang);
+  const qs = params.toString();
   return useQuery({
-    queryKey: ["competitions", status],
-    queryFn: () =>
-      getJson<{ items: CompetitionSummary[] }>(`/api/competitions${status ? `?status=${status}` : ""}`).then((r) => r.items),
+    queryKey: ["competitions", status, lang],
+    queryFn: () => getJson<{ items: CompetitionSummary[] }>(`/api/competitions${qs ? `?${qs}` : ""}`).then((r) => r.items),
   });
 }
 
-/** One competition with entries, teams and (when published, or for staff) results. 404 → error. */
-export function useCompetition(slug: string | undefined) {
+/**
+ * One competition with entries, teams and (when published, or for staff) results. 404 → error.
+ * Pass the UI language so switching languages refetches the localized title/summary/rules.
+ */
+export function useCompetition(slug: string | undefined, lang?: string) {
   return useQuery({
-    queryKey: ["competition", slug],
-    queryFn: () => getJson<CompetitionDetail>(`/api/competitions/${encodeURIComponent(slug!)}`),
+    queryKey: ["competition", slug, lang],
+    queryFn: () =>
+      getJson<CompetitionDetail>(`/api/competitions/${encodeURIComponent(slug!)}${lang ? `?lang=${lang}` : ""}`),
     enabled: Boolean(slug),
   });
 }

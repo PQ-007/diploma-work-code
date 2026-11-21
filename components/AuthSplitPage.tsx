@@ -15,6 +15,12 @@ interface AuthSplitPageProps {
 }
 
 const FORM_SWITCH_DELAY_MS = 750;
+
+/** `?redirect=` only when it is a path on this site ("/x"), never "//host" or "/\host" (open redirect). */
+function safeRedirect(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return null;
+  return value;
+}
 const DONUT_TICK_MS = 90;
 const DONUT_WIDTH = 48;
 const DONUT_HEIGHT = 22;
@@ -157,7 +163,8 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
 
     setMode(nextMode);
     const targetPath = nextMode === "signin" ? "/signin" : "/signup";
-    window.history.replaceState(window.history.state, "", targetPath);
+    // Keep the query string so ?redirect= survives switching between Sign in and Sign up.
+    window.history.replaceState(window.history.state, "", targetPath + window.location.search);
 
     formSwapTimerRef.current = setTimeout(() => {
       setFormMode(nextMode);
@@ -211,7 +218,8 @@ export default function AuthSplitPage({ initialMode }: AuthSplitPageProps) {
         .eq("id", data.user!.id)
         .single();
 
-      router.push(profileRow?.user_name ? "/" : "/setup");
+      // Unfinished profiles still go to /setup first; otherwise return to where sign-in was asked for.
+      router.push(profileRow?.user_name ? safeRedirect(searchParams.get("redirect")) ?? "/" : "/setup");
     } catch {
       setError(t("auth.unexpectedError"));
     } finally {
